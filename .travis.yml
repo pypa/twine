@@ -1,0 +1,14 @@
+language: python
+env:
+  - TOX_ENV=py26
+  - TOX_ENV=py27
+  - TOX_ENV=py32
+  - TOX_ENV=py33
+  - TOX_ENV=docs
+  - TOX_ENV=pep8
+install:
+  - pip install tox coveralls
+script:
+  - tox -e $TOX_ENV
+after_success:
+  - coveralls
