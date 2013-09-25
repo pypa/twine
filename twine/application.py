@@ -40,6 +40,18 @@ class Twine(object):
                     cmd_parser.set_defaults(_cmd=command)
 
         parser = argparse.ArgumentParser(prog="twine")
+        parser.add_argument(
+            "-v", "--verbose",
+            dest="_verbose",
+            action="count",
+            default=0,
+        )
+        parser.add_argument(
+            "-q", "--quiet",
+            dest="_quiet",
+            action="store_true",
+            default=False,
+        )
 
         _generate_parser(parser, twine.commands.__commands__)
 
