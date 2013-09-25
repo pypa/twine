@@ -19,6 +19,11 @@ with open("twine/__about__.py") as fp:
     exec(fp.read(), about)
 
 
+install_requires = [
+    "six",
+]
+
+
 setup(
     name=about["__title__"],
     version=about["__version__"],
@@ -52,4 +57,12 @@ setup(
     ],
 
     packages=find_packages(exclude=["tests", "tests.*"]),
+
+    entry_points={
+        "console_scripts": [
+            "twine = twine.__main__:main",
+        ],
+    },
+
+    install_requires=install_requires,
 )

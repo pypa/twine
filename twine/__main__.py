@@ -13,3 +13,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
+
+import sys
+
+from twine.application import Twine
+
+
+def main():
+    app = Twine()
+    return app.cli(sys.argv[1:])
+
+
+if __name__ == "__main__":
+    sys.exit(main())
