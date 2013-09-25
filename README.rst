@@ -24,6 +24,7 @@ Resources
 * `Documentation <https://twine.readthedocs.org/>`_
 * `IRC <http://webchat.freenode.net?channels=%23warehouse>`_
   (#warehouse - irc.freenode.net)
+* `Repository <https://github.com/dstufft/twine>`_
 
 
 Contributing
@@ -40,4 +41,4 @@ declined.
    optional.
 4. Submit a Pull Request to the master branch on GitHub.
 
-.. _repository: https://github.com/dstufft/warehouse
+.. _repository: https://github.com/dstufft/twine
