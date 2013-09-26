@@ -17,7 +17,7 @@ protecting your credentials from theft.
 Secondly it allows you to precreate your distribution files.
 ``python setup.py upload`` only allows you to upload something that you've
 created in the same command invocation. This means that you cannot test the
-exact file you're going to be uploaded to PyPI to ensure that it works before
+exact file you're going to upload to PyPI to ensure that it works before
 uploading it.
 
 Finally it allows you to pre-sign your files and pass the .asc files into
