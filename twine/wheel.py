@@ -17,6 +17,8 @@ import os
 import re
 import zipfile
 
+import six
+
 from pkginfo import distribution
 from pkginfo.distribution import Distribution
 
@@ -70,3 +72,10 @@ class Wheel(Distribution):
             archive.close()
 
         raise ValueError('No METADATA in archive: %s' % fqn)
+
+    def parse(self, data):
+        super(Wheel, self).parse(data)
+
+        fp = six.StringIO(distribution.must_decode(data))
+        msg = distribution.parse(fp)
+        self.description = msg.get_payload()
