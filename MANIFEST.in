@@ -1,5 +1,11 @@
 include LICENSE
 include CONTRIBUTORS
 include README.rst
+include AUTHORS
 
 recursive-include tests *.py
+recursive-include docs *.bat
+recursive-include docs *.empty
+recursive-include docs *.py
+recursive-include docs *.rst
+recursive-include docs Makefile
