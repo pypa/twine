@@ -24,6 +24,7 @@ import pkg_resources
 import requests
 
 from twine.exceptions import CommandError
+from twine.wheel import Wheel
 from twine.utils import get_distutils_config
 
 
@@ -33,11 +34,13 @@ logger = logging.getLogger(__name__)
 class Upload(object):
 
     DIST_TYPES = {
+        "bdist_wheel": Wheel,
         "bdist_egg": pkginfo.BDist,
         "sdist": pkginfo.SDist,
     }
 
     DIST_EXTENSIONS = {
+        ".whl": "bdist_wheel",
         ".egg": "bdist_egg",
         ".tar.bz2": "sdist",
         ".tar.gz": "sdist",
@@ -74,7 +77,13 @@ class Upload(object):
                     os.path.basename(filename)
                 )
 
-            pkgd = pkg_resources.Distribution.from_filename(filename)
+            if dtype == "bdist_egg":
+                pkgd = pkg_resources.Distribution.from_filename(filename)
+                py_version = pkgd.py_version
+            elif dtype == "bdist_wheel":
+                py_version = meta.py_version
+            else:
+                py_version = None
 
             # Fill in the data - send all the meta-data in case we need to
             # register a new release
@@ -89,7 +98,7 @@ class Upload(object):
 
                 # file content
                 "filetype": dtype,
-                "pyversion": pkgd.py_version,
+                "pyversion": py_version,
 
                 # additional meta-data
                 "metadata_version": meta.metadata_version,
