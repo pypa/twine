@@ -16,10 +16,14 @@ from __future__ import absolute_import, division, print_function
 
 import argparse
 import collections
+import logging
 
 import six
 
 import twine.commands
+
+
+logger = logging.getLogger(__name__)
 
 
 class Twine(object):
