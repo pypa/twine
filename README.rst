@@ -1,6 +1,60 @@
 twine
 =====
 
+Installation
+------------
+
+.. code:: bash
+
+    $ pip install twine
+
+
+Usage
+-----
+
+1. Create some distributions in the normal way:
+
+.. code:: bash
+
+    $ python setup.py sdist bdist_wheel
+
+2. Upload with twine:
+
+.. code:: bash
+
+    $ twine upload dist/*
+
+3. Done!
+
+
+Options
+~~~~~~~
+
+.. code:: bash
+
+    $ twine upload -h
+    usage: twine upload [-h] [-r REPOSITORY] [-s] [-i IDENTITY] [-u USERNAME]
+                        [-p PASSWORD] [-c COMMENT]
+                        dist [dist ...]
+
+    positional arguments:
+      dist                  The distribution files to upload to the repository
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -r REPOSITORY, --repository REPOSITORY
+                            The repository to upload the files to
+      -s, --sign            Sign files to upload using gpg
+      -i IDENTITY, --identity IDENTITY
+                            GPG identity used to sign files
+      -u USERNAME, --username USERNAME
+                            The username to authenticate to the repository as
+      -p PASSWORD, --password PASSWORD
+                            The password to authenticate to the repository with
+      -c COMMENT, --comment COMMENT
+                            The comment to include with the distribution file
+
+
 Resources
 ---------
 
