@@ -22,6 +22,8 @@ import pkginfo
 import pkg_resources
 import requests
 
+from six.moves import urllib_parse
+
 from twine.exceptions import CommandError
 from twine.wheel import Wheel
 from twine.utils import get_distutils_config
@@ -54,6 +56,12 @@ class Upload(object):
 
         # Get our config from ~/.pypirc
         config = get_distutils_config(repository)
+
+        parsed = urllib_parse.urlparse(config["repository"])
+        if parsed.netloc == "pypi.python.org" and parsed.scheme == "http":
+            config["repository"] = urllib_parse.urlunparse(
+                ("https",) + parsed[1:]
+            )
 
         logger.info("Uploading distributions to %s", config["repository"])
 
