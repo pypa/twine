@@ -19,7 +19,7 @@ __all__ = [
 ]
 
 __title__ = "twine"
-__summary__ = ""
+__summary__ = "Collection of utilities for interacting with PyPI"
 __uri__ = "https://github.com/dstufft/twine"
 
 __version__ = "0.1.dev1"
