@@ -1,6 +1,20 @@
 twine
 =====
 
+Twine is a utility for interacting with PyPI.
+
+Currently it only supports uploading distributions.
+
+
+Features
+--------
+
+* Verified HTTPS Connections
+* Uploading doesn't require executing setup.py
+* Uploading files that have already been created, allowing testing of
+  distributions before release
+
+
 Installation
 ------------
 
