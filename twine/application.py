@@ -17,6 +17,7 @@ from __future__ import absolute_import, division, print_function
 import argparse
 import collections
 import logging
+import logging.config
 
 import six
 
@@ -60,6 +61,32 @@ class Twine(object):
         _generate_parser(parser, twine.commands.__commands__)
 
         args = parser.parse_args(argv)
+
+        logging.config.dictConfig({
+            "version": 1,
+            "disable_existing_loggers": False,
+            "formatters": {
+                "simple": {
+                    "format": "%(message)s",
+                },
+            },
+            "handlers": {
+                "console": {
+                    "level": "DEBUG",
+                    "class": "logging.StreamHandler",
+                    "formatter": "simple",
+                },
+            },
+            "root": {
+                "level": logging.getLevelName(
+                    max(
+                        (30 - (args._verbose * 10)),
+                        10,
+                    ) if not args._quiet else "CRITICAL"
+                ),
+                "handlers": ["console"],
+            },
+        })
 
         if getattr(args, "_cmd", None):
             return args._cmd(
