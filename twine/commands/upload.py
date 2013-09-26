@@ -56,11 +56,14 @@ class Upload(object):
         # Get our config from ~/.pypirc
         config = get_distutils_config(repository)
 
+        logger.info("Uploading distributions to %s", config["repository"])
+
         session = requests.session()
 
         for filename in dists:
             # Sign the dist if requested
             if sign:
+                logger.info("Signing %s", os.path.basename(filename))
                 gpg_args = ["gpg", "--detach-sign", "-a", filename]
                 if identity:
                     gpg_args[2:2] = ["--local-user", identity]
@@ -147,6 +150,8 @@ class Upload(object):
                         sigdata,
                     )
 
+            logger.info("Uploading %s", os.path.basename(filename))
+
             resp = session.post(
                 config["repository"],
                 data=dict((k, v) for k, v in data.items() if v),
@@ -154,6 +159,8 @@ class Upload(object):
                 auth=(config.get("username"), config.get("password")),
             )
             resp.raise_for_status()
+
+        logger.info("Finished")
 
     def create_parser(self, parser):
         parser.add_argument(

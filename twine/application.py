@@ -77,10 +77,15 @@ class Twine(object):
                     "formatter": "simple",
                 },
             },
+            "loggers": {
+                "requests": {
+                    "propagate": False,
+                },
+            },
             "root": {
                 "level": logging.getLevelName(
                     max(
-                        (30 - (args._verbose * 10)),
+                        (20 - (args._verbose * 10)),
                         10,
                     ) if not args._quiet else "CRITICAL"
                 ),
