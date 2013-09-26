@@ -54,6 +54,12 @@ class Upload(object):
         if not sign and identity:
             raise CommandError("--sign must be given along with --identity")
 
+        # Determine if the user has passed in pre-signed distributions
+        signatures = dict(
+            (os.path.basename(d), d) for d in dists if d.endswith(".asc")
+        )
+        dists = [i for i in dists if not i.endswith(".asc")]
+
         # Get our config from ~/.pypirc
         config = get_distutils_config(repository)
 
@@ -149,13 +155,13 @@ class Upload(object):
                 }
                 data["md5_digest"] = hashlib.md5(content).hexdigest()
 
-            if sign:
-                with open(filename + ".asc") as gpg:
-                    sigdata = gpg.read()
-                    filedata["gpg_signature"] = (
-                        os.path.basename(filename) + ".asc",
-                        sigdata,
-                    )
+            signed_name = os.path.basename(filename) + ".asc"
+            if signed_name in signatures:
+                with open(signatures[signed_name], "rb") as gpg:
+                    filedata["gpg_signature"] = (signed_name, gpg.read())
+            elif sign:
+                with open(filename + ".asc", "rb") as gpg:
+                    filedata["gpg_signature"] = (signed_name, gpg.read())
 
             logger.info("Uploading %s", os.path.basename(filename))
 
