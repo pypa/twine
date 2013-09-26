@@ -13,6 +13,8 @@
 # limitations under the License.
 from setuptools import setup, find_packages
 
+import sys
+
 
 about = {}
 with open("twine/__about__.py") as fp:
@@ -21,7 +23,14 @@ with open("twine/__about__.py") as fp:
 
 install_requires = [
     "six",
+    "requests",
+    "pkginfo",
 ]
+
+if sys.version_info[:2] < (2, 7):
+    install_requires += [
+        "argparse",
+    ]
 
 
 setup(
