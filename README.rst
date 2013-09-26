@@ -1,23 +1,6 @@
 twine
 =====
 
-.. image:: https://travis-ci.org/dstufft/twine.png?branch=master
-   :target: https://travis-ci.org/dstufft/twine
-
-.. image:: https://coveralls.io/repos/dstufft/twine/badge.png?branch=master
-   :target: https://coveralls.io/r/dstufft/twine?branch=master
-
-
-Running the tests
------------------
-
-Twine uses tox to run the test suite. You can run all the tests by using:
-
-.. code:: bash
-
-    $ tox
-
-
 Resources
 ---------
 
