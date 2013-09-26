@@ -206,5 +206,7 @@ class Upload(object):
             "dists",
             nargs="+",
             metavar="dist",
-            help="The distribution files to upload to the repository",
+            help="The distribution files to upload to the repository, may "
+                 "additionally contain a .asc file to include an existing "
+                 "signature with the file upload",
         )
