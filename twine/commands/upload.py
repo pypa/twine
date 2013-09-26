@@ -64,7 +64,7 @@ class Upload(object):
         config = get_distutils_config(repository)
 
         parsed = urllib_parse.urlparse(config["repository"])
-        if parsed.netloc == "pypi.python.org" and parsed.scheme == "http":
+        if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
             config["repository"] = urllib_parse.urlunparse(
                 ("https",) + parsed[1:]
             )
