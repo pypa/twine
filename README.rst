@@ -72,7 +72,6 @@ Options
 Resources
 ---------
 
-* `Documentation <https://twine.readthedocs.org/>`_
 * `IRC <http://webchat.freenode.net?channels=%23warehouse>`_
   (#warehouse - irc.freenode.net)
 * `Repository <https://github.com/dstufft/twine>`_
