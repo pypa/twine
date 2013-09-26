@@ -20,6 +20,7 @@ import logging
 import os.path
 
 import pkginfo
+import pkg_resources
 import requests
 
 from twine.exceptions import CommandError
@@ -32,10 +33,12 @@ logger = logging.getLogger(__name__)
 class Upload(object):
 
     DIST_TYPES = {
+        "bdist_egg": pkginfo.BDist,
         "sdist": pkginfo.SDist,
     }
 
     DIST_EXTENSIONS = {
+        ".egg": "bdist_egg",
         ".tar.bz2": "sdist",
         ".tar.gz": "sdist",
         ".zip": "sdist",
@@ -66,12 +69,12 @@ class Upload(object):
                     meta = self.DIST_TYPES[dtype](filename)
                     break
             else:
-                raise CommandError(
+                raise ValueError(
                     "Unknown distribution format: '%s'" %
                     os.path.basename(filename)
                 )
 
-            pyversion = None
+            pkgd = pkg_resources.Distribution.from_filename(filename)
 
             # Fill in the data - send all the meta-data in case we need to
             # register a new release
@@ -86,7 +89,7 @@ class Upload(object):
 
                 # file content
                 "filetype": dtype,
-                "pyversion": pyversion,
+                "pyversion": pkgd.py_version,
 
                 # additional meta-data
                 "metadata_version": meta.metadata_version,
@@ -137,7 +140,7 @@ class Upload(object):
 
             resp = session.post(
                 config["repository"],
-                data=data,
+                data=dict((k, v) for k, v in data.items() if v),
                 files=filedata,
                 auth=(config.get("username"), config.get("password")),
             )
