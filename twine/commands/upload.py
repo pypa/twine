@@ -18,8 +18,6 @@ import distutils.spawn
 import hashlib
 import logging
 import os.path
-import shutil
-import tempfile
 
 import pkginfo
 import requests
@@ -38,7 +36,9 @@ class Upload(object):
     }
 
     DIST_EXTENSIONS = {
+        ".tar.bz2": "sdist",
         ".tar.gz": "sdist",
+        ".zip": "sdist",
     }
 
     def __call__(self, dists, repository, sign, identity, username, password,
