@@ -18,8 +18,6 @@ import collections
 import logging
 import logging.config
 
-import six
-
 import twine.commands
 
 
@@ -32,7 +30,7 @@ class Twine(object):
         def _generate_parser(parser, commands):
             # Generate our commands
             subparsers = parser.add_subparsers()
-            for name, command in six.iteritems(commands):
+            for name, command in commands.items():
                 cmd_parser = subparsers.add_parser(name)
 
                 if hasattr(command, "create_parser"):

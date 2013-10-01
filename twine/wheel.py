@@ -17,7 +17,10 @@ import os
 import re
 import zipfile
 
-import six
+try:
+    from StringIO import StringIO
+except ImportError:
+    from _io import StringIO
 
 from pkginfo import distribution
 from pkginfo.distribution import Distribution
@@ -76,6 +79,6 @@ class Wheel(Distribution):
     def parse(self, data):
         super(Wheel, self).parse(data)
 
-        fp = six.StringIO(distribution.must_decode(data))
+        fp = StringIO(distribution.must_decode(data))
         msg = distribution.parse(fp)
         self.description = msg.get_payload()
