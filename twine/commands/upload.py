@@ -22,7 +22,10 @@ import pkginfo
 import pkg_resources
 import requests
 
-from six.moves import urllib_parse
+try:
+    from urllib import urlparse, urlunparse
+except ImportError:
+    from urllib.parse import urlparse, urlunparse
 
 from twine.exceptions import CommandError
 from twine.wheel import Wheel
@@ -63,9 +66,9 @@ class Upload(object):
         # Get our config from ~/.pypirc
         config = get_distutils_config(repository)
 
-        parsed = urllib_parse.urlparse(config["repository"])
+        parsed = urlparse(config["repository"])
         if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
-            config["repository"] = urllib_parse.urlunparse(
+            config["repository"] = urlunparse(
                 ("https",) + parsed[1:]
             )
 

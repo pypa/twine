@@ -22,7 +22,6 @@ with open("twine/__about__.py") as fp:
 
 
 install_requires = [
-    "six",
     "requests",
     "pkginfo",
 ]
