@@ -14,6 +14,15 @@
 from __future__ import absolute_import, division, print_function
 
 import distutils.config
+import sys
+
+
+if sys.version_info[:1] == (3,):
+    def get_unbound_function(unbound):
+        return unbound
+else:
+    def get_unbound_function(unbound):
+        return unbound.im_func
 
 
 def get_distutils_config(repository):
@@ -31,9 +40,9 @@ def get_distutils_config(repository):
             pass
 
         def _get_rc_file(self):
-            return pypicmd._get_rc_file(self)
+            return get_unbound_function(pypicmd._get_rc_file)(self)
 
     self = Fake()
     self.repository = repository
 
-    return pypicmd._read_pypirc(self)
+    return get_unbound_function(pypicmd._read_pypirc)(self)
