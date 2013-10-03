@@ -22,7 +22,7 @@ __title__ = "twine"
 __summary__ = "Collection of utilities for interacting with PyPI"
 __uri__ = "https://github.com/dstufft/twine"
 
-__version__ = "1.2.1"
+__version__ = "1.2.2"
 
 __author__ = "Donald Stufft and individual contributors"
 __email__ = "donald@stufft.io"
