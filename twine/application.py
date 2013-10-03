@@ -93,10 +93,10 @@ class Twine(object):
         if getattr(args, "_cmd", None):
             return args._cmd(
                 *args._get_args(),
-                **{
-                    k: v for k, v in args._get_kwargs()
+                **dict(
+                    (k, v) for k, v in args._get_kwargs()
                     if not k.startswith("_")
-                }
+                )
             )
         else:
             parser.print_help()

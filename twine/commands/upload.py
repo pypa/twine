@@ -23,7 +23,7 @@ import pkg_resources
 import requests
 
 try:
-    from urllib import urlparse, urlunparse
+    from urlparse import urlparse, urlunparse
 except ImportError:
     from urllib.parse import urlparse, urlunparse
 
