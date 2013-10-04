@@ -69,6 +69,7 @@ setup(
     entry_points={
         "console_scripts": [
             "twine = twine.__main__:main",
+            "twine-upload = twine.commands.upload:main",
         ],
     },
 
