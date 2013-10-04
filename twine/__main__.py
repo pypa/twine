@@ -16,12 +16,11 @@ from __future__ import absolute_import, division, print_function
 
 import sys
 
-from twine.application import Twine
+from twine.cli import dispatch
 
 
 def main():
-    app = Twine()
-    return app.cli(sys.argv[1:])
+    return dispatch(sys.argv[1:])
 
 
 if __name__ == "__main__":
