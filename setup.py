@@ -11,14 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from setuptools import setup, find_packages
+from setuptools import setup
 
 import sys
 
-
-about = {}
-with open("twine/__about__.py") as fp:
-    exec(fp.read(), about)
+import twine
 
 
 install_requires = [
@@ -33,16 +30,16 @@ if sys.version_info[:2] < (2, 7):
 
 
 setup(
-    name=about["__title__"],
-    version=about["__version__"],
+    name=twine.__title__,
+    version=twine.__version__,
 
-    description=about["__summary__"],
+    description=twine.__summary__,
     long_description=open("README.rst").read(),
-    license=about["__license__"],
-    url=about["__uri__"],
+    license=twine.__license__,
+    url=twine.__uri__,
 
-    author=about["__author__"],
-    author_email=about["__email__"],
+    author=twine.__author__,
+    author_email=twine.__email__,
 
     classifiers=[
         "Intended Audience :: Developers",
@@ -64,7 +61,7 @@ setup(
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
 
-    packages=find_packages(exclude=["tests", "tests.*"]),
+    packages=["twine", "twine.commands"],
 
     entry_points={
         "console_scripts": [
