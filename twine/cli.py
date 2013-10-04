@@ -13,3 +13,33 @@
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
+
+import argparse
+import subprocess
+import sys
+
+import twine
+
+
+def dispatch(argv):
+    parser = argparse.ArgumentParser(prog="twine")
+    parser.add_argument(
+        "--version",
+        action="version",
+        version="%(prog)s version {0}".format(twine.__version__),
+    )
+    parser.add_argument("command")
+    parser.add_argument(
+        "args",
+        help=argparse.SUPPRESS,
+        nargs=argparse.REMAINDER,
+    )
+
+    args = parser.parse_args(argv)
+
+    # Dispatch to the real command
+    p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
+    p.wait()
+
+    # Exit using whatever exit code the sub command used
+    sys.exit(p.returncode)
