@@ -14,36 +14,49 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import distutils.config
-import sys
+import os.path
+
+try:
+    import configparser
+except ImportError:
+    import ConfigParser as configparser
 
 
-if sys.version_info[:1] == (3,):
-    def get_unbound_function(unbound):
-        return unbound
-else:
-    def get_unbound_function(unbound):
-        return unbound.im_func
+DEFAULT_REPOSITORY = 'https://pypi.python.org/pypi'
 
 
-def get_distutils_config(repository):
-    pypicmd = distutils.config.PyPIRCCommand
-    pypicmd.announce = lambda msg: msg
+def get_config(path="~/.pypirc"):
+    # Expand user strings in the path
+    path = os.path.expanduser(path)
 
-    class Fake(object):
+    # Parse the rc file
+    parser = configparser.ConfigParser()
+    parser.read(path)
 
-        DEFAULT_REPOSITORY = "http://pypi.python.org/pypi"
-        DEFAULT_REALM = "pypi"
-        repository = None
-        realm = None
+    # Get a list of repositories from the config file
+    if (parser.has_section("distutils")
+            and parser.has_option("distutils", "index-servers")):
+        repositories = parser.get("distutils", "index-servers").split()
+    else:
+        repositories = ["pypi"]
 
-        def announce(self, msg):
-            pass
+    config = {}
 
-        def _get_rc_file(self):
-            return get_unbound_function(pypicmd._get_rc_file)(self)
+    for repository in repositories:
+        # Skip this repository if it doesn't exist in the config file
+        if not parser.has_section(repository):
+            continue
 
-    self = Fake()
-    self.repository = repository
+        # Mandatory configuration and defaults
+        config[repository] = {
+            "repository": DEFAULT_REPOSITORY,
+            "username": parser.get(repository, "username"),
+            "password": None,
+        }
 
-    return get_unbound_function(pypicmd._read_pypirc)(self)
+        # Optional configuration values
+        for key in ["repository", "password"]:
+            if parser.has_option(repository, key):
+                config[repository][key] = parser.get(repository, key)
+
+    return config

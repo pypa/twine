@@ -15,9 +15,9 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
-import distutils.spawn
 import hashlib
 import os.path
+import subprocess
 import sys
 
 try:
@@ -30,7 +30,7 @@ import pkg_resources
 import requests
 
 from twine.wheel import Wheel
-from twine.utils import get_distutils_config
+from twine.utils import get_config
 
 
 DIST_TYPES = {
@@ -60,7 +60,14 @@ def upload(dists, repository, sign, identity, username, password, comment):
     dists = [i for i in dists if not i.endswith(".asc")]
 
     # Get our config from ~/.pypirc
-    config = get_distutils_config(repository)
+    try:
+        config = get_config()[repository]
+    except KeyError:
+        raise KeyError(
+            "Missing '{0}' section from the configuration file".format(
+                repository,
+            ),
+        )
 
     parsed = urlparse(config["repository"])
     if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
@@ -79,7 +86,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
             gpg_args = ["gpg", "--detach-sign", "-a", filename]
             if identity:
                 gpg_args[2:2] = ["--local-user", identity]
-            distutils.spawn.spawn(gpg_args)
+            subprocess.check_call(gpg_args)
 
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
@@ -221,7 +228,7 @@ def main():
             )
         )
     except Exception as exc:
-        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc))
+        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
 
 
 if __name__ == "__main__":
