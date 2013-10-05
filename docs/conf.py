@@ -36,7 +36,12 @@ extensions = [
     "sphinx.ext.intersphinx",
     "sphinx.ext.coverage",
     "sphinx.ext.viewcode",
+    "releases",
 ]
+
+# 'releases' (changelog) settings
+releases_issue_uri = "https://github.com/dstufft/twine/issues/%s"
+releases_release_uri = "https://github.com/dstufft/twine/tree/%s"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
