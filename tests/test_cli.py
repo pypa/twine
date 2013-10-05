@@ -14,31 +14,21 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import argparse
-import subprocess
+import pretend
 
-import twine
+from twine import cli
 
 
-def dispatch(argv):
-    parser = argparse.ArgumentParser(prog="twine")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s version {0}".format(twine.__version__),
+def test_dispatch_to_subcommand(monkeypatch):
+    process = pretend.stub(
+        wait=pretend.call_recorder(lambda: None),
+        returncode=0,
     )
-    parser.add_argument("command")
-    parser.add_argument(
-        "args",
-        help=argparse.SUPPRESS,
-        nargs=argparse.REMAINDER,
-    )
+    popen = pretend.call_recorder(lambda args: process)
+    monkeypatch.setattr(cli.subprocess, "Popen", popen)
 
-    args = parser.parse_args(argv)
+    rcode = cli.dispatch(["upload"])
 
-    # Dispatch to the real command
-    p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
-    p.wait()
-
-    # Return whatever exit code the sub command used
-    return p.returncode
+    assert popen.calls == [pretend.call(["twine-upload"])]
+    assert process.wait.calls == [pretend.call()]
+    assert rcode == process.returncode
