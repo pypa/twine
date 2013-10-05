@@ -22,7 +22,7 @@ except ImportError:
     import ConfigParser as configparser
 
 
-DEFAULT_REPOSITORY = 'https://pypi.python.org/pypi'
+DEFAULT_REPOSITORY = "https://pypi.python.org/pypi"
 
 
 def get_config(path="~/.pypirc"):
