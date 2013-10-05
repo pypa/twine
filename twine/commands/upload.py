@@ -15,9 +15,9 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
-import distutils.spawn
 import hashlib
 import os.path
+import subprocess
 import sys
 
 try:
@@ -86,7 +86,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
             gpg_args = ["gpg", "--detach-sign", "-a", filename]
             if identity:
                 gpg_args[2:2] = ["--local-user", identity]
-            distutils.spawn.spawn(gpg_args)
+            subprocess.check_call(gpg_args)
 
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
