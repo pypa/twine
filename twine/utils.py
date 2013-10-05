@@ -18,7 +18,7 @@ import os.path
 
 try:
     import configparser
-except ImportError:
+except ImportError:  # pragma: no cover
     import ConfigParser as configparser
 
 
