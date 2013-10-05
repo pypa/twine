@@ -30,7 +30,7 @@ import pkg_resources
 import requests
 
 from twine.wheel import Wheel
-from twine.utils import get_distutils_config
+from twine.utils import get_config
 
 
 DIST_TYPES = {
@@ -60,7 +60,14 @@ def upload(dists, repository, sign, identity, username, password, comment):
     dists = [i for i in dists if not i.endswith(".asc")]
 
     # Get our config from ~/.pypirc
-    config = get_distutils_config(repository)
+    try:
+        config = get_config()[repository]
+    except KeyError:
+        raise KeyError(
+            "Missing '{0}' section from the configuration file".format(
+                repository,
+            ),
+        )
 
     parsed = urlparse(config["repository"])
     if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
@@ -221,7 +228,7 @@ def main():
             )
         )
     except Exception as exc:
-        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc))
+        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
 
 
 if __name__ == "__main__":
