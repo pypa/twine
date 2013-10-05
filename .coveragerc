@@ -16,4 +16,4 @@ omit =
     # __main__.py exists only as a very basic wrapper around warehouse.cli
     #   and exists only to provide setuptools and python -m a place to point
     #   at.
-    twine/__main__.py
+    */twine/__main__.py
