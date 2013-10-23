@@ -48,7 +48,7 @@ DIST_EXTENSIONS = {
 }
 
 
-def upload(dists, repository, sign, identity, username, password, comment):
+def upload(dists, repository, sign, identity, username, password, comment, dry_run=False):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -169,15 +169,20 @@ def upload(dists, repository, sign, identity, username, password, comment):
             with open(filename + ".asc", "rb") as gpg:
                 filedata["gpg_signature"] = (signed_name, gpg.read())
 
-        print("Uploading {0}".format(os.path.basename(filename)))
+        if dry_run:
+            print("Would upload {0}".format(os.path.basename(filename)))
+            print(map(lambda x: '%s: %s\n' % x, filedata.items()))
 
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(config.get("username"), config.get("password")),
-        )
-        resp.raise_for_status()
+        else:
+            print("Uploading {0}".format(os.path.basename(filename)))
+
+            resp = session.post(
+                config["repository"],
+                data=dict((k, v) for k, v in data.items() if v),
+                files=filedata,
+                auth=(config.get("username"), config.get("password")),
+            )
+            resp.raise_for_status()
 
 
 def main():
@@ -215,6 +220,12 @@ def main():
         help="The distribution files to upload to the repository, may "
              "additionally contain a .asc file to include an existing "
              "signature with the file upload",
+    )
+    parser.add_argument(
+        "-n", "--dry-run",
+        action="store_true",
+        default=False,
+        help="Don't actually upload, but run everything else."
     )
 
     args = parser.parse_args(sys.argv[1:])
