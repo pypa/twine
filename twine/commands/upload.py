@@ -170,9 +170,13 @@ def upload(dists, repository, sign, identity, username, password, comment, dry_r
                 filedata["gpg_signature"] = (signed_name, gpg.read())
 
         if dry_run:
-            print("Would upload {0}".format(os.path.basename(filename)))
-            print(map(lambda x: '%s: %s\n' % x, filedata.items()))
-
+            print('Metadata:')
+            for (k, v) in data.iteritems():
+                nicevalue = str(v).replace('\n', '\\n')
+                if len(nicevalue) > 80:
+                    nicevalue = nicevalue[:60] + ' ... ' + nicevalue[-15:]
+                print('  %s: %s' % (k, nicevalue))
+            print("Would have uploaded {0}".format(os.path.basename(filename)))
         else:
             print("Uploading {0}".format(os.path.basename(filename)))
 
