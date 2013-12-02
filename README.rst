@@ -35,6 +35,7 @@ Features
 * Uploading doesn't require executing setup.py
 * Uploading files that have already been created, allowing testing of
   distributions before release
+* Supports uploading any packaging format (including wheels).
 
 
 Installation
