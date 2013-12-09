@@ -68,6 +68,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
     for filename in dists:
         _do_upload(filename, signatures, config, session, sign, comment, identity)
 
+
 def _load_config(repository):
     "Load config from ~/.pypirc"
     try:
@@ -86,105 +87,106 @@ def _load_config(repository):
         )
     return config
 
+
 def _do_upload(filename, signatures, config, session, sign, comment, identity):
-        # Sign the dist if requested
-        if sign:
-            print("Signing {0}".format(os.path.basename(filename)))
-            gpg_args = ["gpg", "--detach-sign", "-a", filename]
-            if identity:
-                gpg_args[2:2] = ["--local-user", identity]
-            subprocess.check_call(gpg_args)
+    # Sign the dist if requested
+    if sign:
+        print("Signing {0}".format(os.path.basename(filename)))
+        gpg_args = ["gpg", "--detach-sign", "-a", filename]
+        if identity:
+            gpg_args[2:2] = ["--local-user", identity]
+        subprocess.check_call(gpg_args)
 
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": meta.name,
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        with open(filename, "rb") as fp:
-            content = fp.read()
-            filedata = {
-                "content": (os.path.basename(filename), content),
-            }
-            data["md5_digest"] = hashlib.md5(content).hexdigest()
-
-        signed_name = os.path.basename(filename) + ".asc"
-        if signed_name in signatures:
-            with open(signatures[signed_name], "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
-        elif sign:
-            with open(filename + ".asc", "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
-
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(config.get("username"), config.get("password")),
+    # Extract the metadata from the package
+    for ext, dtype in DIST_EXTENSIONS.items():
+        if filename.endswith(ext):
+            meta = DIST_TYPES[dtype](filename)
+            break
+    else:
+        raise ValueError(
+            "Unknown distribution format: '%s'" %
+            os.path.basename(filename)
         )
-        resp.raise_for_status()
+
+    if dtype == "bdist_egg":
+        pkgd = pkg_resources.Distribution.from_filename(filename)
+        py_version = pkgd.py_version
+    elif dtype == "bdist_wheel":
+        py_version = meta.py_version
+    else:
+        py_version = None
+
+    # Fill in the data - send all the meta-data in case we need to
+    # register a new release
+    data = {
+        # action
+        ":action": "file_upload",
+        "protcol_version": "1",
+
+        # identify release
+        "name": meta.name,
+        "version": meta.version,
+
+        # file content
+        "filetype": dtype,
+        "pyversion": py_version,
+
+        # additional meta-data
+        "metadata_version": meta.metadata_version,
+        "summary": meta.summary,
+        "home_page": meta.home_page,
+        "author": meta.author,
+        "author_email": meta.author_email,
+        "maintainer": meta.maintainer,
+        "maintainer_email": meta.maintainer_email,
+        "license": meta.license,
+        "description": meta.description,
+        "keywords": meta.keywords,
+        "platform": meta.platforms,
+        "classifiers": meta.classifiers,
+        "download_url": meta.download_url,
+        "supported_platform": meta.supported_platforms,
+        "comment": comment,
+
+        # PEP 314
+        "provides": meta.provides,
+        "requires": meta.requires,
+        "obsoletes": meta.obsoletes,
+
+        # Metadata 1.2
+        "project_urls": meta.project_urls,
+        "provides_dist": meta.provides_dist,
+        "obsoletes_dist": meta.obsoletes_dist,
+        "requires_dist": meta.requires_dist,
+        "requires_external": meta.requires_external,
+        "requires_python": meta.requires_python,
+
+    }
+
+    with open(filename, "rb") as fp:
+        content = fp.read()
+        filedata = {
+            "content": (os.path.basename(filename), content),
+        }
+        data["md5_digest"] = hashlib.md5(content).hexdigest()
+
+    signed_name = os.path.basename(filename) + ".asc"
+    if signed_name in signatures:
+        with open(signatures[signed_name], "rb") as gpg:
+            filedata["gpg_signature"] = (signed_name, gpg.read())
+    elif sign:
+        with open(filename + ".asc", "rb") as gpg:
+            filedata["gpg_signature"] = (signed_name, gpg.read())
+
+    print("Uploading {0}".format(os.path.basename(filename)))
+
+    resp = session.post(
+        config["repository"],
+        data=dict((k, v) for k, v in data.items() if v),
+        files=filedata,
+        auth=(config.get("username"), config.get("password")),
+    )
+    resp.raise_for_status()
 
 
 def main():
