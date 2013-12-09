@@ -19,11 +19,15 @@ import hashlib
 import os.path
 import subprocess
 import sys
+import io
+import contextlib
 
 try:
     from urlparse import urlparse, urlunparse
+    from urllib2 import urlopen
 except ImportError:
     from urllib.parse import urlparse, urlunparse
+    from urllib.request import urlopen
 
 import pkginfo
 import pkg_resources
@@ -48,6 +52,50 @@ DIST_EXTENSIONS = {
 }
 
 
+class LocalStream(object):
+    """
+    A file stream, in a local file
+    """
+    def __init__(self, name):
+        self.name = name
+
+    @property
+    def url(self):
+        return 'file:' + self.name
+
+    @property
+    def basename(self):
+        return os.path.basename(urlparse(self.name).path)
+
+    @contextlib.contextmanager
+    def local_filename(self):
+        """
+        Return a filename on the local file system containing self.stream
+        """
+        yield self.name
+
+    def sign(self, identity):
+        "Sign the dist"
+        print("Signing {0}".format(self.basename))
+        with self.local_filename() as filename:
+            gpg_args = ["gpg", "--detach-sign", "-a", filename]
+            if identity:
+                gpg_args[2:2] = ["--local-user", identity]
+            subprocess.check_call(gpg_args)
+            with open(filename + '.asc', 'rb') as sig_stream:
+                signature = sig_stream.read()
+            # todo: consider removing signature
+        return signature
+
+    @property
+    def stream(self):
+        if not hasattr(self, '_stream'):
+            with urlopen(self.url) as reader:
+                self._stream = io.BytesIO(reader.read())
+        self._stream.seek(0)
+        return self._stream
+
+
 def upload(dists, repository, sign, identity, username, password, comment):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
@@ -57,7 +105,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [i for i in dists if not i.endswith(".asc")]
+    dists = [LocalStream(i) for i in dists if not i.endswith(".asc")]
 
     config = _load_config(repository)
 
@@ -65,8 +113,8 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
     session = requests.session()
 
-    for filename in dists:
-        _do_upload(filename, signatures, config, session, sign, comment, identity)
+    for dist in dists:
+        _do_upload(dist, signatures, config, session, sign, comment, identity)
 
 
 def _load_config(repository):
@@ -88,28 +136,21 @@ def _load_config(repository):
     return config
 
 
-def _do_upload(filename, signatures, config, session, sign, comment, identity):
-    # Sign the dist if requested
-    if sign:
-        print("Signing {0}".format(os.path.basename(filename)))
-        gpg_args = ["gpg", "--detach-sign", "-a", filename]
-        if identity:
-            gpg_args[2:2] = ["--local-user", identity]
-        subprocess.check_call(gpg_args)
-
+def _do_upload(dist, signatures, config, session, sign, comment, identity):
     # Extract the metadata from the package
     for ext, dtype in DIST_EXTENSIONS.items():
-        if filename.endswith(ext):
-            meta = DIST_TYPES[dtype](filename)
+        if dist.basename.endswith(ext):
+            with dist.local_filename() as filename:
+                meta = DIST_TYPES[dtype](filename)
             break
     else:
         raise ValueError(
-            "Unknown distribution format: '%s'" %
-            os.path.basename(filename)
+            "Unknown distribution format: '%s'" % dist.basename
         )
 
     if dtype == "bdist_egg":
-        pkgd = pkg_resources.Distribution.from_filename(filename)
+        with dist.local_filename() as filename:
+            pkgd = pkg_resources.Distribution.from_filename(filename)
         py_version = pkgd.py_version
     elif dtype == "bdist_wheel":
         py_version = meta.py_version
@@ -163,22 +204,19 @@ def _do_upload(filename, signatures, config, session, sign, comment, identity):
 
     }
 
-    with open(filename, "rb") as fp:
-        content = fp.read()
-        filedata = {
-            "content": (os.path.basename(filename), content),
-        }
-        data["md5_digest"] = hashlib.md5(content).hexdigest()
+    filedata = {
+        "content": (dist.basename, dist.stream.getvalue()),
+    }
+    data["md5_digest"] = hashlib.md5(dist.stream.getvalue()).hexdigest()
 
-    signed_name = os.path.basename(filename) + ".asc"
+    signed_name = dist.basename + ".asc"
     if signed_name in signatures:
         with open(signatures[signed_name], "rb") as gpg:
             filedata["gpg_signature"] = (signed_name, gpg.read())
     elif sign:
-        with open(filename + ".asc", "rb") as gpg:
-            filedata["gpg_signature"] = (signed_name, gpg.read())
+        filedata["gpg_signature"] = (signed_name, dist.sign(identity))
 
-    print("Uploading {0}".format(os.path.basename(filename)))
+    print("Uploading {dist.basename}".format(**vars()))
 
     resp = session.post(
         config["repository"],
