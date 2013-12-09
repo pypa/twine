@@ -59,7 +59,17 @@ def upload(dists, repository, sign, identity, username, password, comment):
     )
     dists = [i for i in dists if not i.endswith(".asc")]
 
-    # Get our config from ~/.pypirc
+    config = _load_config(repository)
+
+    print("Uploading distributions to {0}".format(config["repository"]))
+
+    session = requests.session()
+
+    for filename in dists:
+        _do_upload(filename, signatures, config, session, sign, comment, identity)
+
+def _load_config(repository):
+    "Load config from ~/.pypirc"
     try:
         config = get_config()[repository]
     except KeyError:
@@ -74,12 +84,9 @@ def upload(dists, repository, sign, identity, username, password, comment):
         config["repository"] = urlunparse(
             ("https",) + parsed[1:]
         )
+    return config
 
-    print("Uploading distributions to {0}".format(config["repository"]))
-
-    session = requests.session()
-
-    for filename in dists:
+def _do_upload(filename, signatures, config, session, sign, comment, identity):
         # Sign the dist if requested
         if sign:
             print("Signing {0}".format(os.path.basename(filename)))
