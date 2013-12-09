@@ -21,6 +21,7 @@ import subprocess
 import sys
 import io
 import contextlib
+import tempfile
 
 try:
     from urlparse import urlparse, urlunparse
@@ -96,6 +97,35 @@ class LocalStream(object):
         return self._stream
 
 
+class RemoteStream(LocalStream):
+    """
+    A file stream located in a remote location (e.g. HTTP)
+    """
+    @classmethod
+    def load(cls, name):
+        if not urlparse(name).scheme:
+            return LocalStream(name)
+        return cls(name)
+
+    @property
+    def url(self):
+        return self.name
+
+    @contextlib.contextmanager
+    def local_filename(self):
+        """
+        Return a filename on the local file system containing self.stream
+        """
+        try:
+            tf = tempfile.NamedTemporaryFile(suffix=self.basename,
+                delete=False)
+            with tf:
+                tf.file.write(self.stream.getvalue())
+            yield tf.name
+        finally:
+            os.remove(tf.name)
+
+
 def upload(dists, repository, sign, identity, username, password, comment):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
@@ -105,7 +135,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [LocalStream(i) for i in dists if not i.endswith(".asc")]
+    dists = [RemoteStream.load(i) for i in dists if not i.endswith(".asc")]
 
     config = _load_config(repository)
 
