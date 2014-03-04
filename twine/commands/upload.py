@@ -175,7 +175,10 @@ def upload(dists, repository, sign, identity, username, password, comment):
             config["repository"],
             data=dict((k, v) for k, v in data.items() if v),
             files=filedata,
-            auth=(config.get("username"), config.get("password")),
+            auth=(
+                username or config.get("username"),
+                password or config.get("password"),
+            ),
         )
         resp.raise_for_status()
 
