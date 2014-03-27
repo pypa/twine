@@ -187,7 +187,8 @@ def main():
     parser = argparse.ArgumentParser(prog="twine upload")
     parser.add_argument(
         "-r", "--repository",
-        help="The repository to upload the files to",
+        default="pypi",
+        help="The repository to upload the files to (default: %(default)s)",
     )
     parser.add_argument(
         "-s", "--sign",
