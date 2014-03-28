@@ -61,6 +61,31 @@ DIST_EXTENSIONS = {
 }
 
 
+def get_dtype(filename):
+    '''Determine distribution type'''
+    for ext, dtype in DIST_EXTENSIONS.items():
+        if filename.endswith(ext):
+            return dtype
+
+    raise ValueError(
+        "Unknown distribution format: '%s'" %
+        os.path.basename(filename)
+    )
+
+
+# "unit tests":
+assert 'sdist' == get_dtype('pkg.tar.gz')
+assert 'sdist' == get_dtype('pkg.zip')
+# ? assert 'sdist' == get_dtype('pkg.tgz')
+assert 'bdist_egg' == get_dtype('pkg.egg')
+assert 'bdist_wheel' == get_dtype('pkg.whl')
+
+
+def get_meta(filename, dtype):
+    '''Metadata'''
+    return DIST_TYPES[dtype](filename)
+
+
 def upload(dists, repository, sign, identity, username, password, comment):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
@@ -102,15 +127,8 @@ def upload(dists, repository, sign, identity, username, password, comment):
             subprocess.check_call(gpg_args)
 
         # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
+        dtype = get_dtype(filename)
+        meta = get_meta(filename, dtype)
 
         # Fill in the data - send all the meta-data in case we need to
         # register a new release
