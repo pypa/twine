@@ -82,8 +82,82 @@ assert 'bdist_wheel' == get_dtype('pkg.whl')
 
 
 def get_meta(filename, dtype):
-    '''Metadata'''
     return DIST_TYPES[dtype](filename)
+
+
+def upload_distribution(
+    session, filename, signature, repository, username, password, comment
+):
+    # Extract the metadata from the package
+    dtype = get_dtype(filename)
+    meta = get_meta(filename, dtype)
+
+    # Fill in the data - send all the meta-data in case we need to
+    # register a new release
+    data = {
+        # action
+        ":action": "file_upload",
+        "protcol_version": "1",
+
+        # identify release
+        "name": meta.name,
+        "version": meta.version,
+
+        # file content
+        "filetype": dtype,
+        "pyversion": meta.py_version,
+
+        # additional meta-data
+        "metadata_version": meta.metadata_version,
+        "summary": meta.summary,
+        "home_page": meta.home_page,
+        "author": meta.author,
+        "author_email": meta.author_email,
+        "maintainer": meta.maintainer,
+        "maintainer_email": meta.maintainer_email,
+        "license": meta.license,
+        "description": meta.description,
+        "keywords": meta.keywords,
+        "platform": meta.platforms,
+        "classifiers": meta.classifiers,
+        "download_url": meta.download_url,
+        "supported_platform": meta.supported_platforms,
+        "comment": comment,
+
+        # PEP 314
+        "provides": meta.provides,
+        "requires": meta.requires,
+        "obsoletes": meta.obsoletes,
+
+        # Metadata 1.2
+        "project_urls": meta.project_urls,
+        "provides_dist": meta.provides_dist,
+        "obsoletes_dist": meta.obsoletes_dist,
+        "requires_dist": meta.requires_dist,
+        "requires_external": meta.requires_external,
+        "requires_python": meta.requires_python,
+    }
+
+    pypi_filename = os.path.basename(filename)
+
+    with open(filename, "rb") as fp:
+        content = fp.read()
+        filedata = {
+            "content": (pypi_filename, content),
+        }
+        if signature:
+            filedata["gpg_signature"] = (pypi_filename + ".asc", signature)
+        data["md5_digest"] = hashlib.md5(content).hexdigest()
+
+    print("Uploading {0}".format(pypi_filename))
+
+    resp = session.post(
+        repository,
+        data=dict((k, v) for k, v in data.items() if v),
+        files=filedata,
+        auth=(username, password),
+    )
+    resp.raise_for_status()
 
 
 def upload(dists, repository, sign, identity, username, password, comment):
@@ -107,13 +181,17 @@ def upload(dists, repository, sign, identity, username, password, comment):
             ),
         )
 
-    parsed = urlparse(config["repository"])
+    repository_url = config["repository"]
+    parsed = urlparse(repository_url)
     if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
-        config["repository"] = urlunparse(
+        repository_url = urlunparse(
             ("https",) + parsed[1:]
         )
 
-    print("Uploading distributions to {0}".format(config["repository"]))
+    username = username or config.get("username")
+    password = password or config.get("password")
+
+    print("Uploading distributions to {0}".format(repository_url))
 
     session = requests.session()
 
@@ -126,84 +204,24 @@ def upload(dists, repository, sign, identity, username, password, comment):
                 gpg_args[2:2] = ["--local-user", identity]
             subprocess.check_call(gpg_args)
 
-        # Extract the metadata from the package
-        dtype = get_dtype(filename)
-        meta = get_meta(filename, dtype)
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": meta.name,
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": meta.py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        with open(filename, "rb") as fp:
-            content = fp.read()
-            filedata = {
-                "content": (os.path.basename(filename), content),
-            }
-            data["md5_digest"] = hashlib.md5(content).hexdigest()
-
+        signature = None
         signed_name = os.path.basename(filename) + ".asc"
         if signed_name in signatures:
             with open(signatures[signed_name], "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                signature = gpg.read()
         elif sign:
             with open(filename + ".asc", "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                signature = gpg.read()
 
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(
-                username or config.get("username"),
-                password or config.get("password"),
-            ),
+        upload_distribution(
+            session,
+            filename,
+            signature,
+            repository_url,
+            username,
+            password,
+            comment,
         )
-        resp.raise_for_status()
 
 
 def main():
