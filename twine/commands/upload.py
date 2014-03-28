@@ -225,7 +225,15 @@ def main():
 
     # Call the upload function with the arguments from the command line
     try:
-        upload(**vars(args))
+        upload(
+            dists=args.dists,
+            repository=args.repository,
+            sign=args.sign,
+            identity=args.identity,
+            username=args.username,
+            password=args.password,
+            comment=args.comment,
+        )
     except Exception as exc:
         sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
 
