@@ -33,10 +33,23 @@ from twine.wheel import Wheel
 from twine.utils import get_config
 
 
+class BDist(pkginfo.BDist):
+
+    @property
+    def py_version(self):
+        pkgd = pkg_resources.Distribution.from_filename(self.filename)
+        return pkgd.py_version
+
+
+class SDist(pkginfo.SDist):
+
+    py_version = None
+
+
 DIST_TYPES = {
     "bdist_wheel": Wheel,
-    "bdist_egg": pkginfo.BDist,
-    "sdist": pkginfo.SDist,
+    "bdist_egg": BDist,
+    "sdist": SDist,
 }
 
 DIST_EXTENSIONS = {
@@ -99,14 +112,6 @@ def upload(dists, repository, sign, identity, username, password, comment):
                 os.path.basename(filename)
             )
 
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
         # Fill in the data - send all the meta-data in case we need to
         # register a new release
         data = {
@@ -120,7 +125,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
             # file content
             "filetype": dtype,
-            "pyversion": py_version,
+            "pyversion": meta.py_version,
 
             # additional meta-data
             "metadata_version": meta.metadata_version,
