@@ -97,8 +97,8 @@ Options
 Resources
 ---------
 
-* `IRC <http://webchat.freenode.net?channels=%23warehouse>`_
-  (#warehouse - irc.freenode.net)
+* `IRC <http://webchat.freenode.net?channels=%23pypa>`_
+  (#pypa - irc.freenode.net)
 * `Repository <https://github.com/dstufft/twine>`_
 
 
