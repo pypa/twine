@@ -50,12 +50,12 @@ def get_config(path="~/.pypirc"):
         # Mandatory configuration and defaults
         config[repository] = {
             "repository": DEFAULT_REPOSITORY,
-            "username": parser.get(repository, "username"),
+            "username": None,
             "password": None,
         }
 
         # Optional configuration values
-        for key in ["repository", "password"]:
+        for key in ["username", "repository", "password"]:
             if parser.has_option(repository, key):
                 config[repository][key] = parser.get(repository, key)
 
