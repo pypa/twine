@@ -187,7 +187,8 @@ def main():
     parser = argparse.ArgumentParser(prog="twine upload")
     parser.add_argument(
         "-r", "--repository",
-        help="The repository to upload the files to",
+        default="pypi",
+        help="The repository to upload the files to (default: %(default)s)",
     )
     parser.add_argument(
         "-s", "--sign",
@@ -224,12 +225,7 @@ def main():
 
     # Call the upload function with the arguments from the command line
     try:
-        upload(
-            *args._get_args(),
-            **dict(
-                (k, v) for k, v in args._get_kwargs() if not k.startswith("_")
-            )
-        )
+        upload(**vars(args))
     except Exception as exc:
         sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
 
