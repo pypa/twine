@@ -15,6 +15,7 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
+import getpass
 import hashlib
 import os.path
 import subprocess
@@ -76,6 +77,9 @@ def upload(dists, repository, sign, identity, username, password, comment):
         )
 
     print("Uploading distributions to {0}".format(config["repository"]))
+
+    username = username or config.get("username")
+    password = password or config.get("password") or getpass.getpass()
 
     session = requests.session()
 
@@ -176,8 +180,8 @@ def upload(dists, repository, sign, identity, username, password, comment):
             data=dict((k, v) for k, v in data.items() if v),
             files=filedata,
             auth=(
-                username or config.get("username"),
-                password or config.get("password"),
+                username,
+                password,
             ),
         )
         resp.raise_for_status()

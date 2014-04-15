@@ -1,0 +1,6 @@
+# Docs
+Sphinx==1.2.2
+releases==0.6.1
+
+# Testing
+tox==1.7.1
