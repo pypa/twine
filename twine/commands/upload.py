@@ -15,6 +15,8 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
+import functools
+import getpass
 import hashlib
 import os.path
 import subprocess
@@ -46,6 +48,54 @@ DIST_EXTENSIONS = {
     ".tar.gz": "sdist",
     ".zip": "sdist",
 }
+
+
+# Shim for raw_input in python3
+if sys.version_info > (3,):
+    input_func = input
+else:
+    input_func = raw_input
+
+
+def get_userpass_value(cli_value, config, key, prompt_strategy):
+    """Gets the username / password from config.
+
+    Uses the following rules:
+
+    1. If it is specified on the cli (`cli_value`), use that.
+    2. If `config[key]` is specified, use that.
+    3. Otherwise prompt using `prompt_strategy`.
+
+    :param cli_value: The value supplied from the command line or `None`.
+    :type cli_value: unicode or `None`
+    :param config: Config dictionary
+    :type config: dict
+    :param key: Key to find the config value.
+    :type key: unicode
+    :prompt_strategy: Argumentless function to return fallback value.
+    :type prompt_strategy: function
+    :returns: The value for the username / password
+    :rtype: unicode
+    """
+    if cli_value is not None:
+        return cli_value
+    elif config.get(key):
+        return config[key]
+    else:
+        return prompt_strategy()
+
+get_username = functools.partial(
+    get_userpass_value,
+    key='username',
+    prompt_strategy=functools.partial(input_func, 'Enter your username: '),
+)
+get_password = functools.partial(
+    get_userpass_value,
+    key='password',
+    prompt_strategy=functools.partial(
+        getpass.getpass, 'Enter your password: ',
+    ),
+)
 
 
 def upload(dists, repository, sign, identity, username, password, comment):
@@ -171,14 +221,13 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
         print("Uploading {0}".format(os.path.basename(filename)))
 
+        username = get_username(username, config)
+        password = get_password(password, config)
         resp = session.post(
             config["repository"],
             data=dict((k, v) for k, v in data.items() if v),
             files=filedata,
-            auth=(
-                username or config.get("username"),
-                password or config.get("password"),
-            ),
+            auth=(username, password),
         )
         resp.raise_for_status()
 
