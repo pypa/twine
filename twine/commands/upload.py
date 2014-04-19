@@ -127,6 +127,9 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
+    username = get_username(username, config)
+    password = get_password(password, config)
+
     session = requests.session()
 
     for filename in dists:
@@ -221,8 +224,6 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
         print("Uploading {0}".format(os.path.basename(filename)))
 
-        username = get_username(username, config)
-        password = get_password(password, config)
         resp = session.post(
             config["repository"],
             data=dict((k, v) for k, v in data.items() if v),
