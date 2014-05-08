@@ -30,17 +30,20 @@ import pkg_resources
 import requests
 
 from twine.wheel import Wheel
+from twine.wininst import WinInst
 from twine.utils import get_config
 
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
+    "bdist_wininst": WinInst,
     "bdist_egg": pkginfo.BDist,
     "sdist": pkginfo.SDist,
 }
 
 DIST_EXTENSIONS = {
     ".whl": "bdist_wheel",
+    ".exe": "bdist_wininst",
     ".egg": "bdist_egg",
     ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
@@ -103,6 +106,8 @@ def upload(dists, repository, sign, identity, username, password, comment):
             pkgd = pkg_resources.Distribution.from_filename(filename)
             py_version = pkgd.py_version
         elif dtype == "bdist_wheel":
+            py_version = meta.py_version
+        elif dtype == "bdist_wininst":
             py_version = meta.py_version
         else:
             py_version = None
