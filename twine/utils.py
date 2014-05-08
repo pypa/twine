@@ -29,6 +29,13 @@ def get_config(path="~/.pypirc"):
     # Expand user strings in the path
     path = os.path.expanduser(path)
 
+    if not os.path.isfile(path):
+        return {None: {"repository": DEFAULT_REPOSITORY,
+                       "username": None,
+                       "password": None
+                       }
+                }
+
     # Parse the rc file
     parser = configparser.ConfigParser()
     parser.read(path)
