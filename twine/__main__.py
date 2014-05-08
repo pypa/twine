@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+# !/usr/bin/env python
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -17,11 +17,11 @@ from __future__ import unicode_literals
 
 import sys
 
-from twine.cli import dispatch
+from twine.cli import process_arguments
 
 
 def main():
-    return dispatch(sys.argv[1:])
+    return process_arguments(sys.argv[1:])
 
 
 if __name__ == "__main__":

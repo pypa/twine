@@ -14,11 +14,9 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import argparse
 import hashlib
 import os.path
 import subprocess
-import sys
 
 try:
     from urlparse import urlparse, urlunparse
@@ -48,7 +46,15 @@ DIST_EXTENSIONS = {
 }
 
 
-def upload(dists, repository, sign, identity, username, password, comment):
+def upload(args):
+    dists = args.dists
+    repository = args.repository
+    sign = args.sign
+    identity = args.identity
+    username = args.username
+    password = args.password
+    comment = args.comment
+
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -181,54 +187,3 @@ def upload(dists, repository, sign, identity, username, password, comment):
             ),
         )
         resp.raise_for_status()
-
-
-def main():
-    parser = argparse.ArgumentParser(prog="twine upload")
-    parser.add_argument(
-        "-r", "--repository",
-        default="pypi",
-        help="The repository to upload the files to (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-s", "--sign",
-        action="store_true",
-        default=False,
-        help="Sign files to upload using gpg",
-    )
-    parser.add_argument(
-        "-i", "--identity",
-        help="GPG identity used to sign files",
-    )
-    parser.add_argument(
-        "-u", "--username",
-        help="The username to authenticate to the repository as",
-    )
-    parser.add_argument(
-        "-p", "--password",
-        help="The password to authenticate to the repository with",
-    )
-    parser.add_argument(
-        "-c", "--comment",
-        help="The comment to include with the distribution file",
-    )
-    parser.add_argument(
-        "dists",
-        nargs="+",
-        metavar="dist",
-        help="The distribution files to upload to the repository, may "
-             "additionally contain a .asc file to include an existing "
-             "signature with the file upload",
-    )
-
-    args = parser.parse_args(sys.argv[1:])
-
-    # Call the upload function with the arguments from the command line
-    try:
-        upload(**vars(args))
-    except Exception as exc:
-        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
-
-
-if __name__ == "__main__":
-    sys.exit(main())

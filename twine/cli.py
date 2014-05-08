@@ -15,31 +15,72 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
-import subprocess
-import sys
-
 import twine
+from twine.commands.register import register
+from twine.commands.upload import upload
 
 
-def dispatch(argv):
+def process_arguments(argv):
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
+        "-v",
         "--version",
         action="version",
         version="%(prog)s version {0}".format(twine.__version__),
     )
-    parser.add_argument("command")
-    parser.add_argument(
-        "args",
-        help=argparse.SUPPRESS,
-        nargs=argparse.REMAINDER,
+    subparsers = parser.add_subparsers(title="commands",
+                                       help="%(prog)s {command} -h for command specific help")
+
+    # Shared parent parser for common settings
+    shared_parser = argparse.ArgumentParser(add_help=False)
+    shared_parser.add_argument(
+        "-r", "--repository",
+        default="pypi",
+        help="The repository to upload the files to (default: %(default)s)",
+    )
+    shared_parser.add_argument(
+        "-u", "--username",
+        help="The username to authenticate to the repository as",
+    )
+    shared_parser.add_argument(
+        "-p", "--password",
+        help="The password to authenticate to the repository with",
     )
 
+    # Upload parser
+    upload_parser = subparsers.add_parser("upload", parents=[shared_parser])
+    upload_parser.set_defaults(func=upload)
+
+    upload_parser.add_argument(
+        "-s", "--sign",
+        action="store_true",
+        default=False,
+        help="Sign files to upload using gpg",
+    )
+    upload_parser.add_argument(
+        "-i", "--identity",
+        help="GPG identity used to sign files",
+    )
+
+    upload_parser.add_argument(
+        "-c", "--comment",
+        help="The comment to include with the distribution file",
+    )
+    upload_parser.add_argument(
+        "dists",
+        nargs="+",
+        metavar="dist",
+        help="The distribution files to upload to the repository, may "
+             "additionally contain a .asc file to include an existing "
+             "signature with the file upload",
+    )
+
+    # Register parser
+    register_parser = subparsers.add_parser("register", parents=[shared_parser])
+    register_parser.set_defaults(func=register)
+
     args = parser.parse_args(argv)
+    args.func(args)
 
-    # Dispatch to the real command
-    p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
-    p.wait()
-
-    # Exit using whatever exit code the sub command used
-    sys.exit(p.returncode)
+    # If it makes it here everything is OK
+    return 0
