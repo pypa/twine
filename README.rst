@@ -9,10 +9,10 @@ Currently it only supports uploading distributions.
 Why Should I Use This?
 ----------------------
 
-The biggest reason to use twine is that ``python setup.py upload`` `uploads
-files over plaintext <https://bugs.python.org/issue12226>`_. 
+The biggest reason to use twine is that ``python setup.py upload`` `authenticates you to PyPI 
+over http <http://bugs.python.org/issue12226>`_. 
 This means anytime you use it you expose your username
-and password to a MITM attack. Twine uses only verified TLS to upload to PyPI
+and password to being sniffed. Twine uses only verified TLS to upload to PyPI
 protecting your credentials from theft.
 
 Secondly it allows you to precreate your distribution files.
