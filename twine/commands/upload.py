@@ -30,7 +30,7 @@ import pkg_resources
 import requests
 
 from twine.wheel import Wheel
-from twine.utils import get_config
+from twine.utils import get_config, get_username, get_password
 
 
 DIST_TYPES = {
@@ -76,6 +76,9 @@ def upload(dists, repository, sign, identity, username, password, comment):
         )
 
     print("Uploading distributions to {0}".format(config["repository"]))
+
+    username = get_username(username, config)
+    password = get_password(password, config)
 
     session = requests.session()
 
@@ -175,10 +178,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
             config["repository"],
             data=dict((k, v) for k, v in data.items() if v),
             files=filedata,
-            auth=(
-                username or config.get("username"),
-                password or config.get("password"),
-            ),
+            auth=(username, password),
         )
         resp.raise_for_status()
 

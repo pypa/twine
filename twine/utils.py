@@ -15,11 +15,20 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import os.path
+import functools
+import getpass
+import sys
 
 try:
     import configparser
 except ImportError:  # pragma: no cover
     import ConfigParser as configparser
+
+# Shim for raw_input in python3
+if sys.version_info > (3,):
+    input_func = input
+else:
+    input_func = raw_input
 
 
 DEFAULT_REPOSITORY = "https://pypi.python.org/pypi"
@@ -67,3 +76,44 @@ def get_config(path="~/.pypirc"):
                 config[repository][key] = parser.get(repository, key)
 
     return config
+
+
+def get_userpass_value(cli_value, config, key, prompt_strategy):
+    """Gets the username / password from config.
+
+    Uses the following rules:
+
+    1. If it is specified on the cli (`cli_value`), use that.
+    2. If `config[key]` is specified, use that.
+    3. Otherwise prompt using `prompt_strategy`.
+
+    :param cli_value: The value supplied from the command line or `None`.
+    :type cli_value: unicode or `None`
+    :param config: Config dictionary
+    :type config: dict
+    :param key: Key to find the config value.
+    :type key: unicode
+    :prompt_strategy: Argumentless function to return fallback value.
+    :type prompt_strategy: function
+    :returns: The value for the username / password
+    :rtype: unicode
+    """
+    if cli_value is not None:
+        return cli_value
+    elif config.get(key):
+        return config[key]
+    else:
+        return prompt_strategy()
+
+get_username = functools.partial(
+    get_userpass_value,
+    key='username',
+    prompt_strategy=functools.partial(input_func, 'Enter your username: '),
+)
+get_password = functools.partial(
+    get_userpass_value,
+    key='password',
+    prompt_strategy=functools.partial(
+        getpass.getpass, 'Enter your password: ',
+    ),
+)

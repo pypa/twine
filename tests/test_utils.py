@@ -16,8 +16,9 @@ from __future__ import unicode_literals
 
 import os.path
 import textwrap
+import pytest
 
-from twine.utils import DEFAULT_REPOSITORY, get_config
+from twine.utils import DEFAULT_REPOSITORY, get_config, get_userpass_value
 
 
 def test_get_config(tmpdir):
@@ -81,3 +82,16 @@ def test_get_config_no_section(tmpdir):
             "password": "testpassword",
         },
     }
+
+
+@pytest.mark.parametrize(
+    ('cli_value', 'config', 'key', 'strategy', 'expected'),
+    (
+        ('cli', {}, 'key', lambda: 'fallback', 'cli'),
+        (None, {'key': 'value'}, 'key', lambda: 'fallback', 'value'),
+        (None, {}, 'key', lambda: 'fallback', 'fallback'),
+    ),
+)
+def test_get_userpass_value(cli_value, config, key, strategy, expected):
+    ret = get_userpass_value(cli_value, config, key, strategy)
+    assert ret == expected
