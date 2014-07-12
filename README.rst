@@ -99,7 +99,7 @@ Resources
 
 * `IRC <http://webchat.freenode.net?channels=%23pypa>`_
   (#pypa - irc.freenode.net)
-* `Repository <https://github.com/dstufft/twine>`_
+* `Repository <https://github.com/pypa/twine>`_
 
 
 Contributing
@@ -112,4 +112,4 @@ Contributing
    optional.
 4. Submit a Pull Request to the master branch on GitHub.
 
-.. _repository: https://github.com/dstufft/twine
+.. _repository: https://github.com/pypa/twine

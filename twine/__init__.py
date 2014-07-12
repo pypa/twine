@@ -21,7 +21,7 @@ __all__ = [
 
 __title__ = "twine"
 __summary__ = "Collection of utilities for interacting with PyPI"
-__uri__ = "https://github.com/dstufft/twine"
+__uri__ = "https://github.com/pypa/twine"
 
 __version__ = "1.3.1"
 
