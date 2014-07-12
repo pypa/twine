@@ -227,7 +227,7 @@ def main():
     try:
         upload(**vars(args))
     except Exception as exc:
-        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
+        sys.exit("{exc.__class__.__name__}: {exc}".format(exc=exc))
 
 
 if __name__ == "__main__":
