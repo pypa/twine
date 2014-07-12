@@ -18,11 +18,11 @@ import os.path
 
 try:
     import configparser
-except ImportError:
+except ImportError:  # pragma: no cover
     import ConfigParser as configparser
 
 
-DEFAULT_REPOSITORY = 'https://pypi.python.org/pypi'
+DEFAULT_REPOSITORY = "https://pypi.python.org/pypi"
 
 
 def get_config(path="~/.pypirc"):
