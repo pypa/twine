@@ -33,10 +33,23 @@ from twine.wheel import Wheel
 from twine.utils import get_config
 
 
+class BDist(pkginfo.BDist):
+
+    @property
+    def py_version(self):
+        pkgd = pkg_resources.Distribution.from_filename(self.filename)
+        return pkgd.py_version
+
+
+class SDist(pkginfo.SDist):
+
+    py_version = None
+
+
 DIST_TYPES = {
     "bdist_wheel": Wheel,
-    "bdist_egg": pkginfo.BDist,
-    "sdist": pkginfo.SDist,
+    "bdist_egg": BDist,
+    "sdist": SDist,
 }
 
 DIST_EXTENSIONS = {
@@ -46,6 +59,105 @@ DIST_EXTENSIONS = {
     ".tar.gz": "sdist",
     ".zip": "sdist",
 }
+
+
+def get_dtype(filename):
+    '''Determine distribution type'''
+    for ext, dtype in DIST_EXTENSIONS.items():
+        if filename.endswith(ext):
+            return dtype
+
+    raise ValueError(
+        "Unknown distribution format: '%s'" %
+        os.path.basename(filename)
+    )
+
+
+# "unit tests":
+assert 'sdist' == get_dtype('pkg.tar.gz')
+assert 'sdist' == get_dtype('pkg.zip')
+# ? assert 'sdist' == get_dtype('pkg.tgz')
+assert 'bdist_egg' == get_dtype('pkg.egg')
+assert 'bdist_wheel' == get_dtype('pkg.whl')
+
+
+def get_meta(filename, dtype):
+    return DIST_TYPES[dtype](filename)
+
+
+def upload_distribution(
+    session, filename, signature, repository, username, password, comment
+):
+    # Extract the metadata from the package
+    dtype = get_dtype(filename)
+    meta = get_meta(filename, dtype)
+
+    # Fill in the data - send all the meta-data in case we need to
+    # register a new release
+    data = {
+        # action
+        ":action": "file_upload",
+        "protcol_version": "1",
+
+        # identify release
+        "name": meta.name,
+        "version": meta.version,
+
+        # file content
+        "filetype": dtype,
+        "pyversion": meta.py_version,
+
+        # additional meta-data
+        "metadata_version": meta.metadata_version,
+        "summary": meta.summary,
+        "home_page": meta.home_page,
+        "author": meta.author,
+        "author_email": meta.author_email,
+        "maintainer": meta.maintainer,
+        "maintainer_email": meta.maintainer_email,
+        "license": meta.license,
+        "description": meta.description,
+        "keywords": meta.keywords,
+        "platform": meta.platforms,
+        "classifiers": meta.classifiers,
+        "download_url": meta.download_url,
+        "supported_platform": meta.supported_platforms,
+        "comment": comment,
+
+        # PEP 314
+        "provides": meta.provides,
+        "requires": meta.requires,
+        "obsoletes": meta.obsoletes,
+
+        # Metadata 1.2
+        "project_urls": meta.project_urls,
+        "provides_dist": meta.provides_dist,
+        "obsoletes_dist": meta.obsoletes_dist,
+        "requires_dist": meta.requires_dist,
+        "requires_external": meta.requires_external,
+        "requires_python": meta.requires_python,
+    }
+
+    pypi_filename = os.path.basename(filename)
+
+    with open(filename, "rb") as fp:
+        content = fp.read()
+        filedata = {
+            "content": (pypi_filename, content),
+        }
+        if signature:
+            filedata["gpg_signature"] = (pypi_filename + ".asc", signature)
+        data["md5_digest"] = hashlib.md5(content).hexdigest()
+
+    print("Uploading {0}".format(pypi_filename))
+
+    resp = session.post(
+        repository,
+        data=dict((k, v) for k, v in data.items() if v),
+        files=filedata,
+        auth=(username, password),
+    )
+    resp.raise_for_status()
 
 
 def upload(dists, repository, sign, identity, username, password, comment):
@@ -69,13 +181,17 @@ def upload(dists, repository, sign, identity, username, password, comment):
             ),
         )
 
-    parsed = urlparse(config["repository"])
+    repository_url = config["repository"]
+    parsed = urlparse(repository_url)
     if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
-        config["repository"] = urlunparse(
+        repository_url = urlunparse(
             ("https",) + parsed[1:]
         )
 
-    print("Uploading distributions to {0}".format(config["repository"]))
+    username = username or config.get("username")
+    password = password or config.get("password")
+
+    print("Uploading distributions to {0}".format(repository_url))
 
     session = requests.session()
 
@@ -88,99 +204,24 @@ def upload(dists, repository, sign, identity, username, password, comment):
                 gpg_args[2:2] = ["--local-user", identity]
             subprocess.check_call(gpg_args)
 
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": meta.name,
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        with open(filename, "rb") as fp:
-            content = fp.read()
-            filedata = {
-                "content": (os.path.basename(filename), content),
-            }
-            data["md5_digest"] = hashlib.md5(content).hexdigest()
-
+        signature = None
         signed_name = os.path.basename(filename) + ".asc"
         if signed_name in signatures:
             with open(signatures[signed_name], "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                signature = gpg.read()
         elif sign:
             with open(filename + ".asc", "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                signature = gpg.read()
 
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(
-                username or config.get("username"),
-                password or config.get("password"),
-            ),
+        upload_distribution(
+            session,
+            filename,
+            signature,
+            repository_url,
+            username,
+            password,
+            comment,
         )
-        resp.raise_for_status()
 
 
 def main():
@@ -225,7 +266,15 @@ def main():
 
     # Call the upload function with the arguments from the command line
     try:
-        upload(**vars(args))
+        upload(
+            dists=args.dists,
+            repository=args.repository,
+            sign=args.sign,
+            identity=args.identity,
+            username=args.username,
+            password=args.password,
+            comment=args.comment,
+        )
     except Exception as exc:
         sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
 
