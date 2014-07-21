@@ -20,5 +20,4 @@ import os
 
 for entry in os.listdir(__path__[0]):
     if entry.endswith('.py') and not entry.startswith('_'):
-        subcommands.append( entry[:-3] )
-
+        subcommands.append(entry[:-3])
