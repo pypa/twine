@@ -23,7 +23,8 @@ from twine.commands import subcommands
 
 def dispatch(argv):
     parser = argparse.ArgumentParser(prog="twine")
-    subparse = parser.add_subparsers(dest="command", title="commands", metavar='')
+    subparse = parser.add_subparsers(dest="command", title="commands",
+                                     metavar='')
     for command in subcommands:
         subparse.add_parser(command, help='')
     parser.add_argument(
