@@ -1,5 +1,4 @@
 include LICENSE
-include CONTRIBUTORS
 include README.rst
 include AUTHORS
 
