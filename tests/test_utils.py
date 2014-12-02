@@ -82,7 +82,8 @@ def test_get_config_no_section(tmpdir):
             "password": "testpassword",
         },
     }
-    
+
+
 def test_get_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
