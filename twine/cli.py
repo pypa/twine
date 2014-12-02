@@ -37,7 +37,12 @@ def dispatch(argv):
     args = parser.parse_args(argv)
 
     # Dispatch to the real command
-    p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
+    try:
+        p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
+    except OSError:
+        print("{0} is not a valid command.".format(args.command))
+        raise SystemExit(True)
+
     p.wait()
 
     # Return whatever exit code the sub command used
