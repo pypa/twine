@@ -49,6 +49,24 @@ DIST_EXTENSIONS = {
 }
 
 
+def find_dists(dists):
+    uploads = []
+    for filename in dists:
+        if os.path.exists(filename):
+            uploads.append(filename)
+            continue
+        # The filename didn't exist so it may be a glob
+        files = glob.glob(filename)
+        # If nothing matches, files is []
+        if not files:
+            raise ValueError(
+                "Cannot find file (or expand pattern): '%s'" % filename
+                )
+        # Otherwise, files will be filenames that exist
+        uploads.extend(files)
+    return uploads
+
+
 def upload(dists, repository, sign, identity, username, password, comment):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
@@ -83,16 +101,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
     session = requests.session()
 
-    uploads = []
-    for filename in dists:
-        if os.path.exists(filename):
-            uploads.append(filename)
-            continue
-        files = glob.glob(filename)
-        extend_with = filter(os.path.exists, files)
-        if not extend_with:
-            raise ValueError("Cannot find file: '%s'" % filename)
-        uploads.extend(extend_with)
+    uploads = find_dists(dists)
 
     for filename in uploads:
         # Sign the dist if requested
