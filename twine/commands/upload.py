@@ -15,6 +15,7 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
+import glob
 import hashlib
 import os.path
 import subprocess
@@ -46,6 +47,24 @@ DIST_EXTENSIONS = {
     ".tar.gz": "sdist",
     ".zip": "sdist",
 }
+
+
+def find_dists(dists):
+    uploads = []
+    for filename in dists:
+        if os.path.exists(filename):
+            uploads.append(filename)
+            continue
+        # The filename didn't exist so it may be a glob
+        files = glob.glob(filename)
+        # If nothing matches, files is []
+        if not files:
+            raise ValueError(
+                "Cannot find file (or expand pattern): '%s'" % filename
+                )
+        # Otherwise, files will be filenames that exist
+        uploads.extend(files)
+    return uploads
 
 
 def upload(dists, repository, sign, identity, username, password, comment):
@@ -82,7 +101,9 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
     session = requests.session()
 
-    for filename in dists:
+    uploads = find_dists(dists)
+
+    for filename in uploads:
         # Sign the dist if requested
         if sign:
             print("Signing {0}".format(os.path.basename(filename)))
