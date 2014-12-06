@@ -15,6 +15,7 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
+import glob
 import hashlib
 import os.path
 import subprocess
@@ -82,7 +83,18 @@ def upload(dists, repository, sign, identity, username, password, comment):
 
     session = requests.session()
 
+    uploads = []
     for filename in dists:
+        if os.path.exists(filename):
+            uploads.append(filename)
+            continue
+        files = glob.glob(filename)
+        extend_with = filter(os.path.exists, files)
+        if not extend_with:
+            raise ValueError("Cannot find file: '%s'" % filename)
+        uploads.extend(extend_with)
+
+    for filename in uploads:
         # Sign the dist if requested
         if sign:
             print("Signing {0}".format(os.path.basename(filename)))
