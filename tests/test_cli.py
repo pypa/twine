@@ -32,3 +32,11 @@ def test_dispatch_to_subcommand(monkeypatch):
     assert popen.calls == [pretend.call(["twine-upload"])]
     assert process.wait.calls == [pretend.call()]
     assert rcode == process.returncode
+
+
+def test_catches_enoent():
+    try:
+        cli.dispatch(["non-existant-command"])
+    except SystemExit:
+        return
+    assert False
