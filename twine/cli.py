@@ -18,17 +18,21 @@ import argparse
 import errno
 import subprocess
 
-import twine
+from twine import __version__
+from twine.commands import subcommands
 
 
 def dispatch(argv):
     parser = argparse.ArgumentParser(prog="twine")
+    subparse = parser.add_subparsers(dest="command", title="commands",
+                                     metavar='')
+    for command in subcommands:
+        subparse.add_parser(command, help='')
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s version {0}".format(twine.__version__),
+        version="%(prog)s version {0}".format(__version__),
     )
-    parser.add_argument("command")
     parser.add_argument(
         "args",
         help=argparse.SUPPRESS,
