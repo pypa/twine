@@ -144,7 +144,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
             "protcol_version": "1",
 
             # identify release
-            "name": meta.name,
+            "name": pkg_resources.safe_name(meta.name),
             "version": meta.version,
 
             # file content
