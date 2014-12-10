@@ -108,9 +108,17 @@ Contributing
 
 1. Fork the `repository`_ on GitHub.
 2. Make a branch off of master and commit your changes to it.
-3. Ensure that your name is added to the end of the AUTHORS file using the
+3. Run the tests with `tox`
+  - Either use `tox` to build against all supported Python versions (if you
+    have them installed) or use `tox -e py{version}` to test against a
+    sepcific version, e.g., `tox -e py27` or `tox -e py34`.
+  - Always run `tox -e pep8`
+4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
    optional.
-4. Submit a Pull Request to the master branch on GitHub.
+5. Submit a Pull Request to the master branch on GitHub.
+
+If you'd like to have a development environment for twine, you should create a
+virtualenv and then do `pip install -e .` from within the directory.
 
 .. _repository: https://github.com/pypa/twine
