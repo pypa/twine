@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 
 import argparse
 import errno
+import pkg_resources
 import subprocess
 
 import twine
@@ -37,16 +38,15 @@ def dispatch(argv):
 
     args = parser.parse_args(argv)
 
-    # Dispatch to the real command
-    try:
-        p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
-    except OSError as err:
-        if err.errno == errno.ENOENT:
-            print("{0} is not a valid command.".format(args.command))
-            raise SystemExit(True)
-        raise
+    group = 'twine.registered_commands'
+    command = args.command
+    for registered_command in pkg_resources.iter_entry_points(group):
+        if registered_command.name == command:
+            break
+    else:
+        print("{0} is not a valid command.".format(command))
+        raise SystemExit(True)
 
-    p.wait()
+    main = registered_command.load()
 
-    # Return whatever exit code the sub command used
-    return p.returncode
+    main(args.args)
