@@ -20,14 +20,22 @@ import pkg_resources
 import twine
 
 
+def _registered_commands(group='twine.registered_commands'):
+    return list(pkg_resources.iter_entry_points(group=group))
+
+
 def dispatch(argv):
+    registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
         action="version",
         version="%(prog)s version {0}".format(twine.__version__),
     )
-    parser.add_argument("command")
+    parser.add_argument(
+        "command",
+        choices=[c.name for c in registered_commands],
+    )
     parser.add_argument(
         "args",
         help=argparse.SUPPRESS,
@@ -36,9 +44,8 @@ def dispatch(argv):
 
     args = parser.parse_args(argv)
 
-    group = 'twine.registered_commands'
     command = args.command
-    for registered_command in pkg_resources.iter_entry_points(group):
+    for registered_command in registered_commands:
         if registered_command.name == command:
             break
     else:
