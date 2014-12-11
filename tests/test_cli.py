@@ -14,29 +14,11 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import pretend
+import pytest
 
 from twine import cli
 
 
-def test_dispatch_to_subcommand(monkeypatch):
-    process = pretend.stub(
-        wait=pretend.call_recorder(lambda: None),
-        returncode=0,
-    )
-    popen = pretend.call_recorder(lambda args: process)
-    monkeypatch.setattr(cli.subprocess, "Popen", popen)
-
-    rcode = cli.dispatch(["upload"])
-
-    assert popen.calls == [pretend.call(["twine-upload"])]
-    assert process.wait.calls == [pretend.call()]
-    assert rcode == process.returncode
-
-
 def test_catches_enoent():
-    try:
+    with pytest.raises(SystemExit):
         cli.dispatch(["non-existant-command"])
-    except SystemExit:
-        return
-    assert False
