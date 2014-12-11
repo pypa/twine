@@ -209,7 +209,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
         resp.raise_for_status()
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
     parser.add_argument(
         "-r", "--repository",
@@ -247,7 +247,7 @@ def main():
              "signature with the file upload",
     )
 
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(args)
 
     # Call the upload function with the arguments from the command line
     try:

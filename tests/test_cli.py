@@ -15,28 +15,21 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import pretend
+import pytest
 
 from twine import cli
+import twine.commands.upload
 
 
 def test_dispatch_to_subcommand(monkeypatch):
-    process = pretend.stub(
-        wait=pretend.call_recorder(lambda: None),
-        returncode=0,
-    )
-    popen = pretend.call_recorder(lambda args: process)
-    monkeypatch.setattr(cli.subprocess, "Popen", popen)
+    replaced_main = pretend.call_recorder(lambda args: None)
+    monkeypatch.setattr(twine.commands.upload, "main", replaced_main)
 
-    rcode = cli.dispatch(["upload"])
+    cli.dispatch(["upload", "path/to/file"])
 
-    assert popen.calls == [pretend.call(["twine-upload"])]
-    assert process.wait.calls == [pretend.call()]
-    assert rcode == process.returncode
+    assert replaced_main.calls == [pretend.call(["path/to/file"])]
 
 
 def test_catches_enoent():
-    try:
+    with pytest.raises(SystemExit):
         cli.dispatch(["non-existant-command"])
-    except SystemExit:
-        return
-    assert False

@@ -64,9 +64,11 @@ setup(
     packages=["twine", "twine.commands"],
 
     entry_points={
+        "twine.registered_commands": [
+            "upload = twine.commands.upload:main",
+        ],
         "console_scripts": [
             "twine = twine.__main__:main",
-            "twine-upload = twine.commands.upload:main",
         ],
     },
 
