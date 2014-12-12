@@ -206,6 +206,10 @@ def upload(dists, repository, sign, identity, username, password, comment):
             files=filedata,
             auth=(username, password),
         )
+        # Bug 28. Try to silence a ResourceWarning by releasing the socket and
+        # clearing the connection pool.
+        resp.close()
+        session.close()
         resp.raise_for_status()
 
 
