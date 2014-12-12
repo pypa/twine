@@ -14,16 +14,16 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-__all__ = [
+__all__ = (
     "__title__", "__summary__", "__uri__", "__version__", "__author__",
     "__email__", "__license__", "__copyright__",
-]
+)
 
 __title__ = "twine"
 __summary__ = "Collection of utilities for interacting with PyPI"
 __uri__ = "https://github.com/pypa/twine"
 
-__version__ = "1.3.1"
+__version__ = "1.4.0"
 
 __author__ = "Donald Stufft and individual contributors"
 __email__ = "donald@stufft.io"
