@@ -19,7 +19,7 @@ import twine
 
 
 install_requires = [
-    "requests",
+    "requests >= 2.0",
     "pkginfo",
 ]
 
