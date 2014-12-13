@@ -32,11 +32,11 @@ anything else since *you* will be the one directly executing
 Features
 --------
 
-* Verified HTTPS Connections
-* Uploading doesn't require executing setup.py
-* Uploading files that have already been created, allowing testing of
+- Verified HTTPS Connections
+- Uploading doesn't require executing setup.py
+- Uploading files that have already been created, allowing testing of
   distributions before release
-* Supports uploading any packaging format (including wheels).
+- Supports uploading any packaging format (including wheels).
 
 
 Installation
@@ -99,20 +99,22 @@ Resources
 ---------
 
 * `IRC <http://webchat.freenode.net?channels=%23pypa>`_
-  (#pypa - irc.freenode.net)
-* `Repository <https://github.com/pypa/twine>`_
+  (``#pypa`` - irc.freenode.net)
+* `GitHub repository <https://github.com/pypa/twine>`_
 
 
 Contributing
 ------------
 
-1. Fork the `repository`_ on GitHub.
+1. Fork the `repository <https://github.com/pypa/twine>`_ on GitHub.
 2. Make a branch off of master and commit your changes to it.
-3. Run the tests with `tox`
-  - Either use `tox` to build against all supported Python versions (if you
-    have them installed) or use `tox -e py{version}` to test against a
-    sepcific version, e.g., `tox -e py27` or `tox -e py34`.
-  - Always run `tox -e pep8`
+3. Run the tests with ``tox``
+
+  - Either use ``tox`` to build against all supported Python versions (if you
+    have them installed) or use ``tox -e py{version}`` to test against a
+    sepcific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+  - Always run ``tox -e pep8``
+
 4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
    optional.
@@ -120,5 +122,3 @@ Contributing
 
 If you'd like to have a development environment for twine, you should create a
 virtualenv and then do ``pip install -e .`` from within the directory.
-
-.. _repository: https://github.com/pypa/twine
