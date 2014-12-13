@@ -42,7 +42,7 @@ Features
 Installation
 ------------
 
-.. code:: bash
+.. code-block:: bash
 
     $ pip install twine
 
@@ -52,13 +52,13 @@ Usage
 
 1. Create some distributions in the normal way:
 
-.. code:: bash
+.. code-block:: bash
 
     $ python setup.py sdist bdist_wheel
 
 2. Upload with twine:
 
-.. code:: bash
+.. code-block:: bash
 
     $ twine upload dist/*
 
@@ -68,7 +68,7 @@ Usage
 Options
 ~~~~~~~
 
-.. code:: bash
+.. code-block:: bash
 
     $ twine upload -h
     usage: twine upload [-h] [-r REPOSITORY] [-s] [-i IDENTITY] [-u USERNAME]
@@ -119,6 +119,6 @@ Contributing
 5. Submit a Pull Request to the master branch on GitHub.
 
 If you'd like to have a development environment for twine, you should create a
-virtualenv and then do `pip install -e .` from within the directory.
+virtualenv and then do ``pip install -e .`` from within the directory.
 
 .. _repository: https://github.com/pypa/twine
