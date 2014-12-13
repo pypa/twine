@@ -70,7 +70,8 @@ def find_dists(dists):
     return uploads
 
 
-def upload(dists, repository, sign, identity, username, password, comment):
+def upload(dists, repository, sign, identity, username, password, comment,
+           sign_with):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -110,7 +111,7 @@ def upload(dists, repository, sign, identity, username, password, comment):
         # Sign the dist if requested
         if sign:
             print("Signing {0}".format(os.path.basename(filename)))
-            gpg_args = ["gpg", "--detach-sign", "-a", filename]
+            gpg_args = [sign_with, "--detach-sign", "-a", filename]
             if identity:
                 gpg_args[2:2] = ["--local-user", identity]
             subprocess.check_call(gpg_args)
@@ -225,6 +226,11 @@ def main(args):
         action="store_true",
         default=False,
         help="Sign files to upload using gpg",
+    )
+    parser.add_argument(
+        "--sign-with",
+        default="gpg",
+        help="GPG program used to sign uploads (default: %(default)s)",
     )
     parser.add_argument(
         "-i", "--identity",
