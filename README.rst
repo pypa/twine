@@ -119,6 +119,6 @@ Contributing
 5. Submit a Pull Request to the master branch on GitHub.
 
 If you'd like to have a development environment for twine, you should create a
-virtualenv and then do `pip install -e .` from within the directory.
+virtualenv and then do ``pip install -e .`` from within the directory.
 
 .. _repository: https://github.com/pypa/twine
