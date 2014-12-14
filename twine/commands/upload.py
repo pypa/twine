@@ -70,6 +70,14 @@ def find_dists(dists):
     return uploads
 
 
+def sign_file(sign_with, filename, identity):
+    print("Signing {0}".format(os.path.basename(filename)))
+    gpg_args = [sign_with, "--detach-sign", "-a", filename]
+    if identity:
+        gpg_args[2:2] = ["--local-user", identity]
+    subprocess.check_call(gpg_args)
+
+
 def upload(dists, repository, sign, identity, username, password, comment,
            sign_with):
     # Check that a nonsensical option wasn't given
@@ -110,11 +118,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
     for filename in uploads:
         # Sign the dist if requested
         if sign:
-            print("Signing {0}".format(os.path.basename(filename)))
-            gpg_args = [sign_with, "--detach-sign", "-a", filename]
-            if identity:
-                gpg_args[2:2] = ["--local-user", identity]
-            subprocess.check_call(gpg_args)
+            sign_file(sign_with, filename, identity)
 
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
