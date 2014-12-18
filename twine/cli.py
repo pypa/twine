@@ -17,11 +17,23 @@ from __future__ import unicode_literals
 import argparse
 import pkg_resources
 
+import requests
+import pkginfo
+
 import twine
 
 
 def _registered_commands(group='twine.registered_commands'):
     return list(pkg_resources.iter_entry_points(group=group))
+
+
+def dep_versions():
+    return 'pkginfo: {0}, requests: {1}'.format(
+        pkginfo.Installed(pkginfo).version,
+        # __version__ is always defined but requests does not always have
+        # PKG-INFO to read from
+        requests.__version__,
+    )
 
 
 def dispatch(argv):
@@ -30,7 +42,8 @@ def dispatch(argv):
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s version {0}".format(twine.__version__),
+        version="%(prog)s version {0} ({1})".format(twine.__version__,
+                                                    dep_versions()),
     )
     parser.add_argument(
         "command",
