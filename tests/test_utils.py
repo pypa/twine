@@ -96,6 +96,20 @@ def test_get_config_missing(tmpdir):
     }
 
 
+def test_get_config_deprecated_pypirc():
+    tests_dir = os.path.dirname(os.path.abspath(__file__))
+    deprecated_pypirc_path = os.path.join(tests_dir, 'fixtures',
+                                          'deprecated-pypirc')
+
+    assert get_config(deprecated_pypirc_path) == {
+        "pypi": {
+            "repository": DEFAULT_REPOSITORY,
+            "username": 'testusername',
+            "password": 'testpassword',
+        },
+    }
+
+
 @pytest.mark.parametrize(
     ('cli_value', 'config', 'key', 'strategy', 'expected'),
     (

@@ -58,6 +58,12 @@ def get_config(path="~/.pypirc"):
 
     config = {}
 
+    defaults = {"username": None, "password": None}
+    if parser.has_section("server-login"):
+        for key in ["username", "password"]:
+            if parser.has_option("server-login", key):
+                defaults[key] = parser.get("server-login", key)
+
     for repository in repositories:
         # Skip this repository if it doesn't exist in the config file
         if not parser.has_section(repository):
@@ -74,6 +80,8 @@ def get_config(path="~/.pypirc"):
         for key in ["username", "repository", "password"]:
             if parser.has_option(repository, key):
                 config[repository][key] = parser.get(repository, key)
+            elif defaults.get(key):
+                config[repository][key] = defaults[key]
 
     return config
 

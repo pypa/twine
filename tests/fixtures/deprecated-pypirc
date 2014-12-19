@@ -1,0 +1,6 @@
+[server-login]
+username:testusername
+password:testpassword
+
+[pypi]
+foo:bar
