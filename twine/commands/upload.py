@@ -14,7 +14,6 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import argparse
 import glob
 import hashlib
 import os.path
@@ -30,6 +29,7 @@ import pkginfo
 import pkg_resources
 import requests
 
+from twine.common import common_arguments
 from twine.utils import get_config, get_username, get_password
 from twine.wheel import Wheel
 from twine.wininst import WinInst
@@ -219,12 +219,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
 
 def main(args):
-    parser = argparse.ArgumentParser(prog="twine upload")
-    parser.add_argument(
-        "-r", "--repository",
-        default="pypi",
-        help="The repository to upload the files to (default: %(default)s)",
-    )
+    parser = common_arguments("twine upload")
     parser.add_argument(
         "-s", "--sign",
         action="store_true",
@@ -239,14 +234,6 @@ def main(args):
     parser.add_argument(
         "-i", "--identity",
         help="GPG identity used to sign files",
-    )
-    parser.add_argument(
-        "-u", "--username",
-        help="The username to authenticate to the repository as",
-    )
-    parser.add_argument(
-        "-p", "--password",
-        help="The password to authenticate to the repository with",
     )
     parser.add_argument(
         "-c", "--comment",
