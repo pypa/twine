@@ -19,8 +19,9 @@ import twine
 
 
 install_requires = [
-    "requests >= 2.0",
     "pkginfo",
+    "requests >= 2.0",
+    "setuptools >= 0.7.0",
 ]
 
 if sys.version_info[:2] < (2, 7):
