@@ -9,24 +9,30 @@ Currently it only supports uploading distributions.
 Why Should I Use This?
 ----------------------
 
-The biggest reason to use twine is that ``python setup.py upload`` `authenticates you to PyPI 
-over http <http://bugs.python.org/issue12226>`_. 
-This means anytime you use it you expose your username
-and password to being sniffed. Twine uses only verified TLS to upload to PyPI
-protecting your credentials from theft.
+- Uses secure, verified HTTPS connections to upload to PyPI
 
-Secondly it allows you to precreate your distribution files.
-``python setup.py upload`` only allows you to upload something that you've
-created in the same command invocation. This means that you cannot test the
-exact file you're going to upload to PyPI to ensure that it works before
-uploading it.
+  By contrast, ``python setup.py upload`` `authenticates you to PyPI 
+  over unencrypted, unverfied http <http://bugs.python.org/issue12226>`_. 
+  This that means anytime you use ``python setup.py upload``,
+  you expose your username and password to being sniffed.
+  Twine uses only verified TLS to upload to PyPI,
+  protecting your credentials from theft.
 
-Finally it allows you to pre-sign your files and pass the .asc files into
-the command line invocation
-(``twine upload twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``). This enables you
-to be assured that you're typing your gpg passphrase into gpg itself and not
-anything else since *you* will be the one directly executing
-``gpg --detach-sign -a <filename>``.
+- Allows you to precreate your distribution files
+
+  ``python setup.py upload`` only allows you to upload
+  something that you've created in the same command invocation.
+  This means that you cannot test the exact file
+  that you're going to upload to PyPI
+  to ensure that it works before uploading it.
+  
+- Allows you to pre-sign your files and pass the .asc files into the command line invocation
+  (e.g.: ``twine upload twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``)
+
+  This enables you to be assured that you're typing your gpg passphrase into gpg itself
+  and not anything else
+  since *you* will be the one directly executing
+  ``gpg --detach-sign -a <filename>``.
 
 
 Features
