@@ -112,7 +112,7 @@ Contributing
 
   - Either use ``tox`` to build against all supported Python versions (if you
     have them installed) or use ``tox -e py{version}`` to test against a
-    sepcific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+    specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
   - Always run ``tox -e pep8``
 
 4. Ensure that your name is added to the end of the AUTHORS file using the
