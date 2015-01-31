@@ -30,6 +30,7 @@ import pkginfo
 import pkg_resources
 import requests
 
+import twine.exceptions as exc
 from twine.utils import get_config, get_username, get_password
 from twine.wheel import Wheel
 from twine.wininst import WinInst
@@ -210,11 +211,23 @@ def upload(dists, repository, sign, identity, username, password, comment,
             data=dict((k, v) for k, v in data.items() if v),
             files=filedata,
             auth=(username, password),
+            allow_redirects=False,
         )
         # Bug 28. Try to silence a ResourceWarning by releasing the socket and
         # clearing the connection pool.
         resp.close()
         session.close()
+
+        # Bug 92. If we get a redirect we should abort because something seems
+        # funky. The behaviour is not well defined and redirects being issued
+        # by PyPI should never happen in reality. This should catch malicious
+        # redirects as well.
+        if resp.is_redirect():
+            raise exc.RedirectDetected(
+                ('"{0}" attempted to redirect to "{1}" during upload.'
+                 ' Aborting...').format(config["respository"],
+                                        resp.headers["location"]))
+        # Otherwise, raise an HTTPError based on the status code.
         resp.raise_for_status()
 
 
