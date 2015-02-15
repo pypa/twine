@@ -33,7 +33,6 @@ class TestLocalStream:
         with pytest.raises(ValueError):
             upload.LocalStream.find('twine/*.rb')
 
-
     def test_find_dists_handles_real_files(self):
         expected = ['twine/__init__.py', 'twine/__main__.py', 'twine/cli.py',
                     'twine/utils.py', 'twine/wheel.py']
@@ -48,7 +47,11 @@ class TestLocalStream:
 
     def test_sign_file(self, monkeypatch):
         replaced_check_call = pretend.call_recorder(lambda args: None)
-        monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
+        monkeypatch.setattr(
+            upload.subprocess,
+            'check_call',
+            replaced_check_call,
+        )
 
         ls = upload.LocalStream('my_file.tar.gz')
         ls.sign(identity=None, sign_with='gpg2')
@@ -57,7 +60,11 @@ class TestLocalStream:
 
     def test_sign_file_with_identity(self, monkeypatch):
         replaced_check_call = pretend.call_recorder(lambda args: None)
-        monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
+        monkeypatch.setattr(
+            upload.subprocess,
+            'check_call',
+            replaced_check_call,
+        )
 
         ls = upload.LocalStream('my_file.tar.gz')
         ls.sign(identity='identity', sign_with='gpg')

@@ -153,8 +153,10 @@ class RemoteStream(LocalStream):
         Return a filename on the local file system containing self.stream
         """
         try:
-            tf = tempfile.NamedTemporaryFile(suffix=self.basename,
-                delete=False)
+            tf = tempfile.NamedTemporaryFile(
+                suffix=self.basename,
+                delete=False,
+            )
             with tf:
                 tf.file.write(self.stream.getvalue())
             yield tf.name
@@ -188,8 +190,16 @@ def upload(dists, repository, sign, identity, username, password, comment,
     session.auth = auth
 
     for dist in dists:
-        _do_upload(dist, signatures, config, session, sign, comment, identity,
-            sign_with)
+        _do_upload(
+            dist,
+            signatures,
+            config,
+            session,
+            sign,
+            comment,
+            identity,
+            sign_with,
+        )
 
 
 def _load_config(repository):
@@ -212,7 +222,7 @@ def _load_config(repository):
 
 
 def _do_upload(dist, signatures, config, session, sign, comment, identity,
-        sign_with):
+               sign_with):
 
     # Extract the metadata from the package
     for ext, dtype in DIST_EXTENSIONS.items():
