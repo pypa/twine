@@ -46,21 +46,21 @@ class TestLocalStream:
         names = [res.name for res in results]
         assert expected == names
 
+    def test_sign_file(self, monkeypatch):
+        replaced_check_call = pretend.call_recorder(lambda args: None)
+        monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
 
-def test_sign_file(monkeypatch):
-    replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
+        ls = upload.LocalStream('my_file.tar.gz')
+        ls.sign(identity=None, sign_with='gpg2')
+        args = ['gpg2', '--detach-sign', '-a', 'my_file.tar.gz']
+        assert replaced_check_call.calls == [pretend.call(args)]
 
-    upload.sign_file('gpg2', 'my_file.tar.gz', None)
-    args = ['gpg2', '--detach-sign', '-a', 'my_file.tar.gz']
-    assert replaced_check_call.calls == [pretend.call(args)]
+    def test_sign_file_with_identity(self, monkeypatch):
+        replaced_check_call = pretend.call_recorder(lambda args: None)
+        monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
 
-
-def test_sign_file_with_identity(monkeypatch):
-    replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
-
-    upload.sign_file('gpg', 'my_file.tar.gz', 'identity')
-    args = ['gpg', '--detach-sign', '--local-user', 'identity', '-a',
-            'my_file.tar.gz']
-    assert replaced_check_call.calls == [pretend.call(args)]
+        ls = upload.LocalStream('my_file.tar.gz')
+        ls.sign(identity='identity', sign_with='gpg')
+        args = ['gpg', '--detach-sign', '--local-user', 'identity', '-a',
+                'my_file.tar.gz']
+        assert replaced_check_call.calls == [pretend.call(args)]
