@@ -22,13 +22,15 @@ created in the same command invocation. This means that you cannot test the
 exact file you're going to upload to PyPI to ensure that it works before
 uploading it.
 
-Finally it allows you to pre-sign your files and pass the .asc files into
+Thirdly it allows you to pre-sign your files and pass the .asc files into
 the command line invocation
 (``twine upload twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``). This enables you
 to be assured that you're typing your gpg passphrase into gpg itself and not
 anything else since *you* will be the one directly executing
 ``gpg --detach-sign -a <filename>``.
 
+Forthly it allows uploading of files from a mirror repository to PyPI or
+from PyPI to a mirror repository.
 
 Features
 --------
@@ -38,7 +40,7 @@ Features
 - Uploading files that have already been created, allowing testing of
   distributions before release
 - Supports uploading any packaging format (including wheels).
-
+* Re-use official sdists in a local mirror
 
 Installation
 ------------

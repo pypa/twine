@@ -20,11 +20,17 @@ import hashlib
 import os.path
 import subprocess
 import sys
+import io
+import contextlib
+import tempfile
+import itertools
 
 try:
     from urlparse import urlparse, urlunparse
+    from urllib2 import urlopen
 except ImportError:
     from urllib.parse import urlparse, urlunparse
+    from urllib.request import urlopen
 
 import pkginfo
 import pkg_resources
@@ -52,30 +58,110 @@ DIST_EXTENSIONS = {
 }
 
 
-def find_dists(dists):
-    uploads = []
-    for filename in dists:
-        if os.path.exists(filename):
-            uploads.append(filename)
-            continue
-        # The filename didn't exist so it may be a glob
-        files = glob.glob(filename)
-        # If nothing matches, files is []
-        if not files:
-            raise ValueError(
-                "Cannot find file (or expand pattern): '%s'" % filename
-                )
-        # Otherwise, files will be filenames that exist
-        uploads.extend(files)
-    return uploads
+class LocalStream(object):
+    """
+    A file stream, in a local file
+    """
+    def __init__(self, name):
+        self.name = name
+
+    @classmethod
+    def find(cls, spec):
+        """
+        Find LocalStreams indicated by spec. Spec must by a filename that
+        exists or a glob matching at least one filename.
+        Return an iterable of LocalStreams for each matched name or raise
+        ValueError.
+        """
+        if os.path.exists(spec):
+            return cls(spec),
+
+        # The filename didn't exist so assume it is a glob
+        matches = glob.glob(spec)
+
+        if not matches:
+            msg = "Cannot find file (or expand pattern): '%s'" % spec
+            raise ValueError(msg)
+
+        # Otherwise, matches will be local filenames that exist
+        return map(cls, matches)
+
+    @property
+    def url(self):
+        return 'file:' + self.name
+
+    @property
+    def basename(self):
+        return os.path.basename(urlparse(self.name).path)
+
+    @contextlib.contextmanager
+    def local_filename(self):
+        """
+        Return a filename on the local file system containing self.stream
+        """
+        yield self.name
+
+    def sign(self, identity, sign_with):
+        "Sign the dist"
+        print("Signing {0}".format(self.basename))
+        with self.local_filename() as filename:
+            gpg_args = [sign_with, "--detach-sign", "-a", filename]
+            if identity:
+                gpg_args[2:2] = ["--local-user", identity]
+            subprocess.check_call(gpg_args)
+        return filename + '.asc'
+
+    def sign_and_read(self, identity, sign_with):
+        filename = self.sign(identity, sign_with)
+        with open(filename + '.asc', 'rb') as sig_stream:
+            signature = sig_stream.read()
+        # todo: consider removing signature
+        return signature
+
+    @property
+    def stream(self):
+        if not hasattr(self, '_stream'):
+            with urlopen(self.url) as reader:
+                self._stream = io.BytesIO(reader.read())
+        self._stream.seek(0)
+        return self._stream
 
 
-def sign_file(sign_with, filename, identity):
-    print("Signing {0}".format(os.path.basename(filename)))
-    gpg_args = [sign_with, "--detach-sign", "-a", filename]
-    if identity:
-        gpg_args[2:2] = ["--local-user", identity]
-    subprocess.check_call(gpg_args)
+class RemoteStream(LocalStream):
+    """
+    A file stream located in a remote location (e.g. HTTP)
+    """
+    @classmethod
+    def find(cls, spec):
+        """
+        Find all streams indicated by spec. May be a URL, filename, or glob.
+
+        Return an iterable of LocalStreams.
+        """
+        if not urlparse(spec).scheme:
+            # it's a filename or glob
+            return LocalStream.find(spec)
+        return cls(spec),
+
+    @property
+    def url(self):
+        return self.name
+
+    @contextlib.contextmanager
+    def local_filename(self):
+        """
+        Return a filename on the local file system containing self.stream
+        """
+        try:
+            tf = tempfile.NamedTemporaryFile(
+                suffix=self.basename,
+                delete=False,
+            )
+            with tf:
+                tf.file.write(self.stream.getvalue())
+            yield tf.name
+        finally:
+            os.remove(tf.name)
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
@@ -88,9 +174,36 @@ def upload(dists, repository, sign, identity, username, password, comment,
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [i for i in dists if not i.endswith(".asc")]
+    dists = itertools.chain.from_iterable(
+        RemoteStream.find(spec)
+        for spec in dists
+        if not spec.endswith(".asc")
+    )
 
-    # Get our config from ~/.pypirc
+    config = _load_config(repository)
+
+    print("Uploading distributions to {0}".format(config["repository"]))
+
+    auth = get_username(username, config), get_password(password, config)
+
+    session = requests.session()
+    session.auth = auth
+
+    for dist in dists:
+        _do_upload(
+            dist,
+            signatures,
+            config,
+            session,
+            sign,
+            comment,
+            identity,
+            sign_with,
+        )
+
+
+def _load_config(repository):
+    "Load config from ~/.pypirc"
     try:
         config = get_config()[repository]
     except KeyError:
@@ -105,117 +218,106 @@ def upload(dists, repository, sign, identity, username, password, comment,
         config["repository"] = urlunparse(
             ("https",) + parsed[1:]
         )
+    return config
 
-    print("Uploading distributions to {0}".format(config["repository"]))
 
-    username = get_username(username, config)
-    password = get_password(password, config)
+def _do_upload(dist, signatures, config, session, sign, comment, identity,
+               sign_with):
 
-    session = requests.session()
-
-    uploads = find_dists(dists)
-
-    for filename in uploads:
-        # Sign the dist if requested
-        if sign:
-            sign_file(sign_with, filename, identity)
-
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
+    # Extract the metadata from the package
+    for ext, dtype in DIST_EXTENSIONS.items():
+        if dist.basename.endswith(ext):
+            with dist.local_filename() as filename:
                 meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        elif dtype == "bdist_wininst":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": pkg_resources.safe_name(meta.name),
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        with open(filename, "rb") as fp:
-            content = fp.read()
-            filedata = {
-                "content": (os.path.basename(filename), content),
-            }
-            data["md5_digest"] = hashlib.md5(content).hexdigest()
-
-        signed_name = os.path.basename(filename) + ".asc"
-        if signed_name in signatures:
-            with open(signatures[signed_name], "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
-        elif sign:
-            with open(filename + ".asc", "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
-
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(username, password),
+            break
+    else:
+        raise ValueError(
+            "Unknown distribution format: '%s'" % dist.basename
         )
-        # Bug 28. Try to silence a ResourceWarning by releasing the socket and
-        # clearing the connection pool.
-        resp.close()
-        session.close()
-        resp.raise_for_status()
+
+    if dtype == "bdist_egg":
+        with dist.local_filename() as filename:
+            pkgd = pkg_resources.Distribution.from_filename(filename)
+        py_version = pkgd.py_version
+    elif dtype == "bdist_wheel":
+        py_version = meta.py_version
+    elif dtype == "bdist_wininst":
+        py_version = meta.py_version
+    else:
+        py_version = None
+
+    # Fill in the data - send all the meta-data in case we need to
+    # register a new release
+    data = {
+        # action
+        ":action": "file_upload",
+        "protcol_version": "1",
+
+        # identify release
+        "name": pkg_resources.safe_name(meta.name),
+        "version": meta.version,
+
+        # file content
+        "filetype": dtype,
+        "pyversion": py_version,
+
+        # additional meta-data
+        "metadata_version": meta.metadata_version,
+        "summary": meta.summary,
+        "home_page": meta.home_page,
+        "author": meta.author,
+        "author_email": meta.author_email,
+        "maintainer": meta.maintainer,
+        "maintainer_email": meta.maintainer_email,
+        "license": meta.license,
+        "description": meta.description,
+        "keywords": meta.keywords,
+        "platform": meta.platforms,
+        "classifiers": meta.classifiers,
+        "download_url": meta.download_url,
+        "supported_platform": meta.supported_platforms,
+        "comment": comment,
+
+        # PEP 314
+        "provides": meta.provides,
+        "requires": meta.requires,
+        "obsoletes": meta.obsoletes,
+
+        # Metadata 1.2
+        "project_urls": meta.project_urls,
+        "provides_dist": meta.provides_dist,
+        "obsoletes_dist": meta.obsoletes_dist,
+        "requires_dist": meta.requires_dist,
+        "requires_external": meta.requires_external,
+        "requires_python": meta.requires_python,
+
+    }
+
+    filedata = {
+        "content": (dist.basename, dist.stream.getvalue()),
+    }
+    data["md5_digest"] = hashlib.md5(dist.stream.getvalue()).hexdigest()
+
+    signed_name = dist.basename + ".asc"
+    if signed_name in signatures:
+        with open(signatures[signed_name], "rb") as gpg:
+            filedata["gpg_signature"] = (signed_name, gpg.read())
+    elif sign:
+        signature = dist.sign_and_read(identity, sign_with)
+        filedata["gpg_signature"] = (signed_name, signature)
+
+    print("Uploading {dist.basename}".format(**vars()))
+
+    resp = session.post(
+        config["repository"],
+        data=dict((k, v) for k, v in data.items() if v),
+        files=filedata,
+    )
+    # Bug 28. Try to silence a ResourceWarning by releasing the socket and
+    # clearing the connection pool.
+    resp.close()
+    session.close()
+    resp.raise_for_status()
 
 
 def main(args):
