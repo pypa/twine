@@ -109,9 +109,13 @@ class LocalStream(object):
             if identity:
                 gpg_args[2:2] = ["--local-user", identity]
             subprocess.check_call(gpg_args)
-            with open(filename + '.asc', 'rb') as sig_stream:
-                signature = sig_stream.read()
-            # todo: consider removing signature
+        return filename + '.asc'
+
+    def sign_and_read(self, identity, sign_with):
+        filename = self.sign(identity, sign_with)
+        with open(filename + '.asc', 'rb') as sig_stream:
+            signature = sig_stream.read()
+        # todo: consider removing signature
         return signature
 
     @property
@@ -289,7 +293,7 @@ def _do_upload(dist, signatures, config, session, sign, comment, identity,
         with open(signatures[signed_name], "rb") as gpg:
             filedata["gpg_signature"] = (signed_name, gpg.read())
     elif sign:
-        signature = dist.sign(identity, sign_with)
+        signature = dist.sign_and_read(identity, sign_with)
         filedata["gpg_signature"] = (signed_name, signature)
 
     print("Uploading {dist.basename}".format(**vars()))
