@@ -19,8 +19,9 @@ import twine
 
 
 install_requires = [
-    "requests",
     "pkginfo",
+    "requests >= 2.0",
+    "setuptools >= 0.7.0",
 ]
 
 if sys.version_info[:2] < (2, 7):
@@ -57,6 +58,7 @@ setup(
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
+        "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: Implementation :: CPython",
         "Programming Language :: Python :: Implementation :: PyPy",
     ],
@@ -64,9 +66,11 @@ setup(
     packages=["twine", "twine.commands"],
 
     entry_points={
+        "twine.registered_commands": [
+            "upload = twine.commands.upload:main",
+        ],
         "console_scripts": [
             "twine = twine.__main__:main",
-            "twine-upload = twine.commands.upload:main",
         ],
     },
 

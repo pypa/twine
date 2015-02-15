@@ -15,6 +15,7 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
+import glob
 import hashlib
 import os.path
 import subprocess
@@ -22,6 +23,7 @@ import sys
 import io
 import contextlib
 import tempfile
+import itertools
 
 try:
     from urlparse import urlparse, urlunparse
@@ -34,18 +36,21 @@ import pkginfo
 import pkg_resources
 import requests
 
+from twine.utils import get_config, get_username, get_password
 from twine.wheel import Wheel
-from twine.utils import get_config
+from twine.wininst import WinInst
 
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
+    "bdist_wininst": WinInst,
     "bdist_egg": pkginfo.BDist,
     "sdist": pkginfo.SDist,
 }
 
 DIST_EXTENSIONS = {
     ".whl": "bdist_wheel",
+    ".exe": "bdist_wininst",
     ".egg": "bdist_egg",
     ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
@@ -59,6 +64,27 @@ class LocalStream(object):
     """
     def __init__(self, name):
         self.name = name
+
+    @classmethod
+    def find(cls, spec):
+        """
+        Find LocalStreams indicated by spec. Spec must by a filename that
+        exists or a glob matching at least one filename.
+        Return an iterable of LocalStreams for each matched name or raise
+        ValueError.
+        """
+        if os.path.exists(spec):
+            return cls(spec),
+
+        # The filename didn't exist so assume it is a glob
+        matches = glob.glob(spec)
+
+        if not matches:
+            msg = "Cannot find file (or expand pattern): '%s'" % spec
+            raise ValueError(msg)
+
+        # Otherwise, matches will be local filenames that exist
+        return map(cls, matches)
 
     @property
     def url(self):
@@ -75,11 +101,11 @@ class LocalStream(object):
         """
         yield self.name
 
-    def sign(self, identity):
+    def sign(self, identity, sign_with):
         "Sign the dist"
         print("Signing {0}".format(self.basename))
         with self.local_filename() as filename:
-            gpg_args = ["gpg", "--detach-sign", "-a", filename]
+            gpg_args = [sign_with, "--detach-sign", "-a", filename]
             if identity:
                 gpg_args[2:2] = ["--local-user", identity]
             subprocess.check_call(gpg_args)
@@ -102,10 +128,16 @@ class RemoteStream(LocalStream):
     A file stream located in a remote location (e.g. HTTP)
     """
     @classmethod
-    def load(cls, name):
-        if not urlparse(name).scheme:
-            return LocalStream(name)
-        return cls(name)
+    def find(cls, spec):
+        """
+        Find all streams indicated by spec. May be a URL, filename, or glob.
+
+        Return an iterable of LocalStreams.
+        """
+        if not urlparse(spec).scheme:
+            # it's a filename or glob
+            return LocalStream.find(spec)
+        return cls(spec),
 
     @property
     def url(self):
@@ -126,7 +158,8 @@ class RemoteStream(LocalStream):
             os.remove(tf.name)
 
 
-def upload(dists, repository, sign, identity, username, password, comment):
+def upload(dists, repository, sign, identity, username, password, comment,
+           sign_with):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -135,16 +168,24 @@ def upload(dists, repository, sign, identity, username, password, comment):
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [RemoteStream.load(i) for i in dists if not i.endswith(".asc")]
+    dists = itertools.chain.from_iterable(
+        RemoteStream.find(spec)
+        for spec in dists
+        if not spec.endswith(".asc")
+    )
 
     config = _load_config(repository)
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
+    auth = get_username(username, config), get_password(password, config)
+
     session = requests.session()
+    session.auth = auth
 
     for dist in dists:
-        _do_upload(dist, signatures, config, session, sign, comment, identity)
+        _do_upload(dist, signatures, config, session, sign, comment, identity,
+            sign_with)
 
 
 def _load_config(repository):
@@ -166,7 +207,9 @@ def _load_config(repository):
     return config
 
 
-def _do_upload(dist, signatures, config, session, sign, comment, identity):
+def _do_upload(dist, signatures, config, session, sign, comment, identity,
+        sign_with):
+
     # Extract the metadata from the package
     for ext, dtype in DIST_EXTENSIONS.items():
         if dist.basename.endswith(ext):
@@ -184,6 +227,8 @@ def _do_upload(dist, signatures, config, session, sign, comment, identity):
         py_version = pkgd.py_version
     elif dtype == "bdist_wheel":
         py_version = meta.py_version
+    elif dtype == "bdist_wininst":
+        py_version = meta.py_version
     else:
         py_version = None
 
@@ -195,7 +240,7 @@ def _do_upload(dist, signatures, config, session, sign, comment, identity):
         "protcol_version": "1",
 
         # identify release
-        "name": meta.name,
+        "name": pkg_resources.safe_name(meta.name),
         "version": meta.version,
 
         # file content
@@ -244,7 +289,8 @@ def _do_upload(dist, signatures, config, session, sign, comment, identity):
         with open(signatures[signed_name], "rb") as gpg:
             filedata["gpg_signature"] = (signed_name, gpg.read())
     elif sign:
-        filedata["gpg_signature"] = (signed_name, dist.sign(identity))
+        signature = dist.sign(identity, sign_with)
+        filedata["gpg_signature"] = (signed_name, signature)
 
     print("Uploading {dist.basename}".format(**vars()))
 
@@ -252,22 +298,31 @@ def _do_upload(dist, signatures, config, session, sign, comment, identity):
         config["repository"],
         data=dict((k, v) for k, v in data.items() if v),
         files=filedata,
-        auth=(config.get("username"), config.get("password")),
     )
+    # Bug 28. Try to silence a ResourceWarning by releasing the socket and
+    # clearing the connection pool.
+    resp.close()
+    session.close()
     resp.raise_for_status()
 
 
-def main():
+def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
     parser.add_argument(
         "-r", "--repository",
-        help="The repository to upload the files to",
+        default="pypi",
+        help="The repository to upload the files to (default: %(default)s)",
     )
     parser.add_argument(
         "-s", "--sign",
         action="store_true",
         default=False,
         help="Sign files to upload using gpg",
+    )
+    parser.add_argument(
+        "--sign-with",
+        default="gpg",
+        help="GPG program used to sign uploads (default: %(default)s)",
     )
     parser.add_argument(
         "-i", "--identity",
@@ -294,18 +349,13 @@ def main():
              "signature with the file upload",
     )
 
-    args = parser.parse_args(sys.argv[1:])
+    args = parser.parse_args(args)
 
     # Call the upload function with the arguments from the command line
     try:
-        upload(
-            *args._get_args(),
-            **dict(
-                (k, v) for k, v in args._get_kwargs() if not k.startswith("_")
-            )
-        )
+        upload(**vars(args))
     except Exception as exc:
-        sys.exit("{0}: {1}".format(exc.__class__.__name__, exc.message))
+        sys.exit("{exc.__class__.__name__}: {exc}".format(exc=exc))
 
 
 if __name__ == "__main__":

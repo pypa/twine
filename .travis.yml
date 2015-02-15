@@ -4,6 +4,7 @@ env:
   - TOXENV=py27
   - TOXENV=py32
   - TOXENV=py33
+  - TOXENV=py34
   - TOXENV=docs
   - TOXENV=pep8
 
@@ -27,6 +28,6 @@ after_success:
 notifications:
   irc:
     channels:
-      - "irc.freenode.org#warehouse"
+      - "irc.freenode.org#pypa-dev"
     use_notice: true
     skip_join: true

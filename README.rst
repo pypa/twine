@@ -1,7 +1,7 @@
 twine
 =====
 
-Twine is a utility for interacting with PyPI.
+Twine is a utility for interacting `with PyPI <https://pypi.python.org/pypi/twine>`_.
 
 Currently it only supports uploading distributions.
 
@@ -9,10 +9,12 @@ Currently it only supports uploading distributions.
 Why Should I Use This?
 ----------------------
 
-The biggest reason to use twine is that ``python setup.py upload`` uploads
-files over plaintext. This means anytime you use it you expose your username
-and password to a MITM attack. Twine uses only verified TLS to upload to PyPI
-protecting your credentials from theft.
+The biggest reason to use twine is that it securely authenticates you to PyPI
+over HTTPS using a verified connection while ``python setup.py upload`` `uses
+HTTP and exposes your credentials <http://bugs.python.org/issue12226>`_.  This
+means anytime you use it you expose your username and password to being
+sniffed. Twine uses only verified TLS to upload to PyPI protecting your
+credentials from theft.
 
 Secondly it allows you to precreate your distribution files.
 ``python setup.py upload`` only allows you to upload something that you've
@@ -33,17 +35,17 @@ from PyPI to a mirror repository.
 Features
 --------
 
-* Verified HTTPS Connections
-* Uploading doesn't require executing setup.py
-* Uploading files that have already been created, allowing testing of
+- Verified HTTPS Connections
+- Uploading doesn't require executing setup.py
+- Uploading files that have already been created, allowing testing of
   distributions before release
-* Supports uploading any packaging format (including wheels).
+- Supports uploading any packaging format (including wheels).
 * Re-use official sdists in a local mirror
 
 Installation
 ------------
 
-.. code:: bash
+.. code-block:: bash
 
     $ pip install twine
 
@@ -53,13 +55,13 @@ Usage
 
 1. Create some distributions in the normal way:
 
-.. code:: bash
+.. code-block:: bash
 
     $ python setup.py sdist bdist_wheel
 
 2. Upload with twine:
 
-.. code:: bash
+.. code-block:: bash
 
     $ twine upload dist/*
 
@@ -69,7 +71,7 @@ Usage
 Options
 ~~~~~~~
 
-.. code:: bash
+.. code-block:: bash
 
     $ twine upload -h
     usage: twine upload [-h] [-r REPOSITORY] [-s] [-i IDENTITY] [-u USERNAME]
@@ -99,19 +101,27 @@ Options
 Resources
 ---------
 
-* `IRC <http://webchat.freenode.net?channels=%23warehouse>`_
-  (#warehouse - irc.freenode.net)
-* `Repository <https://github.com/dstufft/twine>`_
+* `IRC <http://webchat.freenode.net?channels=%23pypa>`_
+  (``#pypa`` - irc.freenode.net)
+* `GitHub repository <https://github.com/pypa/twine>`_
 
 
 Contributing
 ------------
 
-1. Fork the `repository`_ on GitHub.
+1. Fork the `repository <https://github.com/pypa/twine>`_ on GitHub.
 2. Make a branch off of master and commit your changes to it.
-3. Ensure that your name is added to the end of the AUTHORS file using the
+3. Run the tests with ``tox``
+
+   - Either use ``tox`` to build against all supported Python versions (if you
+     have them installed) or use ``tox -e py{version}`` to test against a
+     specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+   - Always run ``tox -e pep8``
+  
+4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
    optional.
-4. Submit a Pull Request to the master branch on GitHub.
+5. Submit a Pull Request to the master branch on GitHub.
 
-.. _repository: https://github.com/dstufft/twine
+If you'd like to have a development environment for twine, you should create a
+virtualenv and then do ``pip install -e .`` from within the directory.

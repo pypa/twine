@@ -14,19 +14,22 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-__all__ = (
-    "__title__", "__summary__", "__uri__", "__version__", "__author__",
-    "__email__", "__license__", "__copyright__",
-)
+import pretend
+import pytest
 
-__title__ = "twine"
-__summary__ = "Collection of utilities for interacting with PyPI"
-__uri__ = "https://github.com/pypa/twine"
+from twine import cli
+import twine.commands.upload
 
-__version__ = "1.4.0"
 
-__author__ = "Donald Stufft and individual contributors"
-__email__ = "donald@stufft.io"
+def test_dispatch_to_subcommand(monkeypatch):
+    replaced_main = pretend.call_recorder(lambda args: None)
+    monkeypatch.setattr(twine.commands.upload, "main", replaced_main)
 
-__license__ = "Apache License, Version 2.0"
-__copyright__ = "Copyright 2013 Donald Stufft"
+    cli.dispatch(["upload", "path/to/file"])
+
+    assert replaced_main.calls == [pretend.call(["path/to/file"])]
+
+
+def test_catches_enoent():
+    with pytest.raises(SystemExit):
+        cli.dispatch(["non-existant-command"])

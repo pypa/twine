@@ -15,20 +15,42 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
-import subprocess
-import sys
+import pkg_resources
+import setuptools
+
+import requests
+import pkginfo
 
 import twine
 
 
+def _registered_commands(group='twine.registered_commands'):
+    return list(pkg_resources.iter_entry_points(group=group))
+
+
+def dep_versions():
+    return 'pkginfo: {0}, requests: {1}, setuptools: {2}'.format(
+        pkginfo.Installed(pkginfo).version,
+        # __version__ is always defined but requests does not always have
+        # PKG-INFO to read from
+        requests.__version__,
+        setuptools.__version__,
+    )
+
+
 def dispatch(argv):
+    registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s version {0}".format(twine.__version__),
+        version="%(prog)s version {0} ({1})".format(twine.__version__,
+                                                    dep_versions()),
     )
-    parser.add_argument("command")
+    parser.add_argument(
+        "command",
+        choices=[c.name for c in registered_commands],
+    )
     parser.add_argument(
         "args",
         help=argparse.SUPPRESS,
@@ -37,9 +59,14 @@ def dispatch(argv):
 
     args = parser.parse_args(argv)
 
-    # Dispatch to the real command
-    p = subprocess.Popen(["twine-{0}".format(args.command)] + args.args)
-    p.wait()
+    command = args.command
+    for registered_command in registered_commands:
+        if registered_command.name == command:
+            break
+    else:
+        print("{0} is not a valid command.".format(command))
+        raise SystemExit(True)
 
-    # Exit using whatever exit code the sub command used
-    sys.exit(p.returncode)
+    main = registered_command.load()
+
+    main(args.args)
