@@ -79,7 +79,7 @@ def sign_file(sign_with, filename, identity):
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with):
+           sign_with, config_file):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -90,9 +90,9 @@ def upload(dists, repository, sign, identity, username, password, comment,
     )
     dists = [i for i in dists if not i.endswith(".asc")]
 
-    # Get our config from ~/.pypirc
+    # Get our config from the .pypirc file
     try:
-        config = get_config()[repository]
+        config = get_config(config_file)[repository]
     except KeyError:
         raise KeyError(
             "Missing '{0}' section from the configuration file".format(
@@ -251,6 +251,11 @@ def main(args):
     parser.add_argument(
         "-c", "--comment",
         help="The comment to include with the distribution file",
+    )
+    parser.add_argument(
+        "--config-file",
+        default="~/.pypirc",
+        help="The .pypirc config file to use",
     )
     parser.add_argument(
         "dists",
