@@ -94,6 +94,8 @@ Options
                             The password to authenticate to the repository with
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file
+      --config-file FILE    
+                            The .pypirc config file to use
 
 
 Resources
