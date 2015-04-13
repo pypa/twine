@@ -25,7 +25,7 @@ import twine
 
 
 def _registered_commands(group='twine.registered_commands'):
-    return {c.name: c for c in pkg_resources.iter_entry_points(group=group)}
+    return dict( (c.name, c) for c in pkg_resources.iter_entry_points(group=group))
 
 
 def dep_versions():
