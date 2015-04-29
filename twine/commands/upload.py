@@ -30,6 +30,7 @@ except ImportError:
 import pkginfo
 import pkg_resources
 import requests
+from requests_toolbelt.multipart import MultipartEncoder
 
 import twine.exceptions as exc
 from twine.utils import get_config, get_username, get_password
@@ -207,30 +208,46 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
         }
 
+        md5_hash = hashlib.md5()
         with open(filename, "rb") as fp:
-            content = fp.read()
-            filedata = {
-                "content": (os.path.basename(filename), content),
-            }
-            data["md5_digest"] = hashlib.md5(content).hexdigest()
+            content = fp.read(4096)
+            while content:
+                md5_hash.update(content)
+                content = fp.read(4096)
+
+        data["md5_digest"] = md5_hash.hexdigest()
 
         signed_name = os.path.basename(filename) + ".asc"
         if signed_name in signatures:
             with open(signatures[signed_name], "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                data["gpg_signature"] = (signed_name, gpg.read())
         elif sign:
             with open(filename + ".asc", "rb") as gpg:
-                filedata["gpg_signature"] = (signed_name, gpg.read())
+                data["gpg_signature"] = (signed_name, gpg.read())
 
         print("Uploading {0}".format(os.path.basename(filename)))
 
-        resp = session.post(
-            config["repository"],
-            data=dict((k, v) for k, v in data.items() if v),
-            files=filedata,
-            auth=(username, password),
-            allow_redirects=False,
-        )
+        data_to_send = []
+        for key, value in data.items():
+            if isinstance(value, (list, tuple)):
+                for item in value:
+                    data_to_send.append((key, item))
+            else:
+                data_to_send.append((key, value))
+
+        with open(filename, "rb") as fp:
+            data_to_send.append((
+                "content",
+                (os.path.basename(filename), fp, "application/octet-stream"),
+            ))
+            encoder = MultipartEncoder(data_to_send)
+            resp = session.post(
+                config["repository"],
+                data=encoder,
+                auth=(username, password),
+                allow_redirects=False,
+                headers={'Content-Type': encoder.content_type},
+            )
         # Bug 28. Try to silence a ResourceWarning by releasing the socket and
         # clearing the connection pool.
         resp.close()
@@ -240,7 +257,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
         # funky. The behaviour is not well defined and redirects being issued
         # by PyPI should never happen in reality. This should catch malicious
         # redirects as well.
-        if resp.is_redirect():
+        if resp.is_redirect:
             raise exc.RedirectDetected(
                 ('"{0}" attempted to redirect to "{1}" during upload.'
                  ' Aborting...').format(config["respository"],
