@@ -17,10 +17,10 @@ from __future__ import unicode_literals
 import argparse
 import glob
 import hashlib
+import itertools
 import os.path
 import subprocess
 import sys
-import itertools
 
 try:
     from urlparse import urlparse, urlunparse
