@@ -17,6 +17,26 @@ import pytest
 from twine.commands import upload
 
 
+def test_ensure_wheel_files_uploaded_first():
+    files = upload.group_wheel_files_first(["twine/foo.py",
+                                            "twine/first.whl",
+                                            "twine/bar.py",
+                                            "twine/second.whl"])
+    expected = ["twine/first.whl",
+                "twine/second.whl",
+                "twine/foo.py",
+                "twine/bar.py"]
+    assert expected == files
+
+
+def test_ensure_if_no_wheel_files():
+    files = upload.group_wheel_files_first(["twine/foo.py",
+                                            "twine/bar.py"])
+    expected = ["twine/foo.py",
+                "twine/bar.py"]
+    assert expected == files
+
+
 def test_find_dists_expands_globs():
     files = sorted(upload.find_dists(['twine/__*.py']))
     expected = ['twine/__init__.py', 'twine/__main__.py']

@@ -17,6 +17,7 @@ from __future__ import unicode_literals
 import argparse
 import glob
 import hashlib
+import itertools
 import os.path
 import subprocess
 import sys
@@ -53,6 +54,23 @@ DIST_EXTENSIONS = {
 }
 
 
+def group_wheel_files_first(dist_files):
+    if not any(fname for fname in dist_files if fname.endswith(".whl")):
+        # Return early if there's no wheel files
+        return dist_files
+
+    group_func = lambda x: x.endswith(".whl")
+    sorted_distfiles = sorted(dist_files, key=group_func)
+    wheels, not_wheels = [], []
+    for grp, files in itertools.groupby(sorted_distfiles, key=group_func):
+        if grp:
+            wheels.extend(files)
+        else:
+            not_wheels.extend(files)
+
+    return wheels + not_wheels
+
+
 def find_dists(dists):
     uploads = []
     for filename in dists:
@@ -68,7 +86,7 @@ def find_dists(dists):
                 )
         # Otherwise, files will be filenames that exist
         uploads.extend(files)
-    return uploads
+    return group_wheel_files_first(uploads)
 
 
 def sign_file(sign_with, filename, identity):
