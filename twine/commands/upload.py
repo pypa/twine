@@ -83,7 +83,7 @@ def find_dists(dists):
         if not files:
             raise ValueError(
                 "Cannot find file (or expand pattern): '%s'" % filename
-            )
+                )
         # Otherwise, files will be filenames that exist
         uploads.extend(files)
     return group_wheel_files_first(uploads)
