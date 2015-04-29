@@ -20,6 +20,7 @@ import hashlib
 import os.path
 import subprocess
 import sys
+import itertools
 
 try:
     from urlparse import urlparse, urlunparse
@@ -57,18 +58,17 @@ def group_wheel_files_first(dist_files):
     if not any(fname for fname in dist_files if fname.endswith(".whl")):
         # Return early if there's no wheel files
         return dist_files
-    wheels, not_wheels = [], []
-    # Loop over the uploads and put the wheels first.
-    for upload in dist_files:
-        _, ext = os.path.splitext(upload)
-        if ext in (".whl",):
-            wheels.append(upload)
-        else:
-            not_wheels.append(upload)
 
-    # Make the new list with wheels first
-    grouped_uploads = wheels + not_wheels
-    return grouped_uploads
+    group_func = lambda x: x.endswith(".whl")
+    sorted_distfiles = sorted(dist_files, key=group_func)
+    wheels, not_wheels = [], []
+    for grp, files in itertools.groupby(sorted_distfiles, key=group_func):
+        if grp:
+            wheels.extend(files)
+        else:
+            not_wheels.extend(files)
+
+    return wheels + not_wheels
 
 
 def find_dists(dists):
