@@ -52,22 +52,23 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-WHEEL_EXTENSIONS = (".whl", )
-
 
 def group_wheel_files_first(dist_files):
+    if not any(fname for fname in dist_files if fname.endswith(".whl")):
+        # Return early if there's no wheel files
+        return dist_files
     wheels, not_wheels = [], []
     # Loop over the uploads and put the wheels first.
     for upload in dist_files:
         _, ext = os.path.splitext(upload)
-        if ext in WHEEL_EXTENSIONS:
+        if ext in (".whl",):
             wheels.append(upload)
         else:
             not_wheels.append(upload)
 
     # Make the new list with wheels first
-    uploads = wheels + not_wheels
-    return uploads
+    grouped_uploads = wheels + not_wheels
+    return grouped_uploads
 
 
 def find_dists(dists):
@@ -82,7 +83,7 @@ def find_dists(dists):
         if not files:
             raise ValueError(
                 "Cannot find file (or expand pattern): '%s'" % filename
-                )
+            )
         # Otherwise, files will be filenames that exist
         uploads.extend(files)
     return group_wheel_files_first(uploads)
