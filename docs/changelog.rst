@@ -4,6 +4,16 @@
 Changelog
 =========
 
+* :release:`1.6.0 <2015-xx-yy>`
+
+  * :feature:`106` Upload wheels first to PyPI
+
+  * :feature:`104` Large file support via the ``requests-toolbelt``
+
+  * :bug:`92` Raise an exception on redirects
+
+  * :feature:`97` Allow the user to specify the location of their ``.pypirc``
+
 * :release:`1.5.0 <2015-03-10>`
 
   * :bug:`85` Display information about the version of setuptools installed
