@@ -17,7 +17,6 @@ from __future__ import unicode_literals
 import argparse
 import glob
 import hashlib
-import itertools
 import os.path
 import subprocess
 import sys
@@ -55,21 +54,14 @@ DIST_EXTENSIONS = {
 }
 
 
-def group_wheel_files_first(dist_files):
-    if not any(fname for fname in dist_files if fname.endswith(".whl")):
+def group_wheel_files_first(files):
+    if not any(fname for fname in files if fname.endswith(".whl")):
         # Return early if there's no wheel files
-        return dist_files
+        return files
 
-    group_func = lambda x: x.endswith(".whl")
-    sorted_distfiles = sorted(dist_files, key=group_func)
-    wheels, not_wheels = [], []
-    for grp, files in itertools.groupby(sorted_distfiles, key=group_func):
-        if grp:
-            wheels.extend(files)
-        else:
-            not_wheels.extend(files)
+    files.sort(key=lambda x: -1 if x.endswith(".whl") else 0)
 
-    return wheels + not_wheels
+    return files
 
 
 def find_dists(dists):
