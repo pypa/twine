@@ -116,6 +116,7 @@ def test_get_config_deprecated_pypirc():
         ('cli', {}, 'key', lambda: 'fallback', 'cli'),
         (None, {'key': 'value'}, 'key', lambda: 'fallback', 'value'),
         (None, {}, 'key', lambda: 'fallback', 'fallback'),
+        (None, {'key': ''}, 'key', lambda: 'fallback', ''),
     ),
 )
 def test_get_userpass_value(cli_value, config, key, strategy, expected):
