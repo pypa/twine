@@ -128,7 +128,7 @@ def _parse_pypi_repo_connection_string(conn_str):
     netloc = parsed.hostname
 
     if parsed.port:
-        netloc += ':{}'.format(parsed.port)
+        netloc += ':%s' % parsed.port
 
     repository = urlunparse((parsed[0], netloc) + parsed[2:])
     return {
