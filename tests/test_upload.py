@@ -11,6 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from __future__ import unicode_literals
+
+import os
+import textwrap
+
 import pretend
 import pytest
 
@@ -72,3 +77,26 @@ def test_sign_file_with_identity(monkeypatch):
     args = ['gpg', '--detach-sign', '--local-user', 'identity', '-a',
             'my_file.tar.gz']
     assert replaced_check_call.calls == [pretend.call(args)]
+
+
+def test_get_config_old_format(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [server-login]
+            username:foo
+            password:bar
+        """))
+
+    try:
+        upload.upload(dists="foo", repository="pypi", sign=None, identity=None,
+                      username=None, password=None, comment=None,
+                      sign_with=None, config_file=pypirc)
+    except KeyError as err:
+        assert err.args[0] == (
+            "Missing 'pypi' section from the configuration file.\n"
+            "Maybe you have a out-dated '{0}' format?\n"
+            "more info: "
+            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
+        ).format(pypirc)
