@@ -114,11 +114,16 @@ def upload(dists, repository, sign, identity, username, password, comment,
     try:
         config = get_config(config_file)[repository]
     except KeyError:
-        raise KeyError(
-            "Missing '{0}' section from the configuration file".format(
-                repository,
-            ),
+        msg = (
+            "Missing '{repo}' section from the configuration file.\n"
+            "Maybe you have a out-dated '{cfg}' format?\n"
+            "more info: "
+            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
+        ).format(
+            repo=repository,
+            cfg=config_file
         )
+        raise KeyError(msg)
 
     parsed = urlparse(config["repository"])
     if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
