@@ -99,7 +99,7 @@ def sign_file(sign_with, filename, identity):
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file):
+           sign_with, config_file, verbose_response):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -258,6 +258,10 @@ def upload(dists, repository, sign, identity, username, password, comment,
         resp.close()
         session.close()
 
+        if verbose_response:
+            msg = '\n'.join(('-' * 75, resp.content, '-' * 75))
+            print("Server response:\n%s" % msg)
+
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
         # by PyPI should never happen in reality. This should catch malicious
@@ -309,6 +313,12 @@ def main(args):
         "--config-file",
         default="~/.pypirc",
         help="The .pypirc config file to use",
+    )
+    parser.add_argument(
+        "-v", "--verbose-response",
+        action="store_true",
+        default=False,
+        help="Show a verbose server response",
     )
     parser.add_argument(
         "dists",

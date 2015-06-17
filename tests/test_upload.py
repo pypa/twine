@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import unicode_literals
+from __future__ import unicode_literals, print_function
 
 import os
 import textwrap
@@ -20,6 +20,19 @@ import pretend
 import pytest
 
 from twine.commands import upload
+
+default_kwargs = {
+    'dists': None,
+    'repository': 'pypi',
+    'sign': False,
+    'identity': None,
+    'username': '',
+    'password': '',
+    'comment': None,
+    'sign_with': 'gpg',
+    'config_file': '',
+    'verbose_response': False,
+}
 
 
 def test_ensure_wheel_files_uploaded_first():
@@ -90,9 +103,9 @@ def test_get_config_old_format(tmpdir):
         """))
 
     try:
-        upload.upload(dists="foo", repository="pypi", sign=None, identity=None,
-                      username=None, password=None, comment=None,
-                      sign_with=None, config_file=pypirc)
+        kwargs = default_kwargs.copy()
+        kwargs.update(dict(dists="foo", config_file=pypirc))
+        upload.upload(**kwargs)
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file.\n"
