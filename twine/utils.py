@@ -14,6 +14,7 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
+import os
 import os.path
 import functools
 import getpass
@@ -113,6 +114,14 @@ def get_userpass_value(cli_value, config, key, prompt_strategy):
     else:
         return prompt_strategy()
 
+
+def password_prompt(prompt_text):  # Always expects unicode for our own sanity
+    prompt = prompt_text
+    # Workaround for https://github.com/pypa/twine/issues/116
+    if os.name == 'nt' and sys.version_info < (3, 0):
+        prompt = prompt_text.encode('utf8')
+    return functools.partial(getpass.getpass, prompt=prompt)
+
 get_username = functools.partial(
     get_userpass_value,
     key='username',
@@ -121,7 +130,5 @@ get_username = functools.partial(
 get_password = functools.partial(
     get_userpass_value,
     key='password',
-    prompt_strategy=functools.partial(
-        getpass.getpass, 'Enter your password: ',
-    ),
+    prompt_strategy=password_prompt('Enter your password: '),
 )
