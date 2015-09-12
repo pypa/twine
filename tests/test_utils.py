@@ -96,6 +96,75 @@ def test_get_config_missing(tmpdir):
     }
 
 
+def test_get_config_with_env(tmpdir, monkeypatch):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    # correct repos
+    monkeypatch.setenv(
+        'PYPI_REPO_SUPER_RePo', 'https://user:pass@super.repo:42/stuff')
+
+    monkeypatch.setenv('PYPI_REPO_EMPTY_PASS_repo', 'https://user:@super.repo')
+    monkeypatch.setenv('PYPI_REPO_NO_PASS_repo', 'https://user@super.repo')
+    monkeypatch.setenv('PYPI_REPO_SIMPLE', 'super.repo')
+
+    # wrong repos - ignored
+    monkeypatch.setenv('pypi_repo_SUPER_REPO', 'ignored')
+    monkeypatch.setenv('PYPI_REPO_', 'whatever')
+
+    assert get_config(pypirc) == {
+        "pypi": {
+            "repository": DEFAULT_REPOSITORY,
+            "username": None,
+            "password": None,
+        },
+        "super-repo": {
+            "repository": "https://super.repo:42/stuff",
+            "username": "user",
+            "password": "pass",
+        },
+        "empty-pass-repo": {
+            "repository": "https://super.repo",
+            "username": "user",
+            "password": "",
+        },
+        "no-pass-repo": {
+            "repository": "https://super.repo",
+            "username": "user",
+            "password": None,
+        },
+        "simple": {
+            "repository": "super.repo",
+            "username": None,
+            "password": None,
+        },
+    }
+
+
+def test_get_config_env_overrides_config(tmpdir, monkeypatch):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [distutils]
+            index-servers = pypi
+
+            [pypi]
+            username = testuser
+            password = testpassword
+        """))
+
+    monkeypatch.setenv(
+        'PYPI_REPO_PyPI', 'https://user:pass@super.repo:42/stuff')
+
+    assert get_config(pypirc) == {
+        "pypi": {
+            "repository": "https://super.repo:42/stuff",
+            "username": "user",
+            "password": "pass",
+        },
+    }
+
+
 def test_get_config_deprecated_pypirc():
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     deprecated_pypirc_path = os.path.join(tests_dir, 'fixtures',
@@ -116,6 +185,7 @@ def test_get_config_deprecated_pypirc():
         ('cli', {}, 'key', lambda: 'fallback', 'cli'),
         (None, {'key': 'value'}, 'key', lambda: 'fallback', 'value'),
         (None, {}, 'key', lambda: 'fallback', 'fallback'),
+        (None, {'key': ''}, 'key', lambda: 'fallback', ''),
     ),
 )
 def test_get_userpass_value(cli_value, config, key, strategy, expected):

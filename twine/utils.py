@@ -21,6 +21,11 @@ import getpass
 import sys
 
 try:
+    from urlparse import urlparse, urlunparse
+except ImportError:
+    from urllib.parse import urlparse, urlunparse
+
+try:
     import configparser
 except ImportError:  # pragma: no cover
     import ConfigParser as configparser
@@ -39,13 +44,26 @@ def get_config(path="~/.pypirc"):
     # Expand user strings in the path
     path = os.path.expanduser(path)
 
-    if not os.path.isfile(path):
-        return {"pypi": {"repository": DEFAULT_REPOSITORY,
-                         "username": None,
-                         "password": None
-                         }
-                }
+    if os.path.isfile(path):
+        config = _read_config_file(path)
+    else:
+        config = _get_default_config()
 
+    env_config = _get_env_config()
+
+    config.update(env_config)
+    return config
+
+
+def _get_default_config():
+    return {"pypi": {"repository": DEFAULT_REPOSITORY,
+                     "username": None,
+                     "password": None
+                     }
+            }
+
+
+def _read_config_file(path):
     # Parse the rc file
     parser = configparser.ConfigParser()
     parser.read(path)
@@ -87,6 +105,39 @@ def get_config(path="~/.pypirc"):
     return config
 
 
+def _get_env_config(prefix='pypi_repo_'):
+    prefix_norm = prefix.upper()
+    prefix_len = len(prefix_norm)
+
+    config = {}
+
+    for key, val in os.environ.items():
+        if key.startswith(prefix_norm):
+            repo_name = key[prefix_len:].strip().lower().replace('_', '-')
+            if not repo_name:
+                continue  # wrong repo name, should we log?
+            config[repo_name] = _parse_pypi_repo_connection_string(val)
+
+    return config
+
+
+def _parse_pypi_repo_connection_string(conn_str):
+    parsed = urlparse(conn_str)
+
+    # Extract username and password out of netloc
+    netloc = parsed.hostname
+
+    if parsed.port:
+        netloc += ':%s' % parsed.port
+
+    repository = urlunparse((parsed[0], netloc) + parsed[2:])
+    return {
+        "repository": repository,
+        "username": parsed.username,
+        "password": parsed.password,
+    }
+
+
 def get_userpass_value(cli_value, config, key, prompt_strategy):
     """Gets the username / password from config.
 
@@ -109,7 +160,7 @@ def get_userpass_value(cli_value, config, key, prompt_strategy):
     """
     if cli_value is not None:
         return cli_value
-    elif config.get(key):
+    elif config.get(key) is not None:
         return config[key]
     else:
         return prompt_strategy()

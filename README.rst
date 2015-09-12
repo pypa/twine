@@ -98,6 +98,38 @@ Options
       --config-file FILE    
                             The .pypirc config file to use
 
+Note that on top of .pypirc config file you also can define repositories
+to be used with twine using environment variables using following format:
+
+..
+
+    PYPI_REPO_<REPO_NAME>=URL
+
+For example following environment variables:
+
+..
+
+    PYPI_REPO_INTERNAL_STORE=https://john:secret@pypi.local:42/stuff
+    PYPI_REPO_ADDITIONAL=https://john:@pypi.additional
+    PYPI_REPO_ONE_MORE=https://john@pypi.more
+    PYPI_REPO_PYPI=https://pypi.external
+
+define:
+
+* a repository called 'internal-store' (repository names are normalized
+  to lowercase and '_' replaced with '-') that will be accessed with username
+  'john' and password 'secret'.
+
+* a repository called 'additional' that will be accessed with username 'john'
+  and **with empty password**
+
+* a repository called 'one-more' that will be accessed with username 'john'
+  and password will be asked during runtime
+
+* override url for the 'default' repository called 'pypi'
+
+With such environment you can specify any of 'internal-store', 'additional',
+'one-more' and 'pypi' in -r/--repository parameter.
 
 Resources
 ---------
