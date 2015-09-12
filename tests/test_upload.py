@@ -16,9 +16,13 @@ from __future__ import unicode_literals
 import os
 import textwrap
 
+import mock
 import pytest
 
 from twine.commands import upload
+
+
+WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
 def test_ensure_wheel_files_uploaded_first():
@@ -72,7 +76,7 @@ def test_get_config_old_format(tmpdir):
     try:
         upload.upload(dists="foo", repository="pypi", sign=None, identity=None,
                       username=None, password=None, comment=None,
-                      sign_with=None, config_file=pypirc)
+                      sign_with=None, config_file=pypirc, skip_existing=False)
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file.\n"
@@ -80,3 +84,28 @@ def test_get_config_old_format(tmpdir):
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(pypirc)
+
+
+def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
+    response = mock.Mock(spec=upload.requests.models.Response)
+    session = mock.Mock(spec=upload.requests.sessions.Session)
+
+    monkeypatch.setattr(upload.requests, 'session', lambda: session)
+    monkeypatch.setattr(upload.os.path, 'exists', lambda args: True)
+
+    session.post.return_value = response
+    response.status_code = 400
+    response.is_redirect = False
+
+    upload.upload(
+        dists=[WHEEL_FIXTURE],
+        repository="pypi",
+        sign=None,
+        identity=None,
+        username='username',
+        password='password',
+        comment=None,
+        sign_with=None,
+        config_file='',
+        skip_existing=True
+    )

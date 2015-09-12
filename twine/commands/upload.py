@@ -54,7 +54,7 @@ def find_dists(dists):
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file):
+           sign_with, config_file, skip_existing):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -106,10 +106,15 @@ def upload(dists, repository, sign, identity, username, password, comment,
         if resp.is_redirect:
             raise exc.RedirectDetected(
                 ('"{0}" attempted to redirect to "{1}" during upload.'
-                 ' Aborting...').format(config["respository"],
+                 ' Aborting...').format(config["repository"],
                                         resp.headers["location"]))
+
         # Otherwise, raise an HTTPError based on the status code.
-        resp.raise_for_status()
+        if resp.status_code == 400 and skip_existing:
+            print("  Skipping {0} because it appears to already exist".format(
+                basefilename))
+        else:
+            resp.raise_for_status()
 
     # Bug 28. Try to silence a ResourceWarning by clearing the connection
     # pool.
@@ -154,6 +159,12 @@ def main(args):
         "--config-file",
         default="~/.pypirc",
         help="The .pypirc config file to use",
+    )
+    parser.add_argument(
+        "--skip-existing",
+        default=False,
+        action="store_true",
+        help="Continue uploading files if one already exists",
     )
     parser.add_argument(
         "dists",
