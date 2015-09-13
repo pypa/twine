@@ -26,6 +26,38 @@ class Repository(object):
     def close(self):
         self.session.close()
 
+    @staticmethod
+    def _convert_data_to_list_of_tuples(data):
+        data_to_send = []
+        for key, value in data.items():
+            if isinstance(value, (list, tuple)):
+                for item in value:
+                    data_to_send.append((key, item))
+            else:
+                data_to_send.append((key, value))
+        return data_to_send
+
+    def register(self, package):
+        data = package.metadata_dictionary()
+        data.update({
+            ":action": "submit",
+            "protocol_version": "1",
+        })
+
+        print("Registering {0}".format(package.basefilename))
+
+        data_to_send = self._convert_data_to_list_of_tuples(data)
+        encoder = MultipartEncoder(data_to_send)
+        resp = self.session.post(
+            self.url,
+            data=encoder,
+            allow_redirects=False,
+            headers={'Content-Type': encoder.content_type},
+        )
+        # Bug 28. Try to silence a ResourceWarning by releasing the socket.
+        resp.close()
+        return resp
+
     def upload(self, package):
         data = package.metadata_dictionary()
         data.update({
@@ -34,13 +66,7 @@ class Repository(object):
             "protcol_version": "1",
         })
 
-        data_to_send = []
-        for key, value in data.items():
-            if isinstance(value, (list, tuple)):
-                for item in value:
-                    data_to_send.append((key, item))
-            else:
-                data_to_send.append((key, value))
+        data_to_send = self._convert_data_to_list_of_tuples(data)
 
         print("Uploading {0}".format(package.basefilename))
 

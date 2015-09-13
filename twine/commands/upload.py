@@ -19,15 +19,10 @@ import glob
 import os.path
 import sys
 
-try:
-    from urlparse import urlparse, urlunparse
-except ImportError:
-    from urllib.parse import urlparse, urlunparse
-
 import twine.exceptions as exc
 from twine.package import PackageFile
 from twine.repository import Repository
-from twine.utils import get_config, get_username, get_password
+from twine import utils
 
 
 def group_wheel_files_first(files):
@@ -70,31 +65,16 @@ def upload(dists, repository, sign, identity, username, password, comment,
     )
     dists = [i for i in dists if not i.endswith(".asc")]
 
-    # Get our config from the .pypirc file
-    try:
-        config = get_config(config_file)[repository]
-    except KeyError:
-        msg = (
-            "Missing '{repo}' section from the configuration file.\n"
-            "Maybe you have a out-dated '{cfg}' format?\n"
-            "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(
-            repo=repository,
-            cfg=config_file
-        )
-        raise KeyError(msg)
+    config = utils.get_repository_from_config(config_file, repository)
 
-    parsed = urlparse(config["repository"])
-    if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
-        config["repository"] = urlunparse(
-            ("https",) + parsed[1:]
-        )
+    config["repository"] = utils.normalize_repository_url(
+        config["repository"]
+    )
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
-    username = get_username(username, config)
-    password = get_password(password, config)
+    username = utils.get_username(username, config)
+    password = utils.get_password(password, config)
 
     repository = Repository(config["repository"], username, password)
 
@@ -118,9 +98,6 @@ def upload(dists, repository, sign, identity, username, password, comment,
             #     data["gpg_signature"] = (signed_name, gpg.read())
 
         resp = repository.upload(package)
-        # Bug 28. Try to silence a ResourceWarning by releasing the socket and
-        # clearing the connection pool.
-        resp.close()
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
@@ -134,6 +111,8 @@ def upload(dists, repository, sign, identity, username, password, comment,
         # Otherwise, raise an HTTPError based on the status code.
         resp.raise_for_status()
 
+    # Bug 28. Try to silence a ResourceWarning by clearing the connection
+    # pool.
     repository.close()
 
 

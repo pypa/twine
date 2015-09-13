@@ -25,6 +25,11 @@ try:
 except ImportError:  # pragma: no cover
     import ConfigParser as configparser
 
+try:
+    from urlparse import urlparse, urlunparse
+except ImportError:
+    from urllib.parse import urlparse, urlunparse
+
 # Shim for raw_input in python3
 if sys.version_info > (3,):
     input_func = input
@@ -85,6 +90,30 @@ def get_config(path="~/.pypirc"):
                 config[repository][key] = defaults[key]
 
     return config
+
+
+def get_repository_from_config(config_file, repository):
+    # Get our config from the .pypirc file
+    try:
+        return get_config(config_file)[repository]
+    except KeyError:
+        msg = (
+            "Missing '{repo}' section from the configuration file.\n"
+            "Maybe you have a out-dated '{cfg}' format?\n"
+            "more info: "
+            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
+        ).format(
+            repo=repository,
+            cfg=config_file
+        )
+        raise KeyError(msg)
+
+
+def normalize_repository_url(url):
+    parsed = urlparse(url)
+    if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
+        return urlunparse(("https",) + parsed[1:])
+    return urlunparse(parsed)
 
 
 def get_userpass_value(cli_value, config, key, prompt_strategy):
