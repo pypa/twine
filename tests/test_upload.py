@@ -16,7 +16,6 @@ from __future__ import unicode_literals
 import os
 import textwrap
 
-import pretend
 import pytest
 
 from twine.commands import upload
@@ -58,25 +57,6 @@ def test_find_dists_handles_real_files():
                 'twine/utils.py', 'twine/wheel.py']
     files = upload.find_dists(expected)
     assert expected == files
-
-
-def test_sign_file(monkeypatch):
-    replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
-
-    upload.sign_file('gpg2', 'my_file.tar.gz', None)
-    args = ['gpg2', '--detach-sign', '-a', 'my_file.tar.gz']
-    assert replaced_check_call.calls == [pretend.call(args)]
-
-
-def test_sign_file_with_identity(monkeypatch):
-    replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(upload.subprocess, 'check_call', replaced_check_call)
-
-    upload.sign_file('gpg', 'my_file.tar.gz', 'identity')
-    args = ['gpg', '--detach-sign', '--local-user', 'identity', '-a',
-            'my_file.tar.gz']
-    assert replaced_check_call.calls == [pretend.call(args)]
 
 
 def test_get_config_old_format(tmpdir):
