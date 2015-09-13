@@ -16,10 +16,11 @@ from __future__ import unicode_literals
 import os
 import textwrap
 
-import mock
+import pretend
 import pytest
 
 from twine.commands import upload
+from twine import package
 
 
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
@@ -87,25 +88,24 @@ def test_get_config_old_format(tmpdir):
 
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
-    response = mock.Mock(spec=upload.requests.models.Response)
-    session = mock.Mock(spec=upload.requests.sessions.Session)
+    response = pretend.stub(
+        status_code=400,
+        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+               'exists for twine-1.5.0.')
 
-    monkeypatch.setattr(upload.requests, 'session', lambda: session)
-    monkeypatch.setattr(upload.os.path, 'exists', lambda args: True)
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=True,
+                              package=pkg) is True
 
-    session.post.return_value = response
-    response.status_code = 400
-    response.is_redirect = False
 
-    upload.upload(
-        dists=[WHEEL_FIXTURE],
-        repository="pypi",
-        sign=None,
-        identity=None,
-        username='username',
-        password='password',
-        comment=None,
-        sign_with=None,
-        config_file='',
-        skip_existing=True
-    )
+def test_skip_upload_respects_skip_existing(monkeypatch):
+    response = pretend.stub(
+        status_code=400,
+        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+               'exists for twine-1.5.0.')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=False,
+                              package=pkg) is False
