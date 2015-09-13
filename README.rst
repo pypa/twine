@@ -126,3 +126,12 @@ Contributing
 
 If you'd like to have a development environment for twine, you should create a
 virtualenv and then do ``pip install -e .`` from within the directory.
+
+
+Code of Conduct
+---------------
+
+Everyone interacting in the twine project's codebases, issue trackers, chat
+rooms, and mailing lists is expected to follow the `PyPA Code of Conduct`_.
+
+.. _PyPA Code of Conduct: https://www.pypa.io/en/latest/code-of-conduct/
