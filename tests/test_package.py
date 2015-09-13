@@ -33,7 +33,7 @@ def test_sign_file(monkeypatch):
         pkg.sign('gpg2', None)
     except IOError:
         pass
-    args = ['gpg2', '--detach-sign', '-a', filename]
+    args = ('gpg2', '--detach-sign', '-a', filename)
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
@@ -53,5 +53,5 @@ def test_sign_file_with_identity(monkeypatch):
         pkg.sign('gpg', 'identity')
     except IOError:
         pass
-    args = ['gpg', '--detach-sign', '-a', filename, '--local-user', 'identity']
+    args = ('gpg', '--detach-sign', '-a', filename, '--local-user', 'identity')
     assert replaced_check_call.calls == [pretend.call(args)]
