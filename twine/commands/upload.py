@@ -24,11 +24,9 @@ try:
 except ImportError:
     from urllib.parse import urlparse, urlunparse
 
-import requests
-from requests_toolbelt.multipart import MultipartEncoder
-
 import twine.exceptions as exc
 from twine.package import PackageFile
+from twine.repository import Repository
 from twine.utils import get_config, get_username, get_password
 
 
@@ -58,50 +56,6 @@ def find_dists(dists):
         # Otherwise, files will be filenames that exist
         uploads.extend(files)
     return group_wheel_files_first(uploads)
-
-
-class Repository(object):
-    def __init__(self, repository_url, username, password):
-        self.url = repository_url
-        self.session = requests.session()
-        self.session.auth = (username, password)
-
-    def close(self):
-        self.session.close()
-
-    def upload(self, package):
-        data = package.metadata_dictionary()
-        data.update({
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-        })
-
-        data_to_send = []
-        for key, value in data.items():
-            if isinstance(value, (list, tuple)):
-                for item in value:
-                    data_to_send.append((key, item))
-            else:
-                data_to_send.append((key, value))
-
-        print("Uploading {0}".format(package.basefilename))
-
-        with open(package.filename, "rb") as fp:
-            data_to_send.append((
-                "content",
-                (package.basefilename, fp, "application/octet-stream"),
-            ))
-            encoder = MultipartEncoder(data_to_send)
-
-            resp = self.session.post(
-                self.url,
-                data=encoder,
-                allow_redirects=False,
-                headers={'Content-Type': encoder.content_type},
-            )
-
-        return resp
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
