@@ -22,3 +22,11 @@ class RedirectDetected(Exception):
     redirecting them.
     """
     pass
+
+
+class PackageNotFound(Exception):
+    """A package file was provided that could not be found on the file system.
+
+    This is only used when attempting to register a package.
+    """
+    pass

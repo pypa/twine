@@ -16,42 +16,13 @@ from __future__ import unicode_literals
 
 import argparse
 import glob
-import hashlib
 import os.path
-import subprocess
 import sys
 
-try:
-    from urlparse import urlparse, urlunparse
-except ImportError:
-    from urllib.parse import urlparse, urlunparse
-
-import pkginfo
-import pkg_resources
-import requests
-from requests_toolbelt.multipart import MultipartEncoder
-
 import twine.exceptions as exc
-from twine.utils import get_config, get_username, get_password
-from twine.wheel import Wheel
-from twine.wininst import WinInst
-
-
-DIST_TYPES = {
-    "bdist_wheel": Wheel,
-    "bdist_wininst": WinInst,
-    "bdist_egg": pkginfo.BDist,
-    "sdist": pkginfo.SDist,
-}
-
-DIST_EXTENSIONS = {
-    ".whl": "bdist_wheel",
-    ".exe": "bdist_wininst",
-    ".egg": "bdist_egg",
-    ".tar.bz2": "sdist",
-    ".tar.gz": "sdist",
-    ".zip": "sdist",
-}
+from twine.package import PackageFile
+from twine.repository import Repository
+from twine import utils
 
 
 def group_wheel_files_first(files):
@@ -82,14 +53,6 @@ def find_dists(dists):
     return group_wheel_files_first(uploads)
 
 
-def sign_file(sign_with, filename, identity):
-    print("Signing {0}".format(os.path.basename(filename)))
-    gpg_args = [sign_with, "--detach-sign", "-a", filename]
-    if identity:
-        gpg_args[2:2] = ["--local-user", identity]
-    subprocess.check_call(gpg_args)
-
-
 def upload(dists, repository, sign, identity, username, password, comment,
            sign_with, config_file):
     # Check that a nonsensical option wasn't given
@@ -102,153 +65,39 @@ def upload(dists, repository, sign, identity, username, password, comment,
     )
     dists = [i for i in dists if not i.endswith(".asc")]
 
-    # Get our config from the .pypirc file
-    try:
-        config = get_config(config_file)[repository]
-    except KeyError:
-        msg = (
-            "Missing '{repo}' section from the configuration file.\n"
-            "Maybe you have a out-dated '{cfg}' format?\n"
-            "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(
-            repo=repository,
-            cfg=config_file
-        )
-        raise KeyError(msg)
+    config = utils.get_repository_from_config(config_file, repository)
 
-    parsed = urlparse(config["repository"])
-    if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
-        config["repository"] = urlunparse(
-            ("https",) + parsed[1:]
-        )
+    config["repository"] = utils.normalize_repository_url(
+        config["repository"]
+    )
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
-    username = get_username(username, config)
-    password = get_password(password, config)
+    username = utils.get_username(username, config)
+    password = utils.get_password(password, config)
 
-    session = requests.session()
+    repository = Repository(config["repository"], username, password)
 
     uploads = find_dists(dists)
 
     for filename in uploads:
+        package = PackageFile.from_filename(filename, comment)
         # Sign the dist if requested
-        if sign:
-            sign_file(sign_with, filename, identity)
+        # if sign:
+        #     sign_file(sign_with, filename, identity)
 
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        elif dtype == "bdist_wininst":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": pkg_resources.safe_name(meta.name),
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        md5_hash = hashlib.md5()
-        with open(filename, "rb") as fp:
-            content = fp.read(4096)
-            while content:
-                md5_hash.update(content)
-                content = fp.read(4096)
-
-        data["md5_digest"] = md5_hash.hexdigest()
-
-        signed_name = os.path.basename(filename) + ".asc"
+        # signed_name = os.path.basename(filename) + ".asc"
+        signed_name = package.signed_filename
         if signed_name in signatures:
             with open(signatures[signed_name], "rb") as gpg:
-                data["gpg_signature"] = (signed_name, gpg.read())
+                package.gpg_signature = (signed_name, gpg.read())
+                # data["gpg_signature"] = (signed_name, gpg.read())
         elif sign:
-            with open(filename + ".asc", "rb") as gpg:
-                data["gpg_signature"] = (signed_name, gpg.read())
+            package.sign(sign_with, identity)
+            # with open(filename + ".asc", "rb") as gpg:
+            #     data["gpg_signature"] = (signed_name, gpg.read())
 
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        data_to_send = []
-        for key, value in data.items():
-            if isinstance(value, (list, tuple)):
-                for item in value:
-                    data_to_send.append((key, item))
-            else:
-                data_to_send.append((key, value))
-
-        with open(filename, "rb") as fp:
-            data_to_send.append((
-                "content",
-                (os.path.basename(filename), fp, "application/octet-stream"),
-            ))
-            encoder = MultipartEncoder(data_to_send)
-            resp = session.post(
-                config["repository"],
-                data=encoder,
-                auth=(username, password),
-                allow_redirects=False,
-                headers={'Content-Type': encoder.content_type},
-            )
-        # Bug 28. Try to silence a ResourceWarning by releasing the socket and
-        # clearing the connection pool.
-        resp.close()
-        session.close()
+        resp = repository.upload(package)
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
@@ -261,6 +110,10 @@ def upload(dists, repository, sign, identity, username, password, comment,
                                         resp.headers["location"]))
         # Otherwise, raise an HTTPError based on the status code.
         resp.raise_for_status()
+
+    # Bug 28. Try to silence a ResourceWarning by clearing the connection
+    # pool.
+    repository.close()
 
 
 def main(args):
