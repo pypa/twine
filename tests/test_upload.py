@@ -16,9 +16,14 @@ from __future__ import unicode_literals
 import os
 import textwrap
 
+import pretend
 import pytest
 
 from twine.commands import upload
+from twine import package
+
+
+WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
 def test_ensure_wheel_files_uploaded_first():
@@ -72,7 +77,7 @@ def test_get_config_old_format(tmpdir):
     try:
         upload.upload(dists="foo", repository="pypi", sign=None, identity=None,
                       username=None, password=None, comment=None,
-                      sign_with=None, config_file=pypirc)
+                      sign_with=None, config_file=pypirc, skip_existing=False)
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file.\n"
@@ -80,3 +85,27 @@ def test_get_config_old_format(tmpdir):
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(pypirc)
+
+
+def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
+    response = pretend.stub(
+        status_code=400,
+        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+               'exists for twine-1.5.0.')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=True,
+                              package=pkg) is True
+
+
+def test_skip_upload_respects_skip_existing(monkeypatch):
+    response = pretend.stub(
+        status_code=400,
+        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+               'exists for twine-1.5.0.')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=False,
+                              package=pkg) is False
