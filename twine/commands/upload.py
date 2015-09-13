@@ -82,12 +82,153 @@ def find_dists(dists):
     return group_wheel_files_first(uploads)
 
 
-def sign_file(sign_with, filename, identity):
-    print("Signing {0}".format(os.path.basename(filename)))
-    gpg_args = [sign_with, "--detach-sign", "-a", filename]
-    if identity:
-        gpg_args[2:2] = ["--local-user", identity]
-    subprocess.check_call(gpg_args)
+class Repository(object):
+    def __init__(self, repository_url, username, password):
+        self.url = repository_url
+        self.session = requests.session()
+        self.session.auth = (username, password)
+
+    def close(self):
+        self.session.close()
+
+    def upload(self, package):
+        data = package.metadata_dictionary()
+        data.update({
+            # action
+            ":action": "file_upload",
+            "protcol_version": "1",
+        })
+
+        data_to_send = []
+        for key, value in data.items():
+            if isinstance(value, (list, tuple)):
+                for item in value:
+                    data_to_send.append((key, item))
+            else:
+                data_to_send.append((key, value))
+
+        print("Uploading {0}".format(package.basefilename))
+
+        with open(package.filename, "rb") as fp:
+            data_to_send.append((
+                "content",
+                (package.basefilename, fp, "application/octet-stream"),
+            ))
+            encoder = MultipartEncoder(data_to_send)
+
+            resp = self.session.post(
+                self.url,
+                data=encoder,
+                allow_redirects=False,
+                headers={'Content-Type': encoder.content_type},
+            )
+
+        return resp
+
+
+class PackageFile(object):
+    def __init__(self, filename, comment, metadata, python_version, filetype):
+        self.filename = filename
+        self.basefilename = os.path.basename(filename)
+        self.comment = comment
+        self.metadata = metadata
+        self.python_version = python_version
+        self.filetype = filetype
+        self.safe_name = pkg_resources.safe_name(metadata.name)
+        self.signed_filename = self.filename + '.asc'
+        self.gpg_signature = None
+
+        md5_hash = hashlib.md5()
+        with open(filename, "rb") as fp:
+            content = fp.read(4096)
+            while content:
+                md5_hash.update(content)
+                content = fp.read(4096)
+
+        self.md5_digest = md5_hash.hexdigest()
+
+    @classmethod
+    def from_filename(cls, filename, comment):
+        # Extract the metadata from the package
+        for ext, dtype in DIST_EXTENSIONS.items():
+            if filename.endswith(ext):
+                meta = DIST_TYPES[dtype](filename)
+                break
+        else:
+            raise ValueError(
+                "Unknown distribution format: '%s'" %
+                os.path.basename(filename)
+            )
+
+        if dtype == "bdist_egg":
+            pkgd = pkg_resources.Distribution.from_filename(filename)
+            py_version = pkgd.py_version
+        elif dtype == "bdist_wheel":
+            py_version = meta.py_version
+        elif dtype == "bdist_wininst":
+            py_version = meta.py_version
+        else:
+            py_version = None
+
+        return cls(filename, comment, meta, py_version, dtype)
+
+    def metadata_dictionary(self):
+        meta = self.metadata
+        data = {
+            # identify release
+            "name": self.safe_name,
+            "version": meta.version,
+
+            # file content
+            "filetype": self.filetype,
+            "pyversion": self.python_version,
+
+            # additional meta-data
+            "metadata_version": meta.metadata_version,
+            "summary": meta.summary,
+            "home_page": meta.home_page,
+            "author": meta.author,
+            "author_email": meta.author_email,
+            "maintainer": meta.maintainer,
+            "maintainer_email": meta.maintainer_email,
+            "license": meta.license,
+            "description": meta.description,
+            "keywords": meta.keywords,
+            "platform": meta.platforms,
+            "classifiers": meta.classifiers,
+            "download_url": meta.download_url,
+            "supported_platform": meta.supported_platforms,
+            "comment": self.comment,
+            "md5_digest": self.md5_digest,
+
+            # PEP 314
+            "provides": meta.provides,
+            "requires": meta.requires,
+            "obsoletes": meta.obsoletes,
+
+            # Metadata 1.2
+            "project_urls": meta.project_urls,
+            "provides_dist": meta.provides_dist,
+            "obsoletes_dist": meta.obsoletes_dist,
+            "requires_dist": meta.requires_dist,
+            "requires_external": meta.requires_external,
+            "requires_python": meta.requires_python,
+        }
+
+        if self.gpg_signature is not None:
+            data['gpg_signature'] = self.gpg_signature
+
+        return data
+
+    def sign(self, sign_with, identity):
+        print("Signing {0}".format(self.basefilename))
+        gpg_args = (sign_with, "--detach-sign", "-a", self.filename)
+        if identity:
+            gpg_args += ("--local-user", identity)
+        subprocess.check_call(gpg_args)
+
+        with open(self.signed_filename, "rb") as gpg:
+            self.pg_signature = (self.signed_filename, gpg.read())
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
@@ -128,127 +269,31 @@ def upload(dists, repository, sign, identity, username, password, comment,
     username = get_username(username, config)
     password = get_password(password, config)
 
-    session = requests.session()
+    repository = Repository(config["repository"], username, password)
 
     uploads = find_dists(dists)
 
     for filename in uploads:
+        package = PackageFile.from_filename(filename, comment)
         # Sign the dist if requested
-        if sign:
-            sign_file(sign_with, filename, identity)
+        # if sign:
+        #     sign_file(sign_with, filename, identity)
 
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        elif dtype == "bdist_wininst":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        # Fill in the data - send all the meta-data in case we need to
-        # register a new release
-        data = {
-            # action
-            ":action": "file_upload",
-            "protcol_version": "1",
-
-            # identify release
-            "name": pkg_resources.safe_name(meta.name),
-            "version": meta.version,
-
-            # file content
-            "filetype": dtype,
-            "pyversion": py_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": comment,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-
-        }
-
-        md5_hash = hashlib.md5()
-        with open(filename, "rb") as fp:
-            content = fp.read(4096)
-            while content:
-                md5_hash.update(content)
-                content = fp.read(4096)
-
-        data["md5_digest"] = md5_hash.hexdigest()
-
-        signed_name = os.path.basename(filename) + ".asc"
+        # signed_name = os.path.basename(filename) + ".asc"
+        signed_name = package.signed_filename
         if signed_name in signatures:
             with open(signatures[signed_name], "rb") as gpg:
-                data["gpg_signature"] = (signed_name, gpg.read())
+                package.gpg_signature = (signed_name, gpg.read())
+                # data["gpg_signature"] = (signed_name, gpg.read())
         elif sign:
-            with open(filename + ".asc", "rb") as gpg:
-                data["gpg_signature"] = (signed_name, gpg.read())
+            package.sign(sign_with, identity)
+            # with open(filename + ".asc", "rb") as gpg:
+            #     data["gpg_signature"] = (signed_name, gpg.read())
 
-        print("Uploading {0}".format(os.path.basename(filename)))
-
-        data_to_send = []
-        for key, value in data.items():
-            if isinstance(value, (list, tuple)):
-                for item in value:
-                    data_to_send.append((key, item))
-            else:
-                data_to_send.append((key, value))
-
-        with open(filename, "rb") as fp:
-            data_to_send.append((
-                "content",
-                (os.path.basename(filename), fp, "application/octet-stream"),
-            ))
-            encoder = MultipartEncoder(data_to_send)
-            resp = session.post(
-                config["repository"],
-                data=encoder,
-                auth=(username, password),
-                allow_redirects=False,
-                headers={'Content-Type': encoder.content_type},
-            )
+        resp = repository.upload(package)
         # Bug 28. Try to silence a ResourceWarning by releasing the socket and
         # clearing the connection pool.
         resp.close()
-        session.close()
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
@@ -261,6 +306,8 @@ def upload(dists, repository, sign, identity, username, password, comment,
                                         resp.headers["location"]))
         # Otherwise, raise an HTTPError based on the status code.
         resp.raise_for_status()
+
+    repository.close()
 
 
 def main(args):
