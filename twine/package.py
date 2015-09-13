@@ -52,13 +52,16 @@ class PackageFile(object):
         self.gpg_signature = None
 
         md5_hash = hashlib.md5()
+        sha2_hash = hashlib.sha256()
         with open(filename, "rb") as fp:
             content = fp.read(4096)
             while content:
                 md5_hash.update(content)
+                sha2_hash.update(content)
                 content = fp.read(4096)
 
         self.md5_digest = md5_hash.hexdigest()
+        self.sha2_digest = sha2_hash.hexdigest()
 
     @classmethod
     def from_filename(cls, filename, comment):
@@ -113,6 +116,11 @@ class PackageFile(object):
             "supported_platform": meta.supported_platforms,
             "comment": self.comment,
             "md5_digest": self.md5_digest,
+
+            # When https://github.com/pypa/warehouse/issues/681 is closed and
+            # warehouse is deployed, uncomment the line below to start sending
+            # a more up-to-date digest.
+            # "sha256_digest": self.sha256_digest,
 
             # PEP 314
             "provides": meta.provides,
