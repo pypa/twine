@@ -16,9 +16,7 @@ from __future__ import unicode_literals
 
 import argparse
 import glob
-import hashlib
 import os.path
-import subprocess
 import sys
 
 try:
@@ -26,32 +24,12 @@ try:
 except ImportError:
     from urllib.parse import urlparse, urlunparse
 
-import pkginfo
-import pkg_resources
 import requests
 from requests_toolbelt.multipart import MultipartEncoder
 
 import twine.exceptions as exc
+from twine.package import PackageFile
 from twine.utils import get_config, get_username, get_password
-from twine.wheel import Wheel
-from twine.wininst import WinInst
-
-
-DIST_TYPES = {
-    "bdist_wheel": Wheel,
-    "bdist_wininst": WinInst,
-    "bdist_egg": pkginfo.BDist,
-    "sdist": pkginfo.SDist,
-}
-
-DIST_EXTENSIONS = {
-    ".whl": "bdist_wheel",
-    ".exe": "bdist_wininst",
-    ".egg": "bdist_egg",
-    ".tar.bz2": "sdist",
-    ".tar.gz": "sdist",
-    ".zip": "sdist",
-}
 
 
 def group_wheel_files_first(files):
@@ -124,111 +102,6 @@ class Repository(object):
             )
 
         return resp
-
-
-class PackageFile(object):
-    def __init__(self, filename, comment, metadata, python_version, filetype):
-        self.filename = filename
-        self.basefilename = os.path.basename(filename)
-        self.comment = comment
-        self.metadata = metadata
-        self.python_version = python_version
-        self.filetype = filetype
-        self.safe_name = pkg_resources.safe_name(metadata.name)
-        self.signed_filename = self.filename + '.asc'
-        self.gpg_signature = None
-
-        md5_hash = hashlib.md5()
-        with open(filename, "rb") as fp:
-            content = fp.read(4096)
-            while content:
-                md5_hash.update(content)
-                content = fp.read(4096)
-
-        self.md5_digest = md5_hash.hexdigest()
-
-    @classmethod
-    def from_filename(cls, filename, comment):
-        # Extract the metadata from the package
-        for ext, dtype in DIST_EXTENSIONS.items():
-            if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
-        else:
-            raise ValueError(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
-            )
-
-        if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
-        elif dtype == "bdist_wheel":
-            py_version = meta.py_version
-        elif dtype == "bdist_wininst":
-            py_version = meta.py_version
-        else:
-            py_version = None
-
-        return cls(filename, comment, meta, py_version, dtype)
-
-    def metadata_dictionary(self):
-        meta = self.metadata
-        data = {
-            # identify release
-            "name": self.safe_name,
-            "version": meta.version,
-
-            # file content
-            "filetype": self.filetype,
-            "pyversion": self.python_version,
-
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": self.comment,
-            "md5_digest": self.md5_digest,
-
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-        }
-
-        if self.gpg_signature is not None:
-            data['gpg_signature'] = self.gpg_signature
-
-        return data
-
-    def sign(self, sign_with, identity):
-        print("Signing {0}".format(self.basefilename))
-        gpg_args = (sign_with, "--detach-sign", "-a", self.filename)
-        if identity:
-            gpg_args += ("--local-user", identity)
-        subprocess.check_call(gpg_args)
-
-        with open(self.signed_filename, "rb") as gpg:
-            self.pg_signature = (self.signed_filename, gpg.read())
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
