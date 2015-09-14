@@ -4,7 +4,7 @@
 Changelog
 =========
 
-* :release:`1.6.0 <2015-xx-yy>`
+* :release:`1.6.0 <2015-09-14>`
 
   * :feature:`106` Upload wheels first to PyPI
 
@@ -13,6 +13,19 @@ Changelog
   * :bug:`92` Raise an exception on redirects
 
   * :feature:`97` Allow the user to specify the location of their ``.pypirc``
+
+  * :feature:`115` Add the ``--skip-existing`` flag to ``twine upload`` to
+    allow users to skip releases that already exist on PyPI.
+
+  * :bug:`114` Warnings triggered by pkginfo searching for ``PKG-INFO`` files
+    should no longer be user visible.
+
+  * :bug:`116` Work around problems with Windows when using
+    :func:`getpass.getpass`
+
+  * :bug:`111` Provide more helpful messages if ``.pypirc`` is out of date.
+
+  * :feature:`8` Support registering new packages with ``twine register``
 
 * :release:`1.5.0 <2015-03-10>`
 
