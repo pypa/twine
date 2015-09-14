@@ -22,6 +22,7 @@ import requests
 import pkginfo
 
 import twine
+from twine._installed import Installed
 
 
 def _registered_commands(group='twine.registered_commands'):
@@ -31,7 +32,7 @@ def _registered_commands(group='twine.registered_commands'):
 
 def dep_versions():
     return 'pkginfo: {0}, requests: {1}, setuptools: {2}'.format(
-        pkginfo.Installed(pkginfo).version,
+        Installed(pkginfo).version,
         # __version__ is always defined but requests does not always have
         # PKG-INFO to read from
         requests.__version__,
