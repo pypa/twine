@@ -21,7 +21,7 @@ Changelog
     should no longer be user visible.
 
   * :bug:`116` Work around problems with Windows when using
-    :function:`getpass.getpass`
+    :func:`getpass.getpass`
 
   * :bug:`111` Provide more helpful messages if ``.pypirc`` is out of date.
 
