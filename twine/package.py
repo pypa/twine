@@ -143,9 +143,10 @@ class PackageFile(object):
 
     def sign(self, sign_with, identity):
         print("Signing {0}".format(self.basefilename))
-        gpg_args = (sign_with, "--detach-sign", "-a", self.filename)
+        gpg_args = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
+        gpg_args += ("-a", self.filename)
         subprocess.check_call(gpg_args)
 
         with open(self.signed_filename, "rb") as gpg:
