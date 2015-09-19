@@ -4,6 +4,10 @@
 Changelog
 =========
 
+* :release:`1.6.1 <2015-09-18>`
+
+  * :bug:`130` Fix signing support for uploads
+
 * :release:`1.6.0 <2015-09-14>`
 
   * :feature:`106` Upload wheels first to PyPI
