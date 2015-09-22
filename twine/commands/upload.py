@@ -66,11 +66,6 @@ def upload(dists, repository, sign, identity, username, password, comment,
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
-
-    # Determine if the user has passed in pre-signed distributions
-    signatures = dict(
-        (os.path.basename(d), d) for d in dists if d.endswith(".asc")
-    )
     dists = [i for i in dists if not i.endswith(".asc")]
 
     config = utils.get_repository_from_config(config_file, repository)
@@ -94,12 +89,10 @@ def upload(dists, repository, sign, identity, username, password, comment,
         # if sign:
         #     sign_file(sign_with, filename, identity)
 
-        # signed_name = os.path.basename(filename) + ".asc"
-        signed_name = package.signed_filename
-        if signed_name in signatures:
-            with open(signatures[signed_name], "rb") as gpg:
-                package.gpg_signature = (signed_name, gpg.read())
-                # data["gpg_signature"] = (signed_name, gpg.read())
+        sigfile = package.signed_filename
+        if os.path.exists(sigfile):
+            with open(sigfile, "rb") as gpg:
+                package.gpg_signature = (os.path.basename(sigfile), gpg.read())
         elif sign:
             package.sign(sign_with, identity)
             # with open(filename + ".asc", "rb") as gpg:
