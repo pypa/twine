@@ -49,6 +49,7 @@ class PackageFile(object):
         self.filetype = filetype
         self.safe_name = pkg_resources.safe_name(metadata.name)
         self.signed_filename = self.filename + '.asc'
+        self.signed_basefilename = self.basefilename + '.asc'
         self.gpg_signature = None
 
         md5_hash = hashlib.md5()
@@ -141,6 +142,13 @@ class PackageFile(object):
 
         return data
 
+    def add_gpg_signature(self, signature_filepath, signature_filename):
+        if self.gpg_signature is not None:
+            raise ValueError('GPG Signature can only be added once')
+
+        with open(signature_filepath, "rb") as gpg:
+            self.gpg_signature = (signature_filename, gpg.read())
+
     def sign(self, sign_with, identity):
         print("Signing {0}".format(self.basefilename))
         gpg_args = (sign_with, "--detach-sign")
@@ -149,5 +157,4 @@ class PackageFile(object):
         gpg_args += ("-a", self.filename)
         subprocess.check_call(gpg_args)
 
-        with open(self.signed_filename, "rb") as gpg:
-            self.pg_signature = (self.signed_filename, gpg.read())
+        self.add_gpg_signature(self.signed_filename, self.signed_basefilename)

@@ -55,3 +55,18 @@ def test_sign_file_with_identity(monkeypatch):
         pass
     args = ('gpg', '--detach-sign', '--local-user', 'identity', '-a', filename)
     assert replaced_check_call.calls == [pretend.call(args)]
+
+
+def test_package_signed_name_is_correct():
+    filename = 'tests/fixtures/deprecated-pypirc'
+
+    pkg = package.PackageFile(
+        filename=filename,
+        comment=None,
+        metadata=pretend.stub(name="deprecated-pypirc"),
+        python_version=None,
+        filetype=None
+    )
+
+    assert pkg.signed_basefilename == "deprecated-pypirc.asc"
+    assert pkg.signed_filename == (filename + '.asc')

@@ -90,20 +90,12 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
-        # Sign the dist if requested
-        # if sign:
-        #     sign_file(sign_with, filename, identity)
 
-        # signed_name = os.path.basename(filename) + ".asc"
-        signed_name = package.signed_filename
+        signed_name = package.signed_basefilename
         if signed_name in signatures:
-            with open(signatures[signed_name], "rb") as gpg:
-                package.gpg_signature = (signed_name, gpg.read())
-                # data["gpg_signature"] = (signed_name, gpg.read())
+            package.add_gpg_signature(signatures[signed_name], signed_name)
         elif sign:
             package.sign(sign_with, identity)
-            # with open(filename + ".asc", "rb") as gpg:
-            #     data["gpg_signature"] = (signed_name, gpg.read())
 
         resp = repository.upload(package)
 
