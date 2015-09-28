@@ -4,6 +4,17 @@
 Changelog
 =========
 
+* :release:`1.6.2 <2015-09-28>`
+
+  * :bug:`132` Upload signatures with packages appropriately
+
+    As part of the refactor for the 1.6.0 release, we were using the wrong
+    name to find the signature file.
+
+    This also uncovered a bug where if you're using twine in a situation where
+    ``*`` is not expanded by your shell, we might also miss uploading
+    signatures to PyPI. Both were fixed as part of this.
+
 * :release:`1.6.1 <2015-09-18>`
 
   * :bug:`130` Fix signing support for uploads
