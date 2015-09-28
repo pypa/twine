@@ -67,11 +67,13 @@ def upload(dists, repository, sign, identity, username, password, comment,
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
 
+    dists = find_dists(dists)
+
     # Determine if the user has passed in pre-signed distributions
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [i for i in dists if not i.endswith(".asc")]
+    uploads = [i for i in dists if not i.endswith(".asc")]
 
     config = utils.get_repository_from_config(config_file, repository)
 
@@ -85,8 +87,6 @@ def upload(dists, repository, sign, identity, username, password, comment,
     password = utils.get_password(password, config)
 
     repository = Repository(config["repository"], username, password)
-
-    uploads = find_dists(dists)
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
