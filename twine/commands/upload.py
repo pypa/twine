@@ -67,11 +67,13 @@ def upload(dists, repository, sign, identity, username, password, comment,
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
 
+    dists = find_dists(dists)
+
     # Determine if the user has passed in pre-signed distributions
     signatures = dict(
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
-    dists = [i for i in dists if not i.endswith(".asc")]
+    uploads = [i for i in dists if not i.endswith(".asc")]
 
     config = utils.get_repository_from_config(config_file, repository)
 
@@ -86,24 +88,14 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
     repository = Repository(config["repository"], username, password)
 
-    uploads = find_dists(dists)
-
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
-        # Sign the dist if requested
-        # if sign:
-        #     sign_file(sign_with, filename, identity)
 
-        # signed_name = os.path.basename(filename) + ".asc"
-        signed_name = package.signed_filename
+        signed_name = package.signed_basefilename
         if signed_name in signatures:
-            with open(signatures[signed_name], "rb") as gpg:
-                package.gpg_signature = (signed_name, gpg.read())
-                # data["gpg_signature"] = (signed_name, gpg.read())
+            package.add_gpg_signature(signatures[signed_name], signed_name)
         elif sign:
             package.sign(sign_with, identity)
-            # with open(filename + ".asc", "rb") as gpg:
-            #     data["gpg_signature"] = (signed_name, gpg.read())
 
         resp = repository.upload(package)
 

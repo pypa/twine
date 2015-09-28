@@ -66,6 +66,7 @@ def test_find_dists_handles_real_files():
 
 def test_get_config_old_format(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
+    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
 
     with open(pypirc, "w") as fp:
         fp.write(textwrap.dedent("""
@@ -75,7 +76,7 @@ def test_get_config_old_format(tmpdir):
         """))
 
     try:
-        upload.upload(dists="foo", repository="pypi", sign=None, identity=None,
+        upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
                       username=None, password=None, comment=None,
                       sign_with=None, config_file=pypirc, skip_existing=False)
     except KeyError as err:
