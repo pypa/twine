@@ -17,6 +17,9 @@ import requests
 from requests_toolbelt.multipart import MultipartEncoder
 
 
+KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
+
+
 class Repository(object):
     def __init__(self, repository_url, username, password):
         self.url = repository_url
@@ -30,11 +33,12 @@ class Repository(object):
     def _convert_data_to_list_of_tuples(data):
         data_to_send = []
         for key, value in data.items():
-            if isinstance(value, (list, tuple)):
+            if (key in KEYWORDS_TO_NOT_FLATTEN or
+                    not isinstance(value, (list, tuple))):
+                data_to_send.append((key, value))
+            else:
                 for item in value:
                     data_to_send.append((key, item))
-            else:
-                data_to_send.append((key, value))
         return data_to_send
 
     def register(self, package):
