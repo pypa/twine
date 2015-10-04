@@ -4,6 +4,13 @@
 Changelog
 =========
 
+* :release:`1.6.3 <2015-10-05>`
+
+  * :bug:`137`, :bug:`140` Uploading signatures was broken due to the pull
+    request that added large file support via ``requests-toolbelt``. This
+    caused a 500 error on PyPI and prevented package and signature upload in
+    twine 1.6.0
+
 * :release:`1.6.2 <2015-09-28>`
 
   * :bug:`132` Upload signatures with packages appropriately
