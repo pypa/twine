@@ -116,14 +116,15 @@ def normalize_repository_url(url):
     return urlunparse(parsed)
 
 
-def get_userpass_value(cli_value, config, key, prompt_strategy):
+def get_userpass_value(cli_value, config, key, prompt_strategy=None):
     """Gets the username / password from config.
 
     Uses the following rules:
 
     1. If it is specified on the cli (`cli_value`), use that.
     2. If `config[key]` is specified, use that.
-    3. Otherwise prompt using `prompt_strategy`.
+    3. If `prompt_strategy`, prompt using `prompt_strategy`.
+    4. Otherwise return None
 
     :param cli_value: The value supplied from the command line or `None`.
     :type cli_value: unicode or `None`
@@ -140,8 +141,10 @@ def get_userpass_value(cli_value, config, key, prompt_strategy):
         return cli_value
     elif config.get(key):
         return config[key]
-    else:
+    elif prompt_strategy:
         return prompt_strategy()
+    else:
+        return None
 
 
 def password_prompt(prompt_text):  # Always expects unicode for our own sanity
@@ -160,4 +163,12 @@ get_password = functools.partial(
     get_userpass_value,
     key='password',
     prompt_strategy=password_prompt('Enter your password: '),
+)
+get_cacert = functools.partial(
+    get_userpass_value,
+    key='ca_cert',
+)
+get_clientcert = functools.partial(
+    get_userpass_value,
+    key='client_cert',
 )

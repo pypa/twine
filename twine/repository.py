@@ -21,10 +21,16 @@ KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
 
 class Repository(object):
-    def __init__(self, repository_url, username, password):
+    def __init__(self, repository_url, username, password,
+                 ca_root=None, client_cert=None):
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
+        self.ssl_options = {}
+        if ca_root:
+            self.ssl_options['verify'] = ca_root
+        if client_cert:
+            self.ssl_options['cert'] = client_cert
 
     def close(self):
         self.session.close()
@@ -57,6 +63,7 @@ class Repository(object):
             data=encoder,
             allow_redirects=False,
             headers={'Content-Type': encoder.content_type},
+            **self.ssl_options
         )
         # Bug 28. Try to silence a ResourceWarning by releasing the socket.
         resp.close()
@@ -86,6 +93,7 @@ class Repository(object):
                 data=encoder,
                 allow_redirects=False,
                 headers={'Content-Type': encoder.content_type},
+                **self.ssl_options
             )
 
         return resp

@@ -23,7 +23,8 @@ from twine.repository import Repository
 from twine import utils
 
 
-def register(package, repository, username, password, comment, config_file):
+def register(package, repository, username, password, comment, config_file,
+             cert, client_cert):
     config = utils.get_repository_from_config(config_file, repository)
     config["repository"] = utils.normalize_repository_url(
         config["repository"]
@@ -33,8 +34,11 @@ def register(package, repository, username, password, comment, config_file):
 
     username = utils.get_username(username, config)
     password = utils.get_password(password, config)
+    ca_cert = utils.get_cacert(cert, config)
+    client_cert = utils.get_clientcert(client_cert, config)
 
-    repository = Repository(config["repository"], username, password)
+    repository = Repository(config["repository"], username, password,
+                            ca_cert, client_cert)
 
     if not os.path.exists(package):
         raise exc.PackageNotFound(
@@ -77,6 +81,17 @@ def main(args):
         "--config-file",
         default="~/.pypirc",
         help="The .pypirc config file to use",
+    )
+    parser.add_argument(
+        "--cert",
+        metavar="path",
+        help="Path to alternate CA bundle",
+    )
+    parser.add_argument(
+        "--client-cert",
+        metavar="path",
+        help="Path to SSL client certificate, a single file containing the "
+             "private key and the certificate in PEM forma",
     )
     parser.add_argument(
         "package",

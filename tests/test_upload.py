@@ -78,6 +78,7 @@ def test_get_config_old_format(tmpdir):
     try:
         upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
                       username=None, password=None, comment=None,
+                      cert=None, client_cert=None,
                       sign_with=None, config_file=pypirc, skip_existing=False)
     except KeyError as err:
         assert err.args[0] == (

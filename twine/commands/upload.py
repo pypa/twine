@@ -62,7 +62,7 @@ def skip_upload(response, skip_existing, package):
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file, skip_existing):
+           sign_with, config_file, skip_existing, cert, client_cert):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -85,8 +85,11 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
     username = utils.get_username(username, config)
     password = utils.get_password(password, config)
+    ca_cert = utils.get_cacert(cert, config)
+    client_cert = utils.get_clientcert(client_cert, config)
 
-    repository = Repository(config["repository"], username, password)
+    repository = Repository(config["repository"], username, password,
+                            ca_cert, client_cert)
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
@@ -166,6 +169,17 @@ def main(args):
         default=False,
         action="store_true",
         help="Continue uploading files if one already exists",
+    )
+    parser.add_argument(
+        "--cert",
+        metavar="path",
+        help="Path to alternate CA bundle",
+    )
+    parser.add_argument(
+        "--client-cert",
+        metavar="path",
+        help="Path to SSL client certificate, a single file containing the "
+             "private key and the certificate in PEM forma",
     )
     parser.add_argument(
         "dists",
