@@ -42,12 +42,13 @@ class Wheel(Distribution):
 
     def __init__(self, filename, metadata_version=None):
         self.filename = filename
+        self.basefilename = os.path.basename(self.filename)
         self.metadata_version = metadata_version
         self.extractMetadata()
 
     @property
     def py_version(self):
-        wheel_info = wheel_file_re.match(self.filename)
+        wheel_info = wheel_file_re.match(self.basefilename)
         return wheel_info.group("pyver")
 
     def read(self):
