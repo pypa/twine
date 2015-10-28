@@ -41,6 +41,14 @@ class Repository(object):
                     data_to_send.append((key, item))
         return data_to_send
 
+    def set_certificate_authority(self, cacert):
+        if cacert:
+            self.session.verify = cacert
+
+    def set_client_certificate(self, clientcert):
+        if clientcert:
+            self.session.cert = clientcert
+
     def register(self, package):
         data = package.metadata_dictionary()
         data.update({
