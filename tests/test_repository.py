@@ -47,3 +47,29 @@ def test_iterables_are_flattened():
     tuples = repository.Repository._convert_data_to_list_of_tuples(data)
     assert tuples == [('platform', 'UNKNOWN'),
                       ('platform', 'ANOTHERPLATFORM')]
+
+
+def test_set_client_certificate():
+    repo = repository.Repository(
+        repository_url='https://pypi.python.org/pypi',
+        username='username',
+        password='password',
+    )
+
+    assert repo.session.cert is None
+
+    repo.set_client_certificate(('/path/to/cert', '/path/to/key'))
+    assert repo.session.cert == ('/path/to/cert', '/path/to/key')
+
+
+def test_set_certificate_authority():
+    repo = repository.Repository(
+        repository_url='https://pypi.python.org/pypi',
+        username='username',
+        password='password',
+    )
+
+    assert repo.session.verify is True
+
+    repo.set_certificate_authority('/path/to/cert')
+    assert repo.session.verify == '/path/to/cert'

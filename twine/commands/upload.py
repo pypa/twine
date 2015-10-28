@@ -88,8 +88,9 @@ def upload(dists, repository, sign, identity, username, password, comment,
     ca_cert = utils.get_cacert(cert, config)
     client_cert = utils.get_clientcert(client_cert, config)
 
-    repository = Repository(config["repository"], username, password,
-                            ca_cert, client_cert)
+    repository = Repository(config["repository"], username, password)
+    repository.set_certificate_authority(ca_cert)
+    repository.set_client_certificate(client_cert)
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
