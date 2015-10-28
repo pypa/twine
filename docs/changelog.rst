@@ -4,6 +4,13 @@
 Changelog
 =========
 
+* :release:`1.6.4 <2015-10-27>`
+
+  * :bug:`145` Paths with hyphens in them break the Wheel regular expression.
+
+  * :bug:`146` Exception while accessing the ``respository`` key when raising
+    a redirect exception.
+
 * :release:`1.6.3 <2015-10-05>`
 
   * :bug:`137`, :bug:`140` Uploading signatures was broken due to the pull
