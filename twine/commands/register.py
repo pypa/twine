@@ -46,8 +46,8 @@ def register(package, repository, username, password, comment, config_file):
 
     if resp.is_redirect:
         raise exc.RedirectDetected(
-            ('"{0}" attempted to redirect to "{1}" during upload.'
-             ' Aborting...').format(config["respository"],
+            ('"{0}" attempted to redirect to "{1}" during registration.'
+             ' Aborting...').format(config["repository"],
                                     resp.headers["location"]))
 
     resp.raise_for_status()
