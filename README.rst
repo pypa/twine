@@ -54,15 +54,15 @@ Usage
 
 1. Create some distributions in the normal way:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    $ python setup.py sdist bdist_wheel
+       $ python setup.py sdist bdist_wheel
 
 2. Upload with twine:
 
-.. code-block:: bash
+   .. code-block:: bash
 
-    $ twine upload dist/*
+       $ twine upload dist/*
 
 3. Done!
 
