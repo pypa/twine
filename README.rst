@@ -73,8 +73,10 @@ Options
 .. code-block:: bash
 
     $ twine upload -h
-    usage: twine upload [-h] [-r REPOSITORY] [-s] [-i IDENTITY] [-u USERNAME]
-                        [-p PASSWORD] [-c COMMENT]
+
+    usage: twine upload [-h] [-r REPOSITORY] [-s] [--sign-with SIGN_WITH]
+                        [-i IDENTITY] [-u USERNAME] [-p PASSWORD] [-c COMMENT]
+                        [--config-file CONFIG_FILE] [--skip-existing]
                         dist [dist ...]
 
     positional arguments:
@@ -85,8 +87,10 @@ Options
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to upload the files to
+                            The repository to upload the files to (default: pypi)
       -s, --sign            Sign files to upload using gpg
+      --sign-with SIGN_WITH
+                            GPG program used to sign uploads (default: gpg)
       -i IDENTITY, --identity IDENTITY
                             GPG identity used to sign files
       -u USERNAME, --username USERNAME
@@ -95,8 +99,9 @@ Options
                             The password to authenticate to the repository with
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file
-      --config-file FILE    
+      --config-file CONFIG_FILE
                             The .pypirc config file to use
+      --skip-existing       Continue uploading files if one already exists
 
 
 Resources
