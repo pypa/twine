@@ -24,16 +24,6 @@ from requests_toolbelt.multipart import (
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
 
-def upload_callback(encoder):
-    encoder_len = encoder.len
-    bar = ProgressBar(expected_size=encoder_len, filled_char='=')
-
-    def callback(monitor):
-        bar.show(monitor.bytes_read)
-
-    return callback
-
-
 class Repository(object):
     def __init__(self, repository_url, username, password):
         self.url = repository_url
@@ -102,8 +92,9 @@ class Repository(object):
                 (package.basefilename, fp, "application/octet-stream"),
             ))
             encoder = MultipartEncoder(data_to_send)
+            bar = ProgressBar(expected_size=encoder.len, filled_char='=')
             monitor = MultipartEncoderMonitor(
-                encoder, upload_callback(encoder)
+                encoder, lambda monitor: bar.show(monitor.bytes_read)
             )
 
             resp = self.session.post(
@@ -112,5 +103,6 @@ class Repository(object):
                 allow_redirects=False,
                 headers={'Content-Type': monitor.content_type},
             )
+            bar.done()
 
         return resp
