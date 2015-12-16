@@ -4,12 +4,18 @@
 Changelog
 =========
 
+
 * :release:`1.7.0 <TBD>`
 
   * :feature:`142` Support ``--cert`` and ``--client-cert`` command-line flags
     and config file options for feature parity with pip. This allows users to
     verify connections to servers other than PyPI (e.g., local package
     repositories) with different certificates.
+
+* :release:`1.6.5 <2015-12-16>`
+
+  * :bug:`155` Bump requests-toolbelt version to ensure we avoid
+    ConnectionErrors
 
 * :release:`1.6.4 <2015-10-27>`
 
