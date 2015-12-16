@@ -4,6 +4,11 @@
 Changelog
 =========
 
+* :release:`1.6.5 <2015-12-16>`
+
+  * :bug:`155` Bump requests-toolbelt version to ensure we avoid
+    ConnectionErrors
+
 * :release:`1.6.4 <2015-10-27>`
 
   * :bug:`145` Paths with hyphens in them break the Wheel regular expression.
