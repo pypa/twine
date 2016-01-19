@@ -55,11 +55,9 @@ class PackageFile(object):
         md5_hash = hashlib.md5()
         sha2_hash = hashlib.sha256()
         with open(filename, "rb") as fp:
-            content = fp.read(4096)
-            while content:
+            for content in iter(lambda: fp.read(4096), b''):
                 md5_hash.update(content)
                 sha2_hash.update(content)
-                content = fp.read(4096)
 
         self.md5_digest = md5_hash.hexdigest()
         self.sha2_digest = sha2_hash.hexdigest()
