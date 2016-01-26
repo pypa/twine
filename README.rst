@@ -3,7 +3,7 @@ twine
 
 Twine is a utility for interacting `with PyPI <https://pypi.python.org/pypi/twine>`_.
 
-Currently it only supports uploading distributions.
+Currently it only supports registering projects and uploading distributions.
 
 
 Why Should I Use This?
