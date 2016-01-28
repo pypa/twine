@@ -56,9 +56,16 @@ def find_dists(dists):
 def skip_upload(response, skip_existing, package):
     filename = package.basefilename
     msg = 'A file named "{0}" already exists for'.format(filename)
-    return (response.status_code in [400, 409] and
-            response.reason.startswith(msg) and
-            skip_existing)
+    # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
+    # error message in the reason attribute. Other implementations return a
+    # 409 status code. We only want to skip an upload if:
+    # 1. The user has told us to skip existing packages (skip_existing is
+    #    True) AND
+    # 2. a) The response status code is 409 OR
+    # 2. b) The response status code is 400 AND it has a reason that matches
+    #       what we expect PyPI to return to us.
+    return (skip_existing and (response.status_code == 409 or
+            (response.status_code == 400 and response.reason.startswith(msg))))
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
