@@ -56,7 +56,7 @@ def find_dists(dists):
 def skip_upload(response, skip_existing, package):
     filename = package.basefilename
     msg = 'A file named "{0}" already exists for'.format(filename)
-    return (response.status_code == 400 and
+    return (response.status_code in [400, 409] and
             response.reason.startswith(msg) and
             skip_existing)
 
