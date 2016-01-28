@@ -13,8 +13,12 @@
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
 
+from clint.textui.progress import Bar as ProgressBar
+
 import requests
-from requests_toolbelt.multipart import MultipartEncoder
+from requests_toolbelt.multipart import (
+    MultipartEncoder, MultipartEncoderMonitor
+)
 
 
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
@@ -88,12 +92,17 @@ class Repository(object):
                 (package.basefilename, fp, "application/octet-stream"),
             ))
             encoder = MultipartEncoder(data_to_send)
+            bar = ProgressBar(expected_size=encoder.len, filled_char='=')
+            monitor = MultipartEncoderMonitor(
+                encoder, lambda monitor: bar.show(monitor.bytes_read)
+            )
 
             resp = self.session.post(
                 self.url,
-                data=encoder,
+                data=monitor,
                 allow_redirects=False,
-                headers={'Content-Type': encoder.content_type},
+                headers={'Content-Type': monitor.content_type},
             )
+            bar.done()
 
         return resp

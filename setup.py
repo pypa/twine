@@ -19,6 +19,7 @@ import twine
 
 
 install_requires = [
+    "clint",
     "pkginfo >= 1.0",
     "requests >= 2.3.0",
     "requests-toolbelt >= 0.5.1",
