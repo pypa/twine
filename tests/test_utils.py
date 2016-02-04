@@ -18,8 +18,8 @@ import os.path
 import textwrap
 import pytest
 
-from twine.utils import (DEFAULT_REPOSITORY, get_config, get_userpass_value,
-                         get_repository_from_config)
+from twine.utils import (DEFAULT_REPOSITORY, TEST_REPOSITORY, get_config,
+                         get_userpass_value, get_repository_from_config)
 
 
 def test_get_config(tmpdir):
@@ -93,6 +93,11 @@ def test_get_config_missing(tmpdir):
             "repository": DEFAULT_REPOSITORY,
             "username": None,
             "password": None,
+        },
+        "pypitest": {
+            "repository": TEST_REPOSITORY,
+            "username": None,
+            "password": None
         },
     }
 

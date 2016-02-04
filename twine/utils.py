@@ -38,6 +38,7 @@ else:
 
 
 DEFAULT_REPOSITORY = "https://pypi.python.org/pypi"
+TEST_REPOSITORY = "https://testpypi.python.org/pypi"
 
 
 def get_config(path="~/.pypirc"):
@@ -48,7 +49,11 @@ def get_config(path="~/.pypirc"):
         return {"pypi": {"repository": DEFAULT_REPOSITORY,
                          "username": None,
                          "password": None
-                         }
+                         },
+                "pypitest": {"repository": TEST_REPOSITORY,
+                             "username": None,
+                             "password": None
+                             },
                 }
 
     # Parse the rc file
