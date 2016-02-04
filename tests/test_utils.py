@@ -18,7 +18,8 @@ import os.path
 import textwrap
 import pytest
 
-from twine.utils import DEFAULT_REPOSITORY, get_config, get_userpass_value
+from twine.utils import (DEFAULT_REPOSITORY, get_config, get_userpass_value,
+                         get_repository_from_config)
 
 
 def test_get_config(tmpdir):
@@ -94,6 +95,24 @@ def test_get_config_missing(tmpdir):
             "password": None,
         },
     }
+
+
+def test_get_repository_config_missing(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    repo = "https://notexisting.python.org/pypi"
+    exp = {
+            "repository": repo,
+            "username": None,
+            "password": None,
+        }
+    assert get_repository_from_config(pypirc, repo) == exp
+    exp = {
+            "repository": DEFAULT_REPOSITORY,
+            "username": None,
+            "password": None,
+        }
+    assert get_repository_from_config(pypirc, "pypi") == exp
 
 
 def test_get_config_deprecated_pypirc():

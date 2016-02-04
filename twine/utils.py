@@ -97,8 +97,14 @@ def get_repository_from_config(config_file, repository):
     try:
         return get_config(config_file)[repository]
     except KeyError:
+        if repository and "://" in repository:
+            # assume that the repsoitory is actually an URL and just sent
+            # them a dummy with the repo set
+            return {"repository": repository, "username": None,
+                    "password": None}
         msg = (
-            "Missing '{repo}' section from the configuration file.\n"
+            "Missing '{repo}' section from the configuration file\n"
+            "or not a complete URL in --repository.\n"
             "Maybe you have a out-dated '{cfg}' format?\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
