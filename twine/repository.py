@@ -19,6 +19,9 @@ import requests
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
+from requests.adapters import (
+    Retry
+)
 
 
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
@@ -64,10 +67,14 @@ class Repository(object):
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
         encoder = MultipartEncoder(data_to_send)
+        retry = Retry(connect=5,
+                      method_whitelist=['POST'],
+                      status_forcelist=[502])
         resp = self.session.post(
             self.url,
             data=encoder,
             allow_redirects=False,
+            max_retries=retry,
             headers={'Content-Type': encoder.content_type},
         )
         # Bug 28. Try to silence a ResourceWarning by releasing the socket.
