@@ -14,6 +14,7 @@
 from __future__ import unicode_literals
 
 import os
+from os.path import join as pj
 import textwrap
 
 import pretend
@@ -74,7 +75,7 @@ def test_ensure_if_no_wheel_files():
 
 def test_find_dists_expands_globs():
     files = sorted(upload.find_dists(['twine/__*.py']))
-    expected = ['twine/__init__.py', 'twine/__main__.py']
+    expected = [pj('twine', '__init__.py'), pj('twine', '__main__.py')]
     assert expected == files
 
 
