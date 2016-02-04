@@ -164,5 +164,5 @@ def test_password_and_username_from_env(monkeypatch):
     assert "pypipassword" == result_kwargs["password"]
     assert "pypiuser" == result_kwargs["username"]
     result_kwargs = replaced_upload.calls[1].kwargs
-    assert None == result_kwargs["password"]
-    assert None == result_kwargs["username"]
+    assert None is result_kwargs["password"]
+    assert None is result_kwargs["username"]

@@ -67,14 +67,16 @@ def main(args):
              "%(default)s)",
     )
     parser.add_argument(
-        "-u", "--username", action=utils.EnvDefault, env='PYPI_USER', required=False,
-        help="The username to authenticate to the repository as (can also be set via %(env)s "
-             "environment variable)",
+        "-u", "--username", action=utils.EnvDefault, env='PYPI_USER',
+        required=False, help="The username to authenticate to the repository "
+                             "as (can also be set via %(env)s environment "
+                             "variable)",
     )
     parser.add_argument(
-        "-p", "--password", action=utils.EnvDefault, env='PYPI_PASSWORD', required=False,
-        help="The password to authenticate to the repository with (can also be set via %(env)s "
-             "environment variable)",
+        "-p", "--password", action=utils.EnvDefault, env='PYPI_PASSWORD',
+        required=False, help="The password to authenticate to the repository "
+                             "with (can also be set via %(env)s environment "
+                             "variable)",
     )
     parser.add_argument(
         "-c", "--comment",
