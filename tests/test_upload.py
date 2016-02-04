@@ -14,14 +14,41 @@
 from __future__ import unicode_literals
 
 import os
+from os.path import join as pj
 import textwrap
 
 import pretend
 import pytest
 
 from twine.commands import upload
-from twine import package
+from twine import package, cli
+import twine
 
+import contextlib
+
+
+@contextlib.contextmanager
+def set_env(**environ):
+    """
+    Temporarily set the process environment variables.
+
+    >>> with set_env(PLUGINS_DIR=u'test/plugins'):
+    ...   "PLUGINS_DIR" in os.environ
+    True
+
+    >>> "PLUGINS_DIR" in os.environ
+    False
+
+    :type environ: dict[str, unicode]
+    :param environ: Environment variables to set
+    """
+    old_environ = dict(os.environ)
+    os.environ.update(environ)
+    try:
+        yield
+    finally:
+        os.environ.clear()
+        os.environ.update(old_environ)
 
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
@@ -48,7 +75,7 @@ def test_ensure_if_no_wheel_files():
 
 def test_find_dists_expands_globs():
     files = sorted(upload.find_dists(['twine/__*.py']))
-    expected = ['twine/__init__.py', 'twine/__main__.py']
+    expected = [pj('twine', '__init__.py'), pj('twine', '__main__.py')]
     assert expected == files
 
 
@@ -124,3 +151,18 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
     assert upload.skip_upload(response=response,
                               skip_existing=False,
                               package=pkg) is False
+
+
+def test_password_and_username_from_env(monkeypatch):
+    def none_upload(*args, **kwargs): pass
+    replaced_upload = pretend.call_recorder(none_upload)
+    monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
+    with set_env(PYPI_USER="pypiuser", PYPI_PASSWORD="pypipassword"):
+        cli.dispatch(["upload", "path/to/file"])
+    cli.dispatch(["upload", "path/to/file"])
+    result_kwargs = replaced_upload.calls[0].kwargs
+    assert "pypipassword" == result_kwargs["password"]
+    assert "pypiuser" == result_kwargs["username"]
+    result_kwargs = replaced_upload.calls[1].kwargs
+    assert None is result_kwargs["password"]
+    assert None is result_kwargs["username"]
