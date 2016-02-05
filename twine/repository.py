@@ -16,7 +16,9 @@ from __future__ import absolute_import, unicode_literals, print_function
 from clint.textui.progress import Bar as ProgressBar
 
 import requests
+from requests import adapters
 from requests import codes
+from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
@@ -30,7 +32,19 @@ class Repository(object):
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
+        for scheme in ('http://', 'https://'):
+            self.session.mount(scheme, self._make_adapter_with_retries())
         self._releases_json_data = {}
+
+    @staticmethod
+    def _make_adapter_with_retries():
+        retry = util.Retry(
+            connect=5,
+            total=10,
+            method_whitelist=['GET'],
+            status_forcelist=[500, 501, 502, 503],
+        )
+        return adapters.HTTPAdapter(max_retries=retry)
 
     def close(self):
         self.session.close()
