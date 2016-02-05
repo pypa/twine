@@ -102,6 +102,11 @@ def upload(dists, repository, sign, identity, username, password, comment,
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
 
+        if repository.package_is_uploaded(package) and skip_existing:
+            print("  Skipping {0} because it appears to already exist".format(
+                package.basefilename))
+            continue
+
         signed_name = package.signed_basefilename
         if signed_name in signatures:
             package.add_gpg_signature(signatures[signed_name], signed_name)
@@ -119,12 +124,6 @@ def upload(dists, repository, sign, identity, username, password, comment,
                 ('"{0}" attempted to redirect to "{1}" during upload.'
                  ' Aborting...').format(config["repository"],
                                         resp.headers["location"]))
-
-        # Otherwise, raise an HTTPError based on the status code.
-        if skip_upload(resp, skip_existing, package):
-            print("  Skipping {0} because it appears to already exist".format(
-                package.basefilename))
-            continue
 
         resp.raise_for_status()
 

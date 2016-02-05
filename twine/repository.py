@@ -16,6 +16,7 @@ from __future__ import absolute_import, unicode_literals, print_function
 from clint.textui.progress import Bar as ProgressBar
 
 import requests
+from requests import codes
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
@@ -29,6 +30,7 @@ class Repository(object):
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
+        self._releases_json_data = {}
 
     def close(self):
         self.session.close()
@@ -74,7 +76,7 @@ class Repository(object):
         resp.close()
         return resp
 
-    def upload(self, package):
+    def _upload(self, package):
         data = package.metadata_dictionary()
         data.update({
             # action
@@ -106,3 +108,50 @@ class Repository(object):
             bar.done()
 
         return resp
+
+    def upload(self, package, max_redirects=5):
+        number_of_redirects = 0
+        while number_of_redirects < max_redirects:
+            resp = self._upload(package)
+
+            if resp.status_code == codes.OK:
+                return resp
+            if 500 <= resp.status_code < 600:
+                number_of_redirects += 1
+                print('Received "{status_code}: {reason}" Package upload '
+                      'appears to have failed.  Retry {retry} of 5'.format(
+                          status_code=resp.status_code,
+                          reason=resp.reason,
+                          retry=number_of_redirects,
+                      ))
+            else:
+                return resp
+
+        return resp
+
+    def package_is_uploaded(self, package, bypass_cache=False):
+        safe_name = package.safe_name
+        releases = None
+
+        if not bypass_cache:
+            releases = self._releases_json_data.get(safe_name)
+
+        if releases is None:
+            url = 'https://pypi.python.org/pypi/{0}/json'.format(safe_name)
+            headers = {'Accept': 'application/json'}
+            response = self.session.get(url, headers=headers)
+            releases = response.json()['releases']
+            self._releases_json_data[safe_name] = releases
+
+        packages = releases.get(package.metadata.version, [])
+
+        for uploaded_package in packages:
+            if uploaded_package['filename'] == package.basefilename:
+                return True
+
+        return False
+
+    def verify_package_integrity(self, package):
+        # TODO(sigmavirus24): Add a way for users to download the package and
+        # check it's hash against what it has locally.
+        pass
