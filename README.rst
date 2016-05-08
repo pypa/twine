@@ -58,7 +58,7 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Register your project:
+2. Register your project (if necessary):
  
    .. code-block:: bash
 
