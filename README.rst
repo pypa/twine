@@ -58,13 +58,20 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with twine:
+2. Register your project:
+ 
+   .. code-block:: bash
+
+       $ twine register dist/* 
+
+
+3. Upload with twine:
 
    .. code-block:: bash
 
        $ twine upload dist/*
 
-3. Done!
+4. Done!
 
 
 Options
