@@ -62,9 +62,9 @@ Usage
  
    .. code-block:: bash
 
-       $ twine register dist/* 
-
-
+       $ # One needs to be explicit here, globbing dist/* would fail.
+       $ twine register dist/project_name-x.y.z.tar.gz
+  
 3. Upload with twine:
 
    .. code-block:: bash
