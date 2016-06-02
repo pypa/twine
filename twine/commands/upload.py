@@ -137,7 +137,9 @@ def main(args):
     parser.add_argument(
         "-r", "--repository",
         default="pypi",
-        help="The repository to upload the files to (default: %(default)s)",
+        help="The repository to register the package to. Can be a section in "
+             "the config file or a full URL to the repository (default: "
+             "%(default)s)",
     )
     parser.add_argument(
         "-s", "--sign",
