@@ -37,7 +37,7 @@ else:
     input_func = raw_input
 
 
-DEFAULT_REPOSITORY = "https://pypi.python.org/pypi"
+DEFAULT_REPOSITORY = "https://upload.pypi.io/legacy/"
 
 
 def get_config(path="~/.pypirc"):
