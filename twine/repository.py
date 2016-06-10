@@ -13,9 +13,10 @@
 # limitations under the License.
 from __future__ import absolute_import, print_function
 
-from clint.textui.progress import Bar as ProgressBar
 
+import click
 import requests
+
 from requests import adapters
 from requests import codes
 from requests.packages.urllib3 import util
@@ -108,18 +109,17 @@ class Repository(object):
                 (package.basefilename, fp, "application/octet-stream"),
             ))
             encoder = MultipartEncoder(data_to_send)
-            bar = ProgressBar(expected_size=encoder.len, filled_char='=')
-            monitor = MultipartEncoderMonitor(
-                encoder, lambda monitor: bar.show(monitor.bytes_read)
-            )
+            with click.progressbar(length=encoder.len, fill_char="=") as bar:
+                monitor = MultipartEncoderMonitor(
+                    encoder, lambda monitor: bar.update(monitor.bytes_read)
+                )
 
-            resp = self.session.post(
-                self.url,
-                data=monitor,
-                allow_redirects=False,
-                headers={'Content-Type': monitor.content_type},
-            )
-            bar.done()
+                resp = self.session.post(
+                    self.url,
+                    data=monitor,
+                    allow_redirects=False,
+                    headers={'Content-Type': monitor.content_type},
+                )
 
         return resp
 
