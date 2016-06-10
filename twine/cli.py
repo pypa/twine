@@ -14,20 +14,14 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import argparse
-import pkg_resources
 import setuptools
 
+import click
 import requests
 import pkginfo
 
-import twine
+from twine import __version__
 from twine._installed import Installed
-
-
-def _registered_commands(group='twine.registered_commands'):
-    registered_commands = pkg_resources.iter_entry_points(group=group)
-    return dict((c.name, c) for c in registered_commands)
 
 
 def dep_versions():
@@ -40,27 +34,9 @@ def dep_versions():
     )
 
 
-def dispatch(argv):
-    registered_commands = _registered_commands()
-    parser = argparse.ArgumentParser(prog="twine")
-    parser.add_argument(
-        "--version",
-        action="version",
-        version="%(prog)s version {0} ({1})".format(twine.__version__,
-                                                    dep_versions()),
-    )
-    parser.add_argument(
-        "command",
-        choices=registered_commands.keys(),
-    )
-    parser.add_argument(
-        "args",
-        help=argparse.SUPPRESS,
-        nargs=argparse.REMAINDER,
-    )
-
-    args = parser.parse_args(argv)
-
-    main = registered_commands[args.command].load()
-
-    main(args.args)
+@click.group(context_settings={"help_option_names": ["-h", "--help"]})
+@click.version_option(
+    message="%(prog)s version {0} ({1})".format(__version__, dep_versions()),
+)
+def twine():
+    pass

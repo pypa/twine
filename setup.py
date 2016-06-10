@@ -13,23 +13,17 @@
 # limitations under the License.
 from setuptools import setup
 
-import sys
-
 import twine
 
 
 install_requires = [
+    "click",
     "clint",
     "pkginfo >= 1.0",
     "requests >= 2.5.0",
     "requests-toolbelt >= 0.5.1",
     "setuptools >= 0.7.0",
 ]
-
-if sys.version_info[:2] < (2, 7):
-    install_requires += [
-        "argparse",
-    ]
 
 
 setup(
@@ -69,12 +63,8 @@ setup(
     packages=["twine", "twine.commands"],
 
     entry_points={
-        "twine.registered_commands": [
-            "upload = twine.commands.upload:main",
-            "register = twine.commands.register:main",
-        ],
         "console_scripts": [
-            "twine = twine.__main__:main",
+            "twine = twine._run:twine",
         ],
     },
 
