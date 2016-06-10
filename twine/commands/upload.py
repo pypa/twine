@@ -202,5 +202,6 @@ def upload(dists, repository, sign, identity, username, password, comment,
     ),
 )
 @click.argument("dists", nargs=-1)
-def main(*args, **kwargs):
+@click.pass_context
+def main(ctx, *args, **kwargs):
     return upload(*args, **kwargs)

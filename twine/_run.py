@@ -12,12 +12,17 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import twine
+import functools
+
+from twine.cli import twine as _twine
 
 # We need to import our twine.commands package so that all of our commands get
 # registered.
 # Note: We import this as _ so that we don't expose the imported name.
 import twine.commands as _  # noqa
+
+
+twine = functools.partial(_twine, auto_envvar_prefix="TWINE")
 
 
 __all__ = ["twine"]
