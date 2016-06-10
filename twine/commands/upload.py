@@ -12,14 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 
-import argparse
 import glob
 import os.path
-import sys
+
+import click
 
 import twine.exceptions as exc
+
+from twine.cli import twine
 from twine.package import PackageFile
 from twine.repository import Repository
 from twine import utils
@@ -132,79 +133,75 @@ def upload(dists, repository, sign, identity, username, password, comment,
     repository.close()
 
 
-def main(args):
-    parser = argparse.ArgumentParser(prog="twine upload")
-    parser.add_argument(
-        "-r", "--repository",
-        default="pypi",
-        help="The repository to upload the files to (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-s", "--sign",
-        action="store_true",
-        default=False,
-        help="Sign files to upload using gpg",
-    )
-    parser.add_argument(
-        "--sign-with",
-        default="gpg",
-        help="GPG program used to sign uploads (default: %(default)s)",
-    )
-    parser.add_argument(
-        "-i", "--identity",
-        help="GPG identity used to sign files",
-    )
-    parser.add_argument(
-        "-u", "--username",
-        help="The username to authenticate to the repository as",
-    )
-    parser.add_argument(
-        "-p", "--password",
-        help="The password to authenticate to the repository with",
-    )
-    parser.add_argument(
-        "-c", "--comment",
-        help="The comment to include with the distribution file",
-    )
-    parser.add_argument(
-        "--config-file",
-        default="~/.pypirc",
-        help="The .pypirc config file to use",
-    )
-    parser.add_argument(
-        "--skip-existing",
-        default=False,
-        action="store_true",
-        help="Continue uploading files if one already exists",
-    )
-    parser.add_argument(
-        "--cert",
-        metavar="path",
-        help="Path to alternate CA bundle",
-    )
-    parser.add_argument(
-        "--client-cert",
-        metavar="path",
-        help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM forma",
-    )
-    parser.add_argument(
-        "dists",
-        nargs="+",
-        metavar="dist",
-        help="The distribution files to upload to the repository, may "
-             "additionally contain a .asc file to include an existing "
-             "signature with the file upload",
-    )
-
-    args = parser.parse_args(args)
-
-    # Call the upload function with the arguments from the command line
-    try:
-        upload(**vars(args))
-    except Exception as exc:
-        sys.exit("{exc.__class__.__name__}: {exc}".format(exc=exc))
-
-
-if __name__ == "__main__":
-    sys.exit(main())
+@twine.command(name="upload")
+@click.option(
+    "-r", "--repository",
+    default="pypi",
+    help="The repository to upload the files to.",
+)
+@click.option(
+    "-s", "--sign / --no-sign",
+    default=False,
+    help="Sign files to upload using gpg",
+)
+@click.option(
+    "--sign-with",
+    default="gpg",
+    help="GPG program used to sign uploads",
+)
+@click.option("-i", "--identity", help="GPG identity used to sign files")
+@click.option(
+    "-u", "--username",
+    help="The username to authenticate to the repository as",
+)
+@click.option(
+    "-p", "--password",
+    help="The password to authenticate to the repository with",
+)
+@click.option(
+    "-c", "--comment",
+    help="The comment to include with the distribution file",
+)
+@click.option(
+    "--config-file",
+    default=os.path.expanduser("~/.pypirc"),
+    help="The .pypirc config file to use",
+    type=click.Path(
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+    ),
+)
+@click.option(
+    "--skip-existing / --no-skip-existing",
+    default=False,
+    help="Continue uploading files if one already exists",
+)
+@click.option(
+    "--cert",
+    help="Path to alternate CA bundle",
+    type=click.Path(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+    ),
+)
+@click.option(
+    "--client-cert",
+    help=("Path to SSL client certificate, a single file containing the "
+          "private key and the certificate in PEM forma"),
+    type=click.Path(
+        exists=True,
+        file_okay=True,
+        dir_okay=False,
+        readable=True,
+        resolve_path=True,
+    ),
+)
+@click.argument("dists", nargs=-1)
+@click.pass_context
+def main(ctx, *args, **kwargs):
+    return upload(*args, **kwargs)

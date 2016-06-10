@@ -13,15 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 
 import sys
 
-from twine.cli import dispatch
+from twine._run import twine
 
 
 def main():
-    return dispatch(sys.argv[1:])
+    return twine(sys.argv[1:], prog_name="twine")
 
 
 if __name__ == "__main__":

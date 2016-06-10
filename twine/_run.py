@@ -1,4 +1,4 @@
-# Copyright 2015 Ian Cordasco
+# Copyright 2016 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -11,18 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from twine import wheel
 
-import pytest
+import functools
 
+from twine.cli import twine as _twine
 
-@pytest.fixture(params=[
-    'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl',
-    'tests/alt-fixtures/twine-1.5.0-py2.py3-none-any.whl'
-])
-def example_wheel(request):
-    return wheel.Wheel(request.param)
+# We need to import our twine.commands package so that all of our commands get
+# registered.
+# Note: We import this as _ so that we don't expose the imported name.
+import twine.commands as _  # noqa
 
 
-def test_version_parsing(example_wheel):
-    assert example_wheel.py_version == 'py2.py3'
+twine = functools.partial(_twine, auto_envvar_prefix="TWINE")
+
+
+__all__ = ["twine"]
