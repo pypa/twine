@@ -122,7 +122,7 @@ Resources
 * `IRC <http://webchat.freenode.net?channels=%23pypa>`_
   (``#pypa`` - irc.freenode.net)
 * `GitHub repository <https://github.com/pypa/twine>`_
-
+* `Python Packaging User Guide <https://packaging.python.org/en/latest/distributing/>`_
 
 Contributing
 ------------
