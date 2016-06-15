@@ -55,7 +55,10 @@ def find_dists(dists):
 
 def skip_upload(response, skip_existing, package):
     filename = package.basefilename
-    msg = 'A file named "{0}" already exists for'.format(filename)
+    # NOTE(sigmavirus24): Old PyPI returns the first message while Warehouse
+    # returns the latter. This papers over the differences.
+    msg = ('A file named "{0}" already exists for'.format(filename),
+           'File already exists')
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
     # 409 status code. We only want to skip an upload if:
