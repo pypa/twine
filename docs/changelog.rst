@@ -5,12 +5,24 @@ Changelog
 =========
 
 
-* :release:`1.7.0 <TBD>`
+* :release:`1.7.0 <2016-07-04>`
 
   * :feature:`142` Support ``--cert`` and ``--client-cert`` command-line flags
     and config file options for feature parity with pip. This allows users to
     verify connections to servers other than PyPI (e.g., local package
     repositories) with different certificates.
+
+  * :feature:`152` Add progress bar to uploads.
+
+  * :feature:`162` Allow ``--skip-existing`` to work for 409 status codes.
+
+  * :feature:`167` Implement retries when the CDN in front of PyPI gives us a
+    5xx error.
+
+  * :feature:`177` Switch Twine to upload to pypi.io instead of
+    pypi.python.org.
+
+  * :bug:`186` Allow passwords to have ``%``\ s in them.
 
 * :release:`1.6.5 <2015-12-16>`
 
