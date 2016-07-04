@@ -18,7 +18,9 @@ import argparse
 import pkg_resources
 import setuptools
 
+import clint
 import requests
+import requests_toolbelt
 import pkginfo
 
 import twine
@@ -30,13 +32,20 @@ def _registered_commands(group='twine.registered_commands'):
     return dict((c.name, c) for c in registered_commands)
 
 
+def list_dependencies_and_versions():
+    return [
+        ('pkginfo', Installed(pkginfo).version),
+        ('requests', requests.__version__),
+        ('setuptools', setuptools.__version__),
+        ('requests-toolbelt', requests_toolbelt.__version__),
+        ('clint', clint.__version__),
+    ]
+
+
 def dep_versions():
-    return 'pkginfo: {0}, requests: {1}, setuptools: {2}'.format(
-        Installed(pkginfo).version,
-        # __version__ is always defined but requests does not always have
-        # PKG-INFO to read from
-        requests.__version__,
-        setuptools.__version__,
+    return ', '.join(
+        '{0}: {1}'.format(*dependency)
+        for dependency in list_dependencies_and_versions()
     )
 
 

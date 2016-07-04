@@ -73,3 +73,20 @@ def test_set_certificate_authority():
 
     repo.set_certificate_authority('/path/to/cert')
     assert repo.session.verify == '/path/to/cert'
+
+
+def test_make_user_agent_string():
+    repo = repository.Repository(
+        repository_url='https://pypi.python.org/pypi',
+        username='username',
+        password='password',
+    )
+
+    assert 'User-Agent' in repo.session.headers
+
+    user_agent = repo.session.headers['User-Agent']
+    assert 'twine/' in user_agent
+    assert 'requests/' in user_agent
+    assert 'requests-toolbelt/' in user_agent
+    assert 'pkginfo/' in user_agent
+    assert 'setuptools/' in user_agent
