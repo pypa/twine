@@ -52,7 +52,7 @@ def get_config(path="~/.pypirc"):
                 }
 
     # Parse the rc file
-    parser = configparser.ConfigParser()
+    parser = configparser.RawConfigParser()
     parser.read(path)
 
     # Get a list of repositories from the config file
