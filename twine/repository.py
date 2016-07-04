@@ -22,7 +22,9 @@ from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
+from requests_toolbelt.utils.user_agent import user_agent
 
+import twine
 
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
@@ -32,6 +34,7 @@ class Repository(object):
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
+        self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
         self._releases_json_data = {}
@@ -45,6 +48,12 @@ class Repository(object):
             status_forcelist=[500, 501, 502, 503],
         )
         return adapters.HTTPAdapter(max_retries=retry)
+
+    @staticmethod
+    def _make_user_agent_string():
+        from twine import cli
+        dependencies = cli.list_dependencies_and_versions()
+        return user_agent('twine', twine.__version__, extras=dependencies)
 
     def close(self):
         self.session.close()
