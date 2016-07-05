@@ -181,7 +181,9 @@ def main(args):
         "--skip-existing",
         default=False,
         action="store_true",
-        help="Continue uploading files if one already exists",
+        help="Continue uploading files if one already exists. (Only valid "
+             "when uploading to PyPI. Other implementations may not support "
+             "this.)",
     )
     parser.add_argument(
         "--cert",
