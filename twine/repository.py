@@ -160,9 +160,15 @@ class Repository(object):
             releases = self._releases_json_data.get(safe_name)
 
         if releases is None:
-            url = 'https://pypi.python.org/pypi/{0}/json'.format(safe_name)
+            url = '{url}/{safe_name}/json'.format(url=self.url,
+                                                  safe_name=safe_name)
             headers = {'Accept': 'application/json'}
             response = self.session.get(url, headers=headers)
+            if not int(response.status_code) == 200 and 'application/json' \
+                    not in response.headers['content-type']:
+                raise ValueError('Can\'t load release metadata. Have you '
+                                 'register your package?')
+
             releases = response.json()['releases']
             self._releases_json_data[safe_name] = releases
 
