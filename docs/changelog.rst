@@ -4,6 +4,11 @@
 Changelog
 =========
 
+* :release:`1.7.2 <2016-07-05>`
+
+  * :bug:`189`, :bug:`191` Fix issue where we were checking the existence of
+    packages even if the user didn't specify ``--skip-existing``.
+
 * :release:`1.7.1 <2016-07-05>`
 
   * :bug:`187` Clint was not specified in the wheel metadata as a dependency.
