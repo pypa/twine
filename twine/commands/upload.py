@@ -105,7 +105,10 @@ def upload(dists, repository, sign, identity, username, password, comment,
     for filename in uploads:
         package = PackageFile.from_filename(filename, comment)
 
-        if repository.package_is_uploaded(package) and skip_existing:
+        # Note: The skip_existing check *needs* to be first, because otherwise
+        #       we're going to generate extra HTTP requests against a hardcoded
+        #       URL for no reason.
+        if skip_existing and repository.package_is_uploaded(package):
             print("  Skipping {0} because it appears to already exist".format(
                 package.basefilename))
             continue
