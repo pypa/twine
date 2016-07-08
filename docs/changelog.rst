@@ -4,6 +4,16 @@
 Changelog
 =========
 
+* :release:`1.7.3 <2016-07-08>`
+
+  * :bug:`195` Fix uploads to instances of pypiserver using
+    ``--skip-existing``. We were not properly checking the return status code
+    on the response after attempting an upload.
+
+  * Do not generate traffic to Legacy PyPI unless we're uploading to it or
+    uploading to Warehouse (e.g., pypi.io). This avoids the attempt to upload
+    a package to the index if we can find it on Legacy PyPI already.
+
 * :release:`1.7.2 <2016-07-05>`
 
   * :bug:`189`, :bug:`191` Fix issue where we were checking the existence of
