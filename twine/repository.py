@@ -28,6 +28,9 @@ import twine
 
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
+LEGACY_PYPI = 'https://pypi.python.org/'
+WAREHOUSE = 'https://upload.pypi.io/'
+
 
 class Repository(object):
     def __init__(self, repository_url, username, password):
@@ -153,6 +156,11 @@ class Repository(object):
         return resp
 
     def package_is_uploaded(self, package, bypass_cache=False):
+        # NOTE(sigmavirus24): Not all indices are PyPI and pypi.io doesn't
+        # have a similar interface for finding the package versions.
+        if not self.url.startswith((LEGACY_PYPI, WAREHOUSE)):
+            return False
+
         safe_name = package.safe_name
         releases = None
 
@@ -160,7 +168,8 @@ class Repository(object):
             releases = self._releases_json_data.get(safe_name)
 
         if releases is None:
-            url = 'https://pypi.python.org/pypi/{0}/json'.format(safe_name)
+            url = '{url}pypi/{package}/json'.format(package=safe_name,
+                                                    url=LEGACY_PYPI)
             headers = {'Accept': 'application/json'}
             response = self.session.get(url, headers=headers)
             releases = response.json()['releases']
