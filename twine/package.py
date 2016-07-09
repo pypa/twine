@@ -13,6 +13,7 @@
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
 import hashlib
+import io
 import os
 import subprocess
 
@@ -55,7 +56,7 @@ class PackageFile(object):
         md5_hash = hashlib.md5()
         sha2_hash = hashlib.sha256()
         with open(filename, "rb") as fp:
-            for content in iter(lambda: fp.read(4096), b''):
+            for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
                 md5_hash.update(content)
                 sha2_hash.update(content)
 
