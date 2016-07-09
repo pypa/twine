@@ -4,6 +4,10 @@
 Changelog
 =========
 
+* :release:`1.7.4 <2016-07-09>`
+
+  * Correct a packaging error.
+
 * :release:`1.7.3 <2016-07-08>`
 
   * :bug:`195` Fix uploads to instances of pypiserver using
