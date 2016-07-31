@@ -19,6 +19,8 @@ import os.path
 import functools
 import getpass
 import sys
+import argparse
+
 
 try:
     import configparser
@@ -172,3 +174,19 @@ get_clientcert = functools.partial(
     get_userpass_value,
     key='client_cert',
 )
+
+
+class EnvDefault(argparse.Action):
+    """Get default from environment variable
+    """
+
+    def __init__(self, env, required=True, default=None, **kwargs):
+        default = os.environ.get(env, default)
+        self.env = env
+        if default:
+            required = False
+        super(EnvDefault, self).__init__(default=default, required=required,
+                                         **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, values)
