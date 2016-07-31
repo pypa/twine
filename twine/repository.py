@@ -29,7 +29,7 @@ import twine
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
 LEGACY_PYPI = 'https://pypi.python.org/'
-WAREHOUSE = 'https://upload.pypi.io/'
+WAREHOUSE = 'https://upload.pypi.org/'
 
 
 class Repository(object):
