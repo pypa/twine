@@ -176,17 +176,19 @@ get_clientcert = functools.partial(
 )
 
 
-class EnvDefault(argparse.Action):
-    """Get default from environment variable
-    """
+class EnvironmentDefault(argparse.Action):
+    """Get values from environment variable."""
 
     def __init__(self, env, required=True, default=None, **kwargs):
         default = os.environ.get(env, default)
         self.env = env
         if default:
             required = False
-        super(EnvDefault, self).__init__(default=default, required=required,
-                                         **kwargs)
+        super(EnvironmentDefault, self).__init__(
+            default=default,
+            required=required,
+            **kwargs
+        )
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)

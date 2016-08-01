@@ -14,7 +14,6 @@
 from __future__ import unicode_literals
 
 import os
-from os.path import join as pj
 import textwrap
 
 import pretend
@@ -29,8 +28,7 @@ import contextlib
 
 @contextlib.contextmanager
 def set_env(**environ):
-    """
-    Temporarily set the process environment variables.
+    """Set the process environment variables temporarily.
 
     >>> with set_env(PLUGINS_DIR=u'test/plugins'):
     ...   "PLUGINS_DIR" in os.environ
@@ -39,8 +37,8 @@ def set_env(**environ):
     >>> "PLUGINS_DIR" in os.environ
     False
 
-    :type environ: dict[str, unicode]
     :param environ: Environment variables to set
+    :type environ: dict[str, unicode]
     """
     old_environ = dict(os.environ)
     os.environ.update(environ)
@@ -75,7 +73,8 @@ def test_ensure_if_no_wheel_files():
 
 def test_find_dists_expands_globs():
     files = sorted(upload.find_dists(['twine/__*.py']))
-    expected = [pj('twine', '__init__.py'), pj('twine', '__main__.py')]
+    expected = [os.path.join('twine', '__init__.py'),
+                os.path.join('twine', '__main__.py')]
     assert expected == files
 
 

@@ -4,6 +4,18 @@
 Changelog
 =========
 
+* :release:`1.8.0 <2016-xx-yy>`
+
+  * :feature:`201` Switch from upload.pypi.io to upload.pypi.org.
+
+  * :feature:`144` Retrieve configuration from the environment as a default.
+
+    - Repository URL will default to ``TWINE_REPOSITORY``
+
+    - Username will default to ``TWINE_USERNAME``
+
+    - Password will default to ``TWINE_PASSWORD``
+
 * :release:`1.7.4 <2016-07-09>`
 
   * Correct a packaging error.
