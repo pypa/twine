@@ -23,30 +23,7 @@ from twine.commands import upload
 from twine import package, cli
 import twine
 
-import contextlib
-
-
-@contextlib.contextmanager
-def set_env(**environ):
-    """Set the process environment variables temporarily.
-
-    >>> with set_env(PLUGINS_DIR=u'test/plugins'):
-    ...   "PLUGINS_DIR" in os.environ
-    True
-
-    >>> "PLUGINS_DIR" in os.environ
-    False
-
-    :param environ: Environment variables to set
-    :type environ: dict[str, unicode]
-    """
-    old_environ = dict(os.environ)
-    os.environ.update(environ)
-    try:
-        yield
-    finally:
-        os.environ.clear()
-        os.environ.update(old_environ)
+import helpers
 
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
@@ -156,7 +133,9 @@ def test_password_and_username_from_env(monkeypatch):
     def none_upload(*args, **kwargs): pass
     replaced_upload = pretend.call_recorder(none_upload)
     monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
-    with set_env(PYPI_USER="pypiuser", PYPI_PASSWORD="pypipassword"):
+    testenv = {"TWINE_USERNAME": "pypiuser",
+               "TWINE_PASSWORD": "pypipassword"}
+    with helpers.set_env(**testenv):
         cli.dispatch(["upload", "path/to/file"])
     cli.dispatch(["upload", "path/to/file"])
     result_kwargs = replaced_upload.calls[0].kwargs
