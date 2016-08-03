@@ -20,6 +20,11 @@ import subprocess
 import pkginfo
 import pkg_resources
 
+try:
+    import pyblake2
+except ImportError:
+    pyblake2 = None
+
 from twine.wheel import Wheel
 from twine.wininst import WinInst
 
@@ -53,15 +58,24 @@ class PackageFile(object):
         self.signed_basefilename = self.basefilename + '.asc'
         self.gpg_signature = None
 
+        blake2_256_hash = None
+        if pyblake2 is not None:
+            blake2_256_hash = pyblake2.blake2b(digest_size=256 // 8)
+        # NOTE(sigmavirus24): We may or may not be able to use blake2 so let's
+        # either use the methods or lambdas to do nothing.
+        blake_update = getattr(blake2_256_hash, 'update', lambda *args: None)
+        blake_hexdigest = getattr(blake2_256_hash, 'hexdigest', lambda: None)
         md5_hash = hashlib.md5()
         sha2_hash = hashlib.sha256()
         with open(filename, "rb") as fp:
             for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
                 md5_hash.update(content)
                 sha2_hash.update(content)
+                blake_update(content)
 
         self.md5_digest = md5_hash.hexdigest()
         self.sha2_digest = sha2_hash.hexdigest()
+        self.blake2_256_digest = blake_hexdigest()
 
     @classmethod
     def from_filename(cls, filename, comment):
@@ -117,6 +131,7 @@ class PackageFile(object):
             "comment": self.comment,
             "md5_digest": self.md5_digest,
             "sha256_digest": self.sha256_digest,
+            "blake2_256_digest": self.blake2_256_digest,
 
             # PEP 314
             "provides": meta.provides,
