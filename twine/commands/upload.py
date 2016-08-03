@@ -72,7 +72,8 @@ def skip_upload(response, skip_existing, package):
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file, skip_existing, cert, client_cert):
+           sign_with, config_file, skip_existing, cert, client_cert,
+           repository_url):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -85,7 +86,11 @@ def upload(dists, repository, sign, identity, username, password, comment,
     )
     uploads = [i for i in dists if not i.endswith(".asc")]
 
-    config = utils.get_repository_from_config(config_file, repository)
+    config = utils.get_repository_from_config(
+        config_file,
+        repository,
+        repository_url,
+    )
 
     config["repository"] = utils.normalize_repository_url(
         config["repository"]
@@ -152,7 +157,19 @@ def main(args):
         action=utils.EnvironmentDefault,
         env="TWINE_REPOSITORY",
         default="pypi",
-        help="The repository to upload the files to (default: %(default)s)",
+        help="The repository to register the package to. Can be a section in "
+             "the config file or a full URL to the repository (default: "
+             "%(default)s)",
+    )
+    parser.add_argument(
+        "--repository-url",
+        action=utils.EnvironmentDefault,
+        env="TWINE_REPOSITORY_URL",
+        default=None,
+        required=False,
+        help="The repository URL to upload the package to. This can be "
+             "specified with --repository because it will be used if there is "
+             "no configuration for the value passed to --repository."
     )
     parser.add_argument(
         "-s", "--sign",

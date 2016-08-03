@@ -16,6 +16,10 @@ Changelog
 
     - Password will default to ``TWINE_PASSWORD``
 
+  * :feature:`166` Allow the Repository URL to be provided on the command-line
+    (``--repository-url``) or via an environment variable
+    (``TWINE_REPOSITORY_URL``).
+
 * :release:`1.7.4 <2016-07-09>`
 
   * Correct a packaging error.

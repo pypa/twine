@@ -19,7 +19,6 @@ import textwrap
 
 import pytest
 
-from twine.utils import DEFAULT_REPOSITORY, get_config, get_userpass_value
 from twine import utils
 
 import helpers
@@ -38,9 +37,9 @@ def test_get_config(tmpdir):
             password = testpassword
         """))
 
-    assert get_config(pypirc) == {
+    assert utils.get_config(pypirc) == {
         "pypi": {
-            "repository": DEFAULT_REPOSITORY,
+            "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
             "password": "testpassword",
         },
@@ -57,9 +56,9 @@ def test_get_config_no_distutils(tmpdir):
             password = testpassword
         """))
 
-    assert get_config(pypirc) == {
+    assert utils.get_config(pypirc) == {
         "pypi": {
-            "repository": DEFAULT_REPOSITORY,
+            "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
             "password": "testpassword",
         },
@@ -79,9 +78,9 @@ def test_get_config_no_section(tmpdir):
             password = testpassword
         """))
 
-    assert get_config(pypirc) == {
+    assert utils.get_config(pypirc) == {
         "pypi": {
-            "repository": DEFAULT_REPOSITORY,
+            "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
             "password": "testpassword",
         },
@@ -91,13 +90,37 @@ def test_get_config_no_section(tmpdir):
 def test_get_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
-    assert get_config(pypirc) == {
+    assert utils.get_config(pypirc) == {
         "pypi": {
-            "repository": DEFAULT_REPOSITORY,
+            "repository": utils.DEFAULT_REPOSITORY,
             "username": None,
             "password": None,
         },
+        "pypitest": {
+            "repository": utils.TEST_REPOSITORY,
+            "username": None,
+            "password": None
+        },
     }
+
+
+def test_get_repository_config_missing(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    repository_url = "https://notexisting.python.org/pypi"
+    exp = {
+        "repository": repository_url,
+        "username": None,
+        "password": None,
+    }
+    assert (utils.get_repository_from_config(pypirc, 'foo', repository_url) ==
+            exp)
+    exp = {
+            "repository": utils.DEFAULT_REPOSITORY,
+            "username": None,
+            "password": None,
+        }
+    assert utils.get_repository_from_config(pypirc, "pypi") == exp
 
 
 def test_get_config_deprecated_pypirc():
@@ -105,9 +128,9 @@ def test_get_config_deprecated_pypirc():
     deprecated_pypirc_path = os.path.join(tests_dir, 'fixtures',
                                           'deprecated-pypirc')
 
-    assert get_config(deprecated_pypirc_path) == {
+    assert utils.get_config(deprecated_pypirc_path) == {
         "pypi": {
-            "repository": DEFAULT_REPOSITORY,
+            "repository": utils.DEFAULT_REPOSITORY,
             "username": 'testusername',
             "password": 'testpassword',
         },
@@ -123,7 +146,7 @@ def test_get_config_deprecated_pypirc():
     ),
 )
 def test_get_userpass_value(cli_value, config, key, strategy, expected):
-    ret = get_userpass_value(cli_value, config, key, strategy)
+    ret = utils.get_userpass_value(cli_value, config, key, strategy)
     assert ret == expected
 
 
