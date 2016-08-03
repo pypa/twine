@@ -40,7 +40,7 @@ else:
 
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
-TEST_REPOSITORY = "https://testpypi.python.org/pypi"
+TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def get_config(path="~/.pypirc"):
@@ -99,16 +99,19 @@ def get_config(path="~/.pypirc"):
     return config
 
 
-def get_repository_from_config(config_file, repository):
+def get_repository_from_config(config_file, repository, repository_url=None):
     # Get our config from the .pypirc file
     try:
         return get_config(config_file)[repository]
     except KeyError:
-        if repository and "://" in repository:
+        if repository_url and "://" in repository_url:
             # assume that the repsoitory is actually an URL and just sent
             # them a dummy with the repo set
-            return {"repository": repository, "username": None,
-                    "password": None}
+            return {
+                "repository": repository_url,
+                "username": None,
+                "password": None,
+            }
         msg = (
             "Missing '{repo}' section from the configuration file\n"
             "or not a complete URL in --repository.\n"

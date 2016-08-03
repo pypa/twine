@@ -82,7 +82,9 @@ def test_get_config_old_format(tmpdir):
         upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
                       username=None, password=None, comment=None,
                       cert=None, client_cert=None,
-                      sign_with=None, config_file=pypirc, skip_existing=False)
+                      sign_with=None, config_file=pypirc, skip_existing=False,
+                      repository_url=None,
+                      )
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file\n"
@@ -131,7 +133,9 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
 
 
 def test_password_and_username_from_env(monkeypatch):
-    def none_upload(*args, **kwargs): pass
+    def none_upload(*args, **kwargs):
+        pass
+
     replaced_upload = pretend.call_recorder(none_upload)
     monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
     testenv = {"TWINE_USERNAME": "pypiuser",

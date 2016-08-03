@@ -107,13 +107,14 @@ def test_get_config_missing(tmpdir):
 def test_get_repository_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
-    repo = "https://notexisting.python.org/pypi"
+    repository_url = "https://notexisting.python.org/pypi"
     exp = {
-            "repository": repo,
-            "username": None,
-            "password": None,
-        }
-    assert utils.get_repository_from_config(pypirc, repo) == exp
+        "repository": repository_url,
+        "username": None,
+        "password": None,
+    }
+    assert (utils.get_repository_from_config(pypirc, 'foo', repository_url) ==
+            exp)
     exp = {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": None,
