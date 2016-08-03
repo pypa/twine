@@ -65,7 +65,8 @@ def main(args):
         action=utils.EnvironmentDefault,
         env='TWINE_REPOSITORY',
         default="pypi",
-        help="The repository to register the package to (default: "
+        help="The repository to register the package to. Can be a section in "
+             "the config file or a full URL to the repository (default: "
              "%(default)s)",
     )
     parser.add_argument(
