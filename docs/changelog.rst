@@ -20,6 +20,12 @@ Changelog
     (``--repository-url``) or via an environment variable
     (``TWINE_REPOSITORY_URL``).
 
+  * Generate SHA256 digest for all packages by default.
+
+  * :feature:`171` Generate Blake2b 256 digests for packages *if* ``pyblake2``
+    is installed. Users can use ``python -m pip install twine[with-blake2]``
+    to have ``pyblake2`` installed with Twine.
+
 * :release:`1.7.4 <2016-07-09>`
 
   * Correct a packaging error.
