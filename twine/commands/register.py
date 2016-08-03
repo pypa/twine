@@ -62,17 +62,27 @@ def main(args):
     parser = argparse.ArgumentParser(prog="twine register")
     parser.add_argument(
         "-r", "--repository",
+        action=utils.EnvironmentDefault,
+        env='TWINE_REPOSITORY',
         default="pypi",
         help="The repository to register the package to (default: "
              "%(default)s)",
     )
     parser.add_argument(
         "-u", "--username",
-        help="The username to authenticate to the repository as",
+        action=utils.EnvironmentDefault,
+        env='TWINE_USERNAME',
+        required=False, help="The username to authenticate to the repository "
+                             "as (can also be set via %(env)s environment "
+                             "variable)",
     )
     parser.add_argument(
         "-p", "--password",
-        help="The password to authenticate to the repository with",
+        action=utils.EnvironmentDefault,
+        env='TWINE_PASSWORD',
+        required=False, help="The password to authenticate to the repository "
+                             "with (can also be set via %(env)s environment "
+                             "variable)",
     )
     parser.add_argument(
         "-c", "--comment",

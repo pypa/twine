@@ -16,9 +16,13 @@ from __future__ import unicode_literals
 
 import os.path
 import textwrap
+
 import pytest
 
 from twine.utils import DEFAULT_REPOSITORY, get_config, get_userpass_value
+from twine import utils
+
+import helpers
 
 
 def test_get_config(tmpdir):
@@ -121,3 +125,27 @@ def test_get_config_deprecated_pypirc():
 def test_get_userpass_value(cli_value, config, key, strategy, expected):
     ret = get_userpass_value(cli_value, config, key, strategy)
     assert ret == expected
+
+
+@pytest.mark.parametrize(
+    ('env_name', 'default', 'environ', 'expected'),
+    [
+        ('MY_PASSWORD', None, {}, None),
+        ('MY_PASSWORD', None, {'MY_PASSWORD': 'foo'}, 'foo'),
+        ('URL', 'https://example.org', {}, 'https://example.org'),
+        ('URL', 'https://example.org', {'URL': 'https://pypi.org'},
+            'https://pypi.org'),
+    ],
+)
+def test_default_to_environment_action(env_name, default, environ, expected):
+    option_strings = ('-x', '--example')
+    dest = 'example'
+    with helpers.set_env(**environ):
+        action = utils.EnvironmentDefault(
+            env=env_name,
+            default=default,
+            option_strings=option_strings,
+            dest=dest,
+        )
+    assert action.env == env_name
+    assert action.default == expected
