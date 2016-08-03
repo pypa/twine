@@ -116,11 +116,7 @@ class PackageFile(object):
             "supported_platform": meta.supported_platforms,
             "comment": self.comment,
             "md5_digest": self.md5_digest,
-
-            # When https://github.com/pypa/warehouse/issues/681 is closed and
-            # warehouse is deployed, uncomment the line below to start sending
-            # a more up-to-date digest.
-            # "sha256_digest": self.sha256_digest,
+            "sha256_digest": self.sha256_digest,
 
             # PEP 314
             "provides": meta.provides,
