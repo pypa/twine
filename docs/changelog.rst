@@ -26,6 +26,10 @@ Changelog
     is installed. Users can use ``python -m pip install twine[with-blake2]``
     to have ``pyblake2`` installed with Twine.
 
+  * Stop testing on Python 2.6. 2.6 support will be "best effort" until 2.0.0
+
+  * Warn users if they receive a 500 error when uploading to \*pypi.python.org
+
 * :release:`1.7.4 <2016-07-09>`
 
   * Correct a packaging error.
