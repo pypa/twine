@@ -125,8 +125,8 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         raise KeyError(msg)
 
 
-_HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
-              "test.pypi.org"}
+_HOSTNAMES = set(["pypi.python.org", "testpypi.python.org", "upload.pypi.org",
+                  "test.pypi.org"])
 
 
 def normalize_repository_url(url):
