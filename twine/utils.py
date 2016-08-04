@@ -125,11 +125,27 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         raise KeyError(msg)
 
 
+_HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
+              "test.pypi.org"}
+
+
 def normalize_repository_url(url):
     parsed = urlparse(url)
-    if parsed.netloc in ["pypi.python.org", "testpypi.python.org"]:
+    if parsed.netloc in _HOSTNAMES:
         return urlunparse(("https",) + parsed[1:])
     return urlunparse(parsed)
+
+
+def check_status_code(response):
+    if (response.status_code == 500 and
+            response.url.startswith(("https://pypi.python.org",
+                                     "https://testpypi.python.org"))):
+        print("It appears you're uploading to pypi.python.org (or testpypi) "
+              "you've recieved a 500 error response. PyPI is being phased "
+              "out for pypi.org. Try using https://upload.pypi.org/legacy/ "
+              "(or https://test.pypi.org/legacy/) to upload your packages "
+              "instead. These are the default URLs for Twine now.")
+    response.raise_for_status()
 
 
 def get_userpass_value(cli_value, config, key, prompt_strategy=None):

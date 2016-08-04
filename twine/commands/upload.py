@@ -143,7 +143,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
             print(skip_message)
             continue
 
-        resp.raise_for_status()
+        utils.check_status_code(resp)
 
     # Bug 28. Try to silence a ResourceWarning by clearing the connection
     # pool.
