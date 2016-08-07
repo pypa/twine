@@ -4,7 +4,7 @@
 Changelog
 =========
 
-* :release:`1.8.0 <2016-xx-yy>`
+* :release:`1.8.0 <2016-08-08>`
 
   * :feature:`201` Switch from upload.pypi.io to upload.pypi.org.
 
