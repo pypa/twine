@@ -130,7 +130,7 @@ class PackageFile(object):
             "supported_platform": meta.supported_platforms,
             "comment": self.comment,
             "md5_digest": self.md5_digest,
-            "sha256_digest": self.sha256_digest,
+            "sha256_digest": self.sha2_digest,
             "blake2_256_digest": self.blake2_256_digest,
 
             # PEP 314
