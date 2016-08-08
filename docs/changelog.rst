@@ -4,6 +4,17 @@
 Changelog
 =========
 
+* :release:`1.8.1 <2016-08-09>`
+
+  * Check if a package exists if the URL is one of:
+
+    - ``https://pypi.python.org/pypi/``
+    - ``https://upload.pypi.org/``
+    - ``https://upload.pypi.io/``
+
+    This helps people with ``https://upload.pypi.io`` still in their .pypirc
+    file.
+
 * :release:`1.8.0 <2016-08-08>`
 
   * :feature:`201` Switch from upload.pypi.io to upload.pypi.org.
