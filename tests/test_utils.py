@@ -212,6 +212,7 @@ def keyring_missing(monkeypatch):
     Simulate that 'import keyring' raises an ImportError
     """
     real_import = builtins.__import__
+
     def my_import(name, *args, **kwargs):
         if name == 'keyring':
             raise ImportError
