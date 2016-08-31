@@ -4,6 +4,12 @@
 Changelog
 =========
 
+* :release:`1.9.0 <...>`
+
+  * Twine will now resolve passwords using the
+    `keyring <https://pypi.org/projects/keyring>`_ if available.
+    Module can be required with the ``keyring`` extra.
+
 * :release:`1.8.1 <2016-08-09>`
 
   * Check if a package exists if the URL is one of:

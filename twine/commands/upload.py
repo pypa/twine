@@ -99,7 +99,9 @@ def upload(dists, repository, sign, identity, username, password, comment,
     print("Uploading distributions to {0}".format(config["repository"]))
 
     username = utils.get_username(username, config)
-    password = utils.get_password(password, config)
+    password = utils.get_password(
+        config["repository"], username, password, config,
+    )
     ca_cert = utils.get_cacert(cert, config)
     client_cert = utils.get_clientcert(client_cert, config)
 

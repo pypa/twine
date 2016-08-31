@@ -184,17 +184,29 @@ def password_prompt(prompt_text):  # Always expects unicode for our own sanity
     # Workaround for https://github.com/pypa/twine/issues/116
     if os.name == 'nt' and sys.version_info < (3, 0):
         prompt = prompt_text.encode('utf8')
-    return functools.partial(getpass.getpass, prompt=prompt)
+    return getpass.getpass(prompt)
+
+
+def get_password_from_keyring(system, username):
+    try:
+        import keyring
+    except ImportError:
+        return
+
+    return keyring.get_password(system, username)
+
+
+def password_from_keyring_or_prompt(system, username):
+    return (
+        get_password_from_keyring(system, username)
+        or password_prompt('Enter your password: ')
+    )
+
 
 get_username = functools.partial(
     get_userpass_value,
     key='username',
     prompt_strategy=functools.partial(input_func, 'Enter your username: '),
-)
-get_password = functools.partial(
-    get_userpass_value,
-    key='password',
-    prompt_strategy=password_prompt('Enter your password: '),
 )
 get_cacert = functools.partial(
     get_userpass_value,
@@ -222,3 +234,16 @@ class EnvironmentDefault(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
+
+
+def get_password(system, username, cli_value, config):
+    return get_userpass_value(
+        cli_value,
+        config,
+        key='password',
+        prompt_strategy=functools.partial(
+            password_from_keyring_or_prompt,
+            system,
+            username,
+        ),
+    )

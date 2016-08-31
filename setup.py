@@ -81,6 +81,9 @@ setup(
     extras_require={
         'with-blake2': [
             'pyblake2',
-        ]
+        ],
+        'keyring': [
+            'keyring',
+        ],
     },
 )

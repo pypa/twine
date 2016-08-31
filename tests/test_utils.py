@@ -14,8 +14,14 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
+import sys
 import os.path
 import textwrap
+
+try:
+    import builtins
+except ImportError:
+    import __builtin__ as builtins
 
 import pytest
 
@@ -172,3 +178,50 @@ def test_default_to_environment_action(env_name, default, environ, expected):
         )
     assert action.env == env_name
     assert action.default == expected
+
+
+def test_get_password_keyring_overrides_prompt(monkeypatch):
+    class MockKeyring:
+        @staticmethod
+        def get_password(system, user):
+            return '{user}@{system} sekure pa55word'.format(**locals())
+
+    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+
+    pw = utils.get_password('system', 'user', None, {})
+    assert pw == 'user@system sekure pa55word'
+
+
+def test_get_password_keyring_defers_to_prompt(monkeypatch):
+    monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
+
+    class MockKeyring:
+        @staticmethod
+        def get_password(system, user):
+            return
+
+    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+
+    pw = utils.get_password('system', 'user', None, {})
+    assert pw == 'entered pw'
+
+
+@pytest.fixture
+def keyring_missing(monkeypatch):
+    """
+    Simulate that 'import keyring' raises an ImportError
+    """
+    real_import = builtins.__import__
+
+    def my_import(name, *args, **kwargs):
+        if name == 'keyring':
+            raise ImportError
+        return real_import(name, *args, **kwargs)
+    monkeypatch.setattr(builtins, '__import__', my_import)
+
+
+def test_get_password_keyring_missing_prompts(monkeypatch, keyring_missing):
+    monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
+
+    pw = utils.get_password('system', 'user', None, {})
+    assert pw == 'entered pw'
