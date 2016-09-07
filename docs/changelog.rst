@@ -10,6 +10,9 @@ Changelog
     `keyring <https://pypi.org/projects/keyring>`_ if available.
     Module can be required with the ``keyring`` extra.
 
+  * Twine will use ``hashlib.blake2b`` on Python 3.6+ instead of using pyblake2
+    for Blake2 hashes 256 bit hashes.
+
 * :release:`1.8.1 <2016-08-09>`
 
   * Check if a package exists if the URL is one of:
