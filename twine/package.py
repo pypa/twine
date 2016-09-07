@@ -21,9 +21,12 @@ import pkginfo
 import pkg_resources
 
 try:
-    import pyblake2
+    from hashlib import blake2b
 except ImportError:
-    pyblake2 = None
+    try:
+        from pyblake2 import blake2b
+    except ImportError:
+        blake2b = None
 
 from twine.wheel import Wheel
 from twine.wininst import WinInst
@@ -59,8 +62,8 @@ class PackageFile(object):
         self.gpg_signature = None
 
         blake2_256_hash = None
-        if pyblake2 is not None:
-            blake2_256_hash = pyblake2.blake2b(digest_size=256 // 8)
+        if blake2b is not None:
+            blake2_256_hash = blake2b(digest_size=256 // 8)
         # NOTE(sigmavirus24): We may or may not be able to use blake2 so let's
         # either use the methods or lambdas to do nothing.
         blake_update = getattr(blake2_256_hash, 'update', lambda *args: None)

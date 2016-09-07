@@ -32,6 +32,14 @@ if sys.version_info[:2] < (2, 7):
     ]
 
 
+blake2_requires = []
+
+if sys.version_info[:2] < (3, 6):
+    blake2_requires += [
+        "pyblake2",
+    ]
+
+
 setup(
     name=twine.__title__,
     version=twine.__version__,
@@ -79,9 +87,7 @@ setup(
 
     install_requires=install_requires,
     extras_require={
-        'with-blake2': [
-            'pyblake2',
-        ],
+        'with-blake2': blake2_requires,
         'keyring': [
             'keyring',
         ],
