@@ -71,9 +71,26 @@ def skip_upload(response, skip_existing, package):
             (response.status_code == 400 and response.reason.startswith(msg))))
 
 
-def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file, skip_existing, cert, client_cert,
-           repository_url):
+def upload(
+        dists,
+        repository="pypi",
+        sign=False,
+        identity=None,
+        username=None,
+        password=None,
+        comment=None,
+        sign_with="gpg",
+        config_file="~/.pypirc",
+        skip_existing=False,
+        cert=None,
+        client_cert=None,
+        repository_url=None,
+):
+    # IMPORTANT: Before version 2.0 there were only arguments here, not keywork
+    # arguments.  So for compatibility, please do not change the orde.  New
+    # keyword arguments should be added at the end.  Please update the
+    # README.rst file too.
+
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -161,7 +178,8 @@ def main(args):
         default="pypi",
         help="The repository to register the package to. Can be a section in "
              "the config file or a full URL to the repository (default: "
-             "%(default)s)",
+             "%(default)s). (Can also be set via %(env)s environment "
+             "variable)",
     )
     parser.add_argument(
         "--repository-url",
@@ -171,7 +189,8 @@ def main(args):
         required=False,
         help="The repository URL to upload the package to. This can be "
              "specified with --repository because it will be used if there is "
-             "no configuration for the value passed to --repository."
+             "no configuration for the value passed to --repository. "
+             "(Can also be set via %(env)s environment variable.)"
     )
     parser.add_argument(
         "-s", "--sign",
@@ -230,7 +249,7 @@ def main(args):
         "--client-cert",
         metavar="path",
         help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM forma",
+             "private key and the certificate in PEM format",
     )
     parser.add_argument(
         "dists",
