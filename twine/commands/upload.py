@@ -161,7 +161,8 @@ def main(args):
         default="pypi",
         help="The repository to register the package to. Can be a section in "
              "the config file or a full URL to the repository (default: "
-             "%(default)s)",
+             "%(default)s). (Can also be set via %(env)s environment "
+             "variable)",
     )
     parser.add_argument(
         "--repository-url",
@@ -171,7 +172,8 @@ def main(args):
         required=False,
         help="The repository URL to upload the package to. This can be "
              "specified with --repository because it will be used if there is "
-             "no configuration for the value passed to --repository."
+             "no configuration for the value passed to --repository. "
+             "(Can also be set via %(env)s environment variable.)"
     )
     parser.add_argument(
         "-s", "--sign",
@@ -230,7 +232,7 @@ def main(args):
         "--client-cert",
         metavar="path",
         help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM forma",
+             "private key and the certificate in PEM format",
     )
     parser.add_argument(
         "dists",
