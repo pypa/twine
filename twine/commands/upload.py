@@ -189,7 +189,7 @@ def main(args):
         "--client-cert",
         metavar="path",
         help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM forma",
+             "private key and the certificate in PEM format",
     )
     parser.add_argument(
         "dists",
