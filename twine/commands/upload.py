@@ -225,6 +225,10 @@ def main(args):
     )
     parser.add_argument(
         "--cert",
+        action=utils.EnvironmentDefault,
+        env="TWINE_CERT",
+        default=None,
+        required=False,
         metavar="path",
         help="Path to alternate CA bundle",
     )
