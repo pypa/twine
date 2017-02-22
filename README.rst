@@ -115,6 +115,22 @@ Options
                             The .pypirc config file to use
       --skip-existing       Continue uploading files if one already exists
 
+Environment Variables
+`````````````````````
+
+Twine also supports configuration via environment variables. Options passed on
+the command line will take precedence over options set via environment
+variables. Definition via environment variable is helpful in environments where
+it is not convenient to create a `.pypirc` file, such as a CI/build server, for
+example.
+
+* ``TWINE_USERNAME`` - the username to use for authentication to the repository
+* ``TWINE_PASSWORD`` - the password to use for authentication to the repository
+* ``TWINE_REPOSITORY`` - the repository configuration, either defined as a
+  section in `.pypirc` or provided as a full URL
+* ``TWINE_REPOSITORY_URL`` - the repository URL to use
+* ``TWINE_CERT`` - custom CA certificate to use for repositories with
+  self-signed or untrusted certificates
 
 Resources
 ---------
