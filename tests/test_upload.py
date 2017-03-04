@@ -132,20 +132,23 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
                               package=pkg) is False
 
 
-def test_password_and_username_from_env(monkeypatch):
+def test_values_from_env(monkeypatch):
     def none_upload(*args, **kwargs):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
     monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
     testenv = {"TWINE_USERNAME": "pypiuser",
-               "TWINE_PASSWORD": "pypipassword"}
+               "TWINE_PASSWORD": "pypipassword",
+               "TWINE_CERT": "/foo/bar.crt"}
     with helpers.set_env(**testenv):
         cli.dispatch(["upload", "path/to/file"])
     cli.dispatch(["upload", "path/to/file"])
     result_kwargs = replaced_upload.calls[0].kwargs
     assert "pypipassword" == result_kwargs["password"]
     assert "pypiuser" == result_kwargs["username"]
+    assert "/foo/bar.crt" == result_kwargs["cert"]
     result_kwargs = replaced_upload.calls[1].kwargs
     assert None is result_kwargs["password"]
     assert None is result_kwargs["username"]
+    assert None is result_kwargs["cert"]
