@@ -90,7 +90,10 @@ def get_config(path="~/.pypirc"):
         }
 
         # Optional configuration values
-        for key in ["username", "repository", "password"]:
+        for key in [
+            "username", "repository", "password",
+            "ca_cert", "client_cert",
+        ]:
             if parser.has_option(repository, key):
                 config[repository][key] = parser.get(repository, key)
             elif defaults.get(key):
