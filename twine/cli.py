@@ -18,7 +18,7 @@ import argparse
 import pkg_resources
 import setuptools
 
-import clint
+import tqdm
 import requests
 import requests_toolbelt
 import pkginfo
@@ -38,7 +38,7 @@ def list_dependencies_and_versions():
         ('requests', requests.__version__),
         ('setuptools', setuptools.__version__),
         ('requests-toolbelt', requests_toolbelt.__version__),
-        ('clint', clint.__version__),
+        ('tqdm', tqdm.__version__),
     ]
 
 

@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
 
-from clint.textui.progress import Bar as ProgressBar
+from tqdm import tqdm as tqdm
 
 import requests
 from requests import adapters
@@ -31,6 +31,15 @@ KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 LEGACY_PYPI = 'https://pypi.python.org/'
 WAREHOUSE = 'https://upload.pypi.org/'
 OLD_WAREHOUSE = 'https://upload.pypi.io/'
+
+
+class ProgressBar(tqdm):
+
+    def update_to(self, n):
+        """
+        identical to update, except `n` should be current value and not delta.
+        """
+        self.update(n - self.n)
 
 
 class Repository(object):
@@ -121,18 +130,18 @@ class Repository(object):
                 (package.basefilename, fp, "application/octet-stream"),
             ))
             encoder = MultipartEncoder(data_to_send)
-            bar = ProgressBar(expected_size=encoder.len, filled_char='=')
-            monitor = MultipartEncoderMonitor(
-                encoder, lambda monitor: bar.show(monitor.bytes_read)
-            )
+            with ProgressBar(total=encoder.len, unit='bytes',
+                             unit_scale=True, leave=False) as bar:
+                monitor = MultipartEncoderMonitor(
+                    encoder, lambda monitor: bar.update_to(monitor.bytes_read)
+                )
 
-            resp = self.session.post(
-                self.url,
-                data=monitor,
-                allow_redirects=False,
-                headers={'Content-Type': monitor.content_type},
-            )
-            bar.done()
+                resp = self.session.post(
+                    self.url,
+                    data=monitor,
+                    allow_redirects=False,
+                    headers={'Content-Type': monitor.content_type},
+                )
 
         return resp
 
