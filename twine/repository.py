@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
 
-from tqdm import tqdm as tqdm
+from tqdm import tqdm
 
 import requests
 from requests import adapters
@@ -36,8 +36,10 @@ OLD_WAREHOUSE = 'https://upload.pypi.io/'
 class ProgressBar(tqdm):
 
     def update_to(self, n):
-        """
-        identical to update, except `n` should be current value and not delta.
+        """Update the bar in the way compatible with requests-toolbelt.
+
+        This is identical to tqdm.update, except ``n`` will be the current
+        value - not the delta as tqdm expects.
         """
         self.update(n - self.n)
 
