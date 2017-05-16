@@ -38,6 +38,12 @@ wheel_file_re = re.compile(
     re.VERBOSE)
 
 
+def try_decode(s):
+    if isinstance(s, bytes):
+        return s.decode('utf8')
+    return s
+
+
 class Wheel(Distribution):
 
     def __init__(self, filename, metadata_version=None):
@@ -50,6 +56,15 @@ class Wheel(Distribution):
     def py_version(self):
         wheel_info = wheel_file_re.match(self.basefilename)
         return wheel_info.group("pyver")
+
+    @staticmethod
+    def find_candidate_metadata_files(names):
+        """Filter files that may be METADATA files."""
+        tuples = [
+            x.split('/') for x in map(try_decode, names)
+            if 'METADATA' in x
+        ]
+        return [x[1] for x in sorted([(len(x), x) for x in tuples])]
 
     def read(self):
         fqn = os.path.abspath(os.path.normpath(self.filename))
@@ -66,9 +81,7 @@ class Wheel(Distribution):
             raise ValueError('Not a known archive format: %s' % fqn)
 
         try:
-            tuples = [x.split('/') for x in names if 'METADATA' in x]
-            schwarz = sorted([(len(x), x) for x in tuples])
-            for path in [x[1] for x in schwarz]:
+            for path in self.find_candidate_metadata_files(names):
                 candidate = '/'.join(path)
                 data = read_file(candidate)
                 if b'Metadata-Version' in data:

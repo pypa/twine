@@ -28,3 +28,20 @@ def example_wheel(request):
 
 def test_version_parsing(example_wheel):
     assert example_wheel.py_version == 'py2.py3'
+
+
+def test_find_metadata_files():
+    names = [
+        b'package/lib/__init__.py',
+        b'package/lib/version.py',
+        b'package/METADATA.txt',
+        b'package/METADATA.json',
+        b'package/METADATA',
+    ]
+    expected = [
+        ['package', 'METADATA'],
+        ['package', 'METADATA.json'],
+        ['package', 'METADATA.txt'],
+    ]
+    candidates = wheel.Wheel.find_candidate_metadata_files(names)
+    assert expected == candidates
