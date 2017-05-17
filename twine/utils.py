@@ -144,7 +144,7 @@ def check_status_code(response):
             response.url.startswith(("https://pypi.python.org",
                                      "https://testpypi.python.org"))):
         print("It appears you're uploading to pypi.python.org (or testpypi) "
-              "you've recieved a 500 error response. PyPI is being phased "
+              "you've received a 500 error response. PyPI is being phased "
               "out for pypi.org. Try using https://upload.pypi.org/legacy/ "
               "(or https://test.pypi.org/legacy/) to upload your packages "
               "instead. These are the default URLs for Twine now.")
