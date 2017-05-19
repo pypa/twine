@@ -108,7 +108,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         return get_config(config_file)[repository]
     except KeyError:
         if repository_url and "://" in repository_url:
-            # assume that the repsoitory is actually an URL and just sent
+            # assume that the repository is actually an URL and just sent
             # them a dummy with the repo set
             return {
                 "repository": repository_url,
