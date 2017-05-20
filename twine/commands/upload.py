@@ -251,10 +251,7 @@ def main(args):
     args = parser.parse_args(args)
 
     # Call the upload function with the arguments from the command line
-    try:
-        upload(**vars(args))
-    except Exception as exc:
-        sys.exit("{exc.__class__.__name__}: {exc}".format(exc=exc))
+    upload(**vars(args))
 
 
 if __name__ == "__main__":
