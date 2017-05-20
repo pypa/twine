@@ -13,6 +13,9 @@ Changelog
   * Twine will use ``hashlib.blake2b`` on Python 3.6+ instead of using pyblake2
     for Blake2 hashes 256 bit hashes.
 
+  * Twine sends less information about the user's system in the User-Agent
+    string. See also :bug:`229`
+
 * :release:`1.8.1 <2016-08-09>`
 
   * Check if a package exists if the URL is one of:
