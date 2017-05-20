@@ -22,7 +22,7 @@ install_requires = [
     "tqdm >= 4.11",
     "pkginfo >= 1.0",
     "requests >= 2.5.0",
-    "requests-toolbelt >= 0.5.1",
+    "requests-toolbelt >= 0.8.0",
     "setuptools >= 0.7.0",
 ]
 
