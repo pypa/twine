@@ -22,7 +22,7 @@ from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
-from requests_toolbelt.utils.user_agent import user_agent
+from requests_toolbelt.utils import user_agent
 
 import twine
 
@@ -68,7 +68,11 @@ class Repository(object):
     def _make_user_agent_string():
         from twine import cli
         dependencies = cli.list_dependencies_and_versions()
-        return user_agent('twine', twine.__version__, extras=dependencies)
+        return user_agent.UserAgentBuilder(
+                'twine', twine.__version__,
+            ).include_extras(
+                dependencies
+            ).include_implementation().build()
 
     def close(self):
         self.session.close()
