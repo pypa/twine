@@ -15,7 +15,6 @@ from __future__ import absolute_import, unicode_literals, print_function
 
 import argparse
 import os.path
-import sys
 
 from twine import exceptions as exc
 from twine.package import PackageFile
@@ -137,7 +136,4 @@ def main(args):
     args = parser.parse_args(args)
 
     # Call the register function with the args from the command line
-    try:
-        register(**vars(args))
-    except Exception as exc:
-        sys.exit("{exc.__class__.__name__}: {exc}".format(exc=exc))
+    register(**vars(args))
