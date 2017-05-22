@@ -19,6 +19,9 @@ Changelog
   * Fix ``--skip-existing`` when used to upload a package for the first time.
     See also :bug:`220`
 
+  * Fix precedence of ``--repository-url`` over ``--repository``. See also
+    :bug:`206`
+
 * :release:`1.8.1 <2016-08-09>`
 
   * Check if a package exists if the URL is one of:
