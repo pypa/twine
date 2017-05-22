@@ -4,7 +4,7 @@
 Changelog
 =========
 
-* :release:`1.9.0 <...>`
+* :release:`1.9.0 <2017-05-22>`
 
   * Twine will now resolve passwords using the
     `keyring <https://pypi.org/projects/keyring>`_ if available.
