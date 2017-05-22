@@ -121,6 +121,8 @@ def test_get_repository_config_missing(tmpdir):
     }
     assert (utils.get_repository_from_config(pypirc, 'foo', repository_url) ==
             exp)
+    assert (utils.get_repository_from_config(pypirc, 'pypi', repository_url) ==
+            exp)
     exp = {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": None,
