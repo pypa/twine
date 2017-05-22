@@ -11,7 +11,11 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import requests
+
 from twine import repository
+
+import pretend
 
 
 def test_gpg_signature_structure_is_preserved():
@@ -90,3 +94,48 @@ def test_make_user_agent_string():
     assert 'requests-toolbelt/' in user_agent
     assert 'pkginfo/' in user_agent
     assert 'setuptools/' in user_agent
+
+
+def response_with(**kwattrs):
+    resp = requests.Response()
+    for attr, value in kwattrs.items():
+        if hasattr(resp, attr):
+            setattr(resp, attr, value)
+
+    return resp
+
+
+def test_package_is_uploaded_404s():
+    repo = repository.Repository(
+        repository_url='https://pypi.python.org/pypi',
+        username='username',
+        password='password',
+    )
+    repo.session = pretend.stub(
+        get=lambda url, headers: response_with(status_code=404)
+    )
+    package = pretend.stub(
+        safe_name='fake',
+        metadata=pretend.stub(version='2.12.0'),
+    )
+
+    assert repo.package_is_uploaded(package) is False
+
+
+def test_package_is_uploaded_200s_with_no_releases():
+    repo = repository.Repository(
+        repository_url='https://pypi.python.org/pypi',
+        username='username',
+        password='password',
+    )
+    repo.session = pretend.stub(
+        get=lambda url, headers: response_with(status_code=200,
+                                               _content=b'{"releases": {}}',
+                                               _content_consumed=True),
+    )
+    package = pretend.stub(
+        safe_name='fake',
+        metadata=pretend.stub(version='2.12.0'),
+    )
+
+    assert repo.package_is_uploaded(package) is False
