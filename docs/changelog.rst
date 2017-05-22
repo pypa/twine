@@ -16,6 +16,9 @@ Changelog
   * Twine sends less information about the user's system in the User-Agent
     string. See also :bug:`229`
 
+  * Fix ``--skip-existing`` when used to upload a package for the first time.
+    See also :bug:`220`
+
 * :release:`1.8.1 <2016-08-09>`
 
   * Check if a package exists if the URL is one of:
