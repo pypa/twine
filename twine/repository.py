@@ -188,7 +188,10 @@ class Repository(object):
                                                     url=LEGACY_PYPI)
             headers = {'Accept': 'application/json'}
             response = self.session.get(url, headers=headers)
-            releases = response.json()['releases']
+            if response.status_code == 200:
+                releases = response.json()['releases']
+            else:
+                releases = {}
             self._releases_json_data[safe_name] = releases
 
         packages = releases.get(package.metadata.version, [])
