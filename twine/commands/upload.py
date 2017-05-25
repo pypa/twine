@@ -21,7 +21,7 @@ import sys
 
 import twine.exceptions as exc
 from twine.package import PackageFile
-from twine.repository import Repository
+from twine.repository import Repository, LEGACY_PYPI
 from twine import utils
 
 
@@ -97,6 +97,12 @@ def upload(dists, repository, sign, identity, username, password, comment,
     )
 
     print("Uploading distributions to {0}".format(config["repository"]))
+
+    if config["repository"].startswith(LEGACY_PYPI):
+        print(
+            "Note: you are uploading to the old upload URL. It's recommended "
+            "to use the new URL \"{0}\" or to leave the URL unspecified and "
+            "allow twine to choose.".format(utils.DEFAULT_REPOSITORY))
 
     username = utils.get_username(username, config)
     password = utils.get_password(
