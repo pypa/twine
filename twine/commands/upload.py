@@ -71,9 +71,26 @@ def skip_upload(response, skip_existing, package):
             (response.status_code == 400 and response.reason.startswith(msg))))
 
 
-def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file, skip_existing, cert, client_cert,
-           repository_url):
+def upload(
+        dists,
+        repository="pypi",
+        sign=False,
+        identity=None,
+        username=None,
+        password=None,
+        comment=None,
+        sign_with="gpg",
+        config_file="~/.pypirc",
+        skip_existing=False,
+        cert=None,
+        client_cert=None,
+        repository_url=None,
+):
+    # IMPORTANT: Before version 2.0 there were only arguments here, not keywork
+    # arguments.  So for compatibility, please do not change the orde.  New
+    # keyword arguments should be added at the end.  Please update the
+    # README.rst file too.
+
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")

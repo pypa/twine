@@ -10,6 +10,10 @@ Changelog
 
 * :release:`1.9.0 <2017-05-22>`
 
+  * Changed the register and upload commands to accept keyword arguments.
+
+  * Started documenting the API.
+
   * Twine will now resolve passwords using the
     `keyring <https://pypi.org/projects/keyring>`_ if available.
     Module can be required with the ``keyring`` extra.

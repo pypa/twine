@@ -59,13 +59,13 @@ Usage
        $ python setup.py sdist bdist_wheel
 
 2. Register your project (if necessary):
- 
+
    .. code-block:: bash
 
        $ # One needs to be explicit here, globbing dist/* would fail.
        $ twine register dist/project_name-x.y.z.tar.gz
        $ twine register dist/mypkg-0.1-py2.py3-none-any.whl
-  
+
 3. Upload with twine [#]_:
 
    .. code-block:: bash
@@ -79,16 +79,63 @@ Usage
 4. Done!
 
 
-Options
-~~~~~~~
+Options for register
+~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: bash
+
+    $ twine register -h
+
+    usage: twine register [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
+                          [-u USERNAME] [-p PASSWORD] [-c COMMENT]
+                          [--config-file CONFIG_FILE] [--cert path]
+                          [--client-cert path]
+                          package
+
+    positional arguments:
+      package               File from which we read the package metadata
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -r REPOSITORY, --repository REPOSITORY
+                            The repository to register the package to. Can be a
+                            section in the config file or a full URL to the
+                            repository (default: pypi). (Can also be set via
+                            TWINE_REPOSITORY environment variable)
+      --repository-url REPOSITORY_URL
+                            The repository URL to upload the package to. This can
+                            be specified with --repository because it will be used
+                            if there is no configuration for the value passed to
+                            --repository. (Can also be set via
+                            TWINE_REPOSITORY_URL environment variable.)
+      -u USERNAME, --username USERNAME
+                            The username to authenticate to the repository as (can
+                            also be set via TWINE_USERNAME environment variable)
+      -p PASSWORD, --password PASSWORD
+                            The password to authenticate to the repository with
+                            (can also be set via TWINE_PASSWORD environment
+                            variable)
+      -c COMMENT, --comment COMMENT
+                            The comment to include with the distribution file
+      --config-file CONFIG_FILE
+                            The .pypirc config file to use
+      --cert path           Path to alternate CA bundle
+      --client-cert path    Path to SSL client certificate, a single file
+                            containing the private key and the certificate in PEM
+                            format
+
+
+Options for upload
+~~~~~~~~~~~~~~~~~~
 
 .. code-block:: bash
 
     $ twine upload -h
 
-    usage: twine upload [-h] [-r REPOSITORY] [-s] [--sign-with SIGN_WITH]
-                        [-i IDENTITY] [-u USERNAME] [-p PASSWORD] [-c COMMENT]
-                        [--config-file CONFIG_FILE] [--skip-existing]
+    usage: twine upload [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
+                        [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
+                        [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
+                        [--skip-existing] [--cert path] [--client-cert path]
                         dist [dist ...]
 
     positional arguments:
@@ -99,21 +146,181 @@ Options
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to upload the files to (default: pypi)
+                            The repository to register the package to. Can be a
+                            section in the config file or a full URL to the
+                            repository (default: pypi). (Can also be set via
+                            TWINE_REPOSITORY environment variable)
+      --repository-url REPOSITORY_URL
+                            The repository URL to upload the package to. This can
+                            be specified with --repository because it will be used
+                            if there is no configuration for the value passed to
+                            --repository. (Can also be set via
+                            TWINE_REPOSITORY_URL environment variable.)
       -s, --sign            Sign files to upload using gpg
       --sign-with SIGN_WITH
                             GPG program used to sign uploads (default: gpg)
       -i IDENTITY, --identity IDENTITY
                             GPG identity used to sign files
       -u USERNAME, --username USERNAME
-                            The username to authenticate to the repository as
+                            The username to authenticate to the repository as (can
+                            also be set via TWINE_USERNAME environment variable)
       -p PASSWORD, --password PASSWORD
                             The password to authenticate to the repository with
+                            (can also be set via TWINE_PASSWORD environment
+                            variable)
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file
       --config-file CONFIG_FILE
                             The .pypirc config file to use
-      --skip-existing       Continue uploading files if one already exists
+      --skip-existing       Continue uploading files if one already exists. (Only
+                            valid when uploading to PyPI. Other implementations
+                            may not support this.)
+      --cert path           Path to alternate CA bundle
+      --client-cert path    Path to SSL client certificate, a single file
+                            containing the private key and the certificate in PEM
+                            format
+
+
+API
+---
+
+``twine`` is written in Python.  Of course.  So if you work on a
+Python tool that uses ``twine`` for uploading or registering, you can
+import it.
+
+Note that reading environment variables, for example
+``TWINE_REPOSITORY``, is a feature of the command line tool.  the API
+does not try to read this.
+
+
+API package
+~~~~~~~~~~~
+
+Create a package object:
+
+.. code-block:: python
+
+    from twine.package import PackageFile
+    package = PackageFile.from_filename(filename, comment)
+
+Here ``filename`` is the name of a distribution (usually a wheel or a
+source distribution) and comment is a comment to include with the
+distribution file.  The comment may be ``None``.
+
+You can add a gpg signature:
+
+.. code-block:: python
+
+    package.add_gpg_signature(signature_filepath, signature_filename)
+
+You can sign a package:
+
+.. code-block:: python
+
+    package.sign(sign_with, identity)
+
+
+API repository
+~~~~~~~~~~~~~~
+
+Define a repository:
+
+.. code-block:: python
+
+    from twine.repository import Repository
+    repository = Repository(config["repository"], username, password)
+    repository.set_certificate_authority(ca_cert)
+    repository.set_client_certificate(client_cert)
+
+
+Register a package:
+
+.. code-block:: python
+
+    package = PackageFile.from_filename(filename, comment)
+    response = repository.register()
+
+Upload a package:
+
+.. code-block:: python
+
+    if repository.package_is_uploaded(package):
+        ...
+    response = repository.upload(package)
+    repository.close()
+
+
+API exceptions
+~~~~~~~~~~~~~~
+
+When things go wrong:
+
+.. code-block:: python
+
+    # A redirect was detected that the user needs to resolve.
+    from twine.exceptions import RedirectDetected
+
+    # A package file was provided that could not be found on the file system.
+    from twine.exceptions import PackageNotFound
+
+
+API register
+~~~~~~~~~~~~
+
+Since version 2.0 you can use this:
+
+.. code-block:: python
+
+    from twine.commands.register import register
+    upload('dist/mypkg-0.1-py2.py3-none-any.whl')
+
+It takes as only required argument the name of a file from which we
+read the package metadata.  This is usually a wheel or a source
+distribution.
+
+You can pass several optional keyword arguments.  This is the list,
+including the default values:
+
+.. code-block:: python
+
+   repository="pypi",
+   username=None,
+   password=None,
+   comment=None,
+   config_file="~/.pypirc",
+   cert=None,
+   client_cert=None,
+   repository_url=None,
+
+
+API upload
+~~~~~~~~~~
+
+Since version 2.0 you can use this:
+
+.. code-block:: python
+
+    from twine.commands.upload import upload
+    upload(['dist/project_name-x.y.z.tar.gz', 'dist/mypkg-0.1-py2.py3-none-any.whl'])
+
+Only a list of files to upload is required.  You can pass several
+optional keyword arguments.  This is the list, including the default
+values:
+
+.. code-block:: python
+
+        repository="pypi",
+        sign=False,
+        identity=None,
+        username=None,
+        password=None,
+        comment=None,
+        sign_with="gpg",
+        config_file="~/.pypirc",
+        skip_existing=False,
+        cert=None,
+        client_cert=None,
+        repository_url=None,
 
 Environment Variables
 `````````````````````
@@ -151,7 +358,7 @@ Contributing
      have them installed) or use ``tox -e py{version}`` to test against a
      specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
    - Always run ``tox -e pep8``
-  
+
 4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
    optional.

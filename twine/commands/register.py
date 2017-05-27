@@ -22,8 +22,21 @@ from twine.repository import Repository
 from twine import utils
 
 
-def register(package, repository, username, password, comment, config_file,
-             cert, client_cert, repository_url):
+def register(
+        package,
+        repository="pypi",
+        username=None,
+        password=None,
+        comment=None,
+        config_file="~/.pypirc",
+        cert=None,
+        client_cert=None,
+        repository_url=None,
+):
+    # IMPORTANT: Before version 2.0 there were only arguments here, not keywork
+    # arguments.  So for compatibility, please do not change the orde.  New
+    # keyword arguments should be added at the end.  Please update the
+    # README.rst file too.
     config = utils.get_repository_from_config(
         config_file,
         repository,
