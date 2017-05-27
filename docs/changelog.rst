@@ -4,6 +4,10 @@
 Changelog
 =========
 
+* :release:`1.9.1 <2017-05-27>`
+
+  * Blacklist known bad versions of Requests. See also :bug:`253`
+
 * :release:`1.9.0 <2017-05-22>`
 
   * Twine will now resolve passwords using the
