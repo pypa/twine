@@ -10,6 +10,8 @@ matrix:
       env: TOXENV=py34
     - python: 3.5
       env: TOXENV=py35
+    - python: 3.6
+      env: TOXENV=py36
     - env: TOXENV=docs
     - env: TOXENV=pep8
     - env: TOXENV=pypy
