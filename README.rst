@@ -57,16 +57,8 @@ Usage
    .. code-block:: bash
 
        $ python setup.py sdist bdist_wheel
-
-2. Register your project (if necessary):
- 
-   .. code-block:: bash
-
-       $ # One needs to be explicit here, globbing dist/* would fail.
-       $ twine register dist/project_name-x.y.z.tar.gz
-       $ twine register dist/mypkg-0.1-py2.py3-none-any.whl
-  
-3. Upload with twine [#]_:
+       
+2. Upload with twine [#]_:
 
    .. code-block:: bash
 
