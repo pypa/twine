@@ -70,8 +70,8 @@ def main(args):
         action=utils.EnvironmentDefault,
         env="TWINE_REPOSITORY",
         default="pypi",
-        help="The repository to register the package to. Can be a section in "
-             "the config file or a full URL to the repository (default: "
+        help="The repository to register the package to. "
+             "Should be a section in the config file (default: "
              "%(default)s). (Can also be set via %(env)s environment "
              "variable)",
     )
@@ -81,9 +81,8 @@ def main(args):
         env="TWINE_REPOSITORY_URL",
         default=None,
         required=False,
-        help="The repository URL to upload the package to. This can be "
-             "specified with --repository because it will be used if there is "
-             "no configuration for the value passed to --repository. "
+        help="The repository URL to register the package to. "
+             "This overrides --repository."
              "(Can also be set via %(env)s environment variable.)"
     )
     parser.add_argument(
