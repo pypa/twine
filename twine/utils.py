@@ -117,7 +117,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
     except KeyError:
         msg = (
             "Missing '{repo}' section from the configuration file\n"
-            "or not a complete URL in --repository.\n"
+            "or not a complete URL in --repository-url.\n"
             "Maybe you have a out-dated '{cfg}' format?\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
