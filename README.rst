@@ -64,11 +64,7 @@ Usage
 
        $ twine upload dist/*
 
-   .. [#] If you see the following error while uploading to PyPI, it probably means you need to register (see step 2)::
-
-             $ HTTPError: 403 Client Error: You are not allowed to edit 'xyz' package information
-
-4. Done!
+3. Done!
 
 
 Options
