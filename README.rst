@@ -68,7 +68,7 @@ Usage
 
              $ HTTPError: 403 Client Error: You are not allowed to edit 'xyz' package information
 
-4. Done!
+3. Done!
 
 
 Options
