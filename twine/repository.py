@@ -13,6 +13,8 @@
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
 
+import sys
+
 from tqdm import tqdm
 
 import requests
@@ -137,7 +139,7 @@ class Repository(object):
             encoder = MultipartEncoder(data_to_send)
             with ProgressBar(total=encoder.len,
                              unit='B', unit_scale=True, unit_divisor=1024,
-                             miniters=1) as bar:
+                             miniters=1, file=sys.stdout) as bar:
                 monitor = MultipartEncoderMonitor(
                     encoder, lambda monitor: bar.update_to(monitor.bytes_read)
                 )
