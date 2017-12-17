@@ -124,7 +124,7 @@ class Repository(object):
         data.update({
             # action
             ":action": "file_upload",
-            "protcol_version": "1",
+            "protocol_version": "1",
         })
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
