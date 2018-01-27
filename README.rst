@@ -58,7 +58,7 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with twine [#]_:
+2. Upload with twine:
 
    .. code-block:: bash
 
@@ -88,12 +88,15 @@ Options
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to upload the package to. Should be a
-                            section in the config file (default: pypi). (Can also
-                            be set via TWINE_REPOSITORY environment variable)
+                            The repository to register the package to. Can be a
+                            section in the config file or a full URL to the
+                            repository (default: pypi). (Can also be set via
+                            TWINE_REPOSITORY environment variable)
       --repository-url REPOSITORY_URL
-                            The repository URL to upload the package to. This
-                            overrides --repository.(Can also be set via
+                            The repository URL to upload the package to. This can
+                            be specified with --repository because it will be used
+                            if there is no configuration for the value passed to
+                            --repository. (Can also be set via
                             TWINE_REPOSITORY_URL environment variable.)
       -s, --sign            Sign files to upload using gpg
       --sign-with SIGN_WITH
@@ -119,6 +122,57 @@ Options
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
                             format
+
+
+Twine also includes a ``register`` command which is `not supported in
+Warehouse (the new PyPI software running on pypi.org)
+<https://github.com/pypa/warehouse/issues/1627>`_ and which is `no
+longer necessary if you are uploading to pypi.org
+<https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. For
+completeness, its usage:
+
+.. code-block:: bash
+
+    $ twine register -h
+    usage: twine register [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
+                          [-u USERNAME] [-p PASSWORD] [-c COMMENT]
+                          [--config-file CONFIG_FILE] [--cert path]
+                          [--client-cert path]
+                          package
+
+    positional arguments:
+      package               File from which we read the package metadata
+
+    optional arguments:
+      -h, --help            show this help message and exit
+      -r REPOSITORY, --repository REPOSITORY
+                            The repository to register the package to. Can be a
+                            section in the config file or a full URL to the
+                            repository (default: pypi). (Can also be set via
+                            TWINE_REPOSITORY environment variable)
+      --repository-url REPOSITORY_URL
+                            The repository URL to upload the package to. This can
+                            be specified with --repository because it will be used
+                            if there is no configuration for the value passed to
+                            --repository. (Can also be set via
+                            TWINE_REPOSITORY_URL environment variable.)
+      -u USERNAME, --username USERNAME
+                            The username to authenticate to the repository as (can
+                            also be set via TWINE_USERNAME environment variable)
+      -p PASSWORD, --password PASSWORD
+                            The password to authenticate to the repository with
+                            (can also be set via TWINE_PASSWORD environment
+                            variable)
+      -c COMMENT, --comment COMMENT
+                            The comment to include with the distribution file
+      --config-file CONFIG_FILE
+                            The .pypirc config file to use
+      --cert path           Path to alternate CA bundle (can also be set via
+                            TWINE_CERT environment variable)
+      --client-cert path    Path to SSL client certificate, a single file
+                            containing the private key and the certificate in PEM
+                            format
+
 
 Environment Variables
 `````````````````````
@@ -155,7 +209,7 @@ Contributing
    - Either use ``tox`` to build against all supported Python versions (if you
      have them installed) or use ``tox -e py{version}`` to test against a
      specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
-   - Always run ``tox -e pep8``
+   - Always run ``tox -e pep8``.
 
 4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
