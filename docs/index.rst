@@ -33,61 +33,14 @@ Getting Started
 
 We are happy you have decided to contribute to twine.
 
-To set up your development environment, first fork the twine repository on
-GitHub, using the ``fork`` button on the upper right-hand corner of the page
-for the `main twine repository`_.
-
-Then, go to your fork of twine on GitHub. The URL will be in the following
-format:
-
-.. code-block:: console
-
-  https://github.com/<username>/twine
-
-Your GitHub username will appear where ``<username>`` is in the example URL
-above.
-
-Now, use ``git clone`` to download the code from your fork of the repository:
-
-.. code-block:: console
-
-  git clone https://github.com/<username>/twine
-
-As in the URL above, ``<username>`` is your GitHub username.
-
-Add the main twine repository as ``upstream``:
-
-.. code-block:: console
-
-  git remote add upstream https://github.com/pypa/twine
-
-This allows you to easily keep your local copy and your GitHub fork of the code
-current with any changes in the main twine repository.
-
-To make sure you have set up everything correctly, the output of this command:
-
-.. code-block:: console
-
-  git remote -v
-
-Should be the following:
-
-.. code-block:: console
-
-  origin  https://github.com/<username>/twine.git (fetch)
-  origin  https://github.com/<username>/twine.git (push)
-  upstream  https://github.com/pypa/twine.git (fetch)
-  upstream  https://github.com/pypa/twine.git (push)
-
-Your username on GitHub should replace ``<username>`` in the example above.
-
 It is important to keep your development environment isolated, so that twine
 and its dependencies do not interfere with packages already installed on your
 machine.  We will use a virtual environment for the development environment for
 twine. You can use `virtualenv`_ or `pipenv`_ to isolate your development
 environment.
 
-Activate your virtual environment. Then, run the following command:
+Clone the twine repository from GitHub, and then activate your virtual
+environment. Then, run the following command:
 
 .. code-block:: console
 
@@ -113,7 +66,11 @@ Building the documentation
 Additions and edits to twine's documentation are welcome and appreciated. To
 build the docs locally, first set up a virtual environment and activate it,
 using Python 3.6 as the Python version in the virtual environment. Then install
-the following:
+tox:
+
+.. code-block:: console
+
+  pip install tox
 
 Install Sphinx:
 
@@ -128,13 +85,13 @@ Install the ``releases`` `plugin`_ and the Read the Docs theme for Sphinx:
   pip install -e git+https://github.com/bitprophet/releases/#egg=releases
   pip install sphinx_rtd_theme
 
-Change directories to the ``docs`` directory, and then run:
+Then, run the following command:
 
 .. code-block:: console
 
-  sphinx-build -b html . _build
+  tox -e docs
 
-The docs will be visible at ``twine/docs/_build/index.html``.
+The HTML of the docs will be visible in this directory: ``twine/docs/_build/``.
 
 When you have made your changes to the docs, please lint them before making a
 pull request.
@@ -145,11 +102,11 @@ Install the linter:
 
   pip install doc8
 
-Then, run the linter in the ``twine/docs`` directory:
+Then, run the linter:
 
 .. code-block:: console
 
-    doc8 .
+    doc8 docs
 
 
 Indices and tables
