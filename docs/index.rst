@@ -28,6 +28,85 @@ Contents:
 
    changelog
 
+Getting Started
+---------------
+
+We are happy you have decided to contribute to twine.
+
+It is important to keep your development environment isolated, so that twine
+and its dependencies do not interfere with packages already installed on your
+machine.  We will use a virtual environment for the development environment for
+twine. You can use `virtualenv`_ or `pipenv`_ to isolate your development
+environment.
+
+Clone the twine repository from GitHub, and then activate your virtual
+environment. Then, run the following command:
+
+.. code-block:: console
+
+  pip install -e /path/to/your/local/twine
+
+Now, in your virtual environment, ``twine`` is pointing at your local copy, so
+when you have made changes, you can easily see their effect.
+
+Testing
+-------
+
+Tests with twine are run using `tox`_, and tested against the following Python
+versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
+have these versions of Python installed on your machine.
+
+If you are using pipenv to manage your virtual environment, you may need the
+`tox-pipenv`_ plugin so that tox can use pipenv environments instead of
+virtualenvs.
+
+Building the documentation
+--------------------------
+
+Additions and edits to twine's documentation are welcome and appreciated. To
+build the docs locally, first set up a virtual environment and activate it,
+using Python 3.6 as the Python version in the virtual environment. Then install
+tox:
+
+.. code-block:: console
+
+  pip install tox
+
+Install Sphinx:
+
+.. code-block:: console
+
+  pip install Sphinx
+
+Install the ``releases`` `plugin`_ and the Read the Docs theme for Sphinx:
+
+.. code-block:: console
+
+  pip install -e git+https://github.com/bitprophet/releases/#egg=releases
+  pip install sphinx_rtd_theme
+
+Then, run the following command:
+
+.. code-block:: console
+
+  tox -e docs
+
+The HTML of the docs will be visible in this directory: ``twine/docs/_build/``.
+
+When you have made your changes to the docs, please lint them before making a
+pull request.
+
+Install the linter:
+
+.. code-block:: console
+
+  pip install doc8
+
+Then, run the linter:
+
+.. code-block:: console
+
+    doc8 docs
 
 
 Indices and tables
@@ -45,3 +124,9 @@ Indices and tables
 .. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
+.. _`main twine repository`: https://github.com/pypa/twine
+.. _`virtualenv`: https://virtualenv.pypa.io/en/stable/installation/
+.. _`pipenv`: https://pipenv.readthedocs.io/en/latest/
+.. _`tox`: https://tox.readthedocs.io/en/latest/
+.. _`tox-pipenv`: https://pypi.python.org/pypi/tox-pipenv
+.. _`plugin`: https://github.com/bitprophet/releases
