@@ -20,6 +20,21 @@ and the `Python Packaging User Guide`_ for user documentation. You can
 also join ``#pypa`` or ``#pypa-dev`` `on Freenode`_, or the `pypa-dev
 mailing list`_, to ask questions or get involved.
 
+Overview
+--------
+
+Twine is a command-line tool for interacting with PyPI securely over HTTPS. Its
+command line arguments are parsed in ``twine/cli.py``. Currently, twine
+has two principal functions: uploading new packages and registering new
+`projects`_. The code for registering new projects is in
+``twine/commands/register.py``, and the code for uploading is in
+``twine/commands/upload.py``. The file ``twine/package.py``
+contains a single class, ``PackageFile``, which hashes the project files and
+extracts their metadata. The file ``twine/repository.py`` contains the
+``Repository`` class, whose methods control the URL the package is uploaded to
+(which the user can specify either as a default, in the ``.pypirc`` file, or
+pass on the command line), and the methods that upload the package securely to
+a URL.
 
 Contents:
 
@@ -130,3 +145,4 @@ Indices and tables
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`tox-pipenv`: https://pypi.python.org/pypi/tox-pipenv
 .. _`plugin`: https://github.com/bitprophet/releases
+
