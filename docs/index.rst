@@ -56,53 +56,32 @@ Tests with twine are run using `tox`_, and tested against the following Python
 versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
 have these versions of Python installed on your machine.
 
-If you are using pipenv to manage your virtual environment, you may need the
-`tox-pipenv`_ plugin so that tox can use pipenv environments instead of
-virtualenvs.
+If you are using ``pipenv`` to manage your virtual environment, you
+may need the `tox-pipenv`_ plugin so that tox can use pipenv
+environments instead of virtualenvs.
 
 Building the documentation
 --------------------------
 
 Additions and edits to twine's documentation are welcome and appreciated. To
 build the docs locally, first set up a virtual environment and activate it,
-using Python 3.6 as the Python version in the virtual environment. Then install
-tox:
+using Python 3.6 as the Python version in the virtual environment. Example:
+
+.. code-block:: console
+
+  mkvirtualenv -p /usr/bin/python3.6 twine
+
+Then install ``tox`` and build the docs using ``tox``:
 
 .. code-block:: console
 
   pip install tox
-
-Install Sphinx:
-
-.. code-block:: console
-
-  pip install Sphinx
-
-Install the ``releases`` `plugin`_ and the Read the Docs theme for Sphinx:
-
-.. code-block:: console
-
-  pip install -e git+https://github.com/bitprophet/releases/#egg=releases
-  pip install sphinx_rtd_theme
-
-Then, run the following command:
-
-.. code-block:: console
-
   tox -e docs
 
 The HTML of the docs will be visible in this directory: ``twine/docs/_build/``.
 
 When you have made your changes to the docs, please lint them before making a
-pull request.
-
-Install the linter:
-
-.. code-block:: console
-
-  pip install doc8
-
-Then, run the linter:
+pull request. To run the linter from the root directory:
 
 .. code-block:: console
 
