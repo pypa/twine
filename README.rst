@@ -44,7 +44,7 @@ Features
 Installation
 ------------
 
-.. code-block:: bash
+.. code-block:: console
 
     $ pip install twine
 
@@ -54,13 +54,13 @@ Usage
 
 1. Create some distributions in the normal way:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ python setup.py sdist bdist_wheel
 
 2. Upload with twine:
 
-   .. code-block:: bash
+   .. code-block:: console
 
        $ twine upload dist/*
 
@@ -70,7 +70,7 @@ Usage
 Options
 ~~~~~~~
 
-.. code-block:: bash
+.. code-block:: console
 
     $ twine upload -h
 
@@ -131,7 +131,7 @@ longer necessary if you are uploading to pypi.org
 <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. For
 completeness, its usage:
 
-.. code-block:: bash
+.. code-block:: console
 
     $ twine register -h
     usage: twine register [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
