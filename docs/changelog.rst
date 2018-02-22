@@ -5,7 +5,7 @@ Changelog
 =========
 
 * :release:`1.9.1 <2017-05-27>`
-* :support:`-` Blacklist known bad versions of Requests. See also :bug:`253`
+* :bug:`-` Blacklist known bad versions of Requests. See also :bug:`253`
 * :release:`1.9.0 <2017-05-22>`
 * :support:`-` Twine will now resolve passwords using the
   `keyring <https://pypi.org/projects/keyring>`_ if available.
@@ -42,15 +42,15 @@ Changelog
 * :feature:`171` Generate Blake2b 256 digests for packages *if* ``pyblake2``
   is installed. Users can use ``python -m pip install twine[with-blake2]``
   to have ``pyblake2`` installed with Twine.
-* Stop testing on Python 2.6. 2.6 support will be "best effort" until 2.0.0
-* Warn users if they receive a 500 error when uploading to \*pypi.python.org
+* :support:`-` Stop testing on Python 2.6. 2.6 support will be "best effort" until 2.0.0
+* :support:`-` Warn users if they receive a 500 error when uploading to \*pypi.python.org
 * :release:`1.7.4 <2016-07-09>`
-* Correct a packaging error.
+* :bug:`-` Correct a packaging error.
 * :release:`1.7.3 <2016-07-08>`
 * :bug:`195` Fix uploads to instances of pypiserver using
   ``--skip-existing``. We were not properly checking the return
   status code on the response after attempting an upload.
-* Do not generate traffic to Legacy PyPI unless we're uploading to it
+* :support:`-` Do not generate traffic to Legacy PyPI unless we're uploading to it
   or uploading to Warehouse (e.g., pypi.io). This avoids the attempt
   to upload a package to the index if we can find it on Legacy PyPI
   already.
@@ -70,7 +70,7 @@ Changelog
   5xx error.
 * :feature:`177` Switch Twine to upload to pypi.io instead of
   pypi.python.org.
-* :bug:`186` Allow passwords to have ``%``\ s in them.
+* :bug:`186 major` Allow passwords to have ``%``\ s in them.
 * :release:`1.6.5 <2015-12-16>`
 * :bug:`155` Bump requests-toolbelt version to ensure we avoid
   ConnectionErrors
@@ -98,29 +98,32 @@ Changelog
 * :release:`1.6.0 <2015-09-14>`
 * :feature:`106` Upload wheels first to PyPI
 * :feature:`104` Large file support via the ``requests-toolbelt``
-* :bug:`92` Raise an exception on redirects
+* :bug:`92 major` Raise an exception on redirects
 * :feature:`97` Allow the user to specify the location of their ``.pypirc``
 * :feature:`115` Add the ``--skip-existing`` flag to ``twine upload`` to
   allow users to skip releases that already exist on PyPI.
-* :bug:`114` Warnings triggered by pkginfo searching for ``PKG-INFO`` files
+* :bug:`114 major` Warnings triggered by pkginfo searching for ``PKG-INFO`` files
   should no longer be user visible.
-* :bug:`116` Work around problems with Windows when using ``getpass.getpass``
-* :bug:`111` Provide more helpful messages if ``.pypirc`` is out of date.
+* :bug:`116 major` Work around problems with Windows when using ``getpass.getpass``
+* :bug:`111 major` Provide more helpful messages if ``.pypirc`` is out of date.
 * :feature:`8` Support registering new packages with ``twine register``
 * :release:`1.5.0 <2015-03-10>`
-* :bug:`85` Display information about the version of setuptools installed
-* :bug:`61` Support deprecated pypirc file format
+* :bug:`85 major` Display information about the version of setuptools installed
+* :bug:`61 major` Support deprecated pypirc file format
 * :feature:`29` Support commands not named "gpg" for signing
-* Add lower-limit to requests dependency
+* :support:`-` Add lower-limit to requests dependency
 * :release:`1.4.0 <2014-12-12>`
-* :bug:`28` Prevent ResourceWarning from being shown
-* :bug:`34` List registered commands in help text
-* :bug:`32` Use ``pkg_resources`` to load registered commands
-* :bug:`47` Fix issue uploading packages with ``_``\ s in the name
-* :bug:`26` Add support for uploading Windows installers
-* :bug:`65` Expand globs and check for existence of dists to upload
+* :bug:`28 major` Prevent ResourceWarning from being shown
+* :bug:`34 major` List registered commands in help text
+* :bug:`32 major` Use ``pkg_resources`` to load registered commands
+* :bug:`47 major` Fix issue uploading packages with ``_``\ s in the name
+* :bug:`26 major` Add support for uploading Windows installers
+* :bug:`65 major` Expand globs and check for existence of dists to upload
 * :feature:`13` Parse ``~/.pypirc`` ourselves and use ``subprocess``
   instead of the ``distutils.spawn`` module.
 * :feature:`6` Switch to a git style dispatching for the commands to enable
   simpler commands and programmatic invocation.
+* :release:`1.3.0 <2014-03-31>`
+* :feature:`-` Additional functionality.
 * :release:`1.2.2 <2013-10-03>`
+* :feature:`0` Basic functionality.
