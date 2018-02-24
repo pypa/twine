@@ -24,6 +24,7 @@ install_requires = [
     "requests >= 2.5.0, != 2.15, != 2.16",
     "requests-toolbelt >= 0.8.0",
     "setuptools >= 0.7.0",
+    "lxml >= 4.0.0",
 ]
 
 if sys.version_info[:2] < (2, 7):

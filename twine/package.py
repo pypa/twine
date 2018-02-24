@@ -30,10 +30,12 @@ except ImportError:
 
 from twine.wheel import Wheel
 from twine.wininst import WinInst
+from twine.ivy import Ivy
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
     "bdist_wininst": WinInst,
+    "ivy": Ivy,
     "bdist_egg": pkginfo.BDist,
     "sdist": pkginfo.SDist,
 }
@@ -45,6 +47,7 @@ DIST_EXTENSIONS = {
     ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
     ".zip": "sdist",
+    ".ivy": "ivy"
 }
 
 
@@ -99,6 +102,8 @@ class PackageFile(object):
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
         elif dtype == "bdist_wininst":
+            py_version = meta.py_version
+        elif dtype == "ivy":
             py_version = meta.py_version
         else:
             py_version = None
