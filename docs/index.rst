@@ -11,9 +11,11 @@ Twine is `a utility`_ for interacting with PyPI.
 Currently it only supports registering `projects`_ and uploading
 `distributions`_.
 
-The goal is to improve PyPI interaction by improving security and
-testability. Ideally, ``pip`` and ``twine`` will merge into a single
-tool.
+The goal of ``twine`` is to improve PyPI interaction by improving
+security and testability. In the future, ``pip`` and ``twine`` may
+merge into a single tool; see `discussion
+<https://github.com/pypa/packaging-problems/issues/60>`_ for ongoing
+discussion.
 
 Please see `the GitHub repository`_ for code and more documentation,
 and the `Python Packaging User Guide`_ for user documentation. You can

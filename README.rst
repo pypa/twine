@@ -1,7 +1,7 @@
 twine
 =====
 
-Twine is a utility for interacting `with PyPI <https://pypi.python.org/pypi/twine>`_.
+Twine is a utility for interacting `with PyPI <https://pypi.org/project/twine/>`_.
 
 Currently it only supports registering `projects <https://packaging.python.org/glossary/#term-project>`_ and uploading `distributions <https://packaging.python.org/glossary/#term-distribution-package>`_.
 
