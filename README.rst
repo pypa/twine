@@ -1,7 +1,7 @@
 twine
 =====
 
-Twine is a utility for interacting `with PyPI <https://pypi.python.org/pypi/twine>`_.
+Twine is a utility for interacting `with PyPI <https://pypi.org/project/twine/>`_.
 
 Currently it only supports registering `projects <https://packaging.python.org/glossary/#term-project>`_ and uploading `distributions <https://packaging.python.org/glossary/#term-distribution-package>`_.
 
@@ -9,25 +9,25 @@ Currently it only supports registering `projects <https://packaging.python.org/g
 Why Should I Use This?
 ----------------------
 
-The biggest reason to use twine is that it securely authenticates you to PyPI
-over HTTPS using a verified connection while ``python setup.py upload`` `only
+The biggest reason to use ``twine`` is that it securely authenticates you to PyPI
+over HTTPS using a verified connection, while ``python setup.py upload`` `only
 recently stopped using HTTP <http://bugs.python.org/issue12226>`_ in Python
 2.7.9+ and Python 3.2+. This means anytime you use ``python setup.py upload``
 with an older Python version, you expose your username and password to being
-easily sniffed. Twine uses only verified TLS to upload to PyPI protecting your
+easily sniffed. Twine uses only verified TLS to upload to PyPI, protecting your
 credentials from theft.
 
-Secondly it allows you to precreate your distribution files.
+Secondly, it allows you to precreate your distribution files.
 ``python setup.py upload`` only allows you to upload something that you've
 created in the same command invocation. This means that you cannot test the
 exact file you're going to upload to PyPI to ensure that it works before
 uploading it.
 
-Finally it allows you to pre-sign your files and pass the .asc files into
-the command line invocation
-(``twine upload twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``). This enables you
-to be assured that you're typing your gpg passphrase into gpg itself and not
-anything else since *you* will be the one directly executing
+Finally, it allows you to pre-sign your files and pass the ``.asc``
+files into the command line invocation (``twine upload
+twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``). This enables you to be
+assured that you're typing your ``gpg`` passphrase into ``gpg`` itself
+and not anything else, since *you* will be the one directly executing
 ``gpg --detach-sign -a <filename>``.
 
 
@@ -35,10 +35,10 @@ Features
 --------
 
 - Verified HTTPS Connections
-- Uploading doesn't require executing setup.py
+- Uploading doesn't require executing ``setup.py``
 - Uploading files that have already been created, allowing testing of
   distributions before release
-- Supports uploading any packaging format (including wheels).
+- Supports uploading any packaging format (including wheels)
 
 
 Installation
@@ -58,7 +58,7 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with twine:
+2. Upload with ``twine``:
 
    .. code-block:: console
 
@@ -88,7 +88,7 @@ Options
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to register the package to. Can be a
+                            The repository to upload the package to. Can be a
                             section in the config file or a full URL to the
                             repository (default: pypi). (Can also be set via
                             TWINE_REPOSITORY environment variable)
@@ -204,7 +204,7 @@ Contributing
 
 1. Fork the `repository <https://github.com/pypa/twine>`_ on GitHub.
 2. Make a branch off of master and commit your changes to it.
-3. Run the tests with ``tox``
+3. Run the tests with ``tox``.
 
    - Either use ``tox`` to build against all supported Python versions (if you
      have them installed) or use ``tox -e py{version}`` to test against a
@@ -223,7 +223,8 @@ virtualenv and then do ``pip install -e .`` from within the directory.
 Code of Conduct
 ---------------
 
-Everyone interacting in the twine project's codebases, issue trackers, chat
-rooms, and mailing lists is expected to follow the `PyPA Code of Conduct`_.
+Everyone interacting in the ``twine`` project's codebases, issue
+trackers, chat rooms, and mailing lists is expected to follow the
+`PyPA Code of Conduct`_.
 
 .. _PyPA Code of Conduct: https://www.pypa.io/en/latest/code-of-conduct/
