@@ -1,17 +1,22 @@
 twine
 =====
 
-Twine is a utility for interacting `with PyPI <https://pypi.org/project/twine/>`_.
+.. rtd-inclusion-marker-do-not-remove
 
-Currently it only supports registering `projects <https://packaging.python.org/glossary/#term-project>`_ and uploading `distributions <https://packaging.python.org/glossary/#term-distribution-package>`_.
+Twine is `a utility`_ for `publishing`_ packages on `PyPI`_.
+
+Currently it only supports registering `projects`_ and uploading `distributions`_.
 
 
 Why Should I Use This?
 ----------------------
 
+The goal of ``twine`` is to improve PyPI interaction by improving
+security and testability.
+
 The biggest reason to use ``twine`` is that it securely authenticates you to PyPI
 over HTTPS using a verified connection, while ``python setup.py upload`` `only
-recently stopped using HTTP <http://bugs.python.org/issue12226>`_ in Python
+recently stopped using HTTP <https://bugs.python.org/issue12226>`_ in Python
 2.7.9+ and Python 3.2+. This means anytime you use ``python setup.py upload``
 with an older Python version, you expose your username and password to being
 easily sniffed. Twine uses only verified TLS to upload to PyPI, protecting your
@@ -34,7 +39,7 @@ and not anything else, since *you* will be the one directly executing
 Features
 --------
 
-- Verified HTTPS Connections
+- Verified HTTPS connections
 - Uploading doesn't require executing ``setup.py``
 - Uploading files that have already been created, allowing testing of
   distributions before release
@@ -66,9 +71,12 @@ Usage
 
 3. Done!
 
+More documentation on using ``twine`` to upload packages to PyPI is in
+the `Python Packaging User Guide`_.
+
 
 Options
-~~~~~~~
+^^^^^^^
 
 .. code-block:: console
 
@@ -124,12 +132,18 @@ Options
                             format
 
 
-Twine also includes a ``register`` command which is `not supported in
-Warehouse (the new PyPI software running on pypi.org)
-<https://github.com/pypa/warehouse/issues/1627>`_ and which is `no
-longer necessary if you are uploading to pypi.org
-<https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. For
-completeness, its usage:
+Twine also includes a ``register`` command.
+
+.. WARNING::
+   ``register`` is `no longer necessary if you are
+   uploading to pypi.org
+   <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. As
+   such, it is `no longer supported
+   <https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_
+   (the new PyPI software running on pypi.org). However, you may need
+   this if you are using a different package index.
+
+For completeness, its usage:
 
 .. code-block:: console
 
@@ -175,7 +189,7 @@ completeness, its usage:
 
 
 Environment Variables
-`````````````````````
+^^^^^^^^^^^^^^^^^^^^^
 
 Twine also supports configuration via environment variables. Options passed on
 the command line will take precedence over options set via environment
@@ -194,31 +208,17 @@ example.
 Resources
 ---------
 
-* `IRC <http://webchat.freenode.net?channels=%23pypa>`_
+* `IRC <http://webchat.freenode.net/?channels=%23pypa>`_
   (``#pypa`` - irc.freenode.net)
 * `GitHub repository <https://github.com/pypa/twine>`_
-* `Python Packaging User Guide <https://packaging.python.org/en/latest/distributing/>`_
+* User and developer `documentation`_
+* `Python Packaging User Guide`_
 
 Contributing
 ------------
 
-1. Fork the `repository <https://github.com/pypa/twine>`_ on GitHub.
-2. Make a branch off of master and commit your changes to it.
-3. Run the tests with ``tox``.
-
-   - Either use ``tox`` to build against all supported Python versions (if you
-     have them installed) or use ``tox -e py{version}`` to test against a
-     specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
-   - Always run ``tox -e pep8``.
-
-4. Ensure that your name is added to the end of the AUTHORS file using the
-   format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
-   optional.
-5. Submit a Pull Request to the master branch on GitHub.
-
-If you'd like to have a development environment for twine, you should create a
-virtualenv and then do ``pip install -e .`` from within the directory.
-
+See our `developer documentation`_ for how to get started, an
+architectural overview, and our future development plans.
 
 Code of Conduct
 ---------------
@@ -227,4 +227,13 @@ Everyone interacting in the ``twine`` project's codebases, issue
 trackers, chat rooms, and mailing lists is expected to follow the
 `PyPA Code of Conduct`_.
 
-.. _PyPA Code of Conduct: https://www.pypa.io/en/latest/code-of-conduct/
+.. _`a utility`: https://pypi.org/project/twine/
+.. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`PyPI`: https://pypi.org
+.. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`documentation`: http://twine.readthedocs.io/
+.. _`developer documentation`: https://twine.readthedocs.io/en/latest/contributing.html
+.. _`projects`: https://packaging.python.org/glossary/#term-project
+.. _`distributions`: https://packaging.python.org/glossary/#term-distribution-package
+.. _`PyPA Code of Conduct`: https://www.pypa.io/en/latest/code-of-conduct/
+.. _`Warehouse`: https://github.com/pypa/warehouse
