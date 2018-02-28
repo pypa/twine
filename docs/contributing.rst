@@ -17,8 +17,15 @@ dependencies do not interfere with packages already installed on your
 machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
 development environment.
 
-Clone the twine repository from GitHub, and then activate your virtual
-environment. Then, run the following command:
+Clone the twine repository from GitHub, and then make and activate
+your virtual environment, using Python 3.6 as the Python version in
+the virtual environment. Example:
+
+.. code-block:: console
+
+  mkvirtualenv -p /usr/bin/python3.6 twine
+
+Then, run the following command:
 
 .. code-block:: console
 
@@ -27,33 +34,28 @@ environment. Then, run the following command:
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
 when you have made changes, you can easily see their effect.
 
-Testing
-^^^^^^^
+Building the documentation
+^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-Tests with twine are run using `tox`_, and tested against the following Python
-versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
-have these versions of Python installed on your machine.
+Additions and edits to twine's documentation are welcome and
+appreciated.
+
+We use ``tox`` to build docs. Activate your virtual environment, then
+install ``tox``.
+
+.. code-block:: console
+
+  pip install tox
 
 If you are using ``pipenv`` to manage your virtual environment, you
 may need the `tox-pipenv`_ plugin so that tox can use pipenv
 environments instead of virtualenvs.
 
-Building the documentation
-^^^^^^^^^^^^^^^^^^^^^^^^^^
-
-Additions and edits to twine's documentation are welcome and appreciated. To
-build the docs locally, first set up a virtual environment and activate it,
-using Python 3.6 as the Python version in the virtual environment. Example:
+To build the docs locally using ``tox``, activate your virtual
+environment, then run:
 
 .. code-block:: console
 
-  mkvirtualenv -p /usr/bin/python3.6 twine
-
-Then install ``tox`` and build the docs using ``tox``:
-
-.. code-block:: console
-
-  pip install tox
   tox -e docs
 
 The HTML of the docs will be visible in this directory: ``twine/docs/_build/``.
@@ -65,18 +67,26 @@ pull request. To run the linter from the root directory:
 
     doc8 docs
 
+
+Testing
+^^^^^^^
+
+Tests with twine are run using `tox`_, and tested against the following Python
+versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
+have these versions of Python installed on your machine.
+
+Either use ``tox`` to build against all supported Python versions (if
+you have them installed) or use ``tox -e py{version}`` to test against
+a specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+
+Also, always run ``tox -e pep8`` before submitting a pull request.
+
 Submitting changes
 ^^^^^^^^^^^^^^^^^^
 
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
-3. Run the tests with ``tox``.
-
-   - Either use ``tox`` to build against all supported Python versions (if you
-     have them installed) or use ``tox -e py{version}`` to test against a
-     specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
-   - Always run ``tox -e pep8``.
-
+3. Run the tests with ``tox`` and lint any docs changes with ``doc8``.
 4. Ensure that your name is added to the end of the AUTHORS file using the
    format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
    optional.
