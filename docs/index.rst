@@ -126,4 +126,3 @@ Indices and tables
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`tox-pipenv`: https://pypi.python.org/pypi/tox-pipenv
 .. _`plugin`: https://github.com/bitprophet/releases
-
