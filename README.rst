@@ -134,12 +134,14 @@ Options
 
 Twine also includes a ``register`` command.
 
-.. WARNING:: Warning!
-   ``register`` is `not supported
-   <https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_ (the
-   new PyPI software running on pypi.org) and is `no longer
-   necessary if you are uploading to pypi.org
-   <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_.
+.. WARNING::
+   ``register`` is `no longer necessary if you are
+   uploading to pypi.org
+   <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. As
+   such, it is `no longer supported
+   <https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_
+   (the new PyPI software running on pypi.org). However, you may need
+   this if you are using a different package index.
 
 For completeness, its usage:
 
