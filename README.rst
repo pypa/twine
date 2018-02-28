@@ -132,12 +132,16 @@ Options
                             format
 
 
-Twine also includes a ``register`` command which is `not supported
-<https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_ (the
-new PyPI software running on pypi.org) and which is `no longer
-necessary if you are uploading to pypi.org
-<https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. For
-completeness, its usage:
+Twine also includes a ``register`` command.
+
+.. WARNING:: Warning!
+   ``register`` is `not supported
+   <https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_ (the
+   new PyPI software running on pypi.org) and is `no longer
+   necessary if you are uploading to pypi.org
+   <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_.
+
+For completeness, its usage:
 
 .. code-block:: console
 
