@@ -4,6 +4,20 @@
 Changelog
 =========
 
+* :feature:`304` Reorganize & improve user & developer documentation.
+* :feature:`46` Link to changelog from ``README``
+* :feature:`295` Add doc building instructions
+* :feature:`296` Add architecture overview to docs
+* :feature:`303` Revise docs predicting future of ``twine``
+* :bug:`298 major` Fix syntax highlighting in ``README``
+* :bug:`299 major` Fix changelog formatting
+* :bug:`200 major` Remove obsolete registration guidance
+* :bug:`286 major` Fix Travis CI and test configuration
+* :feature:`257` Declare support for Python 3.6
+* :bug:`297 major` Fix Read the Docs, tox, Travis configuration
+* :bug:`268 major` Print progress to ``stdout``, not ``stderr``
+* :bug:`265 major` Fix ``--repository[-url]`` help text
+* :feature:`256` Improve progressbar
 * :release:`1.9.1 <2017-05-27>`
 * :bug:`-` Blacklist known bad versions of Requests. See also :bug:`253`
 * :release:`1.9.0 <2017-05-22>`
