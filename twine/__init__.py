@@ -1,4 +1,4 @@
-# Copyright 2013 Donald Stufft
+# Copyright 2018 Donald Stufft and individual contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -19,13 +19,13 @@ __all__ = (
 )
 
 __title__ = "twine"
-__summary__ = "Collection of utilities for interacting with PyPI"
-__uri__ = "https://github.com/pypa/twine"
+__summary__ = "Collection of utilities for publishing packages on PyPI"
+__uri__ = "http://twine.readthedocs.io/"
 
-__version__ = "1.9.1"
+__version__ = "1.10.0rc1"
 
 __author__ = "Donald Stufft and individual contributors"
 __email__ = "donald@stufft.io"
 
 __license__ = "Apache License, Version 2.0"
-__copyright__ = "Copyright 2013 Donald Stufft"
+__copyright__ = "Copyright 2018 Donald Stufft and individual contributors"
