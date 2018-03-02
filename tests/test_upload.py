@@ -108,7 +108,8 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
-    # pypiserver (https://pypi.python.org/pypi/pypiserver) responds with 409
+    # pypiserver (http://pypi.org/project/pypiserver) responds with a
+    # 409 when the file already exists.
     response = pretend.stub(
         status_code=409,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
