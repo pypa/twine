@@ -43,6 +43,8 @@ extensions = [
 releases_issue_uri = "https://github.com/pypa/twine/issues/%s"
 releases_release_uri = "https://github.com/pypa/twine/tree/%s"
 
+releases_debug = False  # Change to True to see debug output
+
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
 
@@ -57,7 +59,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "twine"
-copyright = "2013, Donald Stufft and individual contributors"
+copyright = "2018, Donald Stufft and individual contributors"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
