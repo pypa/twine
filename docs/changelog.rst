@@ -22,7 +22,7 @@ Changelog
 * :bug:`-` Blacklist known bad versions of Requests. See also :bug:`253`
 * :release:`1.9.0 <2017-05-22>`
 * :support:`-` Twine will now resolve passwords using the
-  `keyring <https://pypi.org/projects/keyring>`_ if available.
+  `keyring <https://pypi.org/project/keyring/>`_ if available.
   Module can be required with the ``keyring`` extra.
 * :support:`-` Twine will use ``hashlib.blake2b`` on Python 3.6+
   instead of using pyblake2 for Blake2 hashes 256 bit hashes.
@@ -39,8 +39,8 @@ Changelog
     * ``https://upload.pypi.org/``
     * ``https://upload.pypi.io/``
 
-    This helps people with ``https://upload.pypi.io`` still in their .pypirc
-    file.
+    This helps people with ``https://upload.pypi.io`` still in their
+    :file:`.pypirc` file.
 
 * :release:`1.8.0 <2016-08-08>`
 * :feature:`201` Switch from upload.pypi.io to upload.pypi.org.
@@ -50,24 +50,28 @@ Changelog
     * Username will default to ``TWINE_USERNAME``
     * Password will default to ``TWINE_PASSWORD``
 
-* :feature:`166` Allow the Repository URL to be provided on the command-line
-  (``--repository-url``) or via an environment variable
-  (``TWINE_REPOSITORY_URL``).* Generate SHA256 digest for all packages by default.
+* :feature:`166` Allow the Repository URL to be provided on the
+  command-line (``--repository-url``) or via an environment variable
+  (``TWINE_REPOSITORY_URL``).
+* :support:`-` Generate SHA256 digest for all packages
+  by default.
 * :feature:`171` Generate Blake2b 256 digests for packages *if* ``pyblake2``
   is installed. Users can use ``python -m pip install twine[with-blake2]``
   to have ``pyblake2`` installed with Twine.
-* :support:`-` Stop testing on Python 2.6. 2.6 support will be "best effort" until 2.0.0
-* :support:`-` Warn users if they receive a 500 error when uploading to \*pypi.python.org
+* :support:`-` Stop testing on Python 2.6. 2.6 support will be "best
+  effort" until 2.0.0
+* :support:`-` Warn users if they receive a 500 error when uploading
+  to ``*pypi.python.org``
 * :release:`1.7.4 <2016-07-09>`
 * :bug:`-` Correct a packaging error.
 * :release:`1.7.3 <2016-07-08>`
 * :bug:`195` Fix uploads to instances of pypiserver using
   ``--skip-existing``. We were not properly checking the return
   status code on the response after attempting an upload.
-* :support:`-` Do not generate traffic to Legacy PyPI unless we're uploading to it
-  or uploading to Warehouse (e.g., pypi.io). This avoids the attempt
-  to upload a package to the index if we can find it on Legacy PyPI
-  already.
+* :support:`-` Do not generate traffic to Legacy PyPI unless we're
+  uploading to it or uploading to Warehouse (e.g., pypi.io). This
+  avoids the attempt to upload a package to the index if we can find
+  it on Legacy PyPI already.
 * :release:`1.7.2 <2016-07-05>`
 * :bug:`189`, :bug:`191` Fix issue where we were checking the existence of
   packages even if the user didn't specify ``--skip-existing``.
@@ -90,8 +94,8 @@ Changelog
   ConnectionErrors
 * :release:`1.6.4 <2015-10-27>`
 * :bug:`145` Paths with hyphens in them break the Wheel regular expression.
-* :bug:`146` Exception while accessing the ``respository`` key when raising
-  a redirect exception.
+* :bug:`146` Exception while accessing the ``respository`` key (sic)
+  when raising a redirect exception.
 * :release:`1.6.3 <2015-10-05>`
 * :bug:`137`, :bug:`140` Uploading signatures was broken due to the pull
   request that added large file support via ``requests-toolbelt``. This
@@ -113,13 +117,16 @@ Changelog
 * :feature:`106` Upload wheels first to PyPI
 * :feature:`104` Large file support via the ``requests-toolbelt``
 * :bug:`92 major` Raise an exception on redirects
-* :feature:`97` Allow the user to specify the location of their ``.pypirc``
+* :feature:`97` Allow the user to specify the location of their
+  :file:`.pypirc`
 * :feature:`115` Add the ``--skip-existing`` flag to ``twine upload`` to
   allow users to skip releases that already exist on PyPI.
-* :bug:`114 major` Warnings triggered by pkginfo searching for ``PKG-INFO`` files
-  should no longer be user visible.
-* :bug:`116 major` Work around problems with Windows when using ``getpass.getpass``
-* :bug:`111 major` Provide more helpful messages if ``.pypirc`` is out of date.
+* :bug:`114 major` Warnings triggered by pkginfo searching for
+  ``PKG-INFO`` files should no longer be user visible.
+* :bug:`116 major` Work around problems with Windows when using
+  ``getpass.getpass``
+* :bug:`111 major` Provide more helpful messages if :file:`.pypirc` is
+  out of date.
 * :feature:`8` Support registering new packages with ``twine register``
 * :release:`1.5.0 <2015-03-10>`
 * :bug:`85 major` Display information about the version of setuptools installed
@@ -133,8 +140,8 @@ Changelog
 * :bug:`47 major` Fix issue uploading packages with ``_``\ s in the name
 * :bug:`26 major` Add support for uploading Windows installers
 * :bug:`65 major` Expand globs and check for existence of dists to upload
-* :feature:`13` Parse ``~/.pypirc`` ourselves and use ``subprocess``
-  instead of the ``distutils.spawn`` module.
+* :feature:`13` Parse :file:`~/.pypirc` ourselves and use
+  ``subprocess`` instead of the ``distutils.spawn`` module.
 * :feature:`6` Switch to a git style dispatching for the commands to enable
   simpler commands and programmatic invocation.
 * :release:`1.3.0 <2014-03-31>`

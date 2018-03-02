@@ -58,7 +58,7 @@ environment, then run:
 
   tox -e docs
 
-The HTML of the docs will be visible in this directory: ``twine/docs/_build/``.
+The HTML of the docs will be visible in :file:`twine/docs/_build/`.
 
 When you have made your changes to the docs, please lint them before making a
 pull request. To run the linter from the root directory:
@@ -87,27 +87,28 @@ Submitting changes
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
 3. Run the tests with ``tox`` and lint any docs changes with ``doc8``.
-4. Ensure that your name is added to the end of the AUTHORS file using the
-   format ``Name <email@domain.com> (url)``, where the ``(url)`` portion is
-   optional.
+4. Ensure that your name is added to the end of the :file:`AUTHORS`
+   file using the format ``Name <email@domain.com> (url)``, where the
+   ``(url)`` portion is optional.
 5. Submit a Pull Request to the ``master`` branch on GitHub.
 
 
 Architectural overview
 ----------------------
 
-Twine is a command-line tool for interacting with PyPI securely over HTTPS. Its
-command line arguments are parsed in ``twine/cli.py``. Currently, twine
-has two principal functions: uploading new packages and registering new
-`projects`_. The code for registering new projects is in
-``twine/commands/register.py``, and the code for uploading is in
-``twine/commands/upload.py``. The file ``twine/package.py``
-contains a single class, ``PackageFile``, which hashes the project files and
-extracts their metadata. The file ``twine/repository.py`` contains the
-``Repository`` class, whose methods control the URL the package is uploaded to
-(which the user can specify either as a default, in the ``.pypirc`` file, or
-pass on the command line), and the methods that upload the package securely to
-a URL.
+Twine is a command-line tool for interacting with PyPI securely over
+HTTPS. Its command line arguments are parsed in
+:file:`twine/cli.py`. Currently, twine has two principal functions:
+uploading new packages and registering new `projects`_. The code for
+registering new projects is in :file:`twine/commands/register.py`, and
+the code for uploading is in :file:`twine/commands/upload.py`. The
+file :file:`twine/package.py` contains a single class,
+``PackageFile``, which hashes the project files and extracts their
+metadata. The file :file:`twine/repository.py` contains the
+``Repository`` class, whose methods control the URL the package is
+uploaded to (which the user can specify either as a default, in the
+:file:`.pypirc` file, or pass on the command line), and the methods
+that upload the package securely to a URL.
 
 Future development
 ------------------
