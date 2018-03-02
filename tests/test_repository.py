@@ -14,6 +14,7 @@
 import requests
 
 from twine import repository
+from twine.utils import DEFAULT_REPOSITORY
 
 import pretend
 
@@ -55,7 +56,7 @@ def test_iterables_are_flattened():
 
 def test_set_client_certificate():
     repo = repository.Repository(
-        repository_url='https://pypi.python.org/pypi',
+        repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
     )
@@ -68,7 +69,7 @@ def test_set_client_certificate():
 
 def test_set_certificate_authority():
     repo = repository.Repository(
-        repository_url='https://pypi.python.org/pypi',
+        repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
     )
@@ -81,7 +82,7 @@ def test_set_certificate_authority():
 
 def test_make_user_agent_string():
     repo = repository.Repository(
-        repository_url='https://pypi.python.org/pypi',
+        repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
     )
@@ -107,7 +108,7 @@ def response_with(**kwattrs):
 
 def test_package_is_uploaded_404s():
     repo = repository.Repository(
-        repository_url='https://pypi.python.org/pypi',
+        repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
     )
@@ -124,7 +125,7 @@ def test_package_is_uploaded_404s():
 
 def test_package_is_uploaded_200s_with_no_releases():
     repo = repository.Repository(
-        repository_url='https://pypi.python.org/pypi',
+        repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
     )
