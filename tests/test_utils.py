@@ -230,3 +230,22 @@ def entered_password(monkeypatch):
 def test_get_password_keyring_missing_prompts(
         entered_password, keyring_missing):
     assert utils.get_password('system', 'user', None, {}) == 'entered pw'
+
+
+@pytest.fixture
+def keyring_no_backends(monkeypatch):
+    """
+    Simulate that keyring has no available backends. When keyring
+    has no backends for the system, the backend will be a
+    fail.Keyring, which raises RuntimeError on get_password.
+    """
+    class FailKeyring(object):
+        @staticmethod
+        def get_password(system, username):
+            raise RuntimeError("fail!")
+    monkeypatch.setitem(sys.modules, 'keyring', FailKeyring())
+
+
+def test_get_password_runtime_error_suppressed(
+        entered_password, keyring_no_backends):
+    assert utils.get_password('system', 'user', None, {}) == 'entered pw'
