@@ -222,8 +222,11 @@ def keyring_missing(monkeypatch):
     monkeypatch.setattr(builtins, '__import__', my_import)
 
 
-def test_get_password_keyring_missing_prompts(monkeypatch, keyring_missing):
+@pytest.fixture
+def entered_password(monkeypatch):
     monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
 
-    pw = utils.get_password('system', 'user', None, {})
-    assert pw == 'entered pw'
+
+def test_get_password_keyring_missing_prompts(
+        entered_password, keyring_missing):
+    assert utils.get_password('system', 'user', None, {}) == 'entered pw'
