@@ -48,6 +48,11 @@ setup(
     long_description=open("README.rst").read(),
     license=twine.__license__,
     url=twine.__uri__,
+    project_urls={
+        'Packaging tutorial': 'https://packaging.python.org/tutorials/distributing-packages/',
+        'Twine documentation': 'https://twine.readthedocs.io/en/latest/',
+        'Twine source': 'https://github.com/pypa/twine/',
+    },
 
     author=twine.__author__,
     author_email=twine.__email__,
@@ -65,7 +70,6 @@ setup(
         "Programming Language :: Python :: 2",
         "Programming Language :: Python :: 2.7",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.2",
         "Programming Language :: Python :: 3.3",
         "Programming Language :: Python :: 3.4",
         "Programming Language :: Python :: 3.5",
