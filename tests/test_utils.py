@@ -247,5 +247,8 @@ def keyring_no_backends(monkeypatch):
 
 
 def test_get_password_runtime_error_suppressed(
-        entered_password, keyring_no_backends):
+        entered_password, keyring_no_backends, recwarn):
     assert utils.get_password('system', 'user', None, {}) == 'entered pw'
+    assert len(recwarn) == 1
+    warning = recwarn.pop(UserWarning)
+    assert 'fail!' in str(warning)
