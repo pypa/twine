@@ -196,7 +196,10 @@ def get_password_from_keyring(system, username):
     except ImportError:
         return
 
-    return keyring.get_password(system, username)
+    try:
+        return keyring.get_password(system, username)
+    except Exception:
+        pass
 
 
 def password_from_keyring_or_prompt(system, username):
