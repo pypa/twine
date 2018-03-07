@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* :release:`1.10.0 <2018-03-07>`
+* :bug:`315 major` Degrade gracefully when keyring is unavailable
 * :feature:`304` Reorganize & improve user & developer documentation.
 * :feature:`46` Link to changelog from ``README``
 * :feature:`295` Add doc building instructions
