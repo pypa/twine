@@ -22,7 +22,7 @@ __title__ = "twine"
 __summary__ = "Collection of utilities for publishing packages on PyPI"
 __uri__ = "http://twine.readthedocs.io/"
 
-__version__ = "1.10.0rc1"
+__version__ = "1.10.0"
 
 __author__ = "Donald Stufft and individual contributors"
 __email__ = "donald@stufft.io"
