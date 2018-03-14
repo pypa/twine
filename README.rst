@@ -14,13 +14,14 @@ Why Should I Use This?
 The goal of ``twine`` is to improve PyPI interaction by improving
 security and testability.
 
-The biggest reason to use ``twine`` is that it securely authenticates you to PyPI
-over HTTPS using a verified connection, while ``python setup.py upload`` `only
-recently stopped using HTTP <https://bugs.python.org/issue12226>`_ in Python
-2.7.9+ and Python 3.2+. This means anytime you use ``python setup.py upload``
-with an older Python version, you expose your username and password to being
-easily sniffed. Twine uses only verified TLS to upload to PyPI, protecting your
-credentials from theft.
+The biggest reason to use ``twine`` is that it securely authenticates
+you to `PyPI`_ over HTTPS using a verified connection, while ``python
+setup.py upload`` `only recently stopped using HTTP
+<https://bugs.python.org/issue12226>`_ in Python 2.7.9+ and Python
+3.2+. This means anytime you use ``python setup.py upload`` with an
+older Python version, you expose your username and password to being
+easily sniffed. Twine uses only verified TLS to upload to PyPI,
+protecting your credentials from theft.
 
 Secondly, it allows you to precreate your distribution files.
 ``python setup.py upload`` only allows you to upload something that you've
@@ -28,12 +29,12 @@ created in the same command invocation. This means that you cannot test the
 exact file you're going to upload to PyPI to ensure that it works before
 uploading it.
 
-Finally, it allows you to pre-sign your files and pass the ``.asc``
-files into the command line invocation (``twine upload
-twine-1.0.1.tar.gz twine-1.0.1.tar.gz.asc``). This enables you to be
-assured that you're typing your ``gpg`` passphrase into ``gpg`` itself
-and not anything else, since *you* will be the one directly executing
-``gpg --detach-sign -a <filename>``.
+Finally, ``twine`` allows you to pre-sign your files and pass the
+``.asc`` files into the command line invocation (``twine upload
+myproject-1.0.1.tar.gz myproject-1.0.1.tar.gz.asc``). This enables you
+to be assured that you're typing your ``gpg`` passphrase into ``gpg``
+itself and not anything else, since *you* will be the one directly
+executing ``gpg --detach-sign -a <filename>``.
 
 
 Features
@@ -43,7 +44,7 @@ Features
 - Uploading doesn't require executing ``setup.py``
 - Uploading files that have already been created, allowing testing of
   distributions before release
-- Supports uploading any packaging format (including wheels)
+- Supports uploading any packaging format (including `wheels`_)
 
 
 Installation
@@ -95,48 +96,47 @@ Options
                         dist [dist ...]
 
     positional arguments:
-      dist                  The distribution files to upload to the repository,
-                            may additionally contain a .asc file to include an
-                            existing signature with the file upload
+      dist                  The distribution files to upload to the repository
+                            (package index). Usually dist/* . May additionally
+                            contain a .asc file to include an existing signature
+                            with the file upload.
 
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to upload the package to. Can be a
-                            section in the config file or a full URL to the
-                            repository (default: pypi). (Can also be set via
-                            TWINE_REPOSITORY environment variable)
+                            The repository (package index) to upload the package
+                            to. Should be a section in the config file (default:
+                            pypi). (Can also be set via TWINE_REPOSITORY
+                            environment variable.)
       --repository-url REPOSITORY_URL
-                            The repository URL to upload the package to. This can
-                            be specified with --repository because it will be used
-                            if there is no configuration for the value passed to
-                            --repository. (Can also be set via
-                            TWINE_REPOSITORY_URL environment variable.)
-      -s, --sign            Sign files to upload using gpg
+                            The repository (package index) URL to upload the
+                            package to. This overrides --repository. (Can also be
+                            set via TWINE_REPOSITORY_URL environment variable.)
+      -s, --sign            Sign files to upload using GPG.
       --sign-with SIGN_WITH
-                            GPG program used to sign uploads (default: gpg)
+                            GPG program used to sign uploads (default: gpg).
       -i IDENTITY, --identity IDENTITY
-                            GPG identity used to sign files
+                            GPG identity used to sign files.
       -u USERNAME, --username USERNAME
-                            The username to authenticate to the repository as (can
-                            also be set via TWINE_USERNAME environment variable)
+                            The username to authenticate to the repository
+                            (package index) as. (Can also be set via
+                            TWINE_USERNAME environment variable.)
       -p PASSWORD, --password PASSWORD
-                            The password to authenticate to the repository with
-                            (can also be set via TWINE_PASSWORD environment
-                            variable)
+                            The password to authenticate to the repository
+                            (package index) with. (Can also be set via
+                            TWINE_PASSWORD environment variable.)
       -c COMMENT, --comment COMMENT
-                            The comment to include with the distribution file
+                            The comment to include with the distribution file.
       --config-file CONFIG_FILE
-                            The .pypirc config file to use
+                            The .pypirc config file to use.
       --skip-existing       Continue uploading files if one already exists. (Only
                             valid when uploading to PyPI. Other implementations
                             may not support this.)
       --cert path           Path to alternate CA bundle (can also be set via
-                            TWINE_CERT environment variable)
+                            TWINE_CERT environment variable).
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
-                            format
-
+                            format.
 
 Twine also includes a ``register`` command.
 
@@ -154,45 +154,47 @@ For completeness, its usage:
 .. code-block:: console
 
     $ twine register -h
-    usage: twine register [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
+
+    usage: twine register [-h] -r REPOSITORY [--repository-url REPOSITORY_URL]
                           [-u USERNAME] [-p PASSWORD] [-c COMMENT]
                           [--config-file CONFIG_FILE] [--cert path]
                           [--client-cert path]
                           package
 
     positional arguments:
-      package               File from which we read the package metadata
+      package               File from which we read the package metadata.
 
     optional arguments:
       -h, --help            show this help message and exit
       -r REPOSITORY, --repository REPOSITORY
-                            The repository to register the package to. Can be a
-                            section in the config file or a full URL to the
-                            repository (default: pypi). (Can also be set via
-                            TWINE_REPOSITORY environment variable)
+                            The repository (package index) to register the package
+                            to. Should be a section in the config file. (Can also
+                            be set via TWINE_REPOSITORY environment variable.)
+                            Initial package registration no longer necessary on
+                            pypi.org:
+                            https://packaging.python.org/guides/migrating-to-pypi-
+                            org/
       --repository-url REPOSITORY_URL
-                            The repository URL to upload the package to. This can
-                            be specified with --repository because it will be used
-                            if there is no configuration for the value passed to
-                            --repository. (Can also be set via
-                            TWINE_REPOSITORY_URL environment variable.)
+                            The repository (package index) URL to register the
+                            package to. This overrides --repository. (Can also be
+                            set via TWINE_REPOSITORY_URL environment variable.)
       -u USERNAME, --username USERNAME
-                            The username to authenticate to the repository as (can
-                            also be set via TWINE_USERNAME environment variable)
+                            The username to authenticate to the repository
+                            (package index) as. (Can also be set via
+                            TWINE_USERNAME environment variable.)
       -p PASSWORD, --password PASSWORD
-                            The password to authenticate to the repository with
-                            (can also be set via TWINE_PASSWORD environment
-                            variable)
+                            The password to authenticate to the repository
+                            (package index) with. (Can also be set via
+                            TWINE_PASSWORD environment variable.)
       -c COMMENT, --comment COMMENT
-                            The comment to include with the distribution file
+                            The comment to include with the distribution file.
       --config-file CONFIG_FILE
-                            The .pypirc config file to use
+                            The .pypirc config file to use.
       --cert path           Path to alternate CA bundle (can also be set via
-                            TWINE_CERT environment variable)
+                            TWINE_CERT environment variable).
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
-                            format
-
+                            format.
 
 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^
@@ -238,9 +240,10 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
-.. _`documentation`: http://twine.readthedocs.io/
+.. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`: https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`distributions`: https://packaging.python.org/glossary/#term-distribution-package
 .. _`PyPA Code of Conduct`: https://www.pypa.io/en/latest/code-of-conduct/
 .. _`Warehouse`: https://github.com/pypa/warehouse
+.. _`wheels`: https://packaging.python.org/glossary/#term-wheel
