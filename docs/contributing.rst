@@ -12,14 +12,14 @@ Getting started
 ---------------
 
 We recommend you use a development environment. Using a ``virtualenv``
-keeps your development environment isolated, so that ``twine`` and its
-dependencies do not interfere with packages already installed on your
+keeps your development environment isolated, so ``twine`` and its
+dependencies do not interfere with other packages installed on your
 machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
 development environment.
 
-Clone the twine repository from GitHub, and then make and activate
-your virtual environment, using Python 3.6 as the Python version in
-the virtual environment. Example:
+Clone the twine repository from GitHub, and then make and activate a
+virtual environment that uses Python 3.6 as the default
+Python. Example:
 
 .. code-block:: console
 
@@ -32,7 +32,7 @@ Then, run the following command:
   pip install -e /path/to/your/local/twine
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
-when you have made changes, you can easily see their effect.
+when you make changes, you can easily see their effect.
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -51,21 +51,15 @@ If you are using ``pipenv`` to manage your virtual environment, you
 may need the `tox-pipenv`_ plugin so that tox can use pipenv
 environments instead of virtualenvs.
 
-To build the docs locally using ``tox``, activate your virtual
-environment, then run:
+After making docs changes, lint and build the docs locally, using
+``tox``, before making a pull request. Activate your virtual
+environment, then, in the root directory, run:
 
 .. code-block:: console
 
   tox -e docs
 
 The HTML of the docs will be visible in :file:`twine/docs/_build/`.
-
-When you have made your changes to the docs, please lint them before making a
-pull request. To run the linter from the root directory:
-
-.. code-block:: console
-
-    doc8 docs
 
 
 Testing
@@ -86,11 +80,11 @@ Submitting changes
 
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
-3. Run the tests with ``tox`` and lint any docs changes with ``doc8``.
+3. Run the tests with ``tox`` and lint any docs changes with ``tox -e docs``.
 4. Ensure that your name is added to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
-5. Submit a Pull Request to the ``master`` branch on GitHub.
+5. Submit a pull request to the ``master`` branch on GitHub.
 
 
 Architectural overview
@@ -126,7 +120,7 @@ merge into a single tool; see `ongoing discussion
 .. _`virtualenv`: https://virtualenv.pypa.io/en/stable/installation/
 .. _`pipenv`: https://pipenv.readthedocs.io/en/latest/
 .. _`tox`: https://tox.readthedocs.io/en/latest/
-.. _`tox-pipenv`: https://pypi.python.org/pypi/tox-pipenv
+.. _`tox-pipenv`: https://pypi.org/project/tox-pipenv
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`open issues`: https://github.com/pypa/twine/issues
