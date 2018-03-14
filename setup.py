@@ -20,7 +20,7 @@ import twine
 
 install_requires = [
     "tqdm >= 4.14",
-    "pkginfo >= 1.0",
+    "pkginfo >= 1.4.2",
     "requests >= 2.5.0, != 2.15, != 2.16",
     "requests-toolbelt >= 0.8.0",
     "setuptools >= 0.7.0",
