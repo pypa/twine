@@ -51,21 +51,15 @@ If you are using ``pipenv`` to manage your virtual environment, you
 may need the `tox-pipenv`_ plugin so that tox can use pipenv
 environments instead of virtualenvs.
 
-To build the docs locally using ``tox``, activate your virtual
-environment, then run:
+After making docs changes, lint and build the docs locally, using
+``tox``, before making a pull request. Activate your virtual
+environment, then, in the root directory, run:
 
 .. code-block:: console
 
   tox -e docs
 
 The HTML of the docs will be visible in :file:`twine/docs/_build/`.
-
-When you have made your changes to the docs, please lint them before making a
-pull request. To run the linter from the root directory:
-
-.. code-block:: console
-
-    doc8 docs
 
 
 Testing
@@ -86,7 +80,7 @@ Submitting changes
 
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
-3. Run the tests with ``tox`` and lint any docs changes with ``doc8``.
+3. Run the tests with ``tox`` and lint any docs changes with ``tox -e docs``.
 4. Ensure that your name is added to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
