@@ -12,14 +12,14 @@ Getting started
 ---------------
 
 We recommend you use a development environment. Using a ``virtualenv``
-keeps your development environment isolated, so that ``twine`` and its
-dependencies do not interfere with packages already installed on your
+keeps your development environment isolated, so ``twine`` and its
+dependencies do not interfere with other packages installed on your
 machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
 development environment.
 
-Clone the twine repository from GitHub, and then make and activate
-your virtual environment, using Python 3.6 as the Python version in
-the virtual environment. Example:
+Clone the twine repository from GitHub, and then make and activate a
+virtual environment that uses Python 3.6 as the default
+Python. Example:
 
 .. code-block:: console
 
@@ -32,7 +32,7 @@ Then, run the following command:
   pip install -e /path/to/your/local/twine
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
-when you have made changes, you can easily see their effect.
+when you make changes, you can easily see their effect.
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -84,7 +84,7 @@ Submitting changes
 4. Ensure that your name is added to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
-5. Submit a Pull Request to the ``master`` branch on GitHub.
+5. Submit a pull request to the ``master`` branch on GitHub.
 
 
 Architectural overview
