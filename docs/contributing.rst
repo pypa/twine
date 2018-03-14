@@ -120,7 +120,7 @@ merge into a single tool; see `ongoing discussion
 .. _`virtualenv`: https://virtualenv.pypa.io/en/stable/installation/
 .. _`pipenv`: https://pipenv.readthedocs.io/en/latest/
 .. _`tox`: https://tox.readthedocs.io/en/latest/
-.. _`tox-pipenv`: https://pypi.python.org/pypi/tox-pipenv
+.. _`tox-pipenv`: https://pypi.org/project/tox-pipenv
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`open issues`: https://github.com/pypa/twine/issues
