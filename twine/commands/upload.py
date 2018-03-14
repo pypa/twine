@@ -53,7 +53,7 @@ def find_dists(dists):
     return group_wheel_files_first(uploads)
 
 
-def skip_upload(response, skip_existing, package):
+def skip_upload(response, package):
     filename = package.basefilename
     # NOTE(sigmavirus24): Old PyPI returns the first message while Warehouse
     # returns the latter. This papers over the differences.
@@ -67,8 +67,8 @@ def skip_upload(response, skip_existing, package):
     # 2. a) The response status code is 409 OR
     # 2. b) The response status code is 400 AND it has a reason that matches
     #       what we expect PyPI to return to us.
-    return (skip_existing and (response.status_code == 409 or
-            (response.status_code == 400 and response.reason.startswith(msg))))
+    return (response.status_code == 409 or
+            (response.status_code == 400 and response.reason.startswith(msg)))
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
@@ -147,7 +147,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
                  ' Aborting...').format(config["repository"],
                                         resp.headers["location"]))
 
-        if skip_upload(resp, skip_existing, package):
+        if skip_existing and skip_upload(resp, package):
             print(skip_message)
             continue
 

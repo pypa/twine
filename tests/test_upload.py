@@ -103,7 +103,6 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     assert upload.skip_upload(response=response,
-                              skip_existing=True,
                               package=pkg) is True
 
 
@@ -116,20 +115,7 @@ def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     assert upload.skip_upload(response=response,
-                              skip_existing=True,
                               package=pkg) is True
-
-
-def test_skip_upload_respects_skip_existing(monkeypatch):
-    response = pretend.stub(
-        status_code=400,
-        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-               'exists for twine-1.5.0.')
-
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=False,
-                              package=pkg) is False
 
 
 def test_values_from_env(monkeypatch):
