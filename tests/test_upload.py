@@ -13,6 +13,7 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
+import json
 import os
 import textwrap
 
@@ -97,6 +98,7 @@ def test_get_config_old_format(tmpdir):
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
     response = pretend.stub(
+        headers={},
         status_code=400,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
                'exists for twine-1.5.0.')
@@ -109,9 +111,29 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
     # pypiserver (https://pypi.python.org/pypi/pypiserver) responds with 409
     response = pretend.stub(
+        headers={},
         status_code=409,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
                'exists for twine-1.5.0.')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              package=pkg) is True
+
+
+def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
+    response = pretend.stub(
+        headers={'X-Artifactory-Id': '1234567890abcdef'},
+        status_code=403,
+        reason='Forbidden',
+        content=json.dumps({
+            "errors" : [ {
+                "status" : 403,
+                "message" : "Not enough permissions to overwrite artifact "
+                            "'twine-1.5.0-py2.py3-none-any.whl' (user 'user'"
+                            "needs DELETE permission)."
+            } ]
+        }))
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     assert upload.skip_upload(response=response,

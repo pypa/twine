@@ -54,21 +54,42 @@ def find_dists(dists):
 
 
 def skip_upload(response, package):
-    filename = package.basefilename
-    # NOTE(sigmavirus24): Old PyPI returns the first message while Warehouse
-    # returns the latter. This papers over the differences.
-    msg = ('A file named "{0}" already exists for'.format(filename),
-           'File already exists')
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
-    # 409 status code. We only want to skip an upload if:
-    # 1. The user has told us to skip existing packages (skip_existing is
-    #    True) AND
-    # 2. a) The response status code is 409 OR
+    # 409 status code.
+    # NOTE(goodtune): Artifactory v5.9 returns a 403 status code with a JSON
+    # payload when the file exists and the user does not have permissions to
+    # replace the package.
+    # We only want to skip an upload if:
+    # 1. The user has told us to skip existing packages (checked prior to
+    #    calling this function) AND
+    # 2. a) The response status code is 409; OR
     # 2. b) The response status code is 400 AND it has a reason that matches
-    #       what we expect PyPI to return to us.
-    return (response.status_code == 409 or
-            (response.status_code == 400 and response.reason.startswith(msg)))
+    #       what we expect PyPI to return to us; OR
+    # 2. c) The response status code is 403 AND it has a reason that matches
+    #       what we expect Artifactory to return to us.
+
+    # Artifactory provides a custom header we can look for to ensure this
+    # logic is only employed against their implementation.
+    if 'X-Artifactory-Id' in response.headers and response.status_code == 403:
+        if 'needs DELETE permission' in response.content:
+            return True
+
+    # PyPI code path.
+    if response.status_code == 400:
+        filename = package.basefilename
+        # NOTE(sigmavirus24): Old PyPI returns the first message while
+        # Warehouse returns the latter. This papers over the differences.
+        msg = ('A file named "{0}" already exists for'.format(filename),
+               'File already exists')
+        if response.reason.startswith(msg):
+            return True
+
+    # "Other implementations" code path.
+    if response.status_code == 409:
+        return True
+
+    return False
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
