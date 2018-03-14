@@ -143,11 +143,14 @@ def check_status_code(response):
     if (response.status_code == 500 and
             response.url.startswith(("https://pypi.python.org",
                                      "https://testpypi.python.org"))):
-        print("It appears you're uploading to pypi.python.org (or testpypi) "
-              "you've received a 500 error response. PyPI is being phased "
-              "out for pypi.org. Try using https://upload.pypi.org/legacy/ "
+        print("It appears you're uploading to pypi.python.org (or "
+              "testpypi.python.org). You've received a 500 error response. "
+              "Uploading to those sites is deprecated. The new sites are "
+              "pypi.org and test.pypi.org. Try using "
+              "https://upload.pypi.org/legacy/ "
               "(or https://test.pypi.org/legacy/) to upload your packages "
-              "instead. These are the default URLs for Twine now.")
+              "instead. These are the default URLs for Twine now. More at "
+              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
     response.raise_for_status()
 
 
