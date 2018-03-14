@@ -74,7 +74,7 @@ def main(args):
              "Should be a section in the config file. (Can also be set "
              "via %(env)s environment variable.) "
              "Initial package registration no longer necessary on pypi.org: "
-             "https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata",
+             "https://packaging.python.org/guides/migrating-to-pypi-org/",
     )
     parser.add_argument(
         "--repository-url",
@@ -82,8 +82,8 @@ def main(args):
         env="TWINE_REPOSITORY_URL",
         default=None,
         required=False,
-        help="The repository URL to register the package to. "
-             "This overrides --repository."
+        help="The repository (package index) URL to register the package to. "
+             "This overrides --repository. "
              "(Can also be set via %(env)s environment variable.)"
     )
     parser.add_argument(
@@ -91,25 +91,25 @@ def main(args):
         action=utils.EnvironmentDefault,
         env="TWINE_USERNAME",
         required=False, help="The username to authenticate to the repository "
-                             "as (can also be set via %(env)s environment "
-                             "variable)",
+                             "(package index) as. (Can also be set via "
+                             "%(env)s environment variable.)",
     )
     parser.add_argument(
         "-p", "--password",
         action=utils.EnvironmentDefault,
         env="TWINE_PASSWORD",
         required=False, help="The password to authenticate to the repository "
-                             "with (can also be set via %(env)s environment "
-                             "variable)",
+                             "(package index) with. (Can also be set via "
+                             "%(env)s environment variable.)",
     )
     parser.add_argument(
         "-c", "--comment",
-        help="The comment to include with the distribution file",
+        help="The comment to include with the distribution file.",
     )
     parser.add_argument(
         "--config-file",
         default="~/.pypirc",
-        help="The .pypirc config file to use",
+        help="The .pypirc config file to use.",
     )
     parser.add_argument(
         "--cert",
@@ -119,18 +119,18 @@ def main(args):
         required=False,
         metavar="path",
         help="Path to alternate CA bundle (can also be set via %(env)s "
-             "environment variable)",
+             "environment variable).",
     )
     parser.add_argument(
         "--client-cert",
         metavar="path",
         help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM format",
+             "private key and the certificate in PEM format.",
     )
     parser.add_argument(
         "package",
         metavar="package",
-        help="File from which we read the package metadata",
+        help="File from which we read the package metadata.",
     )
 
     args = parser.parse_args(args)
