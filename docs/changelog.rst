@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* :support:`318` `Update PyPI URLs
+  <https://packaging.python.org/guides/migrating-to-pypi-org/>`_.
 * :release:`1.10.0 <2018-03-07>`
 * :bug:`315 major` Degrade gracefully when keyring is unavailable
 * :feature:`304` Reorganize & improve user & developer documentation.
