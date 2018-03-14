@@ -69,11 +69,12 @@ def main(args):
         "-r", "--repository",
         action=utils.EnvironmentDefault,
         env="TWINE_REPOSITORY",
-        default="pypi",
-        help="The repository to register the package to. "
-             "Should be a section in the config file (default: "
-             "%(default)s). (Can also be set via %(env)s environment "
-             "variable)",
+        default=None,
+        help="The repository (package index) to register the package to. "
+             "Should be a section in the config file. (Can also be set "
+             "via %(env)s environment variable.) "
+             "Initial package registration no longer necessary on pypi.org: "
+             "https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata",
     )
     parser.add_argument(
         "--repository-url",
