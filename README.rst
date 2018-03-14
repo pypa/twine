@@ -63,13 +63,19 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with ``twine``:
+2. Upload with ``twine`` to `Test PyPI`_ and verify things look right:
+
+   .. code-block:: console
+
+       $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+
+3. Upload to `PyPI`_:
 
    .. code-block:: console
 
        $ twine upload dist/*
 
-3. Done!
+4. Done!
 
 More documentation on using ``twine`` to upload packages to PyPI is in
 the `Python Packaging User Guide`_.
@@ -230,6 +236,7 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`a utility`: https://pypi.org/project/twine/
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
+.. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`documentation`: http://twine.readthedocs.io/
 .. _`developer documentation`: https://twine.readthedocs.io/en/latest/contributing.html
