@@ -148,6 +148,10 @@ class PackageFile(object):
             "requires_dist": meta.requires_dist,
             "requires_external": meta.requires_external,
             "requires_python": meta.requires_python,
+
+            # Metadata 2.1
+            "provides_extras": meta.provides_extras,
+            "description_content_type": meta.description_content_type,
         }
 
         if self.gpg_signature is not None:
