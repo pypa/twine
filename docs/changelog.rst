@@ -4,8 +4,9 @@
 Changelog
 =========
 
-* :feature:`319` Support Metadata 2.1 (`PEP 566
-  <https://www.python.org/dev/peps/pep-0566/>`_).
+* :feature:`320` Remove PyPI as default ``register`` package index.
+* :feature:`319` Support Metadata 2.1 (:pep:`566`), including Markdown
+  for ``description`` fields.
 * :support:`318` `Update PyPI URLs
   <https://packaging.python.org/guides/migrating-to-pypi-org/>`_.
 * :release:`1.10.0 <2018-03-07>`
