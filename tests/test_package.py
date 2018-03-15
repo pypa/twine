@@ -15,6 +15,7 @@ from __future__ import unicode_literals
 from twine import package
 
 import pretend
+import pytest
 
 
 def test_sign_file(monkeypatch):
@@ -70,3 +71,95 @@ def test_package_signed_name_is_correct():
 
     assert pkg.signed_basefilename == "deprecated-pypirc.asc"
     assert pkg.signed_filename == (filename + '.asc')
+
+
+@pytest.mark.parametrize('gpg_signature', [
+    (None),
+    (pretend.stub()),
+])
+def test_metadata_dictionary(gpg_signature):
+    meta = pretend.stub(
+        name='whatever',
+        version=pretend.stub(),
+        metadata_version=pretend.stub(),
+        summary=pretend.stub(),
+        home_page=pretend.stub(),
+        author=pretend.stub(),
+        author_email=pretend.stub(),
+        maintainer=pretend.stub(),
+        maintainer_email=pretend.stub(),
+        license=pretend.stub(),
+        description=pretend.stub(),
+        keywords=pretend.stub(),
+        platforms=pretend.stub(),
+        classifiers=pretend.stub(),
+        download_url=pretend.stub(),
+        supported_platforms=pretend.stub(),
+        provides=pretend.stub(),
+        requires=pretend.stub(),
+        obsoletes=pretend.stub(),
+        project_urls=pretend.stub(),
+        provides_dist=pretend.stub(),
+        obsoletes_dist=pretend.stub(),
+        requires_dist=pretend.stub(),
+        requires_external=pretend.stub(),
+        requires_python=pretend.stub(),
+        provides_extras=pretend.stub(),
+        description_content_type=pretend.stub(),
+    )
+
+    pkg = package.PackageFile(
+        filename='tests/fixtures/twine-1.5.0-py2.py3-none-any.whl',
+        comment=pretend.stub(),
+        metadata=meta,
+        python_version=pretend.stub(),
+        filetype=pretend.stub(),
+    )
+    pkg.gpg_signature = gpg_signature
+
+    result = pkg.metadata_dictionary()
+
+    # identify release
+    assert result['name'] == pkg.safe_name
+    assert result['version'] == meta.version
+
+    # file content
+    assert result['filetype'] == pkg.filetype
+    assert result['pyversion'] == pkg.python_version
+
+    # additional meta-data
+    assert result['metadata_version'] == meta.metadata_version
+    assert result['summary'] == meta.summary
+    assert result['home_page'] == meta.home_page
+    assert result['author'] == meta.author
+    assert result['author_email'] == meta.author_email
+    assert result['maintainer'] == meta.maintainer
+    assert result['maintainer_email'] == meta.maintainer_email
+    assert result['license'] == meta.license
+    assert result['description'] == meta.description
+    assert result['keywords'] == meta.keywords
+    assert result['platform'] == meta.platforms
+    assert result['classifiers'] == meta.classifiers
+    assert result['download_url'] == meta.download_url
+    assert result['supported_platform'] == meta.supported_platforms
+    assert result['comment'] == pkg.comment
+
+    # PEP 314
+    assert result['provides'] == meta.provides
+    assert result['requires'] == meta.requires
+    assert result['obsoletes'] == meta.obsoletes
+
+    # Metadata 1.2
+    assert result['project_urls'] == meta.project_urls
+    assert result['provides_dist'] == meta.provides_dist
+    assert result['obsoletes_dist'] == meta.obsoletes_dist
+    assert result['requires_dist'] == meta.requires_dist
+    assert result['requires_external'] == meta.requires_external
+    assert result['requires_python'] == meta.requires_python
+
+    # Metadata 2.1
+    assert result['provides_extras'] == meta.provides_extras
+    assert result['description_content_type'] == meta.description_content_type
+
+    # GPG signature
+    assert result.get('gpg_signature') == gpg_signature
