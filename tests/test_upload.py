@@ -68,31 +68,31 @@ def test_find_dists_handles_real_files():
 
 
 def test_get_config_old_format(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+    with pytest.raises(Exception):
+        pypirc = os.path.join(str(tmpdir), ".pypirc")
+        dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
 
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [server-login]
-            username:foo
-            password:bar
-        """))
+        with open(pypirc, "w") as fp:
+            fp.write(textwrap.dedent("""
+                [server-login]
+                username:foo
+                password:bar
+            """))
 
-    try:
-        upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
-                      username=None, password=None, comment=None,
-                      cert=None, client_cert=None,
-                      sign_with=None, config_file=pypirc, skip_existing=False,
-                      repository_url=None,
-                      )
-    except KeyError as err:
-        assert err.args[0] == (
-            "Missing 'pypi' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{0}' format?\n"
-            "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(pypirc)
+        try:
+            upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
+                          username=None, password=None, comment=None,
+                          cert=None, client_cert=None,
+                          sign_with=None, config_file=pypirc, skip_existing=False,
+                          repository_url=None,
+                          )
+        except Exception as err:
+            assert err.args[0] == (
+                "Need 'index-servers' set in 'distutils' section of {0} ."
+                "Maybe you have a out-dated '{0}' format?\n"
+                "more info: "
+                "https://docs.python.org/distutils/packageindex.html#pypirc\n"
+            ).format(pypirc)
 
 
 def test_deprecated_repo(tmpdir):
@@ -102,6 +102,9 @@ def test_deprecated_repo(tmpdir):
 
         with open(pypirc, "w") as fp:
             fp.write(textwrap.dedent("""
+                [distutils]
+                index-servers = pypi
+
                 [pypi]
                 repository: https://pypi.python.org/pypi/
                 username:foo

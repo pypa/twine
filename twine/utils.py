@@ -64,11 +64,18 @@ def get_config(path="~/.pypirc"):
 
     # Get a list of repositories from the config file
     # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
-    if (parser.has_section("distutils") and
-            parser.has_option("distutils", "index-servers")):
+    if (parser.has_section("distutils") and parser.has_option(
+            "distutils", "index-servers")):
+        # distutils-compliant .pypirc file
         repositories = parser.get("distutils", "index-servers").split()
     else:
-        repositories = ["pypi"]
+        raise Exception(
+            "Need 'index-servers' set in 'distutils' section of {cfg} . "
+            "Maybe you have a out-dated '{cfg}' format?\n"
+            "more info: "
+            "https://docs.python.org/distutils/packageindex.html#pypirc "
+            "\n".format(cfg=path)
+            )
 
     config = {}
 
@@ -104,10 +111,11 @@ def get_config(path="~/.pypirc"):
 
 
 def get_repository_from_config(config_file, repository, repository_url=None):
-    # Get our config from the .pypirc file
+    # Get our config from the .pypirc file,
+    # and, if provided, command-line values for the repository
+    # name and URL
     if repository_url and "://" in repository_url:
-        # assume that the repository is actually an URL and just sent
-        # them a dummy with the repo set
+        # prefer the command-line repository_url
         return {
             "repository": repository_url,
             "username": None,
