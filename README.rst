@@ -99,9 +99,11 @@ To use the keyring, you must first install the keyring packages:
   python3-dbus``. See `Keyring's installation instructions`_ for more details.
 
 Once keyring is installed you can use the ``keyring`` program to set your
-username and password for Twine.
+username and password to use for each package index (repository) you want to
+upload to using Twine.
 
-To set your username and password for test PyPI:
+To set your username and password for test PyPI run the following command.
+``keyring`` will prompt you for your password:
 
 .. code-block:: console
 
@@ -109,11 +111,13 @@ To set your username and password for test PyPI:
     # or
     $ python3 -m keyring set https://test.pypi.org/legacy/ your-username
 
-To set your username and password for PyPI:
+To set your username and password for PyPI run this command, again, ``keyring``
+will prompt for the password:
 
 .. code-block:: console
 
     $ keyring set https://upload.pypi.org/legacy/ your-username
+    # or
     $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
 
@@ -256,10 +260,10 @@ example.
 * ``TWINE_USERNAME`` - the username to use for authentication to the repository.
 * ``TWINE_PASSWORD`` - the password to use for authentication to the repository.
 * ``TWINE_REPOSITORY`` - the repository configuration, either defined as a
-  section in `.pypirc` or provided as a full URL
-* ``TWINE_REPOSITORY_URL`` - the repository URL to use
+  section in `.pypirc` or provided as a full URL.
+* ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
-  self-signed or untrusted certificates
+  self-signed or untrusted certificates.
 
 Resources
 ---------
