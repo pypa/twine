@@ -30,3 +30,9 @@ class PackageNotFound(Exception):
     This is only used when attempting to register a package.
     """
     pass
+
+
+class UploadToDeprecatedPyPIDetected(Exception):
+    """An upload attempt was detected to deprecated legacy PyPI
+    sites pypi.python.org or testpypi.python.org."""
+    pass

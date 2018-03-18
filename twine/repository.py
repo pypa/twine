@@ -31,6 +31,7 @@ import twine
 KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
 
 LEGACY_PYPI = 'https://pypi.python.org/'
+LEGACY_TEST_PYPI = 'https://testpypi.python.org/'
 WAREHOUSE = 'https://upload.pypi.org/'
 OLD_WAREHOUSE = 'https://upload.pypi.io/'
 

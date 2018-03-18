@@ -21,7 +21,7 @@ import sys
 
 import twine.exceptions as exc
 from twine.package import PackageFile
-from twine.repository import Repository, LEGACY_PYPI
+from twine.repository import Repository, LEGACY_PYPI, LEGACY_TEST_PYPI
 from twine import utils
 
 
@@ -98,11 +98,20 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
-    if config["repository"].startswith(LEGACY_PYPI):
-        print(
-            "Note: you are uploading to the old upload URL. It's recommended "
-            "to use the new URL \"{0}\" or to leave the URL unspecified and "
-            "allow twine to choose.".format(utils.DEFAULT_REPOSITORY))
+    if config["repository"].startswith((LEGACY_PYPI, LEGACY_TEST_PYPI)):
+        raise exc.UploadToDeprecatedPyPIDetected(
+            "You're trying to upload to the legacy PyPI site '{0}'. "
+            "Uploading to those sites is deprecated. \n "
+            "The new sites are pypi.org and test.pypi.org. Try using "
+            "{1} (or {2}) to upload your packages instead. "
+            "These are the default URLs for Twine now. \n More at "
+            "https://packaging.python.org/guides/migrating-to-pypi-org/ "
+            ".".format(
+                config["repository"],
+                utils.DEFAULT_REPOSITORY,
+                utils.TEST_REPOSITORY
+                )
+            )
 
     username = utils.get_username(username, config)
     password = utils.get_password(

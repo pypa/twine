@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* :bug:`322 major` Raise exception if attempting upload to deprecated legacy
+  PyPI URLs.
 * :feature:`320` Remove PyPI as default ``register`` package index.
 * :feature:`319` Support Metadata 2.1 (:pep:`566`), including Markdown
   for ``description`` fields.
