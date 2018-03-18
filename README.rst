@@ -55,8 +55,8 @@ Installation
     $ pip install twine
 
 
-Usage
------
+Using Twine
+-----------
 
 1. Create some distributions in the normal way:
 
@@ -64,11 +64,14 @@ Usage
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right:
+2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine will automatically prompt for your username and password:
 
    .. code-block:: console
 
        $ twine upload --repository-url https://test.pypi.org/legacy/ dist/*
+       username: ...
+       password:
+       ...
 
 3. Upload to `PyPI`_:
 
@@ -81,9 +84,58 @@ Usage
 More documentation on using ``twine`` to upload packages to PyPI is in
 the `Python Packaging User Guide`_.
 
+Keyring Support
+---------------
+
+Instead of typing in your password every time you upload a distribution, Twine
+allows you to store your username and password securely using `keyring`_.
+
+To use the keyring, you must first install the keyring packages:
+
+- On Windows and MacOS you just need to install ``keyring``, for example,
+  ``pip install --user keyring``.
+- On Linux, in addition to the ``keyring`` package you also need to ensure the
+  ``python3-dbus`` system package is installed. For example, ``apt install
+  python3-dbus``. See `Keyring's installation instructions`_ for more details.
+
+Once keyring is installed you can use the ``keyring`` program to set your
+username and password to use for each package index (repository) you want to
+upload to using Twine.
+
+To set your username and password for test PyPI run the following command.
+``keyring`` will prompt you for your password:
+
+.. code-block:: console
+
+    $ keyring set https://test.pypi.org/legacy/ your-username
+    # or
+    $ python3 -m keyring set https://test.pypi.org/legacy/ your-username
+
+To set your username and password for PyPI run this command, again, ``keyring``
+will prompt for the password:
+
+.. code-block:: console
+
+    $ keyring set https://upload.pypi.org/legacy/ your-username
+    # or
+    $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
+
+
+The next time you run ``twine`` it will prompt you for a username and will grab the appropriate password from the keyring.
+
+.. Note:: If you are using Linux in a headless environment (such as on a
+    server) you'll need to do some additional steps to ensure that Keyring can
+    store secrets securely. See `Using Keyring on headless systems`_.
+
+.. _`keyring`: https://pypi.org/project/keyring/
+.. _`Keyring's installation instructions`:
+    https://keyring.readthedocs.io/en/latest#installation-instructions
+.. _`Using Keyring on headless systems`:
+    https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
+
 
 Options
-^^^^^^^
+-------
 
 .. code-block:: console
 
@@ -205,13 +257,13 @@ variables. Definition via environment variable is helpful in environments where
 it is not convenient to create a `.pypirc` file, such as a CI/build server, for
 example.
 
-* ``TWINE_USERNAME`` - the username to use for authentication to the repository
-* ``TWINE_PASSWORD`` - the password to use for authentication to the repository
+* ``TWINE_USERNAME`` - the username to use for authentication to the repository.
+* ``TWINE_PASSWORD`` - the password to use for authentication to the repository.
 * ``TWINE_REPOSITORY`` - the repository configuration, either defined as a
-  section in `.pypirc` or provided as a full URL
-* ``TWINE_REPOSITORY_URL`` - the repository URL to use
+  section in `.pypirc` or provided as a full URL.
+* ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
-  self-signed or untrusted certificates
+  self-signed or untrusted certificates.
 
 Resources
 ---------
