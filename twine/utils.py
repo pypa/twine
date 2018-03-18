@@ -140,11 +140,15 @@ def normalize_repository_url(url):
 
 
 def check_status_code(response):
-    if (response.status_code == 500 and
+    """
+    Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
+    exception, but this is in case that breaks and it does.
+    """
+    if (response.status_code == 410 and
             response.url.startswith(("https://pypi.python.org",
                                      "https://testpypi.python.org"))):
         print("It appears you're uploading to pypi.python.org (or "
-              "testpypi.python.org). You've received a 500 error response. "
+              "testpypi.python.org). You've received a 410 error response. "
               "Uploading to those sites is deprecated. The new sites are "
               "pypi.org and test.pypi.org. Try using "
               "https://upload.pypi.org/legacy/ "
