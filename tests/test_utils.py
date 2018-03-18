@@ -53,6 +53,10 @@ def test_get_config(tmpdir):
 
 
 def test_get_config_no_distutils(tmpdir):
+    """
+    Even if the user hasn't set PyPI has an index server
+    in 'index-servers', default to uploading to PyPI.
+    """
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:

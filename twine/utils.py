@@ -63,6 +63,7 @@ def get_config(path="~/.pypirc"):
     parser.read(path)
 
     # Get a list of repositories from the config file
+    # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
     if (parser.has_section("distutils") and
             parser.has_option("distutils", "index-servers")):
         repositories = parser.get("distutils", "index-servers").split()
