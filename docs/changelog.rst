@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :support:`314` Add new maintainer, release checklists.
 * :bug:`322 major` Raise exception if attempting upload to deprecated legacy
   PyPI URLs.
 * :feature:`320` Remove PyPI as default ``register`` package index.
