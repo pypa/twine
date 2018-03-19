@@ -21,7 +21,7 @@ import pretend
 import pytest
 
 from twine.commands import upload
-from twine import package, cli
+from twine import package, cli, exceptions
 import twine
 
 import helpers
@@ -96,6 +96,40 @@ def test_get_config_old_format(tmpdir):
         ).format(pypirc)
 
 
+def test_deprecated_repo(tmpdir):
+    with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
+        pypirc = os.path.join(str(tmpdir), ".pypirc")
+        dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+
+        with open(pypirc, "w") as fp:
+            fp.write(textwrap.dedent("""
+                [pypi]
+                repository: https://pypi.python.org/pypi/
+                username:foo
+                password:bar
+            """))
+
+        upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
+                      username=None, password=None, comment=None,
+                      cert=None, client_cert=None,
+                      sign_with=None, config_file=pypirc, skip_existing=False,
+                      repository_url=None,
+                      )
+
+        assert err.args[0] == (
+            "You're trying to upload to the legacy PyPI site "
+            "'https://pypi.python.org/pypi/'. "
+            "Uploading to those sites is deprecated. \n "
+            "The new sites are pypi.org and test.pypi.org. Try using "
+            "https://upload.pypi.org/legacy/ "
+            "(or https://test.pypi.org/legacy/) "
+            "to upload your packages instead. "
+            "These are the default URLs for Twine now. \n "
+            "More at "
+            "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
+            )
+
+
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
     response = pretend.stub(
         headers={},
@@ -108,7 +142,8 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
-    # pypiserver (https://pypi.python.org/pypi/pypiserver) responds with 409
+    # pypiserver (http://pypi.org/project/pypiserver) responds with a
+    # 409 when the file already exists.
     response = pretend.stub(
         headers={},
         status_code=409,

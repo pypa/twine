@@ -21,7 +21,7 @@ import sys
 
 import twine.exceptions as exc
 from twine.package import PackageFile
-from twine.repository import Repository, LEGACY_PYPI
+from twine.repository import Repository, LEGACY_PYPI, LEGACY_TEST_PYPI
 from twine import utils
 
 
@@ -119,11 +119,20 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
     print("Uploading distributions to {0}".format(config["repository"]))
 
-    if config["repository"].startswith(LEGACY_PYPI):
-        print(
-            "Note: you are uploading to the old upload URL. It's recommended "
-            "to use the new URL \"{0}\" or to leave the URL unspecified and "
-            "allow twine to choose.".format(utils.DEFAULT_REPOSITORY))
+    if config["repository"].startswith((LEGACY_PYPI, LEGACY_TEST_PYPI)):
+        raise exc.UploadToDeprecatedPyPIDetected(
+            "You're trying to upload to the legacy PyPI site '{0}'. "
+            "Uploading to those sites is deprecated. \n "
+            "The new sites are pypi.org and test.pypi.org. Try using "
+            "{1} (or {2}) to upload your packages instead. "
+            "These are the default URLs for Twine now. \n More at "
+            "https://packaging.python.org/guides/migrating-to-pypi-org/ "
+            ".".format(
+                config["repository"],
+                utils.DEFAULT_REPOSITORY,
+                utils.TEST_REPOSITORY
+                )
+            )
 
     username = utils.get_username(username, config)
     password = utils.get_password(
@@ -186,10 +195,10 @@ def main(args):
         action=utils.EnvironmentDefault,
         env="TWINE_REPOSITORY",
         default="pypi",
-        help="The repository to upload the package to. "
+        help="The repository (package index) to upload the package to. "
              "Should be a section in the config file (default: "
              "%(default)s). (Can also be set via %(env)s environment "
-             "variable)",
+             "variable.)",
     )
     parser.add_argument(
         "--repository-url",
@@ -197,49 +206,49 @@ def main(args):
         env="TWINE_REPOSITORY_URL",
         default=None,
         required=False,
-        help="The repository URL to upload the package to. "
-             "This overrides --repository."
+        help="The repository (package index) URL to upload the package to. "
+             "This overrides --repository. "
              "(Can also be set via %(env)s environment variable.)"
     )
     parser.add_argument(
         "-s", "--sign",
         action="store_true",
         default=False,
-        help="Sign files to upload using gpg",
+        help="Sign files to upload using GPG.",
     )
     parser.add_argument(
         "--sign-with",
         default="gpg",
-        help="GPG program used to sign uploads (default: %(default)s)",
+        help="GPG program used to sign uploads (default: %(default)s).",
     )
     parser.add_argument(
         "-i", "--identity",
-        help="GPG identity used to sign files",
+        help="GPG identity used to sign files.",
     )
     parser.add_argument(
         "-u", "--username",
         action=utils.EnvironmentDefault,
         env="TWINE_USERNAME",
         required=False, help="The username to authenticate to the repository "
-                             "as (can also be set via %(env)s environment "
-                             "variable)",
+                             "(package index) as. (Can also be set via "
+                             "%(env)s environment variable.)",
     )
     parser.add_argument(
         "-p", "--password",
         action=utils.EnvironmentDefault,
         env="TWINE_PASSWORD",
         required=False, help="The password to authenticate to the repository "
-                             "with (can also be set via %(env)s environment "
-                             "variable)",
+                             "(package index) with. (Can also be set via "
+                             "%(env)s environment variable.)",
     )
     parser.add_argument(
         "-c", "--comment",
-        help="The comment to include with the distribution file",
+        help="The comment to include with the distribution file.",
     )
     parser.add_argument(
         "--config-file",
         default="~/.pypirc",
-        help="The .pypirc config file to use",
+        help="The .pypirc config file to use.",
     )
     parser.add_argument(
         "--skip-existing",
@@ -257,21 +266,22 @@ def main(args):
         required=False,
         metavar="path",
         help="Path to alternate CA bundle (can also be set via %(env)s "
-             "environment variable)",
+             "environment variable).",
     )
     parser.add_argument(
         "--client-cert",
         metavar="path",
         help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM format",
+             "private key and the certificate in PEM format.",
     )
     parser.add_argument(
         "dists",
         nargs="+",
         metavar="dist",
-        help="The distribution files to upload to the repository, may "
-             "additionally contain a .asc file to include an existing "
-             "signature with the file upload",
+        help="The distribution files to upload to the repository "
+             "(package index). Usually dist/* . May additionally contain "
+             "a .asc file to include an existing signature with the "
+             "file upload.",
     )
 
     args = parser.parse_args(args)
