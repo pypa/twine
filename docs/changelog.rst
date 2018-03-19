@@ -4,6 +4,9 @@
 Changelog
 =========
 
+* :bug:`269 major` Avoid uploading to PyPI when given alternate
+  repository URL, and require ``http://`` or ``https://`` in
+  ``repository_url``.
 * :support:`314` Add new maintainer, release checklists.
 * :bug:`322 major` Raise exception if attempting upload to deprecated legacy
   PyPI URLs.
