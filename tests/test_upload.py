@@ -142,7 +142,7 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
-    # pypiserver (http://pypi.org/project/pypiserver) responds with a
+    # pypiserver (https://pypi.org/project/pypiserver) responds with a
     # 409 when the file already exists.
     response = pretend.stub(
         status_code=409,

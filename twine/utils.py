@@ -122,7 +122,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         }
     if repository_url and "://" not in repository_url:
         raise twine.exceptions.UnreachableRepositoryURLDetected(
-            "Repository URL {0} has no protocol. Please add 'http://' or "
+            "Repository URL {0} has no protocol. Please add "
             "'https://'. \n".format(repository_url))
     try:
         return get_config(config_file)[repository]
