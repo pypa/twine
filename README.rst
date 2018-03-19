@@ -268,7 +268,7 @@ example.
 Resources
 ---------
 
-* `IRC <http://webchat.freenode.net/?channels=%23pypa>`_
+* `IRC <https://webchat.freenode.net/?channels=%23pypa>`_
   (``#pypa`` - irc.freenode.net)
 * `GitHub repository <https://github.com/pypa/twine>`_
 * User and developer `documentation`_
