@@ -125,12 +125,14 @@ def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
         status_code=403,
         reason='Forbidden',
         content=json.dumps({
-            "errors" : [ {
-                "status" : 403,
-                "message" : "Not enough permissions to overwrite artifact "
-                            "'twine-1.5.0-py2.py3-none-any.whl' (user 'user'"
-                            "needs DELETE permission)."
-            } ]
+            "errors": [
+                {
+                    "status": 403,
+                    "message": "Not enough permissions to overwrite artifact "
+                               "'twine-1.5.0-py2.py3-none-any.whl' (user "
+                               "'user' needs DELETE permission)."
+                },
+            ],
         }))
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
