@@ -53,7 +53,7 @@ def find_dists(dists):
     return group_wheel_files_first(uploads)
 
 
-def skip_upload(response, package):
+def ignore_upload_failure(response, package):
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
     # 409 status code.
@@ -168,7 +168,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
                  ' Aborting...').format(config["repository"],
                                         resp.headers["location"]))
 
-        if skip_existing and skip_upload(resp, package):
+        if skip_existing and ignore_upload_failure(resp, package):
             print(skip_message)
             continue
 

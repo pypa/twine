@@ -104,8 +104,7 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
                'exists for twine-1.5.0.')
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              package=pkg) is True
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
@@ -117,8 +116,7 @@ def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
                'exists for twine-1.5.0.')
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              package=pkg) is True
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
 def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
@@ -136,8 +134,7 @@ def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
         }))
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              package=pkg) is True
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
 def test_values_from_env(monkeypatch):
