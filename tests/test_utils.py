@@ -19,9 +19,9 @@ import os.path
 import textwrap
 
 try:
-    import builtins
-except ImportError:
     import __builtin__ as builtins
+except ImportError:
+    import builtins
 
 import pytest
 
