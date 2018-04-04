@@ -35,10 +35,10 @@ except ImportError:
 import twine.exceptions
 
 # Shim for raw_input in python3
-if sys.version_info > (3,):
-    input_func = input
-else:
+try:
     input_func = raw_input
+exxept NameError:
+    input_func = input
 
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
