@@ -112,9 +112,9 @@ def get_config(path="~/.pypirc"):
 
 def get_repository_from_config(config_file, repository, repository_url=None):
     # Get our config from, if provided, command-line values for the
-    # repository name and URL, or the .pypirc file
+    # repository name and URL, or from config_file
     if repository_url:
-        # prefer CLI `repository_url` over `repository` or .pypirc
+        # prefer CLI `repository_url` over `repository` or config_file
         if "://" in repository_url:
             return {
                 "repository": repository_url,
@@ -129,8 +129,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         return get_config(config_file)[repository]
     except KeyError:
         msg = (
-            "Missing '{repo}' section from the configuration file.\n"
-            "Maybe you have a out-dated '{cfg}' format?\n"
+            "Missing '{repo}' section from the {cfg} config file.\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(
