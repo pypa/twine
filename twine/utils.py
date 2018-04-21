@@ -111,10 +111,9 @@ def get_config(path="~/.pypirc"):
 
 
 def get_repository_from_config(config_file, repository, repository_url=None):
-    # Get our config from, if provided, command-line values for the
-    # repository name and URL, or from config_file
+    # Get our config from the cli argument --repository-url (preferred),
+    # or config_file's [repository] field
     if repository_url:
-        # prefer CLI `repository_url` over `repository` or config_file
         if "://" in repository_url:
             return {
                 "repository": repository_url,
