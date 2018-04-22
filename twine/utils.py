@@ -14,13 +14,16 @@
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
-import os
-import os.path
+import argparse
 import functools
 import getpass
+import os
+import os.path
 import sys
-import argparse
 import warnings
+
+from appdirs import site_config_dir, user_config_dir
+from first import first
 
 try:
     import configparser
@@ -41,11 +44,33 @@ else:
     input_func = raw_input
 
 
+# Pick up a .pypirc from the first place we find it. Use appdirs to produce
+# sensible locations on various platforms. Similar to pip (although they use a
+# vendored version of appdirs with customisations).
+DEFAULT_PYPIRC = '~/.pypirc'  # backwards compatible location
+PYPIRC = first(
+    [
+        # twine specific user configuration has highest precedence. On Windows
+        # the user may be part of a network environment with a roaming profile;
+        # we will prefer a local profile to a roaming one, but check for each.
+        # The `roaming` option has no effect on other platforms and both these
+        # paths will be the same.
+        os.path.join(
+            user_config_dir('twine', False, roaming=False), '.pypirc'),
+        os.path.join(user_config_dir('twine', False, roaming=True), '.pypirc'),
+        # the historical default is $HOME/.pypirc so take it next
+        os.path.expanduser(DEFAULT_PYPIRC),
+        # introduce a twine specific location to allow system wide config
+        os.path.join(site_config_dir('twine', False), '.pypirc'),
+    ],
+    default=DEFAULT_PYPIRC,
+    key=os.path.exists)
+
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
-def get_config(path="~/.pypirc"):
+def get_config(path=PYPIRC):
     # Expand user strings in the path
     path = os.path.expanduser(path)
 

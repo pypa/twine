@@ -19,6 +19,8 @@ import twine
 
 
 install_requires = [
+    "appdirs >= 1.4.3",
+    "first >= 2.0.1",
     "tqdm >= 4.14",
     "pkginfo >= 1.4.2",
     "requests >= 2.5.0, != 2.15, != 2.16",

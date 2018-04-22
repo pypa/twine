@@ -249,6 +249,17 @@ For completeness, its usage:
                             containing the private key and the certificate in PEM
                             format.
 
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+Twine will search for a `.pypirc` file in the following locations when it is not
+specified on the command line.
+
+1. In the twine folder of the user's configuration directory
+2. In the user's home directory
+3. In the twine folder of the system configuration directory
+
+
 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^
 

@@ -108,7 +108,7 @@ def main(args):
     )
     parser.add_argument(
         "--config-file",
-        default="~/.pypirc",
+        default=utils.PYPIRC,
         help="The .pypirc config file to use.",
     )
     parser.add_argument(
