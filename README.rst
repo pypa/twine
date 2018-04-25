@@ -18,7 +18,7 @@ security and testability.
 
 The biggest reason to use ``twine`` is that it securely authenticates
 you to `PyPI`_ over HTTPS using a verified connection regardless of
-the underlying Python version, while whether or
+the underlying Python version, while whether or not
 ``python setup.py upload`` will work correctly and securely depends
 on your build system, your Python version and the underlying operating
 system.
