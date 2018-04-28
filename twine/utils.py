@@ -22,6 +22,8 @@ import sys
 import argparse
 import warnings
 
+from requests.exceptions import HTTPError
+
 try:
     import configparser
 except ImportError:  # pragma: no cover
@@ -151,7 +153,7 @@ def normalize_repository_url(url):
     return urlunparse(parsed)
 
 
-def check_status_code(response):
+def check_status_code(response, verbose):
     """
     Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
     exception, but this is in case that breaks and it does.
@@ -167,7 +169,16 @@ def check_status_code(response):
               "(or https://test.pypi.org/legacy/) to upload your packages "
               "instead. These are the default URLs for Twine now. More at "
               "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except HTTPError as err:
+        if response.text:
+            if verbose:
+                print('Content received from server:\n{}'.format(
+                    response.text))
+            else:
+                print('NOTE: Try --verbose to see response content.')
+        raise err
 
 
 def get_userpass_value(cli_value, config, key, prompt_strategy=None):
