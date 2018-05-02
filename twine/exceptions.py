@@ -36,3 +36,10 @@ class UploadToDeprecatedPyPIDetected(Exception):
     """An upload attempt was detected to deprecated legacy PyPI
     sites pypi.python.org or testpypi.python.org."""
     pass
+
+
+class UnreachableRepositoryURLDetected(Exception):
+    """An upload attempt was detected to a URL without a protocol prefix.
+
+    """
+    pass

@@ -22,6 +22,8 @@ import sys
 import argparse
 import warnings
 
+from requests.exceptions import HTTPError
+
 try:
     import configparser
 except ImportError:  # pragma: no cover
@@ -31,6 +33,8 @@ try:
     from urlparse import urlparse, urlunparse
 except ImportError:
     from urllib.parse import urlparse, urlunparse
+
+import twine.exceptions
 
 # Shim for raw_input in python3
 if sys.version_info > (3,):
@@ -63,11 +67,17 @@ def get_config(path="~/.pypirc"):
     parser.read(path)
 
     # Get a list of repositories from the config file
+    # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
     if (parser.has_section("distutils") and
             parser.has_option("distutils", "index-servers")):
         repositories = parser.get("distutils", "index-servers").split()
+    elif parser.has_section("pypi"):
+        # Special case: if the .pypirc file has a 'pypi' section,
+        # even if there's no list of index servers,
+        # be lenient and include that in our list of repositories.
+        repositories = ['pypi']
     else:
-        repositories = ["pypi"]
+        repositories = []
 
     config = {}
 
@@ -103,15 +113,19 @@ def get_config(path="~/.pypirc"):
 
 
 def get_repository_from_config(config_file, repository, repository_url=None):
-    # Get our config from the .pypirc file
+    # Get our config from, if provided, command-line values for the
+    # repository name and URL, or the .pypirc file
     if repository_url and "://" in repository_url:
-        # assume that the repository is actually an URL and just sent
-        # them a dummy with the repo set
+        # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
             "username": None,
             "password": None,
         }
+    if repository_url and "://" not in repository_url:
+        raise twine.exceptions.UnreachableRepositoryURLDetected(
+            "Repository URL {0} has no protocol. Please add "
+            "'https://'. \n".format(repository_url))
     try:
         return get_config(config_file)[repository]
     except KeyError:
@@ -139,7 +153,7 @@ def normalize_repository_url(url):
     return urlunparse(parsed)
 
 
-def check_status_code(response):
+def check_status_code(response, verbose):
     """
     Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
     exception, but this is in case that breaks and it does.
@@ -155,7 +169,16 @@ def check_status_code(response):
               "(or https://test.pypi.org/legacy/) to upload your packages "
               "instead. These are the default URLs for Twine now. More at "
               "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
-    response.raise_for_status()
+    try:
+        response.raise_for_status()
+    except HTTPError as err:
+        if response.text:
+            if verbose:
+                print('Content received from server:\n{}'.format(
+                    response.text))
+            else:
+                print('NOTE: Try --verbose to see response content.')
+        raise err
 
 
 def get_userpass_value(cli_value, config, key, prompt_strategy=None):

@@ -84,7 +84,7 @@ def test_get_config_old_format(tmpdir):
                       username=None, password=None, comment=None,
                       cert=None, client_cert=None,
                       sign_with=None, config_file=pypirc, skip_existing=False,
-                      repository_url=None,
+                      repository_url=None, verbose=None,
                       )
     except KeyError as err:
         assert err.args[0] == (
@@ -113,7 +113,7 @@ def test_deprecated_repo(tmpdir):
                       username=None, password=None, comment=None,
                       cert=None, client_cert=None,
                       sign_with=None, config_file=pypirc, skip_existing=False,
-                      repository_url=None,
+                      repository_url=None, verbose=None,
                       )
 
         assert err.args[0] == (
@@ -142,7 +142,7 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
-    # pypiserver (http://pypi.org/project/pypiserver) responds with a
+    # pypiserver (https://pypi.org/project/pypiserver) responds with a
     # 409 when the file already exists.
     response = pretend.stub(
         headers={},

@@ -3,9 +3,11 @@ twine
 
 .. rtd-inclusion-marker-do-not-remove
 
-Twine is `a utility`_ for `publishing`_ packages on `PyPI`_.
+Twine is `a utility`_ for `publishing`_ Python packages on `PyPI`_.
 
-Currently it only supports registering `projects`_ and uploading `distributions`_.
+It provides build system independent uploads of source and binary
+`distribution artifacts <distributions>`_ for both new and existing
+`projects`_.
 
 
 Why Should I Use This?
@@ -15,17 +17,16 @@ The goal of ``twine`` is to improve PyPI interaction by improving
 security and testability.
 
 The biggest reason to use ``twine`` is that it securely authenticates
-you to `PyPI`_ over HTTPS using a verified connection, while ``python
-setup.py upload`` `only recently stopped using HTTP
-<https://bugs.python.org/issue12226>`_ in Python 2.7.9+ and Python
-3.2+. This means anytime you use ``python setup.py upload`` with an
-older Python version, you expose your username and password to being
-easily sniffed. Twine uses only verified TLS to upload to PyPI,
-protecting your credentials from theft.
+you to `PyPI`_ over HTTPS using a verified connection regardless of
+the underlying Python version, while whether or not
+``python setup.py upload`` will work correctly and securely depends
+on your build system, your Python version and the underlying operating
+system.
 
 Secondly, it allows you to precreate your distribution files.
-``python setup.py upload`` only allows you to upload something that you've
-created in the same command invocation. This means that you cannot test the
+``python setup.py upload`` only allows you to upload something that you're
+building with ``distutils`` or ``setuptools``, and created in the same
+command invocation. This means that you cannot test the
 exact file you're going to upload to PyPI to ensure that it works before
 uploading it.
 
@@ -268,7 +269,7 @@ example.
 Resources
 ---------
 
-* `IRC <http://webchat.freenode.net/?channels=%23pypa>`_
+* `IRC <https://webchat.freenode.net/?channels=%23pypa>`_
   (``#pypa`` - irc.freenode.net)
 * `GitHub repository <https://github.com/pypa/twine>`_
 * User and developer `documentation`_

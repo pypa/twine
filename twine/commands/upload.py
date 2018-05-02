@@ -94,7 +94,7 @@ def ignore_upload_failure(response, package):
 
 def upload(dists, repository, sign, identity, username, password, comment,
            sign_with, config_file, skip_existing, cert, client_cert,
-           repository_url):
+           repository_url, verbose):
     # Check that a nonsensical option wasn't given
     if not sign and identity:
         raise ValueError("sign must be given along with identity")
@@ -180,8 +180,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
         if skip_existing and ignore_upload_failure(resp, package):
             print(skip_message)
             continue
-
-        utils.check_status_code(resp)
+        utils.check_status_code(resp, verbose)
 
     # Bug 28. Try to silence a ResourceWarning by clearing the connection
     # pool.
@@ -282,6 +281,11 @@ def main(args):
              "(package index). Usually dist/* . May additionally contain "
              "a .asc file to include an existing signature with the "
              "file upload.",
+    )
+    parser.add_argument(
+        "--verbose",
+        action="store_true",
+        help="Show verbose output."
     )
 
     args = parser.parse_args(args)
