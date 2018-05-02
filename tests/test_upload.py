@@ -13,6 +13,7 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
+import json
 import os
 import textwrap
 
@@ -131,40 +132,46 @@ def test_deprecated_repo(tmpdir):
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
     response = pretend.stub(
+        headers={},
         status_code=400,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
                'exists for twine-1.5.0.')
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
     # pypiserver (https://pypi.org/project/pypiserver) responds with a
     # 409 when the file already exists.
     response = pretend.stub(
+        headers={},
         status_code=409,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
                'exists for twine-1.5.0.')
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
-def test_skip_upload_respects_skip_existing(monkeypatch):
+def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
     response = pretend.stub(
-        status_code=400,
-        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-               'exists for twine-1.5.0.')
+        headers={'X-Artifactory-Id': '1234567890abcdef'},
+        status_code=403,
+        reason='Forbidden',
+        content=json.dumps({
+            "errors": [
+                {
+                    "status": 403,
+                    "message": "Not enough permissions to overwrite artifact "
+                               "'twine-1.5.0-py2.py3-none-any.whl' (user "
+                               "'user' needs DELETE permission)."
+                },
+            ],
+        }))
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=False,
-                              package=pkg) is False
+    assert upload.ignore_upload_failure(response=response, package=pkg) is True
 
 
 def test_values_from_env(monkeypatch):
