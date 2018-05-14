@@ -27,7 +27,8 @@ from requests.exceptions import HTTPError
 try:
     import configparser
 except ImportError:  # pragma: no cover
-    import ConfigParser as configparser
+    # https://github.com/python/mypy/issues/1153
+    import ConfigParser as configparser  # type: ignore
 
 try:
     from urlparse import urlparse, urlunparse

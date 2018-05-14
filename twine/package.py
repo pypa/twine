@@ -24,7 +24,8 @@ try:
     from hashlib import blake2b
 except ImportError:
     try:
-        from pyblake2 import blake2b
+        # https://github.com/python/mypy/issues/1153
+        from pyblake2 import blake2b  # type: ignore
     except ImportError:
         blake2b = None
 

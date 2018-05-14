@@ -21,7 +21,8 @@ import textwrap
 try:
     import builtins
 except ImportError:
-    import __builtin__ as builtins
+    # https://github.com/python/mypy/issues/1153
+    import __builtin__ as builtins  # type: ignore
 
 import pytest
 
