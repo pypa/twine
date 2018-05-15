@@ -20,6 +20,7 @@ Twine user documentation
 
    contributing
    changelog
+   api
    Python Packaging User Guide <https://packaging.python.org/tutorials/distributing-packages/>
 
 * :ref:`search`
