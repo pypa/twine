@@ -57,18 +57,23 @@ def skip_upload(response, skip_existing, package):
     filename = package.basefilename
     # NOTE(sigmavirus24): Old PyPI returns the first message while Warehouse
     # returns the latter. This papers over the differences.
-    msg = ('A file named "{0}" already exists for'.format(filename),
-           'File already exists')
+    msg_400 = ('A file named "{0}" already exists for'.format(filename),
+               'File already exists')
+    msg_403 = 'Not enough permissions to overwrite artifact'
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
-    # 409 status code. We only want to skip an upload if:
+    # 409 or 403 status code. We only want to skip an upload if:
     # 1. The user has told us to skip existing packages (skip_existing is
     #    True) AND
     # 2. a) The response status code is 409 OR
     # 2. b) The response status code is 400 AND it has a reason that matches
-    #       what we expect PyPI to return to us.
+    #       what we expect PyPI to return to us. OR
+    # 2. c) The response status code is 403 AND the text matches what we
+    #       expect Artifactory to return to us.
     return (skip_existing and (response.status_code == 409 or
-            (response.status_code == 400 and response.reason.startswith(msg))))
+            (response.status_code == 400 and
+             response.reason.startswith(msg_400)) or
+            (response.status_code == 403 and msg_403 in response.text)))
 
 
 def upload(dists, repository, sign, identity, username, password, comment,
