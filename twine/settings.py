@@ -254,19 +254,11 @@ class Settings(object):
 
         if repository_url.startswith((repository.LEGACY_PYPI,
                                       repository.LEGACY_TEST_PYPI)):
-            raise exceptions.UploadToDeprecatedPyPIDetected(
-                "You're trying to upload to the legacy PyPI site '{0}'. "
-                "Uploading to those sites is deprecated. \n "
-                "The new sites are pypi.org and test.pypi.org. Try using "
-                "{1} (or {2}) to upload your packages instead. "
-                "These are the default URLs for Twine now. \n More at "
-                "https://packaging.python.org/guides/migrating-to-pypi-org/ "
-                ".".format(
-                    repository_url,
-                    utils.DEFAULT_REPOSITORY,
-                    utils.TEST_REPOSITORY
-                    )
-                )
+            raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
+                repository_url,
+                utils.DEFAULT_REPOSITORY,
+                utils.TEST_REPOSITORY
+            )
 
     def create_repository(self):
         """Create a new repository for uploading."""

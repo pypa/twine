@@ -47,7 +47,17 @@ class UploadToDeprecatedPyPIDetected(TwineException):
     The sites pypi.python.org and testpypi.python.org are deprecated.
     """
 
-    pass
+    @classmethod
+    def from_args(cls, target_url, default_url, test_url):
+        """Return an UploadToDeprecatedPyPIDetected instance."""
+        return cls("You're trying to upload to the legacy PyPI site '{0}'. "
+                   "Uploading to those sites is deprecated. \n "
+                   "The new sites are pypi.org and test.pypi.org. Try using "
+                   "{1} (or {2}) to upload your packages instead. "
+                   "These are the default URLs for Twine now. \n More at "
+                   "https://packaging.python.org/guides/migrating-to-pypi-org/"
+                   " .".format(target_url, default_url, test_url)
+                   )
 
 
 class UnreachableRepositoryURLDetected(TwineException):
