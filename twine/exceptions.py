@@ -1,4 +1,5 @@
-# Copyright 2015 Ian Cordasco
+"""Module containing exceptions raised by twine."""
+# Copyright 2015 Ian Stapleton Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -13,7 +14,13 @@
 # limitations under the License.
 
 
-class RedirectDetected(Exception):
+class TwineException(Exception):
+    """Base class for all exceptions raised by twine."""
+
+    pass
+
+
+class RedirectDetected(TwineException):
     """A redirect was detected that the user needs to resolve.
 
     In some cases, requests refuses to issue a new POST request after a
@@ -21,25 +28,38 @@ class RedirectDetected(Exception):
     exception to allow users to know the index they're uploading to is
     redirecting them.
     """
+
     pass
 
 
-class PackageNotFound(Exception):
+class PackageNotFound(TwineException):
     """A package file was provided that could not be found on the file system.
 
     This is only used when attempting to register a package.
     """
+
     pass
 
 
-class UploadToDeprecatedPyPIDetected(Exception):
-    """An upload attempt was detected to deprecated legacy PyPI
-    sites pypi.python.org or testpypi.python.org."""
+class UploadToDeprecatedPyPIDetected(TwineException):
+    """An upload attempt was detected to deprecated PyPI domains.
+
+    The sites pypi.python.org and testpypi.python.org are deprecated.
+    """
+
     pass
 
 
-class UnreachableRepositoryURLDetected(Exception):
+class UnreachableRepositoryURLDetected(TwineException):
     """An upload attempt was detected to a URL without a protocol prefix.
 
+    All repository URLs must have a protocol (e.g., ``https://``).
     """
+
+    pass
+
+
+class InvalidSigningConfiguration(TwineException):
+    """Both the sign and identity parameters must be present."""
+
     pass
