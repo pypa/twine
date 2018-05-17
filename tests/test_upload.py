@@ -20,7 +20,7 @@ import pretend
 import pytest
 
 from twine.commands import upload
-from twine import package, cli, exceptions
+from twine import package, cli, exceptions, settings
 import twine
 
 import helpers
@@ -79,12 +79,12 @@ def test_get_config_old_format(tmpdir):
         """))
 
     try:
-        upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
-                      username=None, password=None, comment=None,
-                      cert=None, client_cert=None,
-                      sign_with=None, config_file=pypirc, skip_existing=False,
-                      repository_url=None, verbose=None,
-                      )
+        upload_settings = settings.Settings(
+            repository="pypi", sign=None, identity=None, username=None,
+            password=None, comment=None, cert=None, client_cert=None,
+            sign_with=None, config_file=pypirc, skip_existing=False,
+            repository_url=None, verbose=None,
+        )
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file\n"
@@ -108,12 +108,14 @@ def test_deprecated_repo(tmpdir):
                 password:bar
             """))
 
-        upload.upload(dists=dists, repository="pypi", sign=None, identity=None,
-                      username=None, password=None, comment=None,
-                      cert=None, client_cert=None,
-                      sign_with=None, config_file=pypirc, skip_existing=False,
-                      repository_url=None, verbose=None,
-                      )
+        upload_settings = settings.Settings(
+            repository="pypi", sign=None, identity=None, username=None,
+            password=None, comment=None, cert=None, client_cert=None,
+            sign_with=None, config_file=pypirc, skip_existing=False,
+            repository_url=None, verbose=None,
+        )
+
+        upload.upload(upload_settings, dists)
 
         assert err.args[0] == (
             "You're trying to upload to the legacy PyPI site "
@@ -178,12 +180,7 @@ def test_values_from_env(monkeypatch):
                "TWINE_CERT": "/foo/bar.crt"}
     with helpers.set_env(**testenv):
         cli.dispatch(["upload", "path/to/file"])
-    cli.dispatch(["upload", "path/to/file"])
-    result_kwargs = replaced_upload.calls[0].kwargs
-    assert "pypipassword" == result_kwargs["password"]
-    assert "pypiuser" == result_kwargs["username"]
-    assert "/foo/bar.crt" == result_kwargs["cert"]
-    result_kwargs = replaced_upload.calls[1].kwargs
-    assert None is result_kwargs["password"]
-    assert None is result_kwargs["username"]
-    assert None is result_kwargs["cert"]
+    upload_settings = replaced_upload.calls[0].args[0]
+    assert "pypipassword" == upload_settings.password
+    assert "pypiuser" == upload_settings.username
+    assert "/foo/bar.crt" == upload_settings.cacert

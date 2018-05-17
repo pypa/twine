@@ -21,7 +21,7 @@ import sys
 
 import twine.exceptions as exc
 from twine.package import PackageFile
-from twine.repository import Repository, LEGACY_PYPI, LEGACY_TEST_PYPI
+from twine import settings
 from twine import utils
 
 
@@ -71,13 +71,7 @@ def skip_upload(response, skip_existing, package):
             (response.status_code == 400 and response.reason.startswith(msg))))
 
 
-def upload(dists, repository, sign, identity, username, password, comment,
-           sign_with, config_file, skip_existing, cert, client_cert,
-           repository_url, verbose):
-    # Check that a nonsensical option wasn't given
-    if not sign and identity:
-        raise ValueError("sign must be given along with identity")
-
+def upload(upload_settings, dists):
     dists = find_dists(dists)
 
     # Determine if the user has passed in pre-signed distributions
@@ -85,47 +79,15 @@ def upload(dists, repository, sign, identity, username, password, comment,
         (os.path.basename(d), d) for d in dists if d.endswith(".asc")
     )
     uploads = [i for i in dists if not i.endswith(".asc")]
+    upload_settings.check_repository_url()
+    repository_url = upload_settings.repository_config['repository']
 
-    config = utils.get_repository_from_config(
-        config_file,
-        repository,
-        repository_url,
-    )
+    print("Uploading distributions to {0}".format(repository_url))
 
-    config["repository"] = utils.normalize_repository_url(
-        config["repository"]
-    )
-
-    print("Uploading distributions to {0}".format(config["repository"]))
-
-    if config["repository"].startswith((LEGACY_PYPI, LEGACY_TEST_PYPI)):
-        raise exc.UploadToDeprecatedPyPIDetected(
-            "You're trying to upload to the legacy PyPI site '{0}'. "
-            "Uploading to those sites is deprecated. \n "
-            "The new sites are pypi.org and test.pypi.org. Try using "
-            "{1} (or {2}) to upload your packages instead. "
-            "These are the default URLs for Twine now. \n More at "
-            "https://packaging.python.org/guides/migrating-to-pypi-org/ "
-            ".".format(
-                config["repository"],
-                utils.DEFAULT_REPOSITORY,
-                utils.TEST_REPOSITORY
-                )
-            )
-
-    username = utils.get_username(username, config)
-    password = utils.get_password(
-        config["repository"], username, password, config,
-    )
-    ca_cert = utils.get_cacert(cert, config)
-    client_cert = utils.get_clientcert(client_cert, config)
-
-    repository = Repository(config["repository"], username, password)
-    repository.set_certificate_authority(ca_cert)
-    repository.set_client_certificate(client_cert)
+    repository = upload_settings.create_repository()
 
     for filename in uploads:
-        package = PackageFile.from_filename(filename, comment)
+        package = PackageFile.from_filename(filename, upload_settings.comment)
         skip_message = (
             "  Skipping {0} because it appears to already exist".format(
                 package.basefilename)
@@ -134,15 +96,16 @@ def upload(dists, repository, sign, identity, username, password, comment,
         # Note: The skip_existing check *needs* to be first, because otherwise
         #       we're going to generate extra HTTP requests against a hardcoded
         #       URL for no reason.
-        if skip_existing and repository.package_is_uploaded(package):
+        if (upload_settings.skip_existing and
+                repository.package_is_uploaded(package)):
             print(skip_message)
             continue
 
         signed_name = package.signed_basefilename
         if signed_name in signatures:
             package.add_gpg_signature(signatures[signed_name], signed_name)
-        elif sign:
-            package.sign(sign_with, identity)
+        elif upload_settings.sign:
+            package.sign(upload_settings.sign_with, upload_settings.identity)
 
         resp = repository.upload(package)
 
@@ -153,13 +116,13 @@ def upload(dists, repository, sign, identity, username, password, comment,
         if resp.is_redirect:
             raise exc.RedirectDetected(
                 ('"{0}" attempted to redirect to "{1}" during upload.'
-                 ' Aborting...').format(config["repository"],
+                 ' Aborting...').format(repository_url,
                                         resp.headers["location"]))
 
-        if skip_upload(resp, skip_existing, package):
+        if skip_upload(resp, upload_settings.skip_existing, package):
             print(skip_message)
             continue
-        utils.check_status_code(resp, verbose)
+        utils.check_status_code(resp, upload_settings.verbose)
 
     # Bug 28. Try to silence a ResourceWarning by clearing the connection
     # pool.
@@ -168,90 +131,7 @@ def upload(dists, repository, sign, identity, username, password, comment,
 
 def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
-    parser.add_argument(
-        "-r", "--repository",
-        action=utils.EnvironmentDefault,
-        env="TWINE_REPOSITORY",
-        default="pypi",
-        help="The repository (package index) to upload the package to. "
-             "Should be a section in the config file (default: "
-             "%(default)s). (Can also be set via %(env)s environment "
-             "variable.)",
-    )
-    parser.add_argument(
-        "--repository-url",
-        action=utils.EnvironmentDefault,
-        env="TWINE_REPOSITORY_URL",
-        default=None,
-        required=False,
-        help="The repository (package index) URL to upload the package to. "
-             "This overrides --repository. "
-             "(Can also be set via %(env)s environment variable.)"
-    )
-    parser.add_argument(
-        "-s", "--sign",
-        action="store_true",
-        default=False,
-        help="Sign files to upload using GPG.",
-    )
-    parser.add_argument(
-        "--sign-with",
-        default="gpg",
-        help="GPG program used to sign uploads (default: %(default)s).",
-    )
-    parser.add_argument(
-        "-i", "--identity",
-        help="GPG identity used to sign files.",
-    )
-    parser.add_argument(
-        "-u", "--username",
-        action=utils.EnvironmentDefault,
-        env="TWINE_USERNAME",
-        required=False, help="The username to authenticate to the repository "
-                             "(package index) as. (Can also be set via "
-                             "%(env)s environment variable.)",
-    )
-    parser.add_argument(
-        "-p", "--password",
-        action=utils.EnvironmentDefault,
-        env="TWINE_PASSWORD",
-        required=False, help="The password to authenticate to the repository "
-                             "(package index) with. (Can also be set via "
-                             "%(env)s environment variable.)",
-    )
-    parser.add_argument(
-        "-c", "--comment",
-        help="The comment to include with the distribution file.",
-    )
-    parser.add_argument(
-        "--config-file",
-        default="~/.pypirc",
-        help="The .pypirc config file to use.",
-    )
-    parser.add_argument(
-        "--skip-existing",
-        default=False,
-        action="store_true",
-        help="Continue uploading files if one already exists. (Only valid "
-             "when uploading to PyPI. Other implementations may not support "
-             "this.)",
-    )
-    parser.add_argument(
-        "--cert",
-        action=utils.EnvironmentDefault,
-        env="TWINE_CERT",
-        default=None,
-        required=False,
-        metavar="path",
-        help="Path to alternate CA bundle (can also be set via %(env)s "
-             "environment variable).",
-    )
-    parser.add_argument(
-        "--client-cert",
-        metavar="path",
-        help="Path to SSL client certificate, a single file containing the "
-             "private key and the certificate in PEM format.",
-    )
+    settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
         "dists",
         nargs="+",
@@ -261,16 +141,12 @@ def main(args):
              "a .asc file to include an existing signature with the "
              "file upload.",
     )
-    parser.add_argument(
-        "--verbose",
-        action="store_true",
-        help="Show verbose output."
-    )
 
     args = parser.parse_args(args)
+    upload_settings = settings.Settings.from_argparse(args)
 
     # Call the upload function with the arguments from the command line
-    upload(**vars(args))
+    upload(upload_settings, args.dists)
 
 
 if __name__ == "__main__":
