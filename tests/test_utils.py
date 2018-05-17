@@ -270,6 +270,7 @@ def test_no_positional_on_method():
     t = T(foo=True)
     assert t.foo
 
+
 def test_no_positional_on_function():
     @utils.no_positional()
     def t(foo=False):
