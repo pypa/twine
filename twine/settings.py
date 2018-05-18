@@ -45,6 +45,7 @@ class Settings(object):
                  config_file='~/.pypirc', skip_existing=False,
                  cacert=None, client_cert=None,
                  repository_name='pypi', repository_url=None,
+                 verbose=False,
                  **ignored_kwargs
                  ):
         """Initialize our settings instance.
@@ -92,9 +93,12 @@ class Settings(object):
         :param str repository_url:
             The URL of the repository (package index) to interact with. This
             will override the settings inferred from ``repository_name``.
+        :param bool verbose:
+            Show verbose output.
         """
         self.config_file = config_file
         self.comment = comment
+        self.verbose = verbose
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name, repository_url=repository_url,
@@ -197,6 +201,8 @@ class Settings(object):
         )
         parser.add_argument(
             "--verbose",
+            default=False,
+            required=False,
             action="store_true",
             help="Show verbose output."
         )
