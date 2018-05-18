@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import unicode_literals
+import platform
 from twine import package
 
 import pretend
@@ -172,6 +173,10 @@ TWINE_1_5_0_WHEEL_HASHES = {
         'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0'
     ),
 }
+
+if platform.python_implementation().lower() == 'pypy':
+    # pyblake2 refuses to install on PyPy
+    TWINE_1_5_0_WHEEL_HASHES['blake2'] = None
 
 
 def test_hash_manager():
