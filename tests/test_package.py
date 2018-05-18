@@ -166,17 +166,17 @@ def test_metadata_dictionary(gpg_signature):
     assert result.get('gpg_signature') == gpg_signature
 
 
-TWINE_1_5_0_WHEEL_HASHES = {
-    'md5': '1919f967e990bee7413e2a4bc35fd5d1',
-    'sha2': 'd86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67',
-    'blake2': (
-        'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0'
-    ),
-}
+TWINE_1_5_0_WHEEL_HEXDIGEST = package.Hexdigest(
+    '1919f967e990bee7413e2a4bc35fd5d1',
+    'd86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67',
+    'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0',
+)
 
 if platform.python_implementation().lower() == 'pypy':
     # pyblake2 refuses to install on PyPy
-    TWINE_1_5_0_WHEEL_HASHES['blake2'] = None
+    TWINE_1_5_0_WHEEL_HEXDIGEST = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(
+        blake2=None,
+    )
 
 
 def test_hash_manager():
@@ -184,7 +184,7 @@ def test_hash_manager():
     filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
     hasher = package.HashManager(filename)
     hasher.hash()
-    assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HASHES
+    assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
 
 
 def test_fips_hash_manager(monkeypatch):
@@ -195,8 +195,7 @@ def test_fips_hash_manager(monkeypatch):
     filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
     hasher = package.HashManager(filename)
     hasher.hash()
-    hashes = TWINE_1_5_0_WHEEL_HASHES.copy()
-    hashes['md5'] = None
+    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(md5=None)
     assert hasher.hexdigest() == hashes
 
 
@@ -207,6 +206,5 @@ def test_no_blake2_hash_manager(monkeypatch):
     filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
     hasher = package.HashManager(filename)
     hasher.hash()
-    hashes = TWINE_1_5_0_WHEEL_HASHES.copy()
-    hashes['blake2'] = None
+    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
     assert hasher.hexdigest() == hashes

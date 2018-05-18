@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
+import collections
 import hashlib
 import io
 import os
@@ -65,9 +66,9 @@ class PackageFile(object):
         hasher.hash()
         hexdigest = hasher.hexdigest()
 
-        self.md5_digest = hexdigest['md5']
-        self.sha2_digest = hexdigest['sha2']
-        self.blake2_256_digest = hexdigest['blake2']
+        self.md5_digest = hexdigest.md5
+        self.sha2_digest = hexdigest.sha2
+        self.blake2_256_digest = hexdigest.blake2
 
     @classmethod
     def from_filename(cls, filename, comment):
@@ -166,6 +167,9 @@ class PackageFile(object):
         self.add_gpg_signature(self.signed_filename, self.signed_basefilename)
 
 
+Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])
+
+
 class HashManager(object):
     """Manage our hashing objects for simplicity.
 
@@ -214,7 +218,7 @@ class HashManager(object):
         return None
 
     def hash(self):
-        """Hash the file and return a dictionary of hash values."""
+        """Hash the file contents."""
         with open(self.filename, "rb") as fp:
             for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
                 self._md5_update(content)
@@ -222,8 +226,9 @@ class HashManager(object):
                 self._blake_update(content)
 
     def hexdigest(self):
-        return {
-            'md5': self._md5_hexdigest(),
-            'sha2': self._sha2_hexdigest(),
-            'blake2': self._blake_hexdigest(),
-        }
+        """Return the hexdigest for the file."""
+        return Hexdigest(
+            self._md5_hexdigest(),
+            self._sha2_hexdigest(),
+            self._blake_hexdigest(),
+        )
