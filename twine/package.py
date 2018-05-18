@@ -68,15 +68,24 @@ class PackageFile(object):
         # either use the methods or lambdas to do nothing.
         blake_update = getattr(blake2_256_hash, 'update', lambda *args: None)
         blake_hexdigest = getattr(blake2_256_hash, 'hexdigest', lambda: None)
-        md5_hash = hashlib.md5()
+
+        # NOTE: MD5 is not available on FIPS-enabled systems
+        md5_hash = None
+        try:
+            md5_hash = hashlib.md5()
+        except ValueError:
+            md5_hash = None
+        md5_update = getattr(md5_hash, 'update', lambda *args: None)
+        md5_hexdigest = getattr(md5_hash, 'hexdigest', lambda: None)
+
         sha2_hash = hashlib.sha256()
         with open(filename, "rb") as fp:
             for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
-                md5_hash.update(content)
+                md5_update(content)
                 sha2_hash.update(content)
                 blake_update(content)
 
-        self.md5_digest = md5_hash.hexdigest()
+        self.md5_digest = md5_hexdigest()
         self.sha2_digest = sha2_hash.hexdigest()
         self.blake2_256_digest = blake_hexdigest()
 
