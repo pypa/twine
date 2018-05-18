@@ -79,10 +79,10 @@ def test_get_config_old_format(tmpdir):
 
     try:
         settings.Settings(
-            repository="pypi", sign=None, identity=None, username=None,
+            repository_name="pypi", sign=None, identity=None, username=None,
             password=None, comment=None, cert=None, client_cert=None,
             sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=None,
+            repository_url=None, verbose=False,
         )
     except KeyError as err:
         assert err.args[0] == (
@@ -108,10 +108,10 @@ def test_deprecated_repo(tmpdir):
             """))
 
         upload_settings = settings.Settings(
-            repository="pypi", sign=None, identity=None, username=None,
+            repository_name="pypi", sign=None, identity=None, username=None,
             password=None, comment=None, cert=None, client_cert=None,
             sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=None,
+            repository_url=None, verbose=False,
         )
 
         upload.upload(upload_settings, dists)
