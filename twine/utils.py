@@ -21,6 +21,7 @@ import getpass
 import sys
 import argparse
 import warnings
+import collections
 
 from requests.exceptions import HTTPError
 
@@ -48,68 +49,56 @@ TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def get_config(path="~/.pypirc"):
+    # even if the config file does not exist, set up the parser
+    # variable to reduce the number of if/else statements
+    parser = configparser.RawConfigParser()
+
+    # this list will only be used if index-servers
+    # is not defined in the config file
+    index_servers = ["pypi", "pypitest", "testpypi"]
+
+    # default configuration for each repository
+    defaults = {"username": None, "password": None}
+
     # Expand user strings in the path
     path = os.path.expanduser(path)
 
-    if not os.path.isfile(path):
-        return {"pypi": {"repository": DEFAULT_REPOSITORY,
-                         "username": None,
-                         "password": None
-                         },
-                "pypitest": {"repository": TEST_REPOSITORY,
-                             "username": None,
-                             "password": None
-                             },
-                }
-
     # Parse the rc file
-    parser = configparser.RawConfigParser()
-    parser.read(path)
+    if os.path.isfile(path):
+        parser.read(path)
 
-    # Get a list of repositories from the config file
-    # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
-    if (parser.has_section("distutils") and
-            parser.has_option("distutils", "index-servers")):
-        repositories = parser.get("distutils", "index-servers").split()
-    elif parser.has_section("pypi"):
-        # Special case: if the .pypirc file has a 'pypi' section,
-        # even if there's no list of index servers,
-        # be lenient and include that in our list of repositories.
-        repositories = ['pypi']
-    else:
-        repositories = []
+        # Get a list of index_servers from the config file
+        # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
+        if (parser.has_section("distutils") and
+                parser.has_option("distutils", "index-servers")):
+            index_servers = parser.get("distutils", "index-servers").split()
 
-    config = {}
+        if parser.has_section("server-login"):
+            for key in ["username", "password"]:
+                if parser.has_option("server-login", key):
+                    defaults[key] = parser.get("server-login", key)
 
-    defaults = {"username": None, "password": None}
-    if parser.has_section("server-login"):
-        for key in ["username", "password"]:
-            if parser.has_option("server-login", key):
-                defaults[key] = parser.get("server-login", key)
+    config = collections.defaultdict(lambda: defaults.copy())
 
-    for repository in repositories:
-        # Skip this repository if it doesn't exist in the config file
-        if not parser.has_section(repository):
-            continue
+    # always configure pypi, regardless of index_servers
+    config["pypi"]["repository"] = DEFAULT_REPOSITORY
 
-        # Mandatory configuration and defaults
-        config[repository] = {
-            "repository": DEFAULT_REPOSITORY,
-            "username": None,
-            "password": None,
-        }
+    # if testpypi/pypitest is in index_servers, configure those as well
+    for repository in ("testpypi", "pypitest"):
+        if repository in index_servers:
+            config[repository]["repository"] = TEST_REPOSITORY
 
-        # Optional configuration values
-        for key in [
-            "username", "repository", "password",
-            "ca_cert", "client_cert",
-        ]:
-            if parser.has_option(repository, key):
-                config[repository][key] = parser.get(repository, key)
-            elif defaults.get(key):
-                config[repository][key] = defaults[key]
+    # optional configuration values for individual repositories
+    for repository in index_servers:
+        if parser.has_section(repository):
+            for key in [
+                "username", "repository", "password",
+                "ca_cert", "client_cert",
+            ]:
+                if parser.has_option(repository, key):
+                    config[repository][key] = parser.get(repository, key)
 
-    return config
+    return dict(config)
 
 
 def get_repository_from_config(config_file, repository, repository_url=None):
