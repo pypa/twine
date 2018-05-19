@@ -69,14 +69,12 @@ def get_config(path="~/.pypirc"):
 
         # Get a list of index_servers from the config file
         # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
-        if (parser.has_section("distutils") and
-                parser.has_option("distutils", "index-servers")):
+        if parser.has_option("distutils", "index-servers"):
             index_servers = parser.get("distutils", "index-servers").split()
 
-        if parser.has_section("server-login"):
-            for key in ["username", "password"]:
-                if parser.has_option("server-login", key):
-                    defaults[key] = parser.get("server-login", key)
+        for key in ["username", "password"]:
+            if parser.has_option("server-login", key):
+                defaults[key] = parser.get("server-login", key)
 
     config = collections.defaultdict(lambda: defaults.copy())
 
@@ -90,13 +88,12 @@ def get_config(path="~/.pypirc"):
 
     # optional configuration values for individual repositories
     for repository in index_servers:
-        if parser.has_section(repository):
-            for key in [
-                "username", "repository", "password",
-                "ca_cert", "client_cert",
-            ]:
-                if parser.has_option(repository, key):
-                    config[repository][key] = parser.get(repository, key)
+        for key in [
+            "username", "repository", "password",
+            "ca_cert", "client_cert",
+        ]:
+            if parser.has_option(repository, key):
+                config[repository][key] = parser.get(repository, key)
 
     return dict(config)
 
