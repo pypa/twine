@@ -55,7 +55,7 @@ def get_config(path="~/.pypirc"):
 
     # this list will only be used if index-servers
     # is not defined in the config file
-    index_servers = ["pypi", "pypitest", "testpypi"]
+    index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
     defaults = {"username": None, "password": None}
@@ -78,13 +78,10 @@ def get_config(path="~/.pypirc"):
 
     config = collections.defaultdict(lambda: defaults.copy())
 
-    # always configure pypi, regardless of index_servers
-    config["pypi"]["repository"] = DEFAULT_REPOSITORY
-
-    # if testpypi/pypitest is in index_servers, configure those as well
-    for repository in ("testpypi", "pypitest"):
-        if repository in index_servers:
-            config[repository]["repository"] = TEST_REPOSITORY
+    # don't require users to manually configure URLs for these repositories
+    config["pypi"].setdefault("repository", DEFAULT_REPOSITORY)
+    if "testpypi" in index_servers:
+        config["testpypi"].setdefault("repository", TEST_REPOSITORY)
 
     # optional configuration values for individual repositories
     for repository in index_servers:

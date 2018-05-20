@@ -77,11 +77,6 @@ def test_get_config_no_distutils(tmpdir):
             "username": None,
             "password": None,
         },
-        "pypitest": {
-            "repository": utils.TEST_REPOSITORY,
-            "username": None,
-            "password": None,
-        },
     }
 
 
@@ -115,11 +110,6 @@ def test_get_config_missing(tmpdir):
             "repository": utils.DEFAULT_REPOSITORY,
             "username": None,
             "password": None,
-        },
-        "pypitest": {
-            "repository": utils.TEST_REPOSITORY,
-            "username": None,
-            "password": None
         },
         "testpypi": {
             "repository": utils.TEST_REPOSITORY,
@@ -162,11 +152,6 @@ def test_get_config_deprecated_pypirc():
             "password": "testpassword",
         },
         "testpypi": {
-            "repository": utils.TEST_REPOSITORY,
-            "username": "testusername",
-            "password": "testpassword",
-        },
-        "pypitest": {
             "repository": utils.TEST_REPOSITORY,
             "username": "testusername",
             "password": "testpassword",
