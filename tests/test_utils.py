@@ -102,6 +102,18 @@ def test_get_config_no_section(tmpdir):
     }
 
 
+def test_get_config_override_pypi_url(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            repository = http://pypiproxy
+        """))
+
+    assert utils.get_config(pypirc)['pypi']['repository'] == 'http://pypiproxy'
+
+
 def test_get_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 

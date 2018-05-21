@@ -79,9 +79,9 @@ def get_config(path="~/.pypirc"):
     config = collections.defaultdict(lambda: defaults.copy())
 
     # don't require users to manually configure URLs for these repositories
-    config["pypi"].setdefault("repository", DEFAULT_REPOSITORY)
+    config["pypi"]["repository"] = DEFAULT_REPOSITORY
     if "testpypi" in index_servers:
-        config["testpypi"].setdefault("repository", TEST_REPOSITORY)
+        config["testpypi"]["repository"] = TEST_REPOSITORY
 
     # optional configuration values for individual repositories
     for repository in index_servers:
