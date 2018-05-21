@@ -72,6 +72,11 @@ def test_get_config_no_distutils(tmpdir):
             "username": "testuser",
             "password": "testpassword",
         },
+        "testpypi": {
+            "repository": utils.TEST_REPOSITORY,
+            "username": None,
+            "password": None,
+        },
     }
 
 
@@ -97,6 +102,18 @@ def test_get_config_no_section(tmpdir):
     }
 
 
+def test_get_config_override_pypi_url(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            repository = http://pypiproxy
+        """))
+
+    assert utils.get_config(pypirc)['pypi']['repository'] == 'http://pypiproxy'
+
+
 def test_get_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
@@ -106,7 +123,7 @@ def test_get_config_missing(tmpdir):
             "username": None,
             "password": None,
         },
-        "pypitest": {
+        "testpypi": {
             "repository": utils.TEST_REPOSITORY,
             "username": None,
             "password": None
@@ -143,8 +160,13 @@ def test_get_config_deprecated_pypirc():
     assert utils.get_config(deprecated_pypirc_path) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
-            "username": 'testusername',
-            "password": 'testpassword',
+            "username": "testusername",
+            "password": "testpassword",
+        },
+        "testpypi": {
+            "repository": utils.TEST_REPOSITORY,
+            "username": "testusername",
+            "password": "testpassword",
         },
     }
 
