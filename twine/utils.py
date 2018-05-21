@@ -93,7 +93,7 @@ def get_config(path="~/.pypirc"):
                 config[repository][key] = parser.get(repository, key)
 
     # convert the defaultdict to a regular dict at this point
-    # to prevent unsurprising behavior later on
+    # to prevent surprising behavior later on
     return dict(config)
 
 
