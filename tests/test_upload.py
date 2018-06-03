@@ -86,9 +86,7 @@ def test_get_config_old_format(tmpdir):
         )
     except KeyError as err:
         assert err.args[0] == (
-            "Missing 'pypi' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{0}' format?\n"
+            "Missing 'pypi' section from the '{0}' configuration file.\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(pypirc)

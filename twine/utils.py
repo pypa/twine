@@ -98,26 +98,24 @@ def get_config(path="~/.pypirc"):
 
 
 def get_repository_from_config(config_file, repository, repository_url=None):
-    # Get our config from, if provided, command-line values for the
-    # repository name and URL, or the .pypirc file
-    if repository_url and "://" in repository_url:
-        # prefer CLI `repository_url` over `repository` or .pypirc
-        return {
-            "repository": repository_url,
-            "username": None,
-            "password": None,
-        }
-    if repository_url and "://" not in repository_url:
-        raise twine.exceptions.UnreachableRepositoryURLDetected(
-            "Repository URL {0} has no protocol. Please add "
-            "'https://'. \n".format(repository_url))
+    # Get our config from the cli argument --repository-url (preferred),
+    # or config_file's [repository] field
+    if repository_url:
+        if "://" in repository_url:
+            return {
+                "repository": repository_url,
+                "username": None,
+                "password": None,
+            }
+        else:
+            raise twine.exceptions.UnreachableRepositoryURLDetected(
+                "Repository URL {0} has no protocol. Please add "
+                "'https://'. \n".format(repository_url))
     try:
         return get_config(config_file)[repository]
     except KeyError:
         msg = (
-            "Missing '{repo}' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{cfg}' format?\n"
+            "Missing '{repo}' section from the '{cfg}' configuration file.\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(
