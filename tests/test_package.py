@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import unicode_literals
+import platform
 from twine import package
 
 import pretend
@@ -163,3 +164,47 @@ def test_metadata_dictionary(gpg_signature):
 
     # GPG signature
     assert result.get('gpg_signature') == gpg_signature
+
+
+TWINE_1_5_0_WHEEL_HEXDIGEST = package.Hexdigest(
+    '1919f967e990bee7413e2a4bc35fd5d1',
+    'd86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67',
+    'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0',
+)
+
+if platform.python_implementation().lower() == 'pypy':
+    # pyblake2 refuses to install on PyPy
+    TWINE_1_5_0_WHEEL_HEXDIGEST = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(
+        blake2=None,
+    )
+
+
+def test_hash_manager():
+    """Verify our HashManager works."""
+    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    hasher = package.HashManager(filename)
+    hasher.hash()
+    assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
+
+
+def test_fips_hash_manager(monkeypatch):
+    """Verify the behaviour if hashlib is using FIPS mode."""
+    replaced_md5 = pretend.raiser(ValueError('fipsmode'))
+    monkeypatch.setattr(package.hashlib, 'md5', replaced_md5)
+
+    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    hasher = package.HashManager(filename)
+    hasher.hash()
+    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(md5=None)
+    assert hasher.hexdigest() == hashes
+
+
+def test_no_blake2_hash_manager(monkeypatch):
+    """Verify the behaviour with missing blake2."""
+    monkeypatch.setattr(package, 'blake2b', None)
+
+    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    hasher = package.HashManager(filename)
+    hasher.hash()
+    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
+    assert hasher.hexdigest() == hashes

@@ -72,6 +72,11 @@ def test_get_config_no_distutils(tmpdir):
             "username": "testuser",
             "password": "testpassword",
         },
+        "testpypi": {
+            "repository": utils.TEST_REPOSITORY,
+            "username": None,
+            "password": None,
+        },
     }
 
 
@@ -97,6 +102,18 @@ def test_get_config_no_section(tmpdir):
     }
 
 
+def test_get_config_override_pypi_url(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            repository = http://pypiproxy
+        """))
+
+    assert utils.get_config(pypirc)['pypi']['repository'] == 'http://pypiproxy'
+
+
 def test_get_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
@@ -106,7 +123,7 @@ def test_get_config_missing(tmpdir):
             "username": None,
             "password": None,
         },
-        "pypitest": {
+        "testpypi": {
             "repository": utils.TEST_REPOSITORY,
             "username": None,
             "password": None
@@ -143,8 +160,13 @@ def test_get_config_deprecated_pypirc():
     assert utils.get_config(deprecated_pypirc_path) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
-            "username": 'testusername',
-            "password": 'testpassword',
+            "username": "testusername",
+            "password": "testpassword",
+        },
+        "testpypi": {
+            "repository": utils.TEST_REPOSITORY,
+            "username": "testusername",
+            "password": "testpassword",
         },
     }
 
@@ -256,3 +278,27 @@ def test_get_password_runtime_error_suppressed(
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert 'fail!' in str(warning)
+
+
+def test_no_positional_on_method():
+    class T(object):
+        @utils.no_positional(allow_self=True)
+        def __init__(self, foo=False):
+            self.foo = foo
+
+    with pytest.raises(TypeError):
+        T(1)
+
+    t = T(foo=True)
+    assert t.foo
+
+
+def test_no_positional_on_function():
+    @utils.no_positional()
+    def t(foo=False):
+        return foo
+
+    with pytest.raises(TypeError):
+        t(1)
+
+    assert t(foo=True)
