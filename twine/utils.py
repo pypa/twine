@@ -41,7 +41,8 @@ import twine.exceptions
 if sys.version_info > (3,):
     input_func = input
 else:
-    input_func = raw_input
+    # Ignore "undefined name" for flake8/python3
+    input_func = raw_input  # noqa: F821
 
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"

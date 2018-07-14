@@ -73,7 +73,7 @@ Either use ``tox`` to build against all supported Python versions (if
 you have them installed) or use ``tox -e py{version}`` to test against
 a specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
 
-Also, always run ``tox -e pep8`` before submitting a pull request.
+Also, always run ``tox -e lint`` before submitting a pull request.
 
 Submitting changes
 ^^^^^^^^^^^^^^^^^^
@@ -157,7 +157,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Run Twine tests:
 
    #. ``tox -e py{27,34,35,36,py}``
-   #. ``tox -e pep8`` for the linter
+   #. ``tox -e lint`` for the linter
    #. ``tox -e docs`` (this checks the Sphinx docs and uses
       ``readme_renderer`` to check that the ``long_description`` and other
       metadata will render fine on the PyPI description)
