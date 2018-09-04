@@ -5,7 +5,6 @@ include .coveragerc
 
 recursive-include tests *.py *.whl deprecated-pypirc
 recursive-include docs *.bat *.empty *.py *.rst Makefile *.txt
-recursive-include .github *md
 
 prune docs/_build
 prune *.yml
