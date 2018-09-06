@@ -10,12 +10,14 @@ To more efficiently resolve this issue, we'd like to know some basic information
 python --version
 ```
 
-3) Version of twine you have installed (include complete output of):
+3) How did you install twine? Did you use your operating system's package manager or pip or something else?
+
+4) Version of twine you have installed (include complete output of):
 ``` bash
 twine --version
 ```
 
-4) Which package repository are you targeting?
+5) Which package repository are you targeting?
 
 
 If you're having issues uploading a specific package, you *must* include a copy of the following:
