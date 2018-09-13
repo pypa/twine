@@ -28,45 +28,6 @@ import helpers
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
-def test_ensure_wheel_files_uploaded_first():
-    files = upload.group_wheel_files_first(["twine/foo.py",
-                                            "twine/first.whl",
-                                            "twine/bar.py",
-                                            "twine/second.whl"])
-    expected = ["twine/first.whl",
-                "twine/second.whl",
-                "twine/foo.py",
-                "twine/bar.py"]
-    assert expected == files
-
-
-def test_ensure_if_no_wheel_files():
-    files = upload.group_wheel_files_first(["twine/foo.py",
-                                            "twine/bar.py"])
-    expected = ["twine/foo.py",
-                "twine/bar.py"]
-    assert expected == files
-
-
-def test_find_dists_expands_globs():
-    files = sorted(upload.find_dists(['twine/__*.py']))
-    expected = [os.path.join('twine', '__init__.py'),
-                os.path.join('twine', '__main__.py')]
-    assert expected == files
-
-
-def test_find_dists_errors_on_invalid_globs():
-    with pytest.raises(ValueError):
-        upload.find_dists(['twine/*.rb'])
-
-
-def test_find_dists_handles_real_files():
-    expected = ['twine/__init__.py', 'twine/__main__.py', 'twine/cli.py',
-                'twine/utils.py', 'twine/wheel.py']
-    files = upload.find_dists(expected)
-    assert expected == files
-
-
 def test_get_config_old_format(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 

@@ -15,42 +15,13 @@ from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
 
 import argparse
-import glob
 import os.path
-import sys
 
 import twine.exceptions as exc
+from twine.commands import _find_dists
 from twine.package import PackageFile
 from twine import settings
 from twine import utils
-
-
-def group_wheel_files_first(files):
-    if not any(fname for fname in files if fname.endswith(".whl")):
-        # Return early if there's no wheel files
-        return files
-
-    files.sort(key=lambda x: -1 if x.endswith(".whl") else 0)
-
-    return files
-
-
-def find_dists(dists):
-    uploads = []
-    for filename in dists:
-        if os.path.exists(filename):
-            uploads.append(filename)
-            continue
-        # The filename didn't exist so it may be a glob
-        files = glob.glob(filename)
-        # If nothing matches, files is []
-        if not files:
-            raise ValueError(
-                "Cannot find file (or expand pattern): '%s'" % filename
-                )
-        # Otherwise, files will be filenames that exist
-        uploads.extend(files)
-    return group_wheel_files_first(uploads)
 
 
 def skip_upload(response, skip_existing, package):
@@ -72,7 +43,7 @@ def skip_upload(response, skip_existing, package):
 
 
 def upload(upload_settings, dists):
-    dists = find_dists(dists)
+    dists = _find_dists(dists)
 
     # Determine if the user has passed in pre-signed distributions
     signatures = dict(
