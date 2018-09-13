@@ -118,7 +118,3 @@ def main(args):
 
     # Call the upload function with the arguments from the command line
     upload(upload_settings, args.dists)
-
-
-if __name__ == "__main__":
-    sys.exit(main())
