@@ -72,4 +72,4 @@ def dispatch(argv):
 
     main = registered_commands[args.command].load()
 
-    main(args.args)
+    return main(args.args)

@@ -99,6 +99,8 @@ def upload(upload_settings, dists):
     # pool.
     repository.close()
 
+    return True
+
 
 def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
@@ -117,4 +119,4 @@ def main(args):
     upload_settings = settings.Settings.from_argparse(args)
 
     # Call the upload function with the arguments from the command line
-    upload(upload_settings, args.dists)
+    return upload(upload_settings, args.dists)
