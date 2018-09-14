@@ -138,6 +138,11 @@ The next time you run ``twine`` it will prompt you for a username and will grab 
 Options
 -------
 
+``twine upload``
+^^^^^^^^^^^^^^^^
+
+Uploads one or more distributions to a repository.
+
 .. code-block:: console
 
     $ twine upload -h
@@ -191,16 +196,29 @@ Options
                             containing the private key and the certificate in PEM
                             format.
 
-Twine also includes a ``register`` command.
+``twine check``
+^^^^^^^^^^^^^^^
 
-.. WARNING::
-   ``register`` is `no longer necessary if you are
-   uploading to pypi.org
-   <https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata>`_. As
-   such, it is `no longer supported
-   <https://github.com/pypa/warehouse/issues/1627>`_ in `Warehouse`_
-   (the new PyPI software running on pypi.org). However, you may need
-   this if you are using a different package index.
+Checks whether your distributions long description will render correctly on PyPI.
+
+.. code-block:: console
+
+    $ twine check -h
+    usage: twine check [-h] dist [dist ...]
+
+    positional arguments:
+    dist        The distribution files to check, usually dist/*
+
+    optional arguments:
+    -h, --help  show this help message and exit
+
+``twine register``
+^^^^^^^^^^^^^^^^^^
+
+**WARNING**: The ``register`` command is `no longer necessary if you are uploading to
+pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_ (the new
+PyPI software running on pypi.org). However, you may need this if you are using
+a different package index.
 
 For completeness, its usage:
 
@@ -300,3 +318,5 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`PyPA Code of Conduct`: https://www.pypa.io/en/latest/code-of-conduct/
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-wheel
+.. _`no longer necessary if you are uploading to pypi.org`: https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
+.. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
