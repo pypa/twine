@@ -137,9 +137,9 @@ The next time you run ``twine`` it will prompt you for a username and will grab 
 Disabling Keyring
 ~~~~~~~~~~~~~~~~~
 
-In some cases, the presence of keyring may be an impediment. To disable
-keyring and defer to a prompt for passwords, simply uninstall ``keyring``
-or if that's not an option, you can also configure Keyring to be disabled.
+In some cases, the presence of keyring may be problemmatic. To disable
+keyring and defer to a prompt for passwords, uninstall ``keyring``
+or if that's not an option, you can also configure keyring to be disabled.
 
 See `twine 338 <https://github.com/pypa/twine/issues/338>` for a
 discussion on ways to do that.
