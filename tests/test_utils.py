@@ -18,11 +18,6 @@ import sys
 import os.path
 import textwrap
 
-try:
-    import builtins
-except ImportError:
-    import __builtin__ as builtins
-
 import pytest
 
 from twine import utils
@@ -239,13 +234,7 @@ def keyring_missing(monkeypatch):
     """
     Simulate that 'import keyring' raises an ImportError
     """
-    real_import = builtins.__import__
-
-    def my_import(name, *args, **kwargs):
-        if name == 'keyring':
-            raise ImportError
-        return real_import(name, *args, **kwargs)
-    monkeypatch.setattr(builtins, '__import__', my_import)
+    monkeypatch.delitem(sys.modules, 'keyring', raising=False)
 
 
 @pytest.fixture

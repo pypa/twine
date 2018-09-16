@@ -21,6 +21,7 @@ import twine
 install_requires = [
     "tqdm >= 4.14",
     "pkginfo >= 1.4.2",
+    "readme_renderer >= 21.0",
     "requests >= 2.5.0, != 2.15, != 2.16",
     "requests-toolbelt >= 0.8.0",
     "setuptools >= 0.7.0",
@@ -81,6 +82,7 @@ setup(
 
     entry_points={
         "twine.registered_commands": [
+            "check = twine.commands.check:main",
             "upload = twine.commands.upload:main",
             "register = twine.commands.register:main",
         ],

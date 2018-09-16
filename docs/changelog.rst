@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :feature:`395 major` Add ``twine check`` command to check long description
 * :feature:`392 major` Drop support for Python 3.3
 * :release:`1.11.0 <2018-03-19>`
 * :bug:`269 major` Avoid uploading to PyPI when given alternate

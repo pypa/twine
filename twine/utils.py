@@ -207,12 +207,11 @@ def password_prompt(prompt_text):  # Always expects unicode for our own sanity
 
 
 def get_password_from_keyring(system, username):
-    try:
-        import keyring
-    except ImportError:
+    if 'keyring' not in sys.modules:
         return
 
     try:
+        import keyring
         return keyring.get_password(system, username)
     except Exception as exc:
         warnings.warn(str(exc))
