@@ -26,6 +26,8 @@ except ImportError:
 from pkginfo import distribution
 from pkginfo.distribution import Distribution
 
+import twine.exceptions
+
 # Monkeypatch Metadata 2.0 support
 distribution.HEADER_ATTRS_2_0 = distribution.HEADER_ATTRS_1_2
 distribution.HEADER_ATTRS.update({"2.0": distribution.HEADER_ATTRS_2_0})
@@ -69,7 +71,9 @@ class Wheel(Distribution):
     def read(self):
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
-            raise ValueError('No such file: %s' % fqn)
+            raise twine.exceptions.InvalidDistribution(
+                'No such file: %s' % fqn
+            )
 
         if fqn.endswith('.whl'):
             archive = zipfile.ZipFile(fqn)
@@ -78,7 +82,9 @@ class Wheel(Distribution):
             def read_file(name):
                 return archive.read(name)
         else:
-            raise ValueError('Not a known archive format: %s' % fqn)
+            raise twine.exceptions.InvalidDistribution(
+                'Not a known archive format: %s' % fqn
+            )
 
         try:
             for path in self.find_candidate_metadata_files(names):
@@ -89,7 +95,9 @@ class Wheel(Distribution):
         finally:
             archive.close()
 
-        raise ValueError('No METADATA in archive: %s' % fqn)
+        raise twine.exceptions.InvalidDistribution(
+            'No METADATA in archive: %s' % fqn
+        )
 
     def parse(self, data):
         super(Wheel, self).parse(data)

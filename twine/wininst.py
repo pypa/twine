@@ -7,6 +7,8 @@ import zipfile
 
 from pkginfo.distribution import Distribution
 
+import twine.exceptions
+
 wininst_file_re = re.compile(r".*py(?P<pyver>\d+\.\d+)\.exe$")
 
 
@@ -28,7 +30,9 @@ class WinInst(Distribution):
     def read(self):
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
-            raise ValueError('No such file: %s' % fqn)
+            raise twine.exceptions.InvalidDistribution(
+                'No such file: %s' % fqn
+            )
 
         if fqn.endswith('.exe'):
             archive = zipfile.ZipFile(fqn)
@@ -37,7 +41,9 @@ class WinInst(Distribution):
             def read_file(name):
                 return archive.read(name)
         else:
-            raise ValueError('Not a known archive format: %s' % fqn)
+            raise twine.exceptions.InvalidDistribution(
+                'Not a known archive format: %s' % fqn
+            )
 
         try:
             tuples = [x.split('/') for x in names
@@ -51,4 +57,6 @@ class WinInst(Distribution):
         finally:
             archive.close()
 
-        raise ValueError('No PKG-INFO/.egg-info in archive: %s' % fqn)
+        raise twine.exceptions.InvalidDistribution(
+            'No PKG-INFO/.egg-info in archive: %s' % fqn
+        )

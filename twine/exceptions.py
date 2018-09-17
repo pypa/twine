@@ -79,3 +79,9 @@ class InvalidConfiguration(TwineException):
     """Raised when configuration is invalid."""
 
     pass
+
+
+class InvalidDistribution(TwineException):
+    """Raised when a distribution is invalid."""
+
+    pass
