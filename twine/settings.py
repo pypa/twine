@@ -14,9 +14,9 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
-from twine import exceptions
 from twine import repository
 from twine import utils
+import twine.exceptions
 
 
 class Settings(object):
@@ -217,7 +217,7 @@ class Settings(object):
 
     def _handle_package_signing(self, sign, sign_with, identity):
         if not sign and identity:
-            raise exceptions.InvalidSigningConfiguration(
+            raise twine.exceptions.InvalidSigningConfiguration(
                 "sign must be given along with identity"
             )
         self.sign = sign
@@ -260,7 +260,7 @@ class Settings(object):
 
         if repository_url.startswith((repository.LEGACY_PYPI,
                                       repository.LEGACY_TEST_PYPI)):
-            raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
+            raise twine.exceptions.UploadToDeprecatedPyPIDetected.from_args(
                 repository_url,
                 utils.DEFAULT_REPOSITORY,
                 utils.TEST_REPOSITORY

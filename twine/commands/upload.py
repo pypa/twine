@@ -17,7 +17,7 @@ from __future__ import unicode_literals
 import argparse
 import os.path
 
-import twine.exceptions as exc
+import twine.exceptions
 from twine.commands import _find_dists
 from twine.package import PackageFile
 from twine import settings
@@ -85,7 +85,7 @@ def upload(upload_settings, dists):
         # by PyPI should never happen in reality. This should catch malicious
         # redirects as well.
         if resp.is_redirect:
-            raise exc.RedirectDetected(
+            raise twine.exceptions.RedirectDetected(
                 ('"{0}" attempted to redirect to "{1}" during upload.'
                  ' Aborting...').format(repository_url,
                                         resp.headers["location"]))

@@ -16,8 +16,8 @@ from __future__ import unicode_literals
 import os.path
 import textwrap
 
-from twine import exceptions
 from twine import settings
+import twine.exceptions
 
 import pytest
 
@@ -53,5 +53,5 @@ def test_settings_transforms_config(tmpdir):
 
 def test_identity_requires_sign():
     """Verify that if a user passes identity, we require sign=True."""
-    with pytest.raises(exceptions.InvalidSigningConfiguration):
+    with pytest.raises(twine.exceptions.InvalidSigningConfiguration):
         settings.Settings(sign=False, identity='fakeid')
