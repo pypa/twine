@@ -125,7 +125,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
             repo=repository,
             cfg=config_file
         )
-        raise KeyError(msg)
+        raise twine.exceptions.InvalidConfiguration(msg)
 
 
 _HOSTNAMES = set(["pypi.python.org", "testpypi.python.org", "upload.pypi.org",

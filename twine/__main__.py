@@ -18,12 +18,13 @@ from __future__ import unicode_literals
 import sys
 
 from twine.cli import dispatch
+import twine.exceptions
 
 
 def main():
     try:
         return dispatch(sys.argv[1:])
-    except Exception as exc:
+    except twine.exceptions.TwineException as exc:
         return '{0}: {1}'.format(
             exc.__class__.__name__,
             exc.args[0],
