@@ -18,21 +18,6 @@ import sys
 import twine
 
 
-install_requires = [
-    "tqdm >= 4.14",
-    "pkginfo >= 1.4.2",
-    "readme_renderer >= 21.0",
-    "requests >= 2.5.0, != 2.15, != 2.16",
-    "requests-toolbelt >= 0.8.0",
-    "setuptools >= 0.7.0",
-]
-
-if sys.version_info[:2] < (2, 7):
-    install_requires += [
-        "argparse",
-    ]
-
-
 blake2_requires = []
 
 if sys.version_info[:2] < (3, 6):
@@ -91,7 +76,14 @@ setup(
         ],
     },
 
-    install_requires=install_requires,
+    install_requires=[
+        "pkginfo >= 1.4.2",
+        "readme_renderer >= 21.0",
+        "requests >= 2.5.0, != 2.15, != 2.16",
+        "requests-toolbelt >= 0.8.0",
+        "setuptools >= 0.7.0",
+        "tqdm >= 4.14",
+    ],
     extras_require={
         'with-blake2': blake2_requires,
         'keyring': [
