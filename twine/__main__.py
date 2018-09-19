@@ -23,20 +23,14 @@ from twine import exceptions
 from twine.cli import dispatch
 
 
-def _trim_exception(exc):
-    return '{0}: {1}'.format(
-        exc.__class__.__name__,
-        exc.args[0],
-    )
-
-
 def main():
     try:
         return dispatch(sys.argv[1:])
-    except exceptions.TwineException as exc:
-        return _trim_exception(exc)
-    except requests.exceptions.HTTPError as exc:
-        return _trim_exception(exc)
+    except (exceptions.TwineException, requests.exceptions.HTTPError) as exc:
+        return '{0}: {1}'.format(
+            exc.__class__.__name__,
+            exc.args[0],
+        )
 
 
 if __name__ == "__main__":
