@@ -35,7 +35,7 @@ try:
 except ImportError:
     from urllib.parse import urlparse, urlunparse
 
-import twine.exceptions
+from twine import exceptions
 
 # Shim for raw_input in python3
 if sys.version_info > (3,):
@@ -109,7 +109,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
             "password": None,
         }
     if repository_url and "://" not in repository_url:
-        raise twine.exceptions.UnreachableRepositoryURLDetected(
+        raise exceptions.UnreachableRepositoryURLDetected(
             "Repository URL {0} has no protocol. Please add "
             "'https://'. \n".format(repository_url))
     try:
@@ -125,7 +125,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
             repo=repository,
             cfg=config_file
         )
-        raise twine.exceptions.InvalidConfiguration(msg)
+        raise exceptions.InvalidConfiguration(msg)
 
 
 _HOSTNAMES = set(["pypi.python.org", "testpypi.python.org", "upload.pypi.org",

@@ -7,7 +7,7 @@ import zipfile
 
 from pkginfo.distribution import Distribution
 
-import twine.exceptions
+from twine import exceptions
 
 wininst_file_re = re.compile(r".*py(?P<pyver>\d+\.\d+)\.exe$")
 
@@ -30,7 +30,7 @@ class WinInst(Distribution):
     def read(self):
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
-            raise twine.exceptions.InvalidDistribution(
+            raise exceptions.InvalidDistribution(
                 'No such file: %s' % fqn
             )
 
@@ -41,7 +41,7 @@ class WinInst(Distribution):
             def read_file(name):
                 return archive.read(name)
         else:
-            raise twine.exceptions.InvalidDistribution(
+            raise exceptions.InvalidDistribution(
                 'Not a known archive format: %s' % fqn
             )
 
@@ -57,6 +57,6 @@ class WinInst(Distribution):
         finally:
             archive.close()
 
-        raise twine.exceptions.InvalidDistribution(
+        raise exceptions.InvalidDistribution(
             'No PKG-INFO/.egg-info in archive: %s' % fqn
         )

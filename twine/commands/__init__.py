@@ -17,7 +17,7 @@ from __future__ import unicode_literals
 import glob
 import os.path
 
-import twine.exceptions
+from twine import exceptions
 
 __all__ = []
 
@@ -42,7 +42,7 @@ def _find_dists(dists):
         files = glob.glob(filename)
         # If nothing matches, files is []
         if not files:
-            raise twine.exceptions.InvalidDistribution(
+            raise exceptions.InvalidDistribution(
                 "Cannot find file (or expand pattern): '%s'" % filename
             )
         # Otherwise, files will be filenames that exist

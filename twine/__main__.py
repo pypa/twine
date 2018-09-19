@@ -17,10 +17,10 @@ from __future__ import unicode_literals
 
 import sys
 
-import requests.exceptions
+import requests
 
+from twine import exceptions
 from twine.cli import dispatch
-import twine.exceptions
 
 
 def _trim_exception(exc):
@@ -33,7 +33,7 @@ def _trim_exception(exc):
 def main():
     try:
         return dispatch(sys.argv[1:])
-    except twine.exceptions.TwineException as exc:
+    except exceptions.TwineException as exc:
         return _trim_exception(exc)
     except requests.exceptions.HTTPError as exc:
         return _trim_exception(exc)

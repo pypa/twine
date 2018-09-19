@@ -3,7 +3,7 @@ import os
 import pytest
 
 from twine.commands import _find_dists, _group_wheel_files_first
-import twine.exceptions
+from twine import exceptions
 
 
 def test_ensure_wheel_files_uploaded_first():
@@ -35,7 +35,7 @@ def test_find_dists_expands_globs():
 
 
 def test_find_dists_errors_on_invalid_globs():
-    with pytest.raises(twine.exceptions.InvalidDistribution):
+    with pytest.raises(exceptions.InvalidDistribution):
         _find_dists(["twine/*.rb"])
 
 

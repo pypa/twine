@@ -31,7 +31,7 @@ except ImportError:
 
 from twine.wheel import Wheel
 from twine.wininst import WinInst
-import twine.exceptions
+from twine import exceptions
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
@@ -79,7 +79,7 @@ class PackageFile(object):
                 meta = DIST_TYPES[dtype](filename)
                 break
         else:
-            raise twine.exceptions.InvalidDistribution(
+            raise exceptions.InvalidDistribution(
                 "Unknown distribution format: '%s'" %
                 os.path.basename(filename)
             )
@@ -152,7 +152,7 @@ class PackageFile(object):
 
     def add_gpg_signature(self, signature_filepath, signature_filename):
         if self.gpg_signature is not None:
-            raise twine.exceptions.InvalidDistribution(
+            raise exceptions.InvalidDistribution(
                 'GPG Signature can only be added once'
             )
 
