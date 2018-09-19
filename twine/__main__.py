@@ -17,18 +17,26 @@ from __future__ import unicode_literals
 
 import sys
 
+import requests.exceptions
+
 from twine.cli import dispatch
 import twine.exceptions
+
+
+def _trim_exception(exc):
+    return '{0}: {1}'.format(
+        exc.__class__.__name__,
+        exc.args[0],
+    )
 
 
 def main():
     try:
         return dispatch(sys.argv[1:])
     except twine.exceptions.TwineException as exc:
-        return '{0}: {1}'.format(
-            exc.__class__.__name__,
-            exc.args[0],
-        )
+        return _trim_exception(exc)
+    except requests.exceptions.HTTPError as exc:
+        return _trim_exception(exc)
 
 
 if __name__ == "__main__":
