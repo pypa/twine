@@ -85,6 +85,46 @@ Using Twine
 More documentation on using ``twine`` to upload packages to PyPI is in
 the `Python Packaging User Guide`_.
 
+Configuring ``.pypirc``
+-----------------------
+
+Creating a ``$HOME/.pypirc`` file allows you to define the
+repositories you use, avoiding entering URLs, usernames and passwords
+whenever you run Twine::
+
+    [distutils]
+    index-servers =
+        pypi
+        testpypi
+
+    [pypi]
+    repository: https://upload.pypi.org/legacy/
+    username: <username>
+
+    [testpypi]
+    repository: https://test.pypi.org/legacy/
+    username: <username>
+    password: <password>
+
+You may create as many sections as you want, but remember to add their
+names to the ``index-servers`` variable in the ``distutils`` section.
+The next time you run ``twine``, you just need to use the
+``--repository`` option:
+
+.. code-block:: console
+
+   $ twine upload --repository testpypi dist/*
+
+.. warning::
+   Including your password to this file is discouraged, as
+   **it will be stored in plaintext**. It is recommended to ommit the
+   password as it was done for the ``pypi`` section of the file and
+   either provide it whenever you run Twine or configure the
+   ``keyring`` program, explained in the following section.
+
+More information about the ``.pypirc`` file can be found in the
+`Python Standard Library`_.
+
 Keyring Support
 ---------------
 
@@ -311,6 +351,7 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`Python Standard Library`: https://docs.python.org/3/distutils/packageindex.html#the-pypirc-file
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`: https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-project
