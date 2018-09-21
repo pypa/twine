@@ -135,13 +135,13 @@ The next time you run ``twine`` it will prompt you for a username and will grab 
     https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
 
 Disabling Keyring
-~~~~~~~~~~~~~~~~~
+^^^^^^^^^^^^^^^^^
 
 In some cases, the presence of keyring may be problemmatic. To disable
 keyring and defer to a prompt for passwords, uninstall ``keyring``
 or if that's not an option, you can also configure keyring to be disabled.
 
-See `twine 338 <https://github.com/pypa/twine/issues/338>` for a
+See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for a
 discussion on ways to do that.
 
 Options
