@@ -16,8 +16,8 @@ from __future__ import absolute_import, unicode_literals, print_function
 import argparse
 import os.path
 
-from twine import exceptions as exc
 from twine.package import PackageFile
+from twine import exceptions
 from twine import settings
 
 
@@ -28,7 +28,7 @@ def register(register_settings, package):
     repository = register_settings.create_repository()
 
     if not os.path.exists(package):
-        raise exc.PackageNotFound(
+        raise exceptions.PackageNotFound(
             '"{0}" does not exist on the file system.'.format(package)
         )
 
@@ -38,7 +38,7 @@ def register(register_settings, package):
     repository.close()
 
     if resp.is_redirect:
-        raise exc.RedirectDetected(
+        raise exceptions.RedirectDetected(
             ('"{0}" attempted to redirect to "{1}" during registration.'
              ' Aborting...').format(repository_url,
                                     resp.headers["location"]))

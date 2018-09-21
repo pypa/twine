@@ -73,3 +73,15 @@ class InvalidSigningConfiguration(TwineException):
     """Both the sign and identity parameters must be present."""
 
     pass
+
+
+class InvalidConfiguration(TwineException):
+    """Raised when configuration is invalid."""
+
+    pass
+
+
+class InvalidDistribution(TwineException):
+    """Raised when a distribution is invalid."""
+
+    pass
