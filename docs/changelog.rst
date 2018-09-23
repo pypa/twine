@@ -4,8 +4,11 @@
 Changelog
 =========
 
+* :release:`1.12.0 <2018-09-24>`
 * :feature:`395 major` Add ``twine check`` command to check long description
 * :feature:`392 major` Drop support for Python 3.3
+* :feature:`363` Empower ``--skip-existing`` for Artifactory repositories
+* :bug:`367` Avoid MD5 when Python is compiled in FIPS mode
 * :release:`1.11.0 <2018-03-19>`
 * :bug:`269 major` Avoid uploading to PyPI when given alternate
   repository URL, and require ``http://`` or ``https://`` in
