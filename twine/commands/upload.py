@@ -104,8 +104,6 @@ def upload(upload_settings, dists):
     # pool.
     repository.close()
 
-    return True
-
 
 def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
