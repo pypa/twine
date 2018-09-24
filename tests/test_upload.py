@@ -77,18 +77,18 @@ def test_deprecated_repo(tmpdir):
 
         upload.upload(upload_settings, dists)
 
-        assert err.args[0] == (
-            "You're trying to upload to the legacy PyPI site "
-            "'https://pypi.python.org/pypi/'. "
-            "Uploading to those sites is deprecated. \n "
-            "The new sites are pypi.org and test.pypi.org. Try using "
-            "https://upload.pypi.org/legacy/ "
-            "(or https://test.pypi.org/legacy/) "
-            "to upload your packages instead. "
-            "These are the default URLs for Twine now. \n "
-            "More at "
-            "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
-            )
+    assert err.value.args[0] == (
+        "You're trying to upload to the legacy PyPI site "
+        "'https://pypi.python.org/pypi/'. "
+        "Uploading to those sites is deprecated. \n "
+        "The new sites are pypi.org and test.pypi.org. Try using "
+        "https://upload.pypi.org/legacy/ "
+        "(or https://test.pypi.org/legacy/) "
+        "to upload your packages instead. "
+        "These are the default URLs for Twine now. \n "
+        "More at "
+        "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
+    )
 
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
