@@ -28,6 +28,40 @@ import helpers
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
+def test_successful_upload(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            username:foo
+            password:bar
+        """))
+
+    upload_settings = settings.Settings(
+        repository_name="pypi", sign=None, identity=None, username=None,
+        password=None, comment=None, cert=None, client_cert=None,
+        sign_with=None, config_file=pypirc, skip_existing=False,
+        repository_url=None, verbose=False,
+    )
+
+    stub_response = pretend.stub(
+        is_redirect=False, status_code=201, raise_for_status=lambda: None
+    )
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response, close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, dists)
+
+    # Raising an exception or returning anything truthy would mean that the
+    # upload has failed
+    assert result is None
+
+
 def test_get_config_old_format(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
@@ -77,18 +111,18 @@ def test_deprecated_repo(tmpdir):
 
         upload.upload(upload_settings, dists)
 
-        assert err.args[0] == (
-            "You're trying to upload to the legacy PyPI site "
-            "'https://pypi.python.org/pypi/'. "
-            "Uploading to those sites is deprecated. \n "
-            "The new sites are pypi.org and test.pypi.org. Try using "
-            "https://upload.pypi.org/legacy/ "
-            "(or https://test.pypi.org/legacy/) "
-            "to upload your packages instead. "
-            "These are the default URLs for Twine now. \n "
-            "More at "
-            "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
-            )
+    assert err.value.args[0] == (
+        "You're trying to upload to the legacy PyPI site "
+        "'https://pypi.python.org/pypi/'. "
+        "Uploading to those sites is deprecated. \n "
+        "The new sites are pypi.org and test.pypi.org. Try using "
+        "https://upload.pypi.org/legacy/ "
+        "(or https://test.pypi.org/legacy/) "
+        "to upload your packages instead. "
+        "These are the default URLs for Twine now. \n "
+        "More at "
+        "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
+    )
 
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
