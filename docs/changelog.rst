@@ -4,6 +4,7 @@
 Changelog
 =========
 
+* :bug:`404` Fix regression with upload exit code
 * :release:`1.12.0 <2018-09-24>`
 * :feature:`395 major` Add ``twine check`` command to check long description
 * :feature:`392 major` Drop support for Python 3.3
