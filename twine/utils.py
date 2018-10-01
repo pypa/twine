@@ -35,6 +35,11 @@ try:
 except ImportError:
     from urllib.parse import urlparse, urlunparse
 
+try:
+    import keyring  # noqa
+except ImportError:
+    pass
+
 from twine import exceptions
 
 # Shim for raw_input in python3
@@ -211,8 +216,7 @@ def get_password_from_keyring(system, username):
         return
 
     try:
-        import keyring
-        return keyring.get_password(system, username)
+        return sys.modules['keyring'].get_password(system, username)
     except Exception as exc:
         warnings.warn(str(exc))
 
