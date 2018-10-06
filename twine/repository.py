@@ -14,13 +14,13 @@
 from __future__ import absolute_import, unicode_literals, print_function
 
 import sys
+from urllib3 import util
 
 from tqdm import tqdm
 
 import requests
 from requests import adapters
 from requests import codes
-from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
