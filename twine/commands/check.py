@@ -33,7 +33,6 @@ from twine.package import PackageFile
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
-    "": readme_renderer.rst,  # Default if description_content_type is None
     "text/plain": readme_renderer.txt,
     "text/x-rst": readme_renderer.rst,
     "text/markdown": readme_renderer.markdown,
@@ -85,28 +84,33 @@ def check(dists, output_stream=sys.stdout):
         package = PackageFile.from_filename(filename, comment=None)
 
         metadata = package.metadata_dictionary()
-        content_type, parameters = cgi.parse_header(
-            metadata.get("description_content_type") or ""
-        )
+        description = metadata["description"]
+        description_content_type = metadata["description_content_type"]
 
-        # Get the appropriate renderer
-        renderer = _RENDERERS.get(content_type, readme_renderer.txt)
-
-        # Actually render the given value
-        rendered = renderer.render(
-            metadata.get("description"), stream=stream, **parameters
-        )
-
-        if rendered is None:
-            failure = True
-            output_stream.write("Failed\n")
+        if description_content_type is None:
             output_stream.write(
-                "The project's long_description has invalid markup which will "
-                "not be rendered on PyPI. The following syntax errors were "
-                "detected:\n%s" % stream
+                'warning: `long_description_content_type` missing.  '
+                'defaulting to `text/x-rst`.\n'
             )
-        else:
+            description_content_type = 'text/x-rst'
+
+        content_type, params = cgi.parse_header(description_content_type)
+        renderer = _RENDERERS.get(content_type, _RENDERERS[None])
+
+        if description in {None, 'UNKNOWN\n\n\n'}:
+            output_stream.write('warning: `long_description` missing.\n')
             output_stream.write("Passed\n")
+        else:
+            if renderer.render(description, stream=stream, **params) is None:
+                failure = True
+                output_stream.write("Failed\n")
+                output_stream.write(
+                    "The project's long_description has invalid markup which "
+                    "will not be rendered on PyPI. The following syntax "
+                    "errors were detected:\n%s" % stream
+                )
+            else:
+                output_stream.write("Passed\n")
 
     return failure
 
