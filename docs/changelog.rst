@@ -4,6 +4,8 @@
 Changelog
 =========
 
+* :release:`1.12.2 <2018-10-14>`
+* :bug:`408` Fix regression where keyring is unconditionally disabled.
 * :release:`1.12.1 <2018-09-24>`
 * :bug:`404` Fix regression with upload exit code
 * :release:`1.12.0 <2018-09-24>`
