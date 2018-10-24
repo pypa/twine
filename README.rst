@@ -160,6 +160,7 @@ Uploads one or more distributions to a repository.
                         [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
                         [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
                         [--skip-existing] [--cert path] [--client-cert path]
+                        [--check-first]
                         dist [dist ...]
 
     positional arguments:
@@ -204,6 +205,7 @@ Uploads one or more distributions to a repository.
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
                             format.
+      --check-first         Check distribution files before uploading.
 
 ``twine check``
 ^^^^^^^^^^^^^^^

@@ -18,6 +18,7 @@ import argparse
 import os.path
 
 from twine.commands import _find_dists
+from twine.commands.check import check
 from twine.package import PackageFile
 from twine import exceptions
 from twine import settings
@@ -109,6 +110,12 @@ def main(args):
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
+        "--check-first",
+        default=False,
+        action="store_true",
+        help="Check distribution files before uploading.",
+    )
+    parser.add_argument(
         "dists",
         nargs="+",
         metavar="dist",
@@ -120,6 +127,12 @@ def main(args):
 
     args = parser.parse_args(args)
     upload_settings = settings.Settings.from_argparse(args)
+
+    # Call the check function if specified
+    if args.check_first:
+        failed_check = check(args.dists)
+        if failed_check:
+            return
 
     # Call the upload function with the arguments from the command line
     return upload(upload_settings, args.dists)
