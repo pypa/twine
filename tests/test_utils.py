@@ -237,7 +237,7 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
 
     monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
 
-    user = utils.get_username('system', 'user', None, {})
+    user = utils.get_username('system', 'user', {})
     assert user == 'real_user'
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'real_user@system sekure pa55word'
