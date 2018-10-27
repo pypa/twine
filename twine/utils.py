@@ -208,12 +208,14 @@ def get_username_from_keyring(system):
         return
 
     try:
-        getter = sys.modules['keyring'].get_username_and_password
+        getter = sys.modules['keyring'].get_credential
     except AttributeError:
         return None
 
     try:
-        return getter(system, None)[0]
+        creds = getter(system, None)
+        if creds:
+            return creds.username
     except Exception as exc:
         warnings.warn(str(exc))
 
