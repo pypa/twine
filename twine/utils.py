@@ -219,6 +219,7 @@ def get_username_from_keyring(system):
     except Exception as exc:
         warnings.warn(str(exc))
 
+
 def password_prompt(prompt_text):  # Always expects unicode for our own sanity
     prompt = prompt_text
     # Workaround for https://github.com/pypa/twine/issues/116
@@ -242,6 +243,7 @@ def username_from_keyring_or_prompt(system):
         get_username_from_keyring(system)
         or input_func('Enter your username: ')
     )
+
 
 def password_from_keyring_or_prompt(system, username):
     return (

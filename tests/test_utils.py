@@ -232,6 +232,7 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch):
 def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
     import collections
     Credential = collections.namedtuple('Credential', 'username password')
+
     class MockKeyring:
         @staticmethod
         def get_credential(system, user):
@@ -239,6 +240,13 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
                 'real_user',
                 'real_user@{system} sekure pa55word'.format(**locals())
             )
+
+        @staticmethod
+        def get_password(system, user):
+            cred = MockKeyring.get_credential(system, user)
+            if user != cred.username:
+                raise RuntimeError("unexpected username")
+            return cred.password
 
     monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
 
