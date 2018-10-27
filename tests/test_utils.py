@@ -229,6 +229,20 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch):
     assert pw == 'entered pw'
 
 
+def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
+    class MockKeyring:
+        @staticmethod
+        def get_username_and_password(system, user):
+            return 'real_user', 'real_user@{system} sekure pa55word'.format(**locals())
+
+    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+
+    user = utils.get_username('system', 'user', None, {})
+    assert user == 'real_user'
+    pw = utils.get_password('system', 'user', None, {})
+    assert pw == 'real_user@system sekure pa55word'
+
+
 @pytest.fixture
 def keyring_missing(monkeypatch):
     """

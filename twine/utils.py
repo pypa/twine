@@ -203,6 +203,20 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
         return None
 
 
+def get_username_from_keyring(system):
+    if 'keyring' not in sys.modules:
+        return
+
+    try:
+        getter = sys.modules['keyring'].get_username_and_password
+    except AttributeError:
+        return None
+
+    try:
+        return getter(system, None)[0]
+    except Exception as exc:
+        warnings.warn(str(exc))
+
 def password_prompt(prompt_text):  # Always expects unicode for our own sanity
     prompt = prompt_text
     # Workaround for https://github.com/pypa/twine/issues/116
@@ -221,6 +235,12 @@ def get_password_from_keyring(system, username):
         warnings.warn(str(exc))
 
 
+def username_from_keyring_or_prompt(system):
+    return (
+        get_username_from_keyring(system)
+        or input_func('Enter your username: ')
+    )
+
 def password_from_keyring_or_prompt(system, username):
     return (
         get_password_from_keyring(system, username)
@@ -228,11 +248,18 @@ def password_from_keyring_or_prompt(system, username):
     )
 
 
-get_username = functools.partial(
-    get_userpass_value,
-    key='username',
-    prompt_strategy=functools.partial(input_func, 'Enter your username: '),
-)
+def get_username(system, cli_value, config):
+    return get_userpass_value(
+        cli_value,
+        config,
+        key='username',
+        prompt_strategy=functools.partial(
+            username_from_keyring_or_prompt,
+            system,
+        ),
+    )
+
+
 get_cacert = functools.partial(
     get_userpass_value,
     key='ca_cert',
