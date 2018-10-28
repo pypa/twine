@@ -283,7 +283,7 @@ def entered_password(monkeypatch):
     monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
 
 
-def test_get_password_keyring_missing_get_credentials_prompts(
+def test_get_username_keyring_missing_get_credentials_prompts(
         entered_username, keyring_missing_get_credentials):
     assert utils.get_username('system', None, {}) == 'entered user'
 
