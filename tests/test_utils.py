@@ -284,8 +284,8 @@ def entered_password(monkeypatch):
 
 
 def test_get_password_keyring_missing_get_credentials_prompts(
-        entered_password, keyring_missing_get_credentials):
-    assert utils.get_password('system', 'user', None, {}) == 'entered pw'
+        entered_username, keyring_missing_get_credentials):
+    assert utils.get_username('system', None, {}) == 'entered user'
 
 
 def test_get_password_keyring_missing_prompts(
