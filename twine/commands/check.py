@@ -24,18 +24,16 @@ try:
 except ImportError:
     from _io import StringIO
 
-import readme_renderer.markdown
 import readme_renderer.rst
-import readme_renderer.txt
 
 from twine.commands import _find_dists
 from twine.package import PackageFile
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
-    "text/plain": readme_renderer.txt,
+    "text/plain": None,  # Rendering cannot fail
     "text/x-rst": readme_renderer.rst,
-    "text/markdown": readme_renderer.markdown,
+    "text/markdown": None,  # Rendering cannot fail
 }
 
 
@@ -101,7 +99,11 @@ def check(dists, output_stream=sys.stdout):
             output_stream.write('warning: `long_description` missing.\n')
             output_stream.write("Passed\n")
         else:
-            if renderer.render(description, stream=stream, **params) is None:
+            if (
+                renderer
+                and renderer.render(description, stream=stream, **params)
+                is None
+            ):
                 failure = True
                 output_stream.write("Failed\n")
                 output_stream.write(
