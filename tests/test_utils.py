@@ -267,10 +267,11 @@ def keyring_missing(monkeypatch):
 @pytest.fixture
 def keyring_missing_get_credentials(monkeypatch):
     """
-    Simulate that 'import keyring' raises an ImportError
+    Simulate older versions of keyring that do not have the
+    'get_credentials' API.
     """
     monkeypatch.delattr('keyring.backends.KeyringBackend',
-                        'get_credentials', raising=False)
+                        'get_credential', raising=False)
 
 
 @pytest.fixture
