@@ -235,7 +235,11 @@ class Settings(object):
         )
 
     def _handle_authentication(self, username, password):
-        self.username = utils.get_username(username, self.repository_config)
+        self.username = utils.get_username(
+            self.repository_config['repository'],
+            username,
+            self.repository_config
+        )
         self.password = utils.get_password(
             self.repository_config['repository'],
             self.username,
