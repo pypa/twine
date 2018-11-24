@@ -16,7 +16,11 @@ import requests
 from twine import repository
 from twine.utils import DEFAULT_REPOSITORY
 
-import unittest.mock as mock
+try:
+    from unittest import mock
+except ImportError:
+    import mock
+
 import pretend
 import pytest
 
