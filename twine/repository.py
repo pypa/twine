@@ -47,7 +47,8 @@ class ProgressBar(tqdm):
 
 
 class Repository(object):
-    def __init__(self, repository_url, username, password):
+    def __init__(self, repository_url, username, password,
+                 disable_progress_bar=False):
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
@@ -55,6 +56,7 @@ class Repository(object):
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
         self._releases_json_data = {}
+        self.disable_progress_bar = disable_progress_bar
 
     @staticmethod
     def _make_adapter_with_retries():
@@ -140,7 +142,8 @@ class Repository(object):
             encoder = MultipartEncoder(data_to_send)
             with ProgressBar(total=encoder.len,
                              unit='B', unit_scale=True, unit_divisor=1024,
-                             miniters=1, file=sys.stdout) as bar:
+                             miniters=1, file=sys.stdout,
+                             disable=self.disable_progress_bar) as bar:
                 monitor = MultipartEncoderMonitor(
                     encoder, lambda monitor: bar.update_to(monitor.bytes_read)
                 )

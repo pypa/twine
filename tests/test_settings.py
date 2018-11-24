@@ -49,6 +49,7 @@ def test_settings_transforms_config(tmpdir):
     assert s.password == 'password'
     assert s.cacert is None
     assert s.client_cert is None
+    assert s.disable_progress_bar is False
 
 
 def test_identity_requires_sign():

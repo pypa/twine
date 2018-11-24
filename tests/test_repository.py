@@ -16,7 +16,9 @@ import requests
 from twine import repository
 from twine.utils import DEFAULT_REPOSITORY
 
+import unittest.mock as mock
 import pretend
+import pytest
 
 
 def test_gpg_signature_structure_is_preserved():
@@ -140,3 +142,46 @@ def test_package_is_uploaded_200s_with_no_releases():
     )
 
     assert repo.package_is_uploaded(package) is False
+
+
+@pytest.mark.parametrize('disable_progress_bar', [
+    True,
+    False
+])
+@mock.patch("twine.repository.ProgressBar")
+def test_disable_progress_bar_is_forwarded_to_tqdm(pb,
+                                                   tmpdir,
+                                                   disable_progress_bar):
+    """Test whether the disable flag is passed to tqdm
+        when the disable_progress_bar option is passed to the
+        repository
+    """
+    repo = repository.Repository(
+        repository_url=DEFAULT_REPOSITORY,
+        username='username',
+        password='password',
+        disable_progress_bar=disable_progress_bar
+    )
+
+    repo.session = pretend.stub(
+        post=lambda url, data, allow_redirects, headers: response_with(
+            status_code=200)
+    )
+
+    fakefile = tmpdir.join('fake.whl')
+    fakefile.write('.')
+
+    def dictfunc():
+        return {"name": "fake"}
+
+    package = pretend.stub(
+        safe_name='fake',
+        metadata=pretend.stub(version='2.12.0'),
+        basefilename="fake.whl",
+        filename=str(fakefile),
+        metadata_dictionary=dictfunc
+    )
+
+    repo.upload(package)
+    assert "disable" in pb.call_args[1]
+    assert pb.call_args[1]["disable"] == disable_progress_bar
