@@ -16,13 +16,9 @@ import requests
 from twine import repository
 from twine.utils import DEFAULT_REPOSITORY
 
-try:
-    from unittest import mock
-except ImportError:
-    import mock
-
 import pretend
 import pytest
+from contextlib import contextmanager
 
 
 def test_gpg_signature_structure_is_preserved():
@@ -152,14 +148,19 @@ def test_package_is_uploaded_200s_with_no_releases():
     True,
     False
 ])
-@mock.patch("twine.repository.ProgressBar")
-def test_disable_progress_bar_is_forwarded_to_tqdm(pb,
-                                                   tmpdir,
+def test_disable_progress_bar_is_forwarded_to_tqdm(monkeypatch, tmpdir,
                                                    disable_progress_bar):
     """Test whether the disable flag is passed to tqdm
         when the disable_progress_bar option is passed to the
         repository
     """
+    @contextmanager
+    def callable(*args, **kwargs):
+        assert "disable" in kwargs
+        assert kwargs["disable"] == disable_progress_bar
+        yield
+
+    monkeypatch.setattr(repository, "ProgressBar", callable)
     repo = repository.Repository(
         repository_url=DEFAULT_REPOSITORY,
         username='username',
@@ -187,5 +188,4 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(pb,
     )
 
     repo.upload(package)
-    assert "disable" in pb.call_args[1]
-    assert pb.call_args[1]["disable"] == disable_progress_bar
+
