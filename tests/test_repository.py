@@ -155,12 +155,12 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(monkeypatch, tmpdir,
         repository
     """
     @contextmanager
-    def callable(*args, **kwargs):
+    def progressbarstub(*args, **kwargs):
         assert "disable" in kwargs
         assert kwargs["disable"] == disable_progress_bar
         yield
 
-    monkeypatch.setattr(repository, "ProgressBar", callable)
+    monkeypatch.setattr(repository, "ProgressBar", progressbarstub)
     repo = repository.Repository(
         repository_url=DEFAULT_REPOSITORY,
         username='username',
@@ -188,4 +188,3 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(monkeypatch, tmpdir,
     )
 
     repo.upload(package)
-
