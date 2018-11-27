@@ -26,10 +26,14 @@ from twine import utils
 
 def skip_upload(response, skip_existing, package):
     filename = package.basefilename
-    # NOTE(sigmavirus24): Old PyPI returns the first message while Warehouse
-    # returns the latter. This papers over the differences.
-    msg_400 = ('A file named "{0}" already exists for'.format(filename),
-               'File already exists')
+    msg_400 = (
+        # Old PyPI message:
+        'A file named "{0}" already exists for'.format(filename),
+        # Warehouse message:
+        'File already exists',
+        # Nexus Repository OSS message:
+        'Repository does not allow updating assets',
+    )
     msg_403 = 'Not enough permissions to overwrite artifact'
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
@@ -38,7 +42,7 @@ def skip_upload(response, skip_existing, package):
     #    True) AND
     # 2. a) The response status code is 409 OR
     # 2. b) The response status code is 400 AND it has a reason that matches
-    #       what we expect PyPI to return to us. OR
+    #       what we expect PyPI or Nexus OSS to return to us. OR
     # 2. c) The response status code is 403 AND the text matches what we
     #       expect Artifactory to return to us.
     return (skip_existing and (response.status_code == 409 or

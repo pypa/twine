@@ -137,6 +137,20 @@ def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
                               package=pkg) is True
 
 
+def test_skip_existing_skips_files_already_on_nexus(monkeypatch):
+    # Nexus Repository Manager (https://www.sonatype.com/nexus-repository-oss)
+    # responds with 400 when the file already exists
+    response = pretend.stub(
+        status_code=400,
+        reason="Repository does not allow updating assets: pypi for url: "
+               "http://www.foo.bar")
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=True,
+                              package=pkg) is True
+
+
 def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
     # pypiserver (https://pypi.org/project/pypiserver) responds with a
     # 409 when the file already exists.
