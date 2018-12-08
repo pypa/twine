@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, unicode_literals, print_function
-
 import sys
 
 from tqdm import tqdm
@@ -46,7 +44,7 @@ class ProgressBar(tqdm):
         self.update(n - self.n)  # will also do self.n = n
 
 
-class Repository(object):
+class Repository:
     def __init__(self, repository_url, username, password,
                  disable_progress_bar=False):
         self.url = repository_url

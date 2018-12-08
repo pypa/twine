@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
-
 import os
 import os.path
 import functools
@@ -22,18 +19,10 @@ import sys
 import argparse
 import warnings
 import collections
+import configparser
+from urllib.parse import urlparse, urlunparse
 
 from requests.exceptions import HTTPError
-
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    import ConfigParser as configparser
-
-try:
-    from urlparse import urlparse, urlunparse
-except ImportError:
-    from urllib.parse import urlparse, urlunparse
 
 try:
     import keyring  # noqa
@@ -42,12 +31,8 @@ except ImportError:
 
 from twine import exceptions
 
-# Shim for raw_input in python3
-if sys.version_info > (3,):
-    input_func = input
-else:
-    # Ignore "undefined name" for flake8/python3
-    input_func = raw_input  # noqa: F821
+# Shim for input to allow testing.
+input_func = input
 
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
@@ -221,11 +206,7 @@ def get_username_from_keyring(system):
 
 
 def password_prompt(prompt_text):  # Always expects unicode for our own sanity
-    prompt = prompt_text
-    # Workaround for https://github.com/pypa/twine/issues/116
-    if os.name == 'nt' and sys.version_info < (3, 0):
-        prompt = prompt_text.encode('utf8')
-    return getpass.getpass(prompt)
+    return getpass.getpass(prompt_text)
 
 
 def get_password_from_keyring(system, username):
@@ -282,11 +263,7 @@ class EnvironmentDefault(argparse.Action):
         self.env = env
         if default:
             required = False
-        super(EnvironmentDefault, self).__init__(
-            default=default,
-            required=required,
-            **kwargs
-        )
+        super().__init__(default=default, required=required, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)

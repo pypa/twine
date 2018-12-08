@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, unicode_literals, print_function
 import collections
 import hashlib
 import io
@@ -50,7 +49,7 @@ DIST_EXTENSIONS = {
 }
 
 
-class PackageFile(object):
+class PackageFile:
     def __init__(self, filename, comment, metadata, python_version, filetype):
         self.filename = filename
         self.basefilename = os.path.basename(filename)
@@ -173,7 +172,7 @@ class PackageFile(object):
 Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])
 
 
-class HashManager(object):
+class HashManager:
     """Manage our hashing objects for simplicity.
 
     This will also allow us to better test this logic.
