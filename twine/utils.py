@@ -115,7 +115,7 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         }
     if repository_url and "://" not in repository_url:
         raise exceptions.UnreachableRepositoryURLDetected(
-            "Repository URL {0} has no protocol. Please add "
+            "Repository URL {} has no protocol. Please add "
             "'https://'. \n".format(repository_url))
     try:
         return get_config(config_file)[repository]
@@ -133,8 +133,8 @@ def get_repository_from_config(config_file, repository, repository_url=None):
         raise exceptions.InvalidConfiguration(msg)
 
 
-_HOSTNAMES = set(["pypi.python.org", "testpypi.python.org", "upload.pypi.org",
-                  "test.pypi.org"])
+_HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
+              "test.pypi.org"}
 
 
 def normalize_repository_url(url):
