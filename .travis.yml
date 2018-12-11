@@ -43,7 +43,7 @@ install:
 script:
   - tox
 
-after_success:
+after_script:
   - codecov --env TRAVIS_OS_NAME,TOXENV
 
 notifications:
