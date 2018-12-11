@@ -11,9 +11,11 @@ matrix:
 
   include:
     - python: 3.7
+      name: Linting code smells and metadata
       env:
         TOXENV: lint
     - python: 3.7
+      name: Making sure that docs build is healthy
       env:
         TOXENV: docs
     - python: 3.7
