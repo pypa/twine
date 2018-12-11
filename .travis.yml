@@ -2,6 +2,10 @@ dist: xenial
 language: python
 cache: pip
 
+env:
+  global:
+    TOXENV: python
+
 matrix:
   fast_finish: true
 
@@ -10,26 +14,12 @@ matrix:
       env:
         TOXENV: lint
     - python: 2.7
-      env:
-        TOXENV: py27
     - python: pypy2.7-6.0
-      env:
-        TOXENV: pypy
     - python: 3.4
-      env:
-        TOXENV: py34
     - python: 3.5
-      env:
-        TOXENV: py35
     - python: 3.6
-      env:
-        TOXENV: py36
     - python: 3.7
-      env:
-        TOXENV: py37
     - python: pypy3.5-6.0
-      env:
-        TOXENV: pypy3
     - python: 3.7
       env:
         TOXENV: docs
