@@ -1,3 +1,6 @@
+.. image:: https://img.shields.io/travis/pypa/twine/master.svg?label=travis-ci
+   :target: https://travis-ci.org/pypa/twine
+
 twine
 =====
 
