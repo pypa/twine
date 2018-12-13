@@ -2,26 +2,40 @@ dist: xenial
 language: python
 cache: pip
 
+env:
+  global:
+    TOXENV: python
+
 matrix:
+  fast_finish: true
+  allow_failures:
+    - env:
+        TOXENV: lint-mypy
+
   include:
     - python: 3.7
-      env: TOXENV=lint
+      name: Linting code smells
+      env:
+        TOXENV: lint-code-style
+    - python: 3.7
+      name: Linting distribution metadata
+      env:
+        TOXENV: lint-dist-meta
+    - python: 3.7
+      name: Linting type matching
+      env:
+        TOXENV: lint-mypy
+    - python: 3.7
+      name: Making sure that docs build is healthy
+      env:
+        TOXENV: docs
+    - python: 3.7
     - python: 2.7
-      env: TOXENV=py27
-    - python: pypy2.7-6.0
-      env: TOXENV=pypy
-    - python: 3.4
-      env: TOXENV=py34
-    - python: 3.5
-      env: TOXENV=py35
-    - python: 3.6
-      env: TOXENV=py36
-    - python: 3.7
-      env: TOXENV=py37
     - python: pypy3.5-6.0
-      env: TOXENV=pypy3
-    - python: 3.7
-      env: TOXENV=docs
+    - python: 3.6
+    - python: 3.5
+    - python: 3.4
+    - python: pypy2.7-6.0
 
 install:
   - pip install tox codecov
@@ -29,7 +43,7 @@ install:
 script:
   - tox
 
-after_success:
+after_script:
   - codecov --env TRAVIS_OS_NAME,TOXENV
 
 notifications:

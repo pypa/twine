@@ -36,6 +36,7 @@ setup(
     url=twine.__uri__,
     project_urls={
         'Packaging tutorial': 'https://packaging.python.org/tutorials/distributing-packages/',
+        'Travis CI': 'https://travis-ci.org/pypa/twine',
         'Twine documentation': 'https://twine.readthedocs.io/en/latest/',
         'Twine source': 'https://github.com/pypa/twine/',
     },
