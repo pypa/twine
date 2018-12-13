@@ -13,17 +13,7 @@
 # limitations under the License.
 from setuptools import setup
 
-import sys
-
 import twine
-
-
-blake2_requires = []
-
-if sys.version_info[:2] < (3, 6):
-    blake2_requires += [
-        "pyblake2",
-    ]
 
 
 setup(
@@ -88,7 +78,9 @@ setup(
         "tqdm >= 4.14",
     ],
     extras_require={
-        'with-blake2': blake2_requires,
+        'with-blake2': [
+            'pyblake2; python_version<"3.6" and platform_python_implementation=="CPython"',
+        ],
         'keyring': [
             'keyring',
         ],
