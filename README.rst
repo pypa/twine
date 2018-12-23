@@ -140,7 +140,7 @@ The next time you run ``twine`` it will prompt you for a username and will grab 
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
 
-In some cases, the presence of keyring may be problemmatic. To disable
+In some cases, the presence of keyring may be problematic. To disable
 keyring and defer to a prompt for passwords, uninstall ``keyring``
 or if that's not an option, you can also configure keyring to be disabled.
 
