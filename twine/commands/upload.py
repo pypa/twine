@@ -28,7 +28,7 @@ def skip_upload(response, skip_existing, package):
     filename = package.basefilename
     msg_400 = (
         # Old PyPI message:
-        'A file named "{0}" already exists for'.format(filename),
+        'A file named "{}" already exists for'.format(filename),
         # Warehouse message:
         'File already exists',
         # Nexus Repository OSS message:
@@ -55,21 +55,19 @@ def upload(upload_settings, dists):
     dists = _find_dists(dists)
 
     # Determine if the user has passed in pre-signed distributions
-    signatures = dict(
-        (os.path.basename(d), d) for d in dists if d.endswith(".asc")
-    )
+    signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
     uploads = [i for i in dists if not i.endswith(".asc")]
     upload_settings.check_repository_url()
     repository_url = upload_settings.repository_config['repository']
 
-    print("Uploading distributions to {0}".format(repository_url))
+    print("Uploading distributions to {}".format(repository_url))
 
     repository = upload_settings.create_repository()
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, upload_settings.comment)
         skip_message = (
-            "  Skipping {0} because it appears to already exist".format(
+            "  Skipping {} because it appears to already exist".format(
                 package.basefilename)
         )
 

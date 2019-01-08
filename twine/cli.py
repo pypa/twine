@@ -29,7 +29,7 @@ from twine._installed import Installed
 
 def _registered_commands(group='twine.registered_commands'):
     registered_commands = pkg_resources.iter_entry_points(group=group)
-    return dict((c.name, c) for c in registered_commands)
+    return {c.name: c for c in registered_commands}
 
 
 def list_dependencies_and_versions():
@@ -44,7 +44,7 @@ def list_dependencies_and_versions():
 
 def dep_versions():
     return ', '.join(
-        '{0}: {1}'.format(*dependency)
+        '{}: {}'.format(*dependency)
         for dependency in list_dependencies_and_versions()
     )
 
@@ -55,8 +55,10 @@ def dispatch(argv):
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s version {0} ({1})".format(twine.__version__,
-                                                    dep_versions()),
+        version="%(prog)s version {} ({})".format(
+            twine.__version__,
+            dep_versions(),
+        ),
     )
     parser.add_argument(
         "command",

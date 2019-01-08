@@ -28,7 +28,7 @@ from requests_toolbelt.utils import user_agent
 
 import twine
 
-KEYWORDS_TO_NOT_FLATTEN = set(["gpg_signature", "content"])
+KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
 
 LEGACY_PYPI = 'https://pypi.python.org/'
 LEGACY_TEST_PYPI = 'https://testpypi.python.org/'
@@ -106,7 +106,7 @@ class Repository(object):
             "protocol_version": "1",
         })
 
-        print("Registering {0}".format(package.basefilename))
+        print("Registering {}".format(package.basefilename))
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
         encoder = MultipartEncoder(data_to_send)
@@ -130,7 +130,7 @@ class Repository(object):
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
 
-        print("Uploading {0}".format(package.basefilename))
+        print("Uploading {}".format(package.basefilename))
 
         with open(package.filename, "rb") as fp:
             data_to_send.append((

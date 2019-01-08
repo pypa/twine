@@ -160,7 +160,7 @@ class PackageFile(object):
             self.gpg_signature = (signature_filename, gpg.read())
 
     def sign(self, sign_with, identity):
-        print("Signing {0}".format(self.basefilename))
+        print("Signing {}".format(self.basefilename))
         gpg_args = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
