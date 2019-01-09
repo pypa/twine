@@ -18,11 +18,7 @@ import argparse
 import cgi
 import re
 import sys
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from _io import StringIO
+from io import StringIO
 
 import readme_renderer.rst
 

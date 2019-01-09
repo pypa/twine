@@ -17,11 +17,7 @@ from __future__ import unicode_literals
 import os
 import re
 import zipfile
-
-try:
-    from StringIO import StringIO
-except ImportError:
-    from _io import StringIO
+from io import StringIO
 
 from pkginfo import distribution
 from pkginfo.distribution import Distribution
