@@ -46,6 +46,7 @@ class Settings(object):
                  cacert=None, client_cert=None,
                  repository_name='pypi', repository_url=None,
                  verbose=False,
+                 disable_progress_bar=False,
                  **ignored_kwargs
                  ):
         """Initialize our settings instance.
@@ -95,10 +96,15 @@ class Settings(object):
             will override the settings inferred from ``repository_name``.
         :param bool verbose:
             Show verbose output.
+        :param bool disable_progress_bar:
+            Disable the progress bar.
+
+            This defaults to ``False``
         """
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
+        self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name, repository_url=repository_url,
@@ -206,6 +212,13 @@ class Settings(object):
             action="store_true",
             help="Show verbose output."
         )
+        parser.add_argument(
+            "--disable-progress-bar",
+            default=False,
+            required=False,
+            action="store_true",
+            help="Disable the progress bar."
+        )
 
     @classmethod
     def from_argparse(cls, args):
@@ -276,6 +289,7 @@ class Settings(object):
             self.repository_config['repository'],
             self.username,
             self.password,
+            self.disable_progress_bar
         )
         repo.set_certificate_authority(self.cacert)
         repo.set_client_certificate(self.client_cert)
