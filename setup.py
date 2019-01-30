@@ -73,7 +73,7 @@ setup(
         "pkginfo >= 1.4.2",
         "readme_renderer >= 21.0",
         "requests >= 2.5.0, != 2.15, != 2.16",
-        "requests-toolbelt == 0.8.0",
+        "requests-toolbelt >= 0.8.0, != 0.9.0",
         "setuptools >= 0.7.0",
         "tqdm >= 4.14",
     ],
