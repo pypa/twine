@@ -126,6 +126,26 @@ def test_get_config_missing(tmpdir):
     }
 
 
+def test_empty_userpass(tmpdir):
+    """
+    Empty username and password may be supplied to suppress
+    prompts. See #426.
+    """
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            username=
+            password=
+        """))
+
+    config = utils.get_config(pypirc)
+    pypi = config['pypi']
+
+    assert pypi['username'] == pypi['password'] == ''
+
+
 def test_get_repository_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
