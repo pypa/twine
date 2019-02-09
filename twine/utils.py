@@ -195,7 +195,7 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
     """
     if cli_value is not None:
         return cli_value
-    elif key in config:
+    elif config.get(key) is not None:
         return config[key]
     elif prompt_strategy:
         return prompt_strategy()
