@@ -126,6 +126,26 @@ def test_get_config_missing(tmpdir):
     }
 
 
+def test_empty_userpass(tmpdir):
+    """
+    Empty username and password may be supplied to suppress
+    prompts. See #426.
+    """
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            username=
+            password=
+        """))
+
+    config = utils.get_config(pypirc)
+    pypi = config['pypi']
+
+    assert pypi['username'] == pypi['password'] == ''
+
+
 def test_get_repository_config_missing(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
@@ -227,6 +247,18 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch):
 
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'entered pw'
+
+
+def test_no_password_defers_to_prompt(monkeypatch):
+    monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
+    pw = utils.get_password('system', 'user', None, {'password': None})
+    assert pw == 'entered pw'
+
+
+def test_empty_password_bypasses_prompt(monkeypatch):
+    monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
+    pw = utils.get_password('system', 'user', None, {'password': ''})
+    assert pw == ''
 
 
 def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
