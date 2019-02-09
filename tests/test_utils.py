@@ -255,6 +255,12 @@ def test_no_password_defers_to_prompt(monkeypatch):
     assert pw == 'entered pw'
 
 
+def test_empty_password_bypasses_prompt(monkeypatch):
+    monkeypatch.setattr(utils, 'password_prompt', lambda prompt: 'entered pw')
+    pw = utils.get_password('system', 'user', None, {'password': ''})
+    assert pw == ''
+
+
 def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
     import collections
     Credential = collections.namedtuple('Credential', 'username password')
