@@ -57,7 +57,7 @@ TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 def get_config(path="~/.pypirc"):
     # even if the config file does not exist, set up the parser
     # variable to reduce the number of if/else statements
-    parser = configparser.RawConfigParser(allow_no_value=True)
+    parser = configparser.RawConfigParser()
 
     # this list will only be used if index-servers
     # is not defined in the config file
@@ -195,7 +195,7 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
     """
     if cli_value is not None:
         return cli_value
-    elif key in config:
+    elif config.get(key) is not None:
         return config[key]
     elif prompt_strategy:
         return prompt_strategy()
