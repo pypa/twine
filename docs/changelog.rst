@@ -5,7 +5,7 @@ Changelog
 =========
 * :release:`1.13.0 <2019-02-13>`
 * :bug:`452` Restore prompts while retaining support for suppressing prompts .
-* :bug:`447` Pin requests-toolbelt to 0.8.0 to avoid attempting to use openssl
+* :bug:`447` Avoid requests-toolbelt to 0.9.0 to prevent attempting to use openssl
   when it isn't available.
 * :feature:`427` Add disable_progress_bar option to disable tqdm.
 * :feature:`426` Allow defining an empty username and password in .pypirc.
