@@ -3,7 +3,25 @@
 =========
 Changelog
 =========
-
+* :release:`1.13.0 <2019-02-13>`
+* :bug:`452` Restore prompts while retaining support for suppressing prompts.
+* :bug:`447` Avoid requests-toolbelt to 0.9.0 to prevent attempting to use
+  openssl when it isn't available.
+* :feature:`427` Add disable_progress_bar option to disable tqdm.
+* :feature:`426` Allow defining an empty username and password in .pypirc.
+* :bug:`441` Only install pyblake2 if needed.
+* :bug:`444` Use io.StringIO instead of StringIO.
+* :bug:`436` Use modern Python language features.
+* :support:`439` Refactor tox env and travis config.
+* :bug:`435` Specify python_requires in setup.py
+* :bug:`432` Use https URLs everywhere.
+* :bug:`428` Fix --skip-existing for Nexus Repos.
+* :feature:`419` Support keyring.get_credential.
+* :feature:`418` Support keyring.get_username_and_password.
+* :bug:`421` Remove unnecessary usage of readme_render.markdown.
+* :feature:`` Add Python 3.7 to classifiers.
+* :bug:`412` Don't crash if there's no package description.
+* :bug:`408` Fix keyring support.
 * :release:`1.12.1 <2018-09-24>`
 * :bug:`404` Fix regression with upload exit code
 * :release:`1.12.0 <2018-09-24>`
