@@ -47,7 +47,13 @@ def register(register_settings, package):
 
 
 def main(args):
-    parser = argparse.ArgumentParser(prog="twine register")
+    parser = argparse.ArgumentParser(
+        prog="twine register",
+        description=(
+            "register operation is a no op with PyPI since " +
+            "Warehouse was released in 2018"
+        )
+    )
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
         "package",
