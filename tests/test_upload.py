@@ -125,6 +125,81 @@ def test_deprecated_repo(tmpdir):
     )
 
 
+def test_upload_prints_skip_message_for_uploaded_package(tmpdir, capsys):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            username:foo
+            password:bar
+        """))
+
+    upload_settings = settings.Settings(
+        repository_name="pypi", sign=None, identity=None, username=None,
+        password=None, comment=None, cert=None, client_cert=None,
+        sign_with=None, config_file=pypirc, skip_existing=True,
+        repository_url=None, verbose=False,
+    )
+
+    # package_is_uploaded short-circuits the need for a stub response
+    stub_repository = pretend.stub(
+        package_is_uploaded=lambda package: True,
+        close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, dists)
+
+    # Raising an exception or returning anything truthy would mean that the
+    # upload has failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
+
+
+def test_upload_prints_skip_message_for_response(tmpdir, capsys):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+
+    with open(pypirc, "w") as fp:
+        fp.write(textwrap.dedent("""
+            [pypi]
+            username:foo
+            password:bar
+        """))
+
+    upload_settings = settings.Settings(
+        repository_name="pypi", sign=None, identity=None, username=None,
+        password=None, comment=None, cert=None, client_cert=None,
+        sign_with=None, config_file=pypirc, skip_existing=True,
+        repository_url=None, verbose=False,
+    )
+
+    stub_response = pretend.stub(
+        is_redirect=False,
+        status_code=409,
+    )
+    stub_repository = pretend.stub(
+        package_is_uploaded=lambda package: False,
+        upload=lambda package: stub_response, close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, dists)
+
+    # Raising an exception or returning anything truthy would mean that the
+    # upload has failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
+
+
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
     response = pretend.stub(
         status_code=400,
