@@ -32,17 +32,29 @@ def pypirc(tmpdir):
     return tmpdir / ".pypirc"
 
 
-def test_successful_upload(pypirc):
-    pypirc.write(textwrap.dedent("""
+@pytest.fixture()
+def make_settings(pypirc):
+    """Returns a factory function for settings.Settings with defaults."""
+
+    default_pypirc = """
         [pypi]
         username:foo
         password:bar
-    """))
+    """
 
-    upload_settings = settings.Settings(
-        sign_with=None,
-        config_file=str(pypirc),
-    )
+    def _settings(pypirc_text=default_pypirc, **settings_kwargs):
+        pypirc.write(textwrap.dedent(pypirc_text))
+
+        settings_kwargs.setdefault('sign_with', None)
+        settings_kwargs.setdefault('config_file', str(pypirc))
+
+        return settings.Settings(**settings_kwargs)
+
+    return _settings
+
+
+def test_successful_upload(make_settings):
+    upload_settings = make_settings()
 
     stub_response = pretend.stub(
         is_redirect=False,
@@ -63,18 +75,13 @@ def test_successful_upload(pypirc):
     assert result is None
 
 
-def test_get_config_old_format(pypirc):
-    pypirc.write(textwrap.dedent("""
-        [server-login]
-        username:foo
-        password:bar
-    """))
-
+def test_get_config_old_format(make_settings):
     try:
-        settings.Settings(
-            sign_with=None,
-            config_file=str(pypirc),
-        )
+        make_settings("""
+            [server-login]
+            username:foo
+            password:bar
+        """)
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file\n"
@@ -85,19 +92,14 @@ def test_get_config_old_format(pypirc):
         ).format(pypirc)
 
 
-def test_deprecated_repo(pypirc):
+def test_deprecated_repo(make_settings):
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
-        pypirc.write(textwrap.dedent("""
+        upload_settings = make_settings("""
             [pypi]
             repository: https://pypi.python.org/pypi/
             username:foo
             password:bar
-        """))
-
-        upload_settings = settings.Settings(
-            sign_with=None,
-            config_file=str(pypirc),
-        )
+        """)
 
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
@@ -115,18 +117,8 @@ def test_deprecated_repo(pypirc):
     )
 
 
-def test_upload_prints_skip_message_for_uploaded_package(pypirc, capsys):
-    pypirc.write(textwrap.dedent("""
-        [pypi]
-        username:foo
-        password:bar
-    """))
-
-    upload_settings = settings.Settings(
-        sign_with=None,
-        config_file=str(pypirc),
-        skip_existing=True,
-    )
+def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
+    upload_settings = make_settings(skip_existing=True)
 
     stub_repository = pretend.stub(
         # Short-circuit the upload, so no need for a stub response
@@ -145,18 +137,8 @@ def test_upload_prints_skip_message_for_uploaded_package(pypirc, capsys):
     assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
 
 
-def test_upload_prints_skip_message_for_response(pypirc, capsys):
-    pypirc.write(textwrap.dedent("""
-        [pypi]
-        username:foo
-        password:bar
-    """))
-
-    upload_settings = settings.Settings(
-        sign_with=None,
-        config_file=str(pypirc),
-        skip_existing=True,
-    )
+def test_prints_skip_message_for_response(make_settings, capsys):
+    upload_settings = make_settings(skip_existing=True)
 
     stub_response = pretend.stub(
         is_redirect=False,
@@ -249,7 +231,7 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
 
 
 def test_values_from_env(monkeypatch):
-    def none_upload(*args, **kwargs):
+    def none_upload(*args, **settings_kwargs):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
