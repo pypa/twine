@@ -13,7 +13,6 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
-import os
 import textwrap
 
 import pretend
@@ -28,56 +27,53 @@ import helpers
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
-def test_successful_upload(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+@pytest.fixture()
+def pypirc(tmpdir):
+    return tmpdir / ".pypirc"
 
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [pypi]
-            username:foo
-            password:bar
-        """))
+
+def test_successful_upload(pypirc):
+    pypirc.write(textwrap.dedent("""
+        [pypi]
+        username:foo
+        password:bar
+    """))
 
     upload_settings = settings.Settings(
-        repository_name="pypi", sign=None, identity=None, username=None,
-        password=None, comment=None, cert=None, client_cert=None,
-        sign_with=None, config_file=pypirc, skip_existing=False,
-        repository_url=None, verbose=False,
+        sign_with=None,
+        config_file=str(pypirc),
     )
 
     stub_response = pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
+        is_redirect=False,
+        status_code=201,
+        raise_for_status=lambda: None
     )
+
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response, close=lambda: None
+        upload=lambda package: stub_response,
+        close=lambda: None
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, dists)
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    # Raising an exception or returning anything truthy would mean that the
-    # upload has failed
+    # A truthy result means the upload failed
     assert result is None
 
 
-def test_get_config_old_format(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [server-login]
-            username:foo
-            password:bar
-        """))
+def test_get_config_old_format(pypirc):
+    pypirc.write(textwrap.dedent("""
+        [server-login]
+        username:foo
+        password:bar
+    """))
 
     try:
         settings.Settings(
-            repository_name="pypi", sign=None, identity=None, username=None,
-            password=None, comment=None, cert=None, client_cert=None,
-            sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=False,
+            sign_with=None,
+            config_file=str(pypirc),
         )
     except KeyError as err:
         assert err.args[0] == (
@@ -89,27 +85,21 @@ def test_get_config_old_format(tmpdir):
         ).format(pypirc)
 
 
-def test_deprecated_repo(tmpdir):
+def test_deprecated_repo(pypirc):
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
-        pypirc = os.path.join(str(tmpdir), ".pypirc")
-        dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
-
-        with open(pypirc, "w") as fp:
-            fp.write(textwrap.dedent("""
-                [pypi]
-                repository: https://pypi.python.org/pypi/
-                username:foo
-                password:bar
-            """))
+        pypirc.write(textwrap.dedent("""
+            [pypi]
+            repository: https://pypi.python.org/pypi/
+            username:foo
+            password:bar
+        """))
 
         upload_settings = settings.Settings(
-            repository_name="pypi", sign=None, identity=None, username=None,
-            password=None, comment=None, cert=None, client_cert=None,
-            sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=False,
+            sign_with=None,
+            config_file=str(pypirc),
         )
 
-        upload.upload(upload_settings, dists)
+        upload.upload(upload_settings, [WHEEL_FIXTURE])
 
     assert err.value.args[0] == (
         "You're trying to upload to the legacy PyPI site "
@@ -125,75 +115,66 @@ def test_deprecated_repo(tmpdir):
     )
 
 
-def test_upload_prints_skip_message_for_uploaded_package(tmpdir, capsys):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
-
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [pypi]
-            username:foo
-            password:bar
-        """))
+def test_upload_prints_skip_message_for_uploaded_package(pypirc, capsys):
+    pypirc.write(textwrap.dedent("""
+        [pypi]
+        username:foo
+        password:bar
+    """))
 
     upload_settings = settings.Settings(
-        repository_name="pypi", sign=None, identity=None, username=None,
-        password=None, comment=None, cert=None, client_cert=None,
-        sign_with=None, config_file=pypirc, skip_existing=True,
-        repository_url=None, verbose=False,
+        sign_with=None,
+        config_file=str(pypirc),
+        skip_existing=True,
     )
 
-    # package_is_uploaded short-circuits the need for a stub response
     stub_repository = pretend.stub(
+        # Short-circuit the upload, so no need for a stub response
         package_is_uploaded=lambda package: True,
         close=lambda: None
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, dists)
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    # Raising an exception or returning anything truthy would mean that the
-    # upload has failed
+    # A truthy result means the upload failed
     assert result is None
 
     captured = capsys.readouterr()
     assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
 
 
-def test_upload_prints_skip_message_for_response(tmpdir, capsys):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
-
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [pypi]
-            username:foo
-            password:bar
-        """))
+def test_upload_prints_skip_message_for_response(pypirc, capsys):
+    pypirc.write(textwrap.dedent("""
+        [pypi]
+        username:foo
+        password:bar
+    """))
 
     upload_settings = settings.Settings(
-        repository_name="pypi", sign=None, identity=None, username=None,
-        password=None, comment=None, cert=None, client_cert=None,
-        sign_with=None, config_file=pypirc, skip_existing=True,
-        repository_url=None, verbose=False,
+        sign_with=None,
+        config_file=str(pypirc),
+        skip_existing=True,
     )
 
     stub_response = pretend.stub(
         is_redirect=False,
         status_code=409,
     )
+
     stub_repository = pretend.stub(
+        # Do the upload, triggering the error response
         package_is_uploaded=lambda package: False,
-        upload=lambda package: stub_response, close=lambda: None
+        upload=lambda package: stub_response,
+        close=lambda: None
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, dists)
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    # Raising an exception or returning anything truthy would mean that the
-    # upload has failed
+    # A truthy result means the upload failed
     assert result is None
 
     captured = capsys.readouterr()
