@@ -47,7 +47,10 @@ def register(register_settings, package):
 
 
 def main(args):
-    parser = argparse.ArgumentParser(prog="twine register")
+    parser = argparse.ArgumentParser(
+        prog="twine register",
+        description="register operation is not required with PyPI.org",
+    )
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
         "package",
