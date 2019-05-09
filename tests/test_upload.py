@@ -117,6 +117,38 @@ def test_deprecated_repo(make_settings):
     )
 
 
+def test_exception_for_redirect(make_settings):
+    upload_settings = make_settings("""
+        [pypi]
+        repository: https://test.pypi.org/legacy
+        username:foo
+        password:bar
+    """)
+
+    stub_response = pretend.stub(
+        is_redirect=True,
+        status_code=301,
+        headers={'location': 'https://test.pypi.org/legacy/'}
+    )
+
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response,
+        close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    with pytest.raises(exceptions.RedirectDetected) as err:
+        upload.upload(upload_settings, [WHEEL_FIXTURE])
+
+    assert err.value.args[0] == (
+        "Unexpected redirect from https://test.pypi.org/legacy"
+        " to https://test.pypi.org/legacy/."
+        "\nYou might need to change the configured repository URL."
+        "\nAborting."
+    )
+
+
 def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
     upload_settings = make_settings(skip_existing=True)
 

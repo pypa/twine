@@ -29,7 +29,16 @@ class RedirectDetected(TwineException):
     redirecting them.
     """
 
-    pass
+    @classmethod
+    def from_args(cls, repository_url, redirect_url):
+        msg = "\n".join([
+            "Unexpected redirect from {0} to {1}."
+            .format(repository_url, redirect_url),
+            "You might need to change the configured repository URL.",
+            "Aborting."
+        ])
+
+        return cls(msg)
 
 
 class PackageNotFound(TwineException):
