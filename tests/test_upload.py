@@ -13,7 +13,6 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
-import os
 import textwrap
 
 import pretend
@@ -28,57 +27,61 @@ import helpers
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
-def test_successful_upload(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+@pytest.fixture()
+def pypirc(tmpdir):
+    return tmpdir / ".pypirc"
 
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
-            [pypi]
-            username:foo
-            password:bar
-        """))
 
-    upload_settings = settings.Settings(
-        repository_name="pypi", sign=None, identity=None, username=None,
-        password=None, comment=None, cert=None, client_cert=None,
-        sign_with=None, config_file=pypirc, skip_existing=False,
-        repository_url=None, verbose=False,
-    )
+@pytest.fixture()
+def make_settings(pypirc):
+    """Returns a factory function for settings.Settings with defaults."""
+
+    default_pypirc = """
+        [pypi]
+        username:foo
+        password:bar
+    """
+
+    def _settings(pypirc_text=default_pypirc, **settings_kwargs):
+        pypirc.write(textwrap.dedent(pypirc_text))
+
+        settings_kwargs.setdefault('sign_with', None)
+        settings_kwargs.setdefault('config_file', str(pypirc))
+
+        return settings.Settings(**settings_kwargs)
+
+    return _settings
+
+
+def test_successful_upload(make_settings):
+    upload_settings = make_settings()
 
     stub_response = pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
+        is_redirect=False,
+        status_code=201,
+        raise_for_status=lambda: None
     )
+
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response, close=lambda: None
+        upload=lambda package: stub_response,
+        close=lambda: None
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, dists)
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    # Raising an exception or returning anything truthy would mean that the
-    # upload has failed
+    # A truthy result means the upload failed
     assert result is None
 
 
-def test_get_config_old_format(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+def test_get_config_old_format(make_settings):
+    try:
+        make_settings("""
             [server-login]
             username:foo
             password:bar
-        """))
-
-    try:
-        settings.Settings(
-            repository_name="pypi", sign=None, identity=None, username=None,
-            password=None, comment=None, cert=None, client_cert=None,
-            sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=False,
-        )
+        """)
     except KeyError as err:
         assert err.args[0] == (
             "Missing 'pypi' section from the configuration file\n"
@@ -89,27 +92,16 @@ def test_get_config_old_format(tmpdir):
         ).format(pypirc)
 
 
-def test_deprecated_repo(tmpdir):
+def test_deprecated_repo(make_settings):
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
-        pypirc = os.path.join(str(tmpdir), ".pypirc")
-        dists = ["tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"]
+        upload_settings = make_settings("""
+            [pypi]
+            repository: https://pypi.python.org/pypi/
+            username:foo
+            password:bar
+        """)
 
-        with open(pypirc, "w") as fp:
-            fp.write(textwrap.dedent("""
-                [pypi]
-                repository: https://pypi.python.org/pypi/
-                username:foo
-                password:bar
-            """))
-
-        upload_settings = settings.Settings(
-            repository_name="pypi", sign=None, identity=None, username=None,
-            password=None, comment=None, cert=None, client_cert=None,
-            sign_with=None, config_file=pypirc, skip_existing=False,
-            repository_url=None, verbose=False,
-        )
-
-        upload.upload(upload_settings, dists)
+        upload.upload(upload_settings, [WHEEL_FIXTURE])
 
     assert err.value.args[0] == (
         "You're trying to upload to the legacy PyPI site "
@@ -123,6 +115,52 @@ def test_deprecated_repo(tmpdir):
         "More at "
         "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
     )
+
+
+def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
+    upload_settings = make_settings(skip_existing=True)
+
+    stub_repository = pretend.stub(
+        # Short-circuit the upload, so no need for a stub response
+        package_is_uploaded=lambda package: True,
+        close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
+
+    # A truthy result means the upload failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
+
+
+def test_prints_skip_message_for_response(make_settings, capsys):
+    upload_settings = make_settings(skip_existing=True)
+
+    stub_response = pretend.stub(
+        is_redirect=False,
+        status_code=409,
+    )
+
+    stub_repository = pretend.stub(
+        # Do the upload, triggering the error response
+        package_is_uploaded=lambda package: False,
+        upload=lambda package: stub_response,
+        close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
+
+    # A truthy result means the upload failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
 
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
@@ -193,7 +231,7 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
 
 
 def test_values_from_env(monkeypatch):
-    def none_upload(*args, **kwargs):
+    def none_upload(*args, **settings_kwargs):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
