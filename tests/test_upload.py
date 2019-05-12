@@ -13,44 +13,16 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
-import textwrap
-
 import pretend
 import pytest
 
 from twine.commands import upload
-from twine import package, cli, exceptions, settings
+from twine import package, cli, exceptions
 import twine
 
 import helpers
 
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
-
-
-@pytest.fixture()
-def pypirc(tmpdir):
-    return tmpdir / ".pypirc"
-
-
-@pytest.fixture()
-def make_settings(pypirc):
-    """Returns a factory function for settings.Settings with defaults."""
-
-    default_pypirc = """
-        [pypi]
-        username:foo
-        password:bar
-    """
-
-    def _settings(pypirc_text=default_pypirc, **settings_kwargs):
-        pypirc.write(textwrap.dedent(pypirc_text))
-
-        settings_kwargs.setdefault('sign_with', None)
-        settings_kwargs.setdefault('config_file', str(pypirc))
-
-        return settings.Settings(**settings_kwargs)
-
-    return _settings
 
 
 def test_successful_upload(make_settings):
@@ -75,7 +47,7 @@ def test_successful_upload(make_settings):
     assert result is None
 
 
-def test_get_config_old_format(make_settings):
+def test_get_config_old_format(make_settings, pypirc):
     try:
         make_settings("""
             [server-login]
