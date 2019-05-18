@@ -114,9 +114,10 @@ def test_exception_for_redirect(make_settings):
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
     assert err.value.args[0] == (
-        "Unexpected redirect from https://test.pypi.org/legacy"
+        "https://test.pypi.org/legacy attempted to redirect"
         " to https://test.pypi.org/legacy/."
-        "\nYou might need to change the configured repository URL."
+        "\nIf you trust these URLs, set https://test.pypi.org/legacy/"
+        " as your repository URL."
         "\nAborting."
     )
 

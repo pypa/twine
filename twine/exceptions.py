@@ -32,9 +32,10 @@ class RedirectDetected(TwineException):
     @classmethod
     def from_args(cls, repository_url, redirect_url):
         msg = "\n".join([
-            "Unexpected redirect from {0} to {1}."
+            "{} attempted to redirect to {}."
             .format(repository_url, redirect_url),
-            "You might need to change the configured repository URL.",
+            "If you trust these URLs, set {} as your repository URL."
+            .format(redirect_url),
             "Aborting."
         ])
 

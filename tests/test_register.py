@@ -36,9 +36,5 @@ def test_exception_for_redirect(make_settings):
     with pytest.raises(exceptions.RedirectDetected) as err:
         register.register(register_settings, WHEEL_FIXTURE)
 
-    assert err.value.args[0] == (
-        "Unexpected redirect from https://test.pypi.org/legacy"
-        " to https://test.pypi.org/legacy/."
-        "\nYou might need to change the configured repository URL."
-        "\nAborting."
-    )
+    # Complete message tested in test_upload.py
+    assert "https://test.pypi.org/legacy/" in err.value.args[0]
