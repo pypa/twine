@@ -16,6 +16,7 @@ from __future__ import unicode_literals
 
 import argparse
 import os.path
+import warnings
 
 from twine.commands import _find_dists
 from twine.package import PackageFile
@@ -86,7 +87,11 @@ def upload(upload_settings, dists):
         elif upload_settings.sign:
             package.sign(upload_settings.sign_with, upload_settings.identity)
 
-        resp = repository.upload(package)
+        # Suppress TLS verification warning on trusted custom certs
+        # See https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
+        with warnings.catch_warnings():
+            warnings.simplefilter("ignore")
+            resp = repository.upload(package)
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued

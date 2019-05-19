@@ -43,7 +43,7 @@ class Settings(object):
                  username=None, password=None,
                  comment=None,
                  config_file='~/.pypirc', skip_existing=False,
-                 cacert=None, client_cert=None,
+                 cacert=None, trusted=False, client_cert=None,
                  repository_name='pypi', repository_url=None,
                  verbose=False,
                  disable_progress_bar=False,
@@ -82,6 +82,9 @@ class Settings(object):
         :param str cacert:
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
+        :param bool trusted:
+            Accept TLS connection with unknown server CA certificates.
+            Don't use with cacert parameter
         :param str client_cert:
             The path to the client certificate used to perform authentication
             to the index.
@@ -106,6 +109,7 @@ class Settings(object):
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
+        self.trusted = trusted
         self._handle_repository_options(
             repository_name=repository_name, repository_url=repository_url,
         )
@@ -189,7 +193,8 @@ class Settings(object):
                  "when uploading to PyPI. Other implementations may not "
                  "support this.)",
         )
-        parser.add_argument(
+        trust_parser = parser.add_mutually_exclusive_group()
+        trust_parser.add_argument(
             "--cert",
             action=utils.EnvironmentDefault,
             env="TWINE_CERT",
@@ -198,6 +203,12 @@ class Settings(object):
             metavar="path",
             help="Path to alternate CA bundle (can also be set via %(env)s "
                  "environment variable).",
+        )
+        trust_parser.add_argument(
+            "--trusted",
+            default=False,
+            action="store_true",
+            help="Accept self signed CA certificates."
         )
         parser.add_argument(
             "--client-cert",
@@ -291,6 +302,6 @@ class Settings(object):
             self.password,
             self.disable_progress_bar
         )
-        repo.set_certificate_authority(self.cacert)
+        repo.set_certificate_authority(self.cacert, self.trusted)
         repo.set_client_certificate(self.client_cert)
         return repo
