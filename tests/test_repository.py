@@ -78,8 +78,21 @@ def test_set_certificate_authority():
 
     assert repo.session.verify is True
 
-    repo.set_certificate_authority('/path/to/cert')
+    repo.set_certificate_authority('/path/to/cert', False)
     assert repo.session.verify == '/path/to/cert'
+
+
+def test_no_ca_verify():
+    repo = repository.Repository(
+        repository_url=DEFAULT_REPOSITORY,
+        username='username',
+        password='password',
+    )
+
+    assert repo.session.verify is True
+
+    repo.set_certificate_authority('/path/to/cert', True)
+    assert not repo.session.verify
 
 
 def test_make_user_agent_string():

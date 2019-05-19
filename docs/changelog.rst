@@ -6,6 +6,7 @@ Changelog
 * :bug:`341` Fail more gracefully when encountering bad metadata
 * :feature:`459` Show Warehouse URL after uploading a package
 * :feature:`310` Now provide a more meaningful error on redirect during upload.
+* :feature:`387` Use ``--trusted`` to skip server cert checking on upload.
 * :release:`1.13.0 <2019-02-13>`
 * :bug:`452 major` Restore prompts while retaining support for suppressing
   prompts.

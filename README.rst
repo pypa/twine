@@ -162,8 +162,8 @@ Uploads one or more distributions to a repository.
     usage: twine upload [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
                         [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
                         [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
-                        [--skip-existing] [--cert path] [--client-cert path]
-                        [--verbose] [--disable-progress-bar]
+                        [--skip-existing] [--cert path | --trusted]
+                        [--client-cert path] [--verbose] [--disable-progress-bar]
                         dist [dist ...]
 
     positional arguments:
@@ -205,6 +205,7 @@ Uploads one or more distributions to a repository.
                             may not support this.)
       --cert path           Path to alternate CA bundle (can also be set via
                             TWINE_CERT environment variable).
+      --trusted             Accept self signed CA certificates.
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
                             format.
@@ -244,7 +245,7 @@ For completeness, its usage:
 
     usage: twine register [-h] -r REPOSITORY [--repository-url REPOSITORY_URL]
                           [-u USERNAME] [-p PASSWORD] [-c COMMENT]
-                          [--config-file CONFIG_FILE] [--cert path]
+                          [--config-file CONFIG_FILE] [--cert path | --trusted]
                           [--client-cert path]
                           package
 
@@ -279,6 +280,7 @@ For completeness, its usage:
                             The .pypirc config file to use.
       --cert path           Path to alternate CA bundle (can also be set via
                             TWINE_CERT environment variable).
+      --trusted             Accept self signed CA certificates.
       --client-cert path    Path to SSL client certificate, a single file
                             containing the private key and the certificate in PEM
                             format.
