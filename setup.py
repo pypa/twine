@@ -84,5 +84,8 @@ setup(
         'keyring': [
             'keyring',
         ],
+        'md': [
+            'cmarkgfm>=0.2.0',
+        ],
     },
 )
