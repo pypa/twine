@@ -4,31 +4,33 @@
 Changelog
 =========
 * :release:`1.13.0 <2019-02-13>`
-* :bug:`452` Restore prompts while retaining support for suppressing prompts.
-* :bug:`447` Avoid requests-toolbelt to 0.9.0 to prevent attempting to use
+* :bug:`452 major` Restore prompts while retaining support for suppressing
+  prompts.
+* :bug:`447 major` Avoid requests-toolbelt to 0.9.0 to prevent attempting to
+  use
   openssl when it isn't available.
 * :feature:`427` Add disable_progress_bar option to disable tqdm.
 * :feature:`426` Allow defining an empty username and password in .pypirc.
-* :bug:`441` Only install pyblake2 if needed.
-* :bug:`444` Use io.StringIO instead of StringIO.
-* :bug:`436` Use modern Python language features.
+* :bug:`441 major` Only install pyblake2 if needed.
+* :bug:`444 major` Use io.StringIO instead of StringIO.
+* :bug:`436 major` Use modern Python language features.
 * :support:`439` Refactor tox env and travis config.
-* :bug:`435` Specify python_requires in setup.py
-* :bug:`432` Use https URLs everywhere.
-* :bug:`428` Fix --skip-existing for Nexus Repos.
+* :bug:`435 major` Specify python_requires in setup.py
+* :bug:`432 major` Use https URLs everywhere.
+* :bug:`428 major` Fix --skip-existing for Nexus Repos.
 * :feature:`419` Support keyring.get_credential.
 * :feature:`418` Support keyring.get_username_and_password.
-* :bug:`421` Remove unnecessary usage of readme_render.markdown.
-* :feature:`` Add Python 3.7 to classifiers.
-* :bug:`412` Don't crash if there's no package description.
-* :bug:`408` Fix keyring support.
+* :bug:`421 major` Remove unnecessary usage of readme_render.markdown.
+* :feature:`416` Add Python 3.7 to classifiers.
+* :bug:`412 major` Don't crash if there's no package description.
+* :bug:`408 major` Fix keyring support.
 * :release:`1.12.1 <2018-09-24>`
 * :bug:`404` Fix regression with upload exit code
 * :release:`1.12.0 <2018-09-24>`
 * :feature:`395 major` Add ``twine check`` command to check long description
 * :feature:`392 major` Drop support for Python 3.3
 * :feature:`363` Empower ``--skip-existing`` for Artifactory repositories
-* :bug:`367` Avoid MD5 when Python is compiled in FIPS mode
+* :bug:`367 major` Avoid MD5 when Python is compiled in FIPS mode
 * :release:`1.11.0 <2018-03-19>`
 * :bug:`269 major` Avoid uploading to PyPI when given alternate
   repository URL, and require ``http://`` or ``https://`` in
