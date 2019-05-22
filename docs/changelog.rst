@@ -21,7 +21,7 @@ Changelog
 * :feature:`419` Support keyring.get_credential.
 * :feature:`418` Support keyring.get_username_and_password.
 * :bug:`421 major` Remove unnecessary usage of readme_render.markdown.
-* :feature:`` Add Python 3.7 to classifiers.
+* :feature:`416` Add Python 3.7 to classifiers.
 * :bug:`412 major` Don't crash if there's no package description.
 * :bug:`408 major` Fix keyring support.
 * :release:`1.12.1 <2018-09-24>`
