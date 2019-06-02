@@ -36,5 +36,4 @@ def test_exception_for_redirect(make_settings):
     with pytest.raises(exceptions.RedirectDetected) as err:
         register.register(register_settings, WHEEL_FIXTURE)
 
-    # Complete message tested in test_upload.py
     assert "https://test.pypi.org/legacy/" in err.value.args[0]

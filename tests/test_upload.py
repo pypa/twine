@@ -55,13 +55,12 @@ def test_get_config_old_format(make_settings, pypirc):
             password:bar
         """)
     except KeyError as err:
-        assert err.args[0] == (
-            "Missing 'pypi' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{0}' format?\n"
-            "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(pypirc)
+        assert all(text in err.args[0] for text in [
+            "'pypi'",
+            "--repository-url",
+            pypirc,
+            "https://docs.python.org/",
+        ])
 
 
 def test_deprecated_repo(make_settings):
@@ -75,18 +74,12 @@ def test_deprecated_repo(make_settings):
 
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    assert err.value.args[0] == (
-        "You're trying to upload to the legacy PyPI site "
-        "'https://pypi.python.org/pypi/'. "
-        "Uploading to those sites is deprecated. \n "
-        "The new sites are pypi.org and test.pypi.org. Try using "
-        "https://upload.pypi.org/legacy/ "
-        "(or https://test.pypi.org/legacy/) "
-        "to upload your packages instead. "
-        "These are the default URLs for Twine now. \n "
-        "More at "
-        "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
-    )
+    assert all(text in err.value.args[0] for text in [
+        "https://pypi.python.org/pypi/",
+        "https://upload.pypi.org/legacy/",
+        "https://test.pypi.org/legacy/",
+        "https://packaging.python.org/",
+    ])
 
 
 def test_exception_for_redirect(make_settings):
@@ -113,13 +106,7 @@ def test_exception_for_redirect(make_settings):
     with pytest.raises(exceptions.RedirectDetected) as err:
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    assert err.value.args[0] == (
-        "https://test.pypi.org/legacy attempted to redirect"
-        " to https://test.pypi.org/legacy/."
-        "\nIf you trust these URLs, set https://test.pypi.org/legacy/"
-        " as your repository URL."
-        "\nAborting."
-    )
+    assert "https://test.pypi.org/legacy/" in err.value.args[0]
 
 
 def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
