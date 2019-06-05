@@ -95,7 +95,7 @@ class Repository(object):
                     data_to_send.append((key, item))
         return data_to_send
 
-    def set_certificate_authority(self, cacert, trusted):
+    def set_certificate_authority(self, cacert, trusted=False):
         if trusted:
             self.session.verify = False
         elif cacert:
