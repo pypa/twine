@@ -38,10 +38,10 @@ def register(register_settings, package):
     repository.close()
 
     if resp.is_redirect:
-        raise exceptions.RedirectDetected(
-            ('"{0}" attempted to redirect to "{1}" during registration.'
-             ' Aborting...').format(repository_url,
-                                    resp.headers["location"]))
+        raise exceptions.RedirectDetected.from_args(
+            repository_url,
+            resp.headers["location"],
+        )
 
     resp.raise_for_status()
 

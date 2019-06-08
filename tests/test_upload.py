@@ -13,44 +13,16 @@
 # limitations under the License.
 from __future__ import unicode_literals
 
-import textwrap
-
 import pretend
 import pytest
 
 from twine.commands import upload
-from twine import package, cli, exceptions, settings
+from twine import package, cli, exceptions
 import twine
 
 import helpers
 
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
-
-
-@pytest.fixture()
-def pypirc(tmpdir):
-    return tmpdir / ".pypirc"
-
-
-@pytest.fixture()
-def make_settings(pypirc):
-    """Returns a factory function for settings.Settings with defaults."""
-
-    default_pypirc = """
-        [pypi]
-        username:foo
-        password:bar
-    """
-
-    def _settings(pypirc_text=default_pypirc, **settings_kwargs):
-        pypirc.write(textwrap.dedent(pypirc_text))
-
-        settings_kwargs.setdefault('sign_with', None)
-        settings_kwargs.setdefault('config_file', str(pypirc))
-
-        return settings.Settings(**settings_kwargs)
-
-    return _settings
 
 
 def test_successful_upload(make_settings):
@@ -75,7 +47,7 @@ def test_successful_upload(make_settings):
     assert result is None
 
 
-def test_get_config_old_format(make_settings):
+def test_get_config_old_format(make_settings, pypirc):
     try:
         make_settings("""
             [server-login]
@@ -83,13 +55,12 @@ def test_get_config_old_format(make_settings):
             password:bar
         """)
     except KeyError as err:
-        assert err.args[0] == (
-            "Missing 'pypi' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{0}' format?\n"
-            "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(pypirc)
+        assert all(text in err.args[0] for text in [
+            "'pypi'",
+            "--repository-url",
+            pypirc,
+            "https://docs.python.org/",
+        ])
 
 
 def test_deprecated_repo(make_settings):
@@ -103,18 +74,39 @@ def test_deprecated_repo(make_settings):
 
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
-    assert err.value.args[0] == (
-        "You're trying to upload to the legacy PyPI site "
-        "'https://pypi.python.org/pypi/'. "
-        "Uploading to those sites is deprecated. \n "
-        "The new sites are pypi.org and test.pypi.org. Try using "
-        "https://upload.pypi.org/legacy/ "
-        "(or https://test.pypi.org/legacy/) "
-        "to upload your packages instead. "
-        "These are the default URLs for Twine now. \n "
-        "More at "
-        "https://packaging.python.org/guides/migrating-to-pypi-org/ ."
+    assert all(text in err.value.args[0] for text in [
+        "https://pypi.python.org/pypi/",
+        "https://upload.pypi.org/legacy/",
+        "https://test.pypi.org/legacy/",
+        "https://packaging.python.org/",
+    ])
+
+
+def test_exception_for_redirect(make_settings):
+    upload_settings = make_settings("""
+        [pypi]
+        repository: https://test.pypi.org/legacy
+        username:foo
+        password:bar
+    """)
+
+    stub_response = pretend.stub(
+        is_redirect=True,
+        status_code=301,
+        headers={'location': 'https://test.pypi.org/legacy/'}
     )
+
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response,
+        close=lambda: None
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    with pytest.raises(exceptions.RedirectDetected) as err:
+        upload.upload(upload_settings, [WHEEL_FIXTURE])
+
+    assert "https://test.pypi.org/legacy/" in err.value.args[0]
 
 
 def test_prints_skip_message_for_uploaded_package(make_settings, capsys):

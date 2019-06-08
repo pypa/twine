@@ -92,10 +92,10 @@ def upload(upload_settings, dists):
         # by PyPI should never happen in reality. This should catch malicious
         # redirects as well.
         if resp.is_redirect:
-            raise exceptions.RedirectDetected(
-                ('"{0}" attempted to redirect to "{1}" during upload.'
-                 ' Aborting...').format(repository_url,
-                                        resp.headers["location"]))
+            raise exceptions.RedirectDetected.from_args(
+                repository_url,
+                resp.headers["location"],
+            )
 
         if skip_upload(resp, upload_settings.skip_existing, package):
             print(skip_message)
