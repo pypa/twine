@@ -16,7 +16,7 @@ import os.path
 
 from twine import exceptions
 
-__all__ = []
+__all__ = []  # type: ignore # TODO: List[str] in stub file
 
 
 def _group_wheel_files_first(files):
