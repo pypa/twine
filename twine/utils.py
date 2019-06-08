@@ -28,8 +28,8 @@ from requests.exceptions import HTTPError
 try:
     import configparser
 except ImportError:  # pragma: no cover
-    import ConfigParser as configparser
-
+    import ConfigParser as configparser  # type: ignore
+    # https://github.com/python/mypy/issues/1153
 try:
     from urlparse import urlparse, urlunparse
 except ImportError:
