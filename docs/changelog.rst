@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :feature:`310` Now provide a more meaningful error on redirect during upload.
 * :release:`1.13.0 <2019-02-13>`
 * :bug:`452` Restore prompts while retaining support for suppressing prompts.
 * :bug:`447` Avoid requests-toolbelt to 0.9.0 to prevent attempting to use
