@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
+from typing import Optional, Tuple
+
 import collections
 import hashlib
 import io
@@ -87,7 +89,7 @@ class PackageFile(object):
 
         if dtype == "bdist_egg":
             pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
+            py_version = pkgd.py_version  # type: Optional[str]
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
         elif dtype == "bdist_wininst":
@@ -162,7 +164,7 @@ class PackageFile(object):
 
     def sign(self, sign_with, identity):
         print("Signing {}".format(self.basefilename))
-        gpg_args = (sign_with, "--detach-sign")
+        gpg_args = (sign_with, "--detach-sign")  # type: Tuple[str, ...]
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)

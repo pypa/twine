@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 from __future__ import absolute_import, unicode_literals, print_function
+from typing import Dict
 
 import sys
 
@@ -55,7 +56,7 @@ class Repository(object):
         self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
-        self._releases_json_data = {}
+        self._releases_json_data = {}  # type: Dict[str, Dict]
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod

@@ -13,6 +13,7 @@
 # limitations under the License.
 from __future__ import absolute_import, division, print_function
 from __future__ import unicode_literals
+from typing import DefaultDict, Dict, Optional
 
 import os
 import os.path
@@ -64,7 +65,10 @@ def get_config(path="~/.pypirc"):
     index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
-    defaults = {"username": None, "password": None}
+    defaults = {
+        "username": None,
+        "password": None
+    }  # type: Dict[str, Optional[str]]
 
     # Expand user strings in the path
     path = os.path.expanduser(path)
@@ -82,7 +86,8 @@ def get_config(path="~/.pypirc"):
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config = collections.defaultdict(lambda: defaults.copy())
+    config = collections.defaultdict(lambda: defaults.copy()) \
+        # type: DefaultDict[str, Dict]
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
