@@ -22,12 +22,12 @@ from twine import settings
 def register(register_settings, package):
     repository_url = register_settings.repository_config['repository']
 
-    print("Registering package to {}".format(repository_url))
+    print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
 
     if not os.path.exists(package):
         raise exceptions.PackageNotFound(
-            '"{}" does not exist on the file system.'.format(package)
+            f'"{package}" does not exist on the file system.'
         )
 
     resp = repository.register(

@@ -25,7 +25,7 @@ def skip_upload(response, skip_existing, package):
     filename = package.basefilename
     msg_400 = (
         # Old PyPI message:
-        'A file named "{}" already exists for'.format(filename),
+        f'A file named "{filename}" already exists for',
         # Warehouse message:
         'File already exists',
         # Nexus Repository OSS message:
@@ -57,7 +57,7 @@ def upload(upload_settings, dists):
     upload_settings.check_repository_url()
     repository_url = upload_settings.repository_config['repository']
 
-    print("Uploading distributions to {}".format(repository_url))
+    print(f"Uploading distributions to {repository_url}")
 
     repository = upload_settings.create_repository()
 

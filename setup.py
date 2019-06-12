@@ -46,11 +46,9 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
-        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
-        "Programming Language :: Python :: Implementation :: PyPy",
     ],
 
     packages=["twine", "twine.commands"],
@@ -66,7 +64,7 @@ setup(
         ],
     },
 
-    python_requires=">=3.5",
+    python_requires=">=3.6",
     install_requires=[
         "pkginfo >= 1.4.2",
         "readme_renderer >= 21.0",
@@ -76,9 +74,6 @@ setup(
         "tqdm >= 4.14",
     ],
     extras_require={
-        'with-blake2': [
-            'pyblake2; python_version<"3.6" and platform_python_implementation=="CPython"',
-        ],
         'keyring': [
             'keyring',
         ],

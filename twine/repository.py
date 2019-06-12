@@ -106,7 +106,7 @@ class Repository:
             "protocol_version": "1",
         })
 
-        print("Registering {}".format(package.basefilename))
+        print(f"Registering {package.basefilename}")
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
         encoder = MultipartEncoder(data_to_send)
@@ -130,7 +130,7 @@ class Repository:
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
 
-        print("Uploading {}".format(package.basefilename))
+        print(f"Uploading {package.basefilename}")
 
         with open(package.filename, "rb") as fp:
             data_to_send.append((

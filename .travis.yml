@@ -30,9 +30,7 @@ matrix:
       env:
         TOXENV: docs
     - python: 3.7
-    - python: pypy3.5-6.0
     - python: 3.6
-    - python: 3.5
 
 install:
   - pip install tox codecov
