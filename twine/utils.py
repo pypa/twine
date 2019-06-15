@@ -65,10 +65,10 @@ def get_config(path="~/.pypirc"):
     index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
-    defaults = {
+    defaults: Dict[str, Optional[str]] = {
         "username": None,
         "password": None
-    }  # type: Dict[str, Optional[str]]
+    }
 
     # Expand user strings in the path
     path = os.path.expanduser(path)
@@ -86,8 +86,8 @@ def get_config(path="~/.pypirc"):
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config = collections.defaultdict(lambda: defaults.copy()) \
-        # type: DefaultDict[str, Dict]
+    config: DefaultDict[str, Dict] = \
+        collections.defaultdict(lambda: defaults.copy())
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY

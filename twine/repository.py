@@ -56,7 +56,7 @@ class Repository(object):
         self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
-        self._releases_json_data = {}  # type: Dict[str, Dict]
+        self._releases_json_data: Dict[str, Dict] = {}
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod

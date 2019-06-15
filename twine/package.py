@@ -89,7 +89,7 @@ class PackageFile(object):
 
         if dtype == "bdist_egg":
             pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version  # type: Optional[str]
+            py_version: Optional[str] = pkgd.py_version
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
         elif dtype == "bdist_wininst":
@@ -164,7 +164,7 @@ class PackageFile(object):
 
     def sign(self, sign_with, identity):
         print("Signing {}".format(self.basefilename))
-        gpg_args = (sign_with, "--detach-sign")  # type: Tuple[str, ...]
+        gpg_args: Tuple[str, ...] = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)
