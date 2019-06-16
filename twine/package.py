@@ -21,6 +21,9 @@ from hashlib import blake2b
 import pkginfo
 import pkg_resources
 
+from pretend import stub
+from typing import Dict, Optional, Union
+
 from twine.wheel import Wheel
 from twine.wininst import WinInst
 from twine import exceptions
@@ -49,7 +52,7 @@ DIST_EXTENSIONS = {
 
 
 class PackageFile:
-    def __init__(self, filename, comment, metadata, python_version, filetype):
+    def __init__(self, filename: str, comment: Optional[stub], metadata: Union[Wheel, stub], python_version: Optional[Union[str, stub]], filetype: Optional[Union[str, stub]]) -> None:
         self.filename = filename
         self.basefilename = os.path.basename(filename)
         self.comment = comment
@@ -70,7 +73,7 @@ class PackageFile:
         self.blake2_256_digest = hexdigest.blake2
 
     @classmethod
-    def from_filename(cls, filename, comment):
+    def from_filename(cls, filename: str, comment: None) -> PackageFile:
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
@@ -103,7 +106,7 @@ class PackageFile:
 
         return cls(filename, comment, meta, py_version, dtype)
 
-    def metadata_dictionary(self):
+    def metadata_dictionary(self) -> Dict[str, Union[str, stub]]:
         meta = self.metadata
         data = {
             # identify release
@@ -157,7 +160,7 @@ class PackageFile:
 
         return data
 
-    def add_gpg_signature(self, signature_filepath, signature_filename):
+    def add_gpg_signature(self, signature_filepath: str, signature_filename: str):
         if self.gpg_signature is not None:
             raise exceptions.InvalidDistribution(
                 'GPG Signature can only be added once'
@@ -166,7 +169,7 @@ class PackageFile:
         with open(signature_filepath, "rb") as gpg:
             self.gpg_signature = (signature_filename, gpg.read())
 
-    def sign(self, sign_with, identity):
+    def sign(self, sign_with: str, identity: Optional[str]):
         print(f"Signing {self.basefilename}")
         gpg_args = (sign_with, "--detach-sign")
         if identity:
@@ -207,7 +210,7 @@ class HashManager:
     This will also allow us to better test this logic.
     """
 
-    def __init__(self, filename):
+    def __init__(self, filename: str) -> None:
         """Initialize our manager and hasher objects."""
         self.filename = filename
         try:
@@ -221,34 +224,34 @@ class HashManager:
         if blake2b is not None:
             self._blake_hasher = blake2b(digest_size=256 // 8)
 
-    def _md5_update(self, content):
+    def _md5_update(self, content: bytes) -> None:
         if self._md5_hasher is not None:
             self._md5_hasher.update(content)
 
-    def _md5_hexdigest(self):
+    def _md5_hexdigest(self) -> Optional[str]:
         if self._md5_hasher is not None:
             return self._md5_hasher.hexdigest()
         return None
 
-    def _sha2_update(self, content):
+    def _sha2_update(self, content: bytes) -> None:
         if self._sha2_hasher is not None:
             self._sha2_hasher.update(content)
 
-    def _sha2_hexdigest(self):
+    def _sha2_hexdigest(self) -> str:
         if self._sha2_hasher is not None:
             return self._sha2_hasher.hexdigest()
         return None
 
-    def _blake_update(self, content):
+    def _blake_update(self, content: bytes) -> None:
         if self._blake_hasher is not None:
             self._blake_hasher.update(content)
 
-    def _blake_hexdigest(self):
+    def _blake_hexdigest(self) -> Optional[str]:
         if self._blake_hasher is not None:
             return self._blake_hasher.hexdigest()
         return None
 
-    def hash(self):
+    def hash(self) -> None:
         """Hash the file contents."""
         with open(self.filename, "rb") as fp:
             for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
@@ -256,7 +259,7 @@ class HashManager:
                 self._sha2_update(content)
                 self._blake_update(content)
 
-    def hexdigest(self):
+    def hexdigest(self) -> Hexdigest:
         """Return the hexdigest for the file."""
         return Hexdigest(
             self._md5_hexdigest(),
