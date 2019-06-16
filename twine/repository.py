@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Sequence, Tuple, Union
+from typing import Dict, List, Tuple
 import sys
 
 from tqdm import tqdm
@@ -26,7 +26,7 @@ from requests_toolbelt.multipart import (
 )
 from requests_toolbelt.utils import user_agent
 
-from twine.package import PackageFile
+from twine.package import PackageFile, MetadataValue
 import twine
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
@@ -91,8 +91,8 @@ class Repository:
 
     @staticmethod
     def _convert_data_to_list_of_tuples(
-        data: Dict[str, Union[str, Sequence[str]]]
-    ) -> List[Tuple[str, Union[str, Sequence[str]]]]:
+        data: Dict[str, MetadataValue]
+    ) -> List[Tuple[str, MetadataValue]]:
         data_to_send = []
         for key, value in data.items():
             if (key in KEYWORDS_TO_NOT_FLATTEN or

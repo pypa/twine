@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict, Optional, Union, Sequence, Tuple
 import collections
 import hashlib
 import io
@@ -50,9 +51,18 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
+MetadataValue = Union[str, Sequence[str]]
+
 
 class PackageFile:
-    def __init__(self, filename: str, comment: Optional[stub], metadata: Union[Wheel, stub], python_version: Optional[Union[str, stub]], filetype: Optional[Union[str, stub]]) -> None:
+    def __init__(
+        self,
+        filename: str,
+        comment: Optional[str],
+        metadata: pkginfo.Distribution,
+        python_version: Optional[str],
+        filetype: Optional[str],
+    ) -> None:
         self.filename = filename
         self.basefilename = os.path.basename(filename)
         self.comment = comment
@@ -62,7 +72,7 @@ class PackageFile:
         self.safe_name = pkg_resources.safe_name(metadata.name)
         self.signed_filename = self.filename + '.asc'
         self.signed_basefilename = self.basefilename + '.asc'
-        self.gpg_signature = None
+        self.gpg_signature: Optional[Tuple[str, bytes]] = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -73,7 +83,7 @@ class PackageFile:
         self.blake2_256_digest = hexdigest.blake2
 
     @classmethod
-    def from_filename(cls, filename: str, comment: None) -> PackageFile:
+    def from_filename(cls, filename: str, comment: None) -> 'PackageFile':
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
@@ -94,6 +104,7 @@ class PackageFile:
                 "possible."
             )
 
+        py_version: Optional[str]
         if dtype == "bdist_egg":
             pkgd = pkg_resources.Distribution.from_filename(filename)
             py_version = pkgd.py_version
@@ -106,7 +117,7 @@ class PackageFile:
 
         return cls(filename, comment, meta, py_version, dtype)
 
-    def metadata_dictionary(self) -> Dict[str, Union[str, stub]]:
+    def metadata_dictionary(self) -> Dict[str, MetadataValue]:
         meta = self.metadata
         data = {
             # identify release
@@ -160,7 +171,11 @@ class PackageFile:
 
         return data
 
-    def add_gpg_signature(self, signature_filepath: str, signature_filename: str):
+    def add_gpg_signature(
+        self,
+        signature_filepath: str,
+        signature_filename: str
+    ):
         if self.gpg_signature is not None:
             raise exceptions.InvalidDistribution(
                 'GPG Signature can only be added once'
@@ -171,7 +186,7 @@ class PackageFile:
 
     def sign(self, sign_with: str, identity: Optional[str]):
         print(f"Signing {self.basefilename}")
-        gpg_args = (sign_with, "--detach-sign")
+        gpg_args: Tuple[str, ...] = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)
@@ -213,13 +228,16 @@ class HashManager:
     def __init__(self, filename: str) -> None:
         """Initialize our manager and hasher objects."""
         self.filename = filename
+
+        self._md5_hasher = None
         try:
             self._md5_hasher = hashlib.md5()
         except ValueError:
             # FIPs mode disables MD5
-            self._md5_hasher = None
+            pass
 
         self._sha2_hasher = hashlib.sha256()
+
         self._blake_hasher = None
         if blake2b is not None:
             self._blake_hasher = blake2b(digest_size=256 // 8)
@@ -237,7 +255,7 @@ class HashManager:
         if self._sha2_hasher is not None:
             self._sha2_hasher.update(content)
 
-    def _sha2_hexdigest(self) -> str:
+    def _sha2_hexdigest(self) -> Optional[str]:
         if self._sha2_hasher is not None:
             return self._sha2_hasher.hexdigest()
         return None
