@@ -107,7 +107,7 @@ def test_check_no_description(monkeypatch, capsys):
     )
 
 
-def test_check_invalid_description(monkeypatch, capsys):
+def test_check_invalid_description_type(monkeypatch):
     package = pretend.stub(metadata_dictionary=lambda: {
         'description': "Project",
         'long_description': "My amazing project::",
