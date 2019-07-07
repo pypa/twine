@@ -69,54 +69,68 @@ class _WarningStream(object):
         return self.output.getvalue()
 
 
+def _get_description_content_type(metadata, output_stream):
+    description_content_type = metadata["description_content_type"]
+    if description_content_type is None:
+        output_stream.write(
+            'warning: `long_description_content_type` missing.  '
+            'defaulting to `text/x-rst`.\n'
+        )
+        description_content_type = 'text/x-rst'
+
+    if description_content_type not in _supported_readme_types:
+        output_stream.write(
+            'warning; `long_description_content_type` invalid.\n'
+            'It must be one of the following types: [{}].\n'
+            .format(", ".join(_supported_readme_types))
+        )
+    return description_content_type
+
+
+def _get_description(metadata, output_stream):
+    description = metadata["description"]
+    if description in {None, 'UNKNOWN\n\n\n'}:
+        output_stream.write('warning: `long_description` missing.\n')
+        return None
+    return description
+
+
+def _description_will_not_render(description_content_type, description):
+    warning_stream = _WarningStream()
+    content_type, params = cgi.parse_header(description_content_type)
+    renderer = _RENDERERS.get(content_type, _RENDERERS[None])
+    return (description is not None
+            and renderer
+            and renderer.render(description, stream=warning_stream, **params)
+            is None)
+
+
+def check_package(package, output_stream):
+    warning_stream = _WarningStream()
+    metadata = package.metadata_dictionary()
+    description_content_type = _get_description_content_type(metadata, output_stream)
+    description = _get_description(metadata, output_stream)
+    failure = _description_will_not_render(description_content_type, description)
+    if failure:
+        output_stream.write("Failed\n")
+        output_stream.write(
+            "The project's long_description has invalid markup which "
+            "will not be rendered on PyPI. The following syntax "
+            "errors were detected:\n%s" % warning_stream
+        )
+    else:
+        output_stream.write("Passed\n")
+    return failure
+
+
 def check(dists, output_stream=sys.stdout):
     uploads = [i for i in _find_dists(dists) if not i.endswith(".asc")]
-    stream = _WarningStream()
     failure = False
 
     for filename in uploads:
         output_stream.write("Checking distribution %s: " % filename)
         package = PackageFile.from_filename(filename, comment=None)
-
-        metadata = package.metadata_dictionary()
-        description = metadata["description"]
-        description_content_type = metadata["description_content_type"]
-
-        if description_content_type is None:
-            output_stream.write(
-                'warning: `long_description_content_type` missing.  '
-                'defaulting to `text/x-rst`.\n'
-            )
-            description_content_type = 'text/x-rst'
-
-        if description_content_type not in _supported_readme_types:
-            output_stream.write(
-                'warning; `long_description_content_type` invalid.\n'
-                'It must be one of the following types: [{}].\n'
-                .format(", ".join(_supported_readme_types))
-            )
-
-        content_type, params = cgi.parse_header(description_content_type)
-        renderer = _RENDERERS.get(content_type, _RENDERERS[None])
-
-        if description in {None, 'UNKNOWN\n\n\n'}:
-            output_stream.write('warning: `long_description` missing.\n')
-            output_stream.write("Passed\n")
-        else:
-            if (
-                renderer
-                and renderer.render(description, stream=stream, **params)
-                is None
-            ):
-                failure = True
-                output_stream.write("Failed\n")
-                output_stream.write(
-                    "The project's long_description has invalid markup which "
-                    "will not be rendered on PyPI. The following syntax "
-                    "errors were detected:\n%s" % stream
-                )
-            else:
-                output_stream.write("Passed\n")
+        failure = check_package(package, output_stream) or failure
 
     return failure
 
