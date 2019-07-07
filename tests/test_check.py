@@ -112,7 +112,7 @@ def test_check_invalid_description_type():
     package = pretend.stub(metadata_dictionary=lambda: {
         'description': "Project",
         'long_description': "My amazing project::",
-        'description_content_type': '"text/rst"',  # close, but not quite
+        'description_content_type': '"text/rst"',  # close, but not quite x-rst
     })
 
     output_stream = check.StringIO()
