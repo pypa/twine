@@ -108,9 +108,15 @@ def _description_will_not_render(description_content_type, description):
 def check_package(package, output_stream):
     warning_stream = _WarningStream()
     metadata = package.metadata_dictionary()
-    description_content_type = _get_description_content_type(metadata, output_stream)
+    description_content_type = _get_description_content_type(
+        metadata,
+        output_stream
+    )
     description = _get_description(metadata, output_stream)
-    failure = _description_will_not_render(description_content_type, description)
+    failure = _description_will_not_render(
+        description_content_type,
+        description
+    )
     if failure:
         output_stream.write("Failed\n")
         output_stream.write(
