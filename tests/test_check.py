@@ -107,6 +107,31 @@ def test_check_no_description(monkeypatch, capsys):
     )
 
 
+def test_check_invalid_description(monkeypatch, capsys):
+    package = pretend.stub(metadata_dictionary=lambda: {
+        'description': "Project",
+        'long_description': "My amazing project::",
+        'description_content_type': '"text/rst"',  # close, but not quite
+    })
+
+    monkeypatch.setattr(check, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(
+        check,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
+    )
+
+    output_stream = check.StringIO()
+    check.check("dist/*", output_stream=output_stream)
+    assert output_stream.getvalue() == (
+        'Checking distribution dist/dist.tar.gz: '
+        'warning; `long_description_content_type` invalid.\n'
+        'It must be one of the following types: '
+        '[text/markdown, text/plain, text/x-rst].\n'
+        'Passed\n'
+    )
+
+
 def test_check_failing_distribution(monkeypatch):
     renderer = pretend.stub(
         render=pretend.call_recorder(lambda *a, **kw: None)

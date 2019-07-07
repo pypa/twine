@@ -32,6 +32,7 @@ _RENDERERS = {
     "text/markdown": None,  # Rendering cannot fail
 }
 
+_supported_readme_types = sorted([key for key in _RENDERERS.keys() if key])
 
 # Regular expression used to capture and reformat doctuils warnings into
 # something that a human can understand. This is loosely borrowed from
@@ -87,6 +88,13 @@ def check(dists, output_stream=sys.stdout):
                 'defaulting to `text/x-rst`.\n'
             )
             description_content_type = 'text/x-rst'
+
+        if description_content_type not in _supported_readme_types:
+            output_stream.write(
+                'warning; `long_description_content_type` invalid.\n'
+                'It must be one of the following types: [{}].\n'
+                .format(", ".join(_supported_readme_types))
+            )
 
         content_type, params = cgi.parse_header(description_content_type)
         renderer = _RENDERERS.get(content_type, _RENDERERS[None])
