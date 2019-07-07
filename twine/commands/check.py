@@ -78,11 +78,11 @@ def _get_description_content_type(metadata, output_stream):
         )
         description_content_type = 'text/x-rst'
 
-    if description_content_type not in _supported_readme_types:
+    if description_content_type not in _VALID_CONTENT_TYPES:
         output_stream.write(
             'warning; `long_description_content_type` invalid.\n'
             'It must be one of the following types: [{}].\n'
-            .format(", ".join(_supported_readme_types))
+            .format(", ".join(_VALID_CONTENT_TYPES))
         )
     return description_content_type
 
