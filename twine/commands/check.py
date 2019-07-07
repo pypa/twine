@@ -32,7 +32,7 @@ _RENDERERS = {
     "text/markdown": None,  # Rendering cannot fail
 }
 
-_supported_readme_types = sorted([key for key in _RENDERERS.keys() if key])
+_VALID_CONTENT_TYPES = sorted([key for key in _RENDERERS.keys() if key])
 
 # Regular expression used to capture and reformat doctuils warnings into
 # something that a human can understand. This is loosely borrowed from
