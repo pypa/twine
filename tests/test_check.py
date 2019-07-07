@@ -89,18 +89,11 @@ def test_check_no_description(monkeypatch, capsys):
         'description': None, 'description_content_type': None,
     })
 
-    monkeypatch.setattr(check, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        check,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-
     # used to crash with `AttributeError`
     output_stream = check.StringIO()
-    check.check("dist/*", output_stream=output_stream)
+    failed = check_package(package, output_stream)
+    assert not failed  # No description is fine
     assert output_stream.getvalue() == (
-        'Checking distribution dist/dist.tar.gz: '
         'warning: `long_description_content_type` missing.  '
         'defaulting to `text/x-rst`.\n'
         'warning: `long_description` missing.\n'
