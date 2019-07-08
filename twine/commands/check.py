@@ -80,7 +80,7 @@ def _get_description_content_type(metadata, output_stream):
 
     if description_content_type not in _VALID_CONTENT_TYPES:
         output_stream.write(
-            'warning; `long_description_content_type` invalid.\n'
+            'warning: `long_description_content_type` invalid.\n'
             'It must be one of the following types: [{}].\n'
             .format(", ".join(_VALID_CONTENT_TYPES))
         )
