@@ -112,7 +112,7 @@ def test_check_invalid_description_type():
     failed = check_package(package, output_stream)
     assert not failed  # Invalid Description type is currently just a warning
     assert output_stream.getvalue() == (
-        'warning; `long_description_content_type` invalid.\n'
+        'warning: `long_description_content_type` invalid.\n'
         'It must be one of the following types: '
         '[text/markdown, text/plain, text/x-rst].\n'
         'Passed\n'
