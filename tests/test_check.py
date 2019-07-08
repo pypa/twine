@@ -110,14 +110,11 @@ def test_check_invalid_description_type():
 
     output_stream = check.StringIO()
     failed = check_package(package, output_stream)
+    check_output = output_stream.getvalue()
     assert not failed  # Invalid Description type is currently just a warning
-    assert output_stream.getvalue() == (
-        'warning: `long_description_content_type` invalid.\n'
-        'It must be one of the following types: '
-        '[text/markdown, text/plain, text/x-rst].\n'
-        'Passed\n'
-    )
-
+    assert "`long_description_content_type` invalid." in check_output
+    assert "Passed" in check_output
+    assert "Failed" not in check_output
 
 def test_check_failing_distribution(monkeypatch):
     renderer = pretend.stub(
