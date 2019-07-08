@@ -69,26 +69,6 @@ class _WarningStream(object):
         return self.output.getvalue()
 
 
-def _get_description_content_type(metadata, output_stream):
-    description_content_type = metadata["description_content_type"]
-    if description_content_type is None:
-        output_stream.write(
-            'warning: `long_description_content_type` missing.  '
-            'defaulting to `text/x-rst`.\n'
-        )
-        description_content_type = 'text/x-rst'
-
-    return description_content_type
-
-
-def _get_description(metadata, output_stream):
-    description = metadata["description"]
-    if description in {None, 'UNKNOWN\n\n\n'}:
-        output_stream.write('warning: `long_description` missing.\n')
-        return None
-    return description
-
-
 def _description_rendering_errors(description_content_type, description):
     warning_stream = _WarningStream()
     content_type, params = cgi.parse_header(description_content_type)
@@ -125,11 +105,17 @@ def _description_content_type_errors(description_content_type):
 
 def check_package(package, output_stream):
     metadata = package.metadata_dictionary()
-    description_content_type = _get_description_content_type(
-        metadata,
-        output_stream
-    )
-    description = _get_description(metadata, output_stream)
+    description_content_type = metadata["description_content_type"]
+    if description_content_type is None:
+        output_stream.write(
+            'warning: `long_description_content_type` missing.  '
+            'defaulting to `text/x-rst`.\n'
+        )
+        description_content_type = 'text/x-rst'
+    description = metadata["description"]
+    if description in {None, 'UNKNOWN\n\n\n'}:
+        output_stream.write('warning: `long_description` missing.\n')
+        description = None
     failures = (
             _description_content_type_errors(description_content_type) +
             _description_rendering_errors(
