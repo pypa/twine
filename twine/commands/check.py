@@ -78,12 +78,6 @@ def _get_description_content_type(metadata, output_stream):
         )
         description_content_type = 'text/x-rst'
 
-    if description_content_type not in _VALID_CONTENT_TYPES:
-        output_stream.write(
-            'warning: `long_description_content_type` invalid.\n'
-            'It must be one of the following types: [{}].\n'
-            .format(", ".join(_VALID_CONTENT_TYPES))
-        )
     return description_content_type
 
 
@@ -95,38 +89,58 @@ def _get_description(metadata, output_stream):
     return description
 
 
-def _description_will_not_render(description_content_type, description):
+def _description_rendering_errors(description_content_type, description):
     warning_stream = _WarningStream()
     content_type, params = cgi.parse_header(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
-    return (description is not None
-            and renderer
-            and renderer.render(description, stream=warning_stream, **params)
-            is None)
+    rendering_has_errors = (
+        description is not None
+        and renderer
+        and renderer.render(description, stream=warning_stream, **params)
+        is None
+    )
+    errors = []
+    if rendering_has_errors:
+        errors.append(
+            "The project's long_description has invalid markup which "
+            "will not be rendered on PyPI. The following syntax "
+            "errors were detected:\n%s" % warning_stream
+        )
+    return errors
+
+
+def _description_content_type_errors(description_content_type):
+    description_content_type_invalid = (
+            description_content_type not in _VALID_CONTENT_TYPES
+    )
+    errors = []
+    if description_content_type_invalid:
+        errors.append(
+            'warning: `long_description_content_type` invalid.\n'
+            'It must be one of the following types: [{}].\n'
+            .format(", ".join(_VALID_CONTENT_TYPES))
+        )
+    return errors
 
 
 def check_package(package, output_stream):
-    warning_stream = _WarningStream()
     metadata = package.metadata_dictionary()
     description_content_type = _get_description_content_type(
         metadata,
         output_stream
     )
     description = _get_description(metadata, output_stream)
-    failure = _description_will_not_render(
-        description_content_type,
-        description
+    failures = (
+            _description_content_type_errors(description_content_type) +
+            _description_rendering_errors(
+                description_content_type,
+                description
+            )
     )
-    if failure:
-        output_stream.write("Failed\n")
-        output_stream.write(
-            "The project's long_description has invalid markup which "
-            "will not be rendered on PyPI. The following syntax "
-            "errors were detected:\n%s" % warning_stream
-        )
-    else:
-        output_stream.write("Passed\n")
-    return failure
+    output_stream.write("Failed\n" if failures else "Passed\n")
+    for failure in failures:
+        output_stream.write(failure)
+    return bool(failures)
 
 
 def check(dists, output_stream=sys.stdout):
