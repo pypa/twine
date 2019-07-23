@@ -13,7 +13,7 @@
 # limitations under the License.
 from __future__ import unicode_literals
 import platform
-from twine import package
+from twine import package, exceptions
 
 import pretend
 import pytest
@@ -208,3 +208,22 @@ def test_no_blake2_hash_manager(monkeypatch):
     hasher.hash()
     hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
     assert hasher.hexdigest() == hashes
+
+
+def test_pkginfo_returns_no_metadata(monkeypatch):
+    """
+    Fail gracefully if pkginfo can't interpret the metadata (possibly due to
+    seeing a version number it doesn't support yet) and gives us back an
+    'empty' object with no metadata
+    """
+
+    def EmptyDist(filename):
+        return pretend.stub(name=None, version=None)
+
+    monkeypatch.setattr(package, "DIST_TYPES", {"bdist_wheel": EmptyDist})
+    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package.PackageFile.from_filename(filename, comment=None)
+
+    assert 'Invalid distribution metadata' in err.value.args[0]
