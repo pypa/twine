@@ -84,7 +84,8 @@ class Settings(object):
             connection to the package index.
         :param bool trusted:
             Accept TLS connection with unknown server CA certificates.
-            Prevents the ``cacert`` parameter from being used if set to ``True``.
+            Prevents the ``cacert`` parameter from being used if set to
+            ``True``.
 
             This defaults to ``False``.
         :param str client_cert:
