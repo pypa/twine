@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :bug:`341` Fail more gracefully when encountering bad metadata
 * :feature:`310` Now provide a more meaningful error on redirect during upload.
 * :release:`1.13.0 <2019-02-13>`
 * :bug:`452 major` Restore prompts while retaining support for suppressing
