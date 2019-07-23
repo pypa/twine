@@ -84,6 +84,15 @@ class PackageFile(object):
                 os.path.basename(filename)
             )
 
+        # If pkginfo encounters a metadata version it doesn't support, it may
+        # give us back empty metadata. At the very least, we should have a name
+        # and version
+        if not (meta.name and meta.version):
+            raise exceptions.InvalidDistribution(
+                "Invalid distribution metadata. Try upgrading twine if "
+                "possible."
+            )
+
         if dtype == "bdist_egg":
             pkgd = pkg_resources.Distribution.from_filename(filename)
             py_version = pkgd.py_version
