@@ -32,4 +32,4 @@ def test_dispatch_to_subcommand(monkeypatch):
 
 def test_catches_enoent():
     with pytest.raises(SystemExit):
-        cli.dispatch(["non-existant-command"])
+        cli.dispatch(["non-existent-command"])
