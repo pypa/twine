@@ -88,7 +88,6 @@ def upload(upload_settings, dists):
             package.sign(upload_settings.sign_with, upload_settings.identity)
 
         # Suppress TLS verification warning on trusted custom certs
-        # See https://docs.python.org/3/library/warnings.html#temporarily-suppressing-warnings
         with warnings.catch_warnings():
             warnings.simplefilter("ignore")
             resp = repository.upload(package)

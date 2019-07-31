@@ -83,9 +83,9 @@ class Settings(object):
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
         :param bool trusted:
-            Accept TLS connection with unknown server CA certificates.
-            Prevents the ``cacert`` parameter from being used if set to
-            ``True``.
+            Accept TLS connection with unknown or self signed server CA
+            certificates. Prevents the ``cacert`` parameter from being used
+            if set to ``True``.
 
             This defaults to ``False``.
         :param str client_cert:
@@ -211,7 +211,10 @@ class Settings(object):
             "--trusted",
             default=False,
             action="store_true",
-            help="Accept self signed CA certificates."
+            help="Accept TLS connection with unknown or self signed server "
+                 "CA certificates. Prevents the 'cert' option "
+                 "from being used."
+
         )
         parser.add_argument(
             "--client-cert",
