@@ -59,6 +59,47 @@ def test_sign_file_with_identity(monkeypatch):
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
+def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
+    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
+
+    assert 'executables not available' in err.value.args[0]
+
+
+def test_run_gpg_no_fallback_if_not_using_gpg(monkeypatch):
+
+    def check_call(*a, **kw):
+        raise FileNotFoundError('gpg not found')
+
+    replaced_check_call = pretend.call_recorder(check_call)
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
+
+    package.PackageFile.run_gpg(gpg_args)
+
+    assert replaced_check_call.calls == [pretend.call(gpg_args)]
+
+
+def test_run_gpg_falls_back_to_gpg2(monkeypatch):
+
+    def check_call(arg_list):
+        if arg_list[0] == 'gpg':
+            raise FileNotFoundError('gpg not found')
+
+    replaced_check_call = pretend.call_recorder(check_call)
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    package.PackageFile.run_gpg(gpg_args)
+
+    gpg2_args = replaced_check_call.calls[1].args
+    assert gpg2_args[0][0] == 'gpg2'
+
+
 def test_package_signed_name_is_correct():
     filename = 'tests/fixtures/deprecated-pypirc'
 

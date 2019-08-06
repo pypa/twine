@@ -174,9 +174,31 @@ class PackageFile(object):
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)
-        subprocess.check_call(gpg_args)
+        self.run_gpg(gpg_args)
 
         self.add_gpg_signature(self.signed_filename, self.signed_basefilename)
+
+    @classmethod
+    def run_gpg(cls, gpg_args):
+        try:
+            subprocess.check_call(gpg_args)
+            return
+        except FileNotFoundError:
+            print("{} executable not available.".format(gpg_args[0]))
+
+        if not gpg_args[0] == "gpg":
+            return
+
+        print("Attempting fallback to gpg2.")
+        try:
+            subprocess.check_call(("gpg2",) + gpg_args[1:])
+        except FileNotFoundError:
+            print("gpg2 executable not available.")
+            raise exceptions.InvalidSigningExecutable(
+                "'gpg' or 'gpg2' executables not available. "
+                "Try installing one of these or specifying an executable "
+                "with the --sign-with flag."
+            )
 
 
 Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])
