@@ -253,12 +253,20 @@ class Settings(object):
             username,
             self.repository_config
         )
-        self.password = utils.get_password(
-            self.repository_config['repository'],
-            self.username,
-            password,
-            self.repository_config,
-        )
+        if self.client_cert:
+            self.password = utils.get_password_no_prompt(
+                self.repository_config['repository'],
+                self.username,
+                password,
+                self.repository_config,
+            )
+        else:
+            self.password = utils.get_password(
+                self.repository_config['repository'],
+                self.username,
+                password,
+                self.repository_config,
+            )
 
     def _handle_certificates(self, cacert, client_cert):
         self.cacert = utils.get_cacert(cacert, self.repository_config)

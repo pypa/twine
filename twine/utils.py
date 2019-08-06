@@ -305,6 +305,14 @@ def get_password(system, username, cli_value, config):
     )
 
 
+def get_password_no_prompt(system, username, cli_value, config):
+    return get_userpass_value(
+        cli_value,
+        config,
+        key='password',
+    )
+
+
 def no_positional(allow_self=False):
     """A decorator that doesn't allow for positional arguments.
 
