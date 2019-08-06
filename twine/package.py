@@ -33,6 +33,12 @@ from twine.wheel import Wheel
 from twine.wininst import WinInst
 from twine import exceptions
 
+try:
+    FileNotFoundError = FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError  # Py2
+
+
 DIST_TYPES = {
     "bdist_wheel": Wheel,
     "bdist_wininst": WinInst,
