@@ -60,7 +60,9 @@ def test_sign_file_with_identity(monkeypatch):
 
 
 def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
-    replaced_check_call = pretend.raiser(package.FileNotFoundError('not found'))
+    replaced_check_call = pretend.raiser(
+        package.FileNotFoundError('not found')
+    )
     monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
     gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
 
