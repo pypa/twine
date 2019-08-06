@@ -1,6 +1,5 @@
 codecov:
   branch: master
-  bot: null
 
 coverage:
   precision: 2
@@ -11,20 +10,11 @@ coverage:
     project:
       default:
         target: auto
-        threshold: null
-        branches: null
 
     patch:
       default:
         target: auto
-        branches: null
 
-    changes:
-      default:
-        branches: null
-
-  ignore: null
-  fixes:
-    - .tox
+    changes: no
 
 comment: off
