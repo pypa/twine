@@ -190,12 +190,11 @@ class PackageFile(object):
             subprocess.check_call(gpg_args)
             return
         except FileNotFoundError:
-            print("{} executable not available.".format(gpg_args[0]))
+            if gpg_args[0] != "gpg":
+                raise exceptions.InvalidSigningExecutable(
+                    "{} executable not available.".format(gpg_args[0]))
 
-        if not gpg_args[0] == "gpg":
-            return
-
-        print("Attempting fallback to gpg2.")
+        print("gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
         except FileNotFoundError:

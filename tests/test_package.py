@@ -72,18 +72,17 @@ def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
     assert 'executables not available' in err.value.args[0]
 
 
-def test_run_gpg_no_fallback_if_not_using_gpg(monkeypatch):
-
-    def check_call(*a, **kw):
-        raise package.FileNotFoundError('gpg not found')
-
-    replaced_check_call = pretend.call_recorder(check_call)
+def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
+    replaced_check_call = pretend.raiser(
+        package.FileNotFoundError('not found')
+    )
     monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
     gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
 
-    package.PackageFile.run_gpg(gpg_args)
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
 
-    assert replaced_check_call.calls == [pretend.call(gpg_args)]
+    assert 'not_gpg executable not available' in err.value.args[0]
 
 
 def test_run_gpg_falls_back_to_gpg2(monkeypatch):
