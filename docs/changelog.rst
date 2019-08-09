@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :feature:`456` Better error handling and gpg2 fallback if gpg not available.
 * :bug:`341` Fail more gracefully when encountering bad metadata
 * :feature:`459` Show Warehouse URL after uploading a package
 * :feature:`310` Now provide a more meaningful error on redirect during upload.
