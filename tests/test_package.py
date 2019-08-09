@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from twine import package
+from twine import package, exceptions
 
 import pretend
 import pytest
@@ -55,6 +55,48 @@ def test_sign_file_with_identity(monkeypatch):
         pass
     args = ('gpg', '--detach-sign', '--local-user', 'identity', '-a', filename)
     assert replaced_check_call.calls == [pretend.call(args)]
+
+
+def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
+    replaced_check_call = pretend.raiser(
+        package.FileNotFoundError('not found')
+    )
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
+
+    assert 'executables not available' in err.value.args[0]
+
+
+def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
+    replaced_check_call = pretend.raiser(
+        package.FileNotFoundError('not found')
+    )
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
+
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
+
+    assert 'not_gpg executable not available' in err.value.args[0]
+
+
+def test_run_gpg_falls_back_to_gpg2(monkeypatch):
+
+    def check_call(arg_list):
+        if arg_list[0] == 'gpg':
+            raise package.FileNotFoundError('gpg not found')
+
+    replaced_check_call = pretend.call_recorder(check_call)
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    package.PackageFile.run_gpg(gpg_args)
+
+    gpg2_args = replaced_check_call.calls[1].args
+    assert gpg2_args[0][0] == 'gpg2'
 
 
 def test_package_signed_name_is_correct():
@@ -200,3 +242,22 @@ def test_no_blake2_hash_manager(monkeypatch):
     hasher.hash()
     hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
     assert hasher.hexdigest() == hashes
+
+
+def test_pkginfo_returns_no_metadata(monkeypatch):
+    """
+    Fail gracefully if pkginfo can't interpret the metadata (possibly due to
+    seeing a version number it doesn't support yet) and gives us back an
+    'empty' object with no metadata
+    """
+
+    def EmptyDist(filename):
+        return pretend.stub(name=None, version=None)
+
+    monkeypatch.setattr(package, "DIST_TYPES", {"bdist_wheel": EmptyDist})
+    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package.PackageFile.from_filename(filename, comment=None)
+
+    assert 'Invalid distribution metadata' in err.value.args[0]

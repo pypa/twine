@@ -14,7 +14,7 @@
 import requests
 
 from twine import repository
-from twine.utils import DEFAULT_REPOSITORY
+from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
 
 import pretend
 import pytest
@@ -188,3 +188,62 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(monkeypatch, tmpdir,
     )
 
     repo.upload(package)
+
+
+@pytest.mark.parametrize('package_meta,repository_url,release_urls', [
+    # Single package
+    (
+        [('fake', '2.12.0')],
+        DEFAULT_REPOSITORY,
+        {'https://pypi.org/project/fake/2.12.0/'},
+    ),
+    # Single package to testpypi
+    (
+        [('fake', '2.12.0')],
+        TEST_REPOSITORY,
+        {'https://test.pypi.org/project/fake/2.12.0/'},
+    ),
+    # Multiple packages (faking a wheel and an sdist)
+    (
+        [('fake', '2.12.0'), ('fake', '2.12.0')],
+        DEFAULT_REPOSITORY,
+        {'https://pypi.org/project/fake/2.12.0/'},
+    ),
+    # Multiple releases
+    (
+        [('fake', '2.12.0'), ('fake', '2.12.1')],
+        DEFAULT_REPOSITORY,
+        {
+            'https://pypi.org/project/fake/2.12.0/',
+            'https://pypi.org/project/fake/2.12.1/',
+        },
+    ),
+    # Not pypi
+    (
+        [('fake', '2.12.0')],
+        'http://devpi.example.com',
+        set(),
+    ),
+    # No packages
+    (
+        [],
+        DEFAULT_REPOSITORY,
+        set(),
+    ),
+])
+def test_release_urls(package_meta, repository_url, release_urls):
+    packages = [
+        pretend.stub(
+            safe_name=name,
+            metadata=pretend.stub(version=version),
+        )
+        for name, version in package_meta
+    ]
+
+    repo = repository.Repository(
+        repository_url=repository_url,
+        username='username',
+        password='password',
+    )
+
+    assert repo.release_urls(packages) == release_urls

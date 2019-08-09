@@ -30,7 +30,7 @@ _RENDERERS = {
 }
 
 
-# Regular expression used to capture and reformat doctuils warnings into
+# Regular expression used to capture and reformat docutils warnings into
 # something that a human can understand. This is loosely borrowed from
 # Sphinx: https://github.com/sphinx-doc/sphinx/blob
 # /c35eb6fade7a3b4a6de4183d1dd4196f04a5edaf/sphinx/util/docutils.py#L199

@@ -13,6 +13,7 @@
 # limitations under the License.
 import pretend
 import pytest
+from requests.exceptions import HTTPError
 
 from twine.commands import upload
 from twine import package, cli, exceptions
@@ -20,10 +21,15 @@ import twine
 
 import helpers
 
+SDIST_FIXTURE = 'tests/fixtures/twine-1.5.0.tar.gz'
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+RELEASE_URL = 'https://pypi.org/project/twine/1.5.0/'
+NEW_SDIST_FIXTURE = 'tests/fixtures/twine-1.6.5.tar.gz'
+NEW_WHEEL_FIXTURE = 'tests/fixtures/twine-1.6.5-py2.py3-none-any.whl'
+NEW_RELEASE_URL = 'https://pypi.org/project/twine/1.6.5/'
 
 
-def test_successful_upload(make_settings):
+def test_successful_upload(make_settings, capsys):
     upload_settings = make_settings()
 
     stub_response = pretend.stub(
@@ -34,15 +40,55 @@ def test_successful_upload(make_settings):
 
     stub_repository = pretend.stub(
         upload=lambda package: stub_response,
-        close=lambda: None
+        close=lambda: None,
+        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
+    result = upload.upload(upload_settings, [
+        WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
+    ])
 
     # A truthy result means the upload failed
     assert result is None
+
+    captured = capsys.readouterr()
+    assert captured.out.count(RELEASE_URL) == 1
+    assert captured.out.count(NEW_RELEASE_URL) == 1
+
+
+@pytest.mark.parametrize('verbose', [False, True])
+def test_exception_for_http_status(verbose, make_settings, capsys):
+    upload_settings = make_settings()
+    upload_settings.verbose = verbose
+
+    stub_response = pretend.stub(
+        is_redirect=False,
+        status_code=403,
+        text="Invalid or non-existent authentication information",
+        raise_for_status=pretend.raiser(HTTPError)
+    )
+
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response,
+        close=lambda: None,
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    with pytest.raises(HTTPError):
+        upload.upload(upload_settings, [WHEEL_FIXTURE])
+
+    captured = capsys.readouterr()
+    assert RELEASE_URL not in captured.out
+
+    if verbose:
+        assert stub_response.text in captured.out
+        assert '--verbose' not in captured.out
+    else:
+        assert stub_response.text not in captured.out
+        assert '--verbose' in captured.out
 
 
 def test_get_config_old_format(make_settings, pypirc):
@@ -113,6 +159,7 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
     stub_repository = pretend.stub(
         # Short-circuit the upload, so no need for a stub response
         package_is_uploaded=lambda package: True,
+        release_urls=lambda packages: {},
         close=lambda: None
     )
 
@@ -125,6 +172,7 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
 
     captured = capsys.readouterr()
     assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
+    assert RELEASE_URL not in captured.out
 
 
 def test_prints_skip_message_for_response(make_settings, capsys):
@@ -138,6 +186,7 @@ def test_prints_skip_message_for_response(make_settings, capsys):
     stub_repository = pretend.stub(
         # Do the upload, triggering the error response
         package_is_uploaded=lambda package: False,
+        release_urls=lambda packages: {},
         upload=lambda package: stub_response,
         close=lambda: None
     )
@@ -151,6 +200,7 @@ def test_prints_skip_message_for_response(make_settings, capsys):
 
     captured = capsys.readouterr()
     assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
+    assert RELEASE_URL not in captured.out
 
 
 def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):

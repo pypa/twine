@@ -32,6 +32,8 @@ LEGACY_PYPI = 'https://pypi.python.org/'
 LEGACY_TEST_PYPI = 'https://testpypi.python.org/'
 WAREHOUSE = 'https://upload.pypi.org/'
 OLD_WAREHOUSE = 'https://upload.pypi.io/'
+TEST_WAREHOUSE = 'https://test.pypi.org/'
+WAREHOUSE_WEB = 'https://pypi.org/'
 
 
 class ProgressBar(tqdm):
@@ -205,6 +207,21 @@ class Repository:
                 return True
 
         return False
+
+    def release_urls(self, packages):
+        if self.url.startswith(WAREHOUSE):
+            url = WAREHOUSE_WEB
+        elif self.url.startswith(TEST_WAREHOUSE):
+            url = TEST_WAREHOUSE
+        else:
+            return set()
+
+        return {
+            '{}project/{}/{}/'.format(
+                url, package.safe_name, package.metadata.version
+            )
+            for package in packages
+        }
 
     def verify_package_integrity(self, package):
         # TODO(sigmavirus24): Add a way for users to download the package and
