@@ -129,9 +129,8 @@ def check(dists, output_stream=sys.stdout):
             output_stream.write("FAILED\n")
 
             error_text = (
-                "The project's long_description has invalid markup which "
-                "will not be rendered on PyPI. The following syntax "
-                "errors were detected:\n"
+                "`long_description` has syntax errors in markup and "
+                "would not be rendered on PyPI.\n"
             )
             output_stream.write(indented(error_text, "  "))
             output_stream.write(indented(str(render_warning_stream), "    "))

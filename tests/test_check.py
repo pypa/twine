@@ -125,8 +125,8 @@ def test_check_failing_distribution(monkeypatch):
     assert check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: FAILED\n"
-        "  The project's long_description has invalid markup which will not be "
-        "rendered on PyPI. The following syntax errors were detected:\n"
+        "  `long_description` has syntax errors in markup and would not be "
+        "rendered on PyPI.\n"
         "    WARNING"
     )
     assert renderer.render.calls == [
