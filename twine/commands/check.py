@@ -102,6 +102,15 @@ def _check_file(filename, render_warning_stream):
     return warnings, is_ok
 
 
+def indented(text, prefix):
+    """Adds 'prefix' to all non-empty lines on 'text'.
+    """
+    def prefixed_lines():
+        for line in text.splitlines(True):
+            yield (prefix + line if line.strip() else line)
+    return ''.join(prefixed_lines())
+
+
 def check(dists, output_stream=sys.stdout):
     uploads = [i for i in _find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
@@ -111,25 +120,28 @@ def check(dists, output_stream=sys.stdout):
     failure = False
 
     for filename in uploads:
-        output_stream.write("Checking distribution %s: " % filename)
+        output_stream.write("Checking %s: " % filename)
         render_warning_stream = _WarningStream()
         warnings, is_ok = _check_file(filename, render_warning_stream)
 
         if not is_ok:
             failure = True
-            output_stream.write("Failed\n")
-            output_stream.write(
+            output_stream.write("FAILED\n")
+
+            error_text = (
                 "The project's long_description has invalid markup which "
                 "will not be rendered on PyPI. The following syntax "
                 "errors were detected:\n"
-                "%s" % render_warning_stream
             )
+            output_stream.write(indented(error_text, "  "))
+            output_stream.write(indented(str(render_warning_stream), "    "))
         elif warnings:
-            output_stream.write("Passed, with warnings\n")
+            output_stream.write("PASSED, with warnings\n")
+
             for message in warnings:
-                output_stream.write('warning: ' + message + '\n')
+                output_stream.write('  warning: ' + message + '\n')
         else:
-            output_stream.write("Passed\n")
+            output_stream.write("PASSED\n")
 
     return failure
 

@@ -74,10 +74,7 @@ def test_check_passing_distribution(monkeypatch):
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
     assert not check.check("dist/*", output_stream=output_stream)
-    assert (
-        output_stream.getvalue()
-        == "Checking distribution dist/dist.tar.gz: Passed\n"
-    )
+    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
     assert renderer.render.calls == [
         pretend.call("blah", stream=warning_stream)
     ]
@@ -99,10 +96,10 @@ def test_check_no_description(monkeypatch, capsys):
     output_stream = check.StringIO()
     check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
-        'Checking distribution dist/dist.tar.gz: Passed, with warnings\n'
-        'warning: `long_description_content_type` missing.  '
+        'Checking dist/dist.tar.gz: PASSED, with warnings\n'
+        '  warning: `long_description_content_type` missing.  '
         'defaulting to `text/x-rst`.\n'
-        'warning: `long_description` missing.\n'
+        '  warning: `long_description` missing.\n'
     )
 
 
@@ -127,10 +124,10 @@ def test_check_failing_distribution(monkeypatch):
 
     assert check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
-        "Checking distribution dist/dist.tar.gz: Failed\n"
-        "The project's long_description has invalid markup which will not be "
+        "Checking dist/dist.tar.gz: FAILED\n"
+        "  The project's long_description has invalid markup which will not be "
         "rendered on PyPI. The following syntax errors were detected:\n"
-        "WARNING"
+        "    WARNING"
     )
     assert renderer.render.calls == [
         pretend.call("blah", stream=warning_stream)
