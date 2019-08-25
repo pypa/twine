@@ -18,31 +18,31 @@ import pretend
 from twine.commands import check
 
 
-def test_warningstream_write_match():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(write=pretend.call_recorder(lambda a: None))
+class TestWarningStream:
 
-    stream.write("<string>:2: (WARNING/2) Title underline too short.")
+    def setup(self):
+        self.stream = check._WarningStream()
+        self.stream.output = pretend.stub(
+            write=pretend.call_recorder(lambda a: None),
+            getvalue=lambda: "result",
+        )
 
-    assert stream.output.write.calls == [
-        pretend.call("line 2: Warning: Title underline too short.\n")
-    ]
+    def test_write_match(self):
+        self.stream.write("<string>:2: (WARNING/2) Title underline too short.")
 
+        assert self.stream.output.write.calls == [
+            pretend.call("line 2: Warning: Title underline too short.\n")
+        ]
 
-def test_warningstream_write_nomatch():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(write=pretend.call_recorder(lambda a: None))
+    def test_write_nomatch(self):
+        self.stream.write("this does not match")
 
-    stream.write("this does not match")
+        assert self.stream.output.write.calls == [
+            pretend.call("this does not match")
+        ]
 
-    assert stream.output.write.calls == [pretend.call("this does not match")]
-
-
-def test_warningstream_str():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(getvalue=lambda: "result")
-
-    assert str(stream) == "result"
+    def test_str_representation(self):
+        assert str(self.stream) == "result"
 
 
 def test_check_no_distributions(monkeypatch):
