@@ -124,6 +124,7 @@ def check(dists, output_stream=sys.stdout):
         render_warning_stream = _WarningStream()
         warnings, is_ok = _check_file(filename, render_warning_stream)
 
+        # Print the status and/or error
         if not is_ok:
             failure = True
             output_stream.write("FAILED\n")
@@ -136,11 +137,12 @@ def check(dists, output_stream=sys.stdout):
             output_stream.write(indented(str(render_warning_stream), "    "))
         elif warnings:
             output_stream.write("PASSED, with warnings\n")
-
-            for message in warnings:
-                output_stream.write('  warning: ' + message + '\n')
         else:
             output_stream.write("PASSED\n")
+
+        # Print warnings after the status and/or error
+        for message in warnings:
+            output_stream.write('  warning: ' + message + '\n')
 
     return failure
 
