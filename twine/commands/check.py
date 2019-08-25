@@ -94,7 +94,7 @@ def _check_file(filename, render_warning_stream):
         warnings.append('`long_description` missing.')
     elif renderer:
         rendering_result = renderer.render(
-            description, stream=render_warning_stream, **params,
+            description, stream=render_warning_stream, **params
         )
         if rendering_result is None:
             is_ok = False
