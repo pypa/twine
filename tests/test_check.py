@@ -99,11 +99,10 @@ def test_check_no_description(monkeypatch, capsys):
     output_stream = check.StringIO()
     check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
-        'Checking distribution dist/dist.tar.gz: '
+        'Checking distribution dist/dist.tar.gz: Passed, with warnings\n'
         'warning: `long_description_content_type` missing.  '
         'defaulting to `text/x-rst`.\n'
         'warning: `long_description` missing.\n'
-        'Passed\n'
     )
 
 

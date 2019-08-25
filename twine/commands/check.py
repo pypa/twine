@@ -68,6 +68,40 @@ class _WarningStream(object):
         return self.output.getvalue()
 
 
+def _check_file(filename, render_warning_stream):
+    """Check given distribution.
+    """
+    warnings = []
+    is_ok = True
+
+    package = PackageFile.from_filename(filename, comment=None)
+
+    metadata = package.metadata_dictionary()
+    description = metadata["description"]
+    description_content_type = metadata["description_content_type"]
+
+    if description_content_type is None:
+        warnings.append(
+            '`long_description_content_type` missing.  '
+            'defaulting to `text/x-rst`.'
+        )
+        description_content_type = 'text/x-rst'
+
+    content_type, params = cgi.parse_header(description_content_type)
+    renderer = _RENDERERS.get(content_type, _RENDERERS[None])
+
+    if description in {None, 'UNKNOWN\n\n\n'}:
+        warnings.append('`long_description` missing.')
+    elif renderer:
+        rendering_result = renderer.render(
+            description, stream=render_warning_stream, **params,
+        )
+        if rendering_result is None:
+            is_ok = False
+
+    return warnings, is_ok
+
+
 def check(dists, output_stream=sys.stdout):
     uploads = [i for i in _find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
@@ -79,40 +113,23 @@ def check(dists, output_stream=sys.stdout):
 
     for filename in uploads:
         output_stream.write("Checking distribution %s: " % filename)
-        package = PackageFile.from_filename(filename, comment=None)
+        warnings, is_ok = _check_file(filename, stream)
 
-        metadata = package.metadata_dictionary()
-        description = metadata["description"]
-        description_content_type = metadata["description_content_type"]
-
-        if description_content_type is None:
+        if not is_ok:
+            failure = True
+            output_stream.write("Failed\n")
             output_stream.write(
-                'warning: `long_description_content_type` missing.  '
-                'defaulting to `text/x-rst`.\n'
+                "The project's long_description has invalid markup which "
+                "will not be rendered on PyPI. The following syntax "
+                "errors were detected:\n"
+                "%s" % stream
             )
-            description_content_type = 'text/x-rst'
-
-        content_type, params = cgi.parse_header(description_content_type)
-        renderer = _RENDERERS.get(content_type, _RENDERERS[None])
-
-        if description in {None, 'UNKNOWN\n\n\n'}:
-            output_stream.write('warning: `long_description` missing.\n')
-            output_stream.write("Passed\n")
+        elif warnings:
+            output_stream.write("Passed, with warnings\n")
+            for message in warnings:
+                output_stream.write('warning: ' + message + '\n')
         else:
-            if (
-                renderer
-                and renderer.render(description, stream=stream, **params)
-                is None
-            ):
-                failure = True
-                output_stream.write("Failed\n")
-                output_stream.write(
-                    "The project's long_description has invalid markup which "
-                    "will not be rendered on PyPI. The following syntax "
-                    "errors were detected:\n%s" % stream
-                )
-            else:
-                output_stream.write("Passed\n")
+            output_stream.write("Passed\n")
 
     return failure
 
