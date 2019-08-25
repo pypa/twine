@@ -70,6 +70,10 @@ class _WarningStream(object):
 
 def check(dists, output_stream=sys.stdout):
     uploads = [i for i in _find_dists(dists) if not i.endswith(".asc")]
+    if not uploads:  # Return early, if there are no files to check.
+        output_stream.write("No files to check.\n")
+        return False
+
     stream = _WarningStream()
     failure = False
 

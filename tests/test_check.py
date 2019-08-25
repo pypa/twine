@@ -51,7 +51,7 @@ def test_check_no_distributions(monkeypatch):
     monkeypatch.setattr(check, "_find_dists", lambda a: [])
 
     assert not check.check("dist/*", output_stream=stream)
-    assert stream.getvalue() == ""
+    assert stream.getvalue() == "No files to check.\n"
 
 
 def test_check_passing_distribution(monkeypatch):
