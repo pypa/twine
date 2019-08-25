@@ -69,8 +69,7 @@ class _WarningStream(object):
 
 
 def _check_file(filename, render_warning_stream):
-    """Check given distribution.
-    """
+    """Check given distribution."""
     warnings = []
     is_ok = True
 
@@ -103,8 +102,7 @@ def _check_file(filename, render_warning_stream):
 
 
 def indented(text, prefix):
-    """Adds 'prefix' to all non-empty lines on 'text'.
-    """
+    """Adds 'prefix' to all non-empty lines on 'text'."""
     def prefixed_lines():
         for line in text.splitlines(True):
             yield (prefix + line if line.strip() else line)
