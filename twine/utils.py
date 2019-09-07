@@ -238,38 +238,45 @@ def get_password_from_keyring(system, username):
         warnings.warn(str(exc))
 
 
-def non_interactive_check_prompt(non_interactive, prompt_func, prompt_type):
-    if non_interactive:
-        error_message = "Credential not found for {}.".format(prompt_type)
-        raise exceptions.NonInteractive(error_message)
-    else:
-        message = "Enter your {}: ".format(prompt_type)
-        return prompt_func(message)
-
-
-def username_from_keyring_or_prompt(system, non_interactive):
+def username_from_keyring_or_prompt(system, prompt_func):
     return (
         get_username_from_keyring(system)
-        or non_interactive_check_prompt(
-            non_interactive,
-            input_func,
-            'username',
-        )
+        or prompt_func()
     )
 
 
-def password_from_keyring_or_prompt(system, username, non_interactive):
+def password_from_keyring_or_prompt(system, username, prompt_func):
     return (
         get_password_from_keyring(system, username)
-        or non_interactive_check_prompt(
-            non_interactive,
-            password_prompt,
-            'password',
-        )
+        or prompt_func()
     )
+
+
+def raises_noninteractive_exc(message):
+    raise exceptions.NonInteractive(message)
+
+
+def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
+    if non_interactive:
+        error_message = "Credential not found for {}.".format(prompt_type)
+        return functools.partial(
+            raises_noninteractive_exc,
+            error_message,
+        )
+    else:
+        message = "Enter your {}: ".format(prompt_type)
+        return functools.partial(
+            prompt_func,
+            message,
+        )
 
 
 def get_username(system, cli_value, config, non_interactive):
+    prompt_func = generate_prompt_func_from(
+        input_func,
+        'username',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -277,7 +284,7 @@ def get_username(system, cli_value, config, non_interactive):
         prompt_strategy=functools.partial(
             username_from_keyring_or_prompt,
             system,
-            non_interactive,
+            prompt_func,
         )
     )
 
@@ -311,6 +318,11 @@ class EnvironmentDefault(argparse.Action):
 
 
 def get_password(system, username, cli_value, config, non_interactive):
+    prompt_func = generate_prompt_func_from(
+        password_prompt,
+        'password',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -319,7 +331,7 @@ def get_password(system, username, cli_value, config, non_interactive):
             password_from_keyring_or_prompt,
             system,
             username,
-            non_interactive,
+            prompt_func,
         ),
     )
 
