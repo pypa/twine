@@ -196,6 +196,8 @@ Uploads one or more distributions to a repository.
                             The password to authenticate to the repository
                             (package index) with. (Can also be set via
                             TWINE_PASSWORD environment variable.)
+      --non-interactive     Do not interactively prompt for username/password
+                            if the required credentials are missing.
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file.
       --config-file CONFIG_FILE
@@ -273,6 +275,8 @@ For completeness, its usage:
                             The password to authenticate to the repository
                             (package index) with. (Can also be set via
                             TWINE_PASSWORD environment variable.)
+      --non-interactive     Do not interactively prompt for username/password
+                            if the required credentials are missing.
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file.
       --config-file CONFIG_FILE

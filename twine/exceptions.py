@@ -101,3 +101,9 @@ class InvalidDistribution(TwineException):
     """Raised when a distribution is invalid."""
 
     pass
+
+
+class NonInteractive(TwineException):
+    """Raised in non-interactive mode when credentials could not be found."""
+
+    pass
