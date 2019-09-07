@@ -3,7 +3,10 @@
 =========
 Changelog
 =========
-* :release:`1.14.0 <2019-06-12>`
+* :release:`1.14.0 <2019-09-06>`
+* :feature:`456` Better error handling and gpg2 fallback if gpg not available.
+* :bug:`341` Fail more gracefully when encountering bad metadata
+* :feature:`459` Show Warehouse URL after uploading a package
 * :feature:`310` Now provide a more meaningful error on redirect during upload.
 * :release:`1.13.0 <2019-02-13>`
 * :bug:`452 major` Restore prompts while retaining support for suppressing
@@ -138,7 +141,7 @@ Changelog
   ConnectionErrors
 * :release:`1.6.4 <2015-10-27>`
 * :bug:`145` Paths with hyphens in them break the Wheel regular expression.
-* :bug:`146` Exception while accessing the ``respository`` key (sic)
+* :bug:`146` Exception while accessing the ``repository`` key (sic)
   when raising a redirect exception.
 * :release:`1.6.3 <2015-10-05>`
 * :bug:`137`, :bug:`140` Uploading signatures was broken due to the pull

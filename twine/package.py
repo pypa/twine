@@ -33,6 +33,12 @@ from twine.wheel import Wheel
 from twine.wininst import WinInst
 from twine import exceptions
 
+try:
+    FileNotFoundError = FileNotFoundError
+except NameError:
+    FileNotFoundError = IOError  # Py2
+
+
 DIST_TYPES = {
     "bdist_wheel": Wheel,
     "bdist_wininst": WinInst,
@@ -82,6 +88,15 @@ class PackageFile(object):
             raise exceptions.InvalidDistribution(
                 "Unknown distribution format: '%s'" %
                 os.path.basename(filename)
+            )
+
+        # If pkginfo encounters a metadata version it doesn't support, it may
+        # give us back empty metadata. At the very least, we should have a name
+        # and version
+        if not (meta.name and meta.version):
+            raise exceptions.InvalidDistribution(
+                "Invalid distribution metadata. Try upgrading twine if "
+                "possible."
             )
 
         if dtype == "bdist_egg":
@@ -165,9 +180,30 @@ class PackageFile(object):
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)
-        subprocess.check_call(gpg_args)
+        self.run_gpg(gpg_args)
 
         self.add_gpg_signature(self.signed_filename, self.signed_basefilename)
+
+    @classmethod
+    def run_gpg(cls, gpg_args):
+        try:
+            subprocess.check_call(gpg_args)
+            return
+        except FileNotFoundError:
+            if gpg_args[0] != "gpg":
+                raise exceptions.InvalidSigningExecutable(
+                    "{} executable not available.".format(gpg_args[0]))
+
+        print("gpg executable not available. Attempting fallback to gpg2.")
+        try:
+            subprocess.check_call(("gpg2",) + gpg_args[1:])
+        except FileNotFoundError:
+            print("gpg2 executable not available.")
+            raise exceptions.InvalidSigningExecutable(
+                "'gpg' or 'gpg2' executables not available. "
+                "Try installing one of these or specifying an executable "
+                "with the --sign-with flag."
+            )
 
 
 Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])

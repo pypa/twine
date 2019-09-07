@@ -63,6 +63,7 @@ def upload(upload_settings, dists):
     print("Uploading distributions to {}".format(repository_url))
 
     repository = upload_settings.create_repository()
+    uploaded_packages = []
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, upload_settings.comment)
@@ -100,7 +101,16 @@ def upload(upload_settings, dists):
         if skip_upload(resp, upload_settings.skip_existing, package):
             print(skip_message)
             continue
+
         utils.check_status_code(resp, upload_settings.verbose)
+
+        uploaded_packages.append(package)
+
+    release_urls = repository.release_urls(uploaded_packages)
+    if release_urls:
+        print('\nView at:')
+        for url in release_urls:
+            print(url)
 
     # Bug 28. Try to silence a ResourceWarning by clearing the connection
     # pool.
