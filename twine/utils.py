@@ -271,7 +271,7 @@ def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
         )
 
 
-def get_username(system, cli_value, config, non_interactive):
+def get_username(system, cli_value, config, non_interactive=False):
     prompt_func = generate_prompt_func_from(
         input_func,
         'username',
@@ -317,7 +317,7 @@ class EnvironmentDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def get_password(system, username, cli_value, config, non_interactive):
+def get_password(system, username, cli_value, config, non_interactive=False):
     prompt_func = generate_prompt_func_from(
         password_prompt,
         'password',
