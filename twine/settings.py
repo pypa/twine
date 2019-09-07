@@ -40,7 +40,7 @@ class Settings(object):
     @utils.no_positional(allow_self=True)
     def __init__(self,
                  sign=False, sign_with='gpg', identity=None,
-                 username=None, password=None, non_interactive=True,
+                 username=None, password=None, non_interactive=False,
                  comment=None,
                  config_file='~/.pypirc', skip_existing=False,
                  cacert=None, client_cert=None,
