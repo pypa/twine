@@ -22,7 +22,6 @@ setup(
 
     description=twine.__summary__,
     long_description=open("README.rst").read(),
-    license=twine.__license__,
     url=twine.__uri__,
     project_urls={
         'Packaging tutorial': 'https://packaging.python.org/tutorials/distributing-packages/',
