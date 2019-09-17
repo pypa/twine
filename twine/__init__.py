@@ -16,14 +16,31 @@ __all__ = (
     "__email__", "__license__", "__copyright__",
 )
 
-__title__ = "twine"
-__summary__ = "Collection of utilities for publishing packages on PyPI"
-__uri__ = "https://twine.readthedocs.io/"
-
-__version__ = "2.0.0"
-
-__author__ = "Donald Stufft and individual contributors"
-__email__ = "donald@stufft.io"
-
-__license__ = "Apache License, Version 2.0"
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
+
+try:
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    try:
+        import importlib_metadata
+    except ImportError:
+        importlib_metadata = None
+
+
+try:
+    metadata = importlib_metadata.metadata('twine')
+except Exception:
+    class Unknown:
+        @classmethod
+        def __getitem__(cls, key):
+            return 'unknown'
+    metadata = Unknown()
+
+
+__title__ = metadata['name']
+__summary__ = metadata['summary']
+__uri__ = metadata['home-page']
+__version__ = metadata['version']
+__author__ = metadata['author']
+__email__ = metadata['author-email']
+__license__ = metadata['license']
