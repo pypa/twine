@@ -3,6 +3,10 @@
 =========
 Changelog
 =========
+* :feature:`488` Improved output on ``check`` command:
+  Prints a message when there are no distributions given to check.
+  Improved handling of errors in a distribution's markup, avoiding
+  messages flowing through to the next distribution's errors.
 * :release:`1.14.0 <2019-09-06>`
 * :feature:`456` Better error handling and gpg2 fallback if gpg not available.
 * :bug:`341` Fail more gracefully when encountering bad metadata
