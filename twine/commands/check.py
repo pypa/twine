@@ -101,7 +101,8 @@ def _check_file(filename, render_warning_stream):
     return warnings, is_ok
 
 
-def indented(text, prefix):
+# TODO: Replace with textwrap.indent when Python 2 support is dropped
+def _indented(text, prefix):
     """Adds 'prefix' to all non-empty lines on 'text'."""
     def prefixed_lines():
         for line in text.splitlines(True):
@@ -131,8 +132,8 @@ def check(dists, output_stream=sys.stdout):
                 "`long_description` has syntax errors in markup and "
                 "would not be rendered on PyPI.\n"
             )
-            output_stream.write(indented(error_text, "  "))
-            output_stream.write(indented(str(render_warning_stream), "    "))
+            output_stream.write(_indented(error_text, "  "))
+            output_stream.write(_indented(str(render_warning_stream), "    "))
         elif warnings:
             output_stream.write("PASSED, with warnings\n")
         else:
