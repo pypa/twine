@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :release:`2.0.0 <2019-09-23>`
 * :feature:`437`: Twine now requires Python 3.6 or later.
 * :bug:`491` Require requests 2.20 or later to avoid reported security
   vulnerabilities in earlier releases.
