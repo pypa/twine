@@ -3,6 +3,8 @@
 =========
 Changelog
 =========
+* :bug:`491` Require requests 2.20 or later to avoid reported security
+  vulnerabilities in earlier releases.
 * :release:`1.15.0 <2019-09-17>`
 * :feature:`488` Improved output on ``check`` command:
   Prints a message when there are no distributions given to check.
