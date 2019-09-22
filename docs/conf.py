@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # twine documentation build configuration file, created by
 # sphinx-quickstart on Tue Aug 13 11:51:54 2013.
 #

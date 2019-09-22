@@ -11,23 +11,15 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, unicode_literals, print_function
 import collections
 import hashlib
 import io
 import os
 import subprocess
+from hashlib import blake2b
 
 import pkginfo
 import pkg_resources
-
-try:
-    from hashlib import blake2b
-except ImportError:
-    try:
-        from pyblake2 import blake2b
-    except ImportError:
-        blake2b = None
 
 from twine.wheel import Wheel
 from twine.wininst import WinInst
@@ -56,7 +48,7 @@ DIST_EXTENSIONS = {
 }
 
 
-class PackageFile(object):
+class PackageFile:
     def __init__(self, filename, comment, metadata, python_version, filetype):
         self.filename = filename
         self.basefilename = os.path.basename(filename)
@@ -175,7 +167,7 @@ class PackageFile(object):
             self.gpg_signature = (signature_filename, gpg.read())
 
     def sign(self, sign_with, identity):
-        print("Signing {}".format(self.basefilename))
+        print(f"Signing {self.basefilename}")
         gpg_args = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
@@ -209,7 +201,7 @@ class PackageFile(object):
 Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])
 
 
-class HashManager(object):
+class HashManager:
     """Manage our hashing objects for simplicity.
 
     This will also allow us to better test this logic.

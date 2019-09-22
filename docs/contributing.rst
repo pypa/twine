@@ -66,12 +66,12 @@ Testing
 ^^^^^^^
 
 Tests with twine are run using `tox`_, and tested against the following Python
-versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
-have these versions of Python installed on your machine.
+versions: 3.6 and 3.7. To run these tests locally, you will need to have these
+versions of Python installed on your machine.
 
-Either use ``tox`` to build against all supported Python versions (if
-you have them installed) or use ``tox -e py{version}`` to test against
-a specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+Either use ``tox`` to build against all supported Python versions (if you have
+them installed) or use ``tox -e py{version}`` to test against a specific
+version, e.g., ``tox -e py36`` or ``tox -e py37``.
 
 Also, always run ``tox -e lint`` before submitting a pull request.
 

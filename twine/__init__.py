@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-
 __all__ = (
     "__title__", "__summary__", "__uri__", "__version__", "__author__",
     "__email__", "__license__", "__copyright__",

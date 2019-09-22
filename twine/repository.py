@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, unicode_literals, print_function
-
 import sys
 
 from tqdm import tqdm
@@ -48,7 +46,7 @@ class ProgressBar(tqdm):
         self.update(n - self.n)  # will also do self.n = n
 
 
-class Repository(object):
+class Repository:
     def __init__(self, repository_url, username, password,
                  disable_progress_bar=False):
         self.url = repository_url
@@ -110,7 +108,7 @@ class Repository(object):
             "protocol_version": "1",
         })
 
-        print("Registering {}".format(package.basefilename))
+        print(f"Registering {package.basefilename}")
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
         encoder = MultipartEncoder(data_to_send)
@@ -134,7 +132,7 @@ class Repository(object):
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
 
-        print("Uploading {}".format(package.basefilename))
+        print(f"Uploading {package.basefilename}")
 
         with open(package.filename, "rb") as fp:
             data_to_send.append((

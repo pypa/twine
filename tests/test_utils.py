@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
-
 import sys
 import os.path
 import textwrap
@@ -333,7 +330,7 @@ def keyring_no_backends(monkeypatch):
     has no backends for the system, the backend will be a
     fail.Keyring, which raises RuntimeError on get_password.
     """
-    class FailKeyring(object):
+    class FailKeyring:
         @staticmethod
         def get_password(system, username):
             raise RuntimeError("fail!")
@@ -347,7 +344,7 @@ def keyring_no_backends_get_credential(monkeypatch):
     has no backends for the system, the backend will be a
     fail.Keyring, which raises RuntimeError on get_password.
     """
-    class FailKeyring(object):
+    class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise RuntimeError("fail!")
@@ -371,7 +368,7 @@ def test_get_password_runtime_error_suppressed(
 
 
 def test_no_positional_on_method():
-    class T(object):
+    class T:
         @utils.no_positional(allow_self=True)
         def __init__(self, foo=False):
             self.foo = foo
