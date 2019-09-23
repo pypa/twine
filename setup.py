@@ -46,6 +46,8 @@ setup(
         "Programming Language :: Python",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3 :: Only",
+        "Programming Language :: Python :: 3.4",
+        "Programming Language :: Python :: 3.5",
         "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: Implementation :: CPython",
@@ -64,7 +66,7 @@ setup(
         ],
     },
 
-    python_requires=">=3.6",
+    python_requires=">=3.4",
     install_requires=[
         "pkginfo >= 1.4.2",
         "readme_renderer >= 21.0",
@@ -72,6 +74,7 @@ setup(
         "requests-toolbelt >= 0.8.0, != 0.9.0",
         "setuptools >= 0.7.0",
         "tqdm >= 4.14",
+        "future-fstrings",
     ],
     extras_require={
         'keyring': [

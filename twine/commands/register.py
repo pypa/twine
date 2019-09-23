@@ -1,3 +1,5 @@
+# coding: future-fstrings
+
 # Copyright 2015 Ian Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
