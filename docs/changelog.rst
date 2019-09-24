@@ -3,8 +3,9 @@
 =========
 Changelog
 =========
-* :release:`2.0.0 <2019-09-23>`
-* :feature:`437`: Twine now requires Python 3.6 or later.
+* :release:`2.0.0 <2019-09-24>`
+* :feature:`437`: Twine now requires Python 3.6 or later. Use pip
+  9 or pin to "twine<2" to install twine on older Python versions.
 * :bug:`491` Require requests 2.20 or later to avoid reported security
   vulnerabilities in earlier releases.
 * :release:`1.15.0 <2019-09-17>`
