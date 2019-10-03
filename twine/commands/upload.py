@@ -22,30 +22,33 @@ from twine import utils
 
 
 def skip_upload(response, skip_existing, package):
-    filename = package.basefilename
-    msg_400 = (
-        # Old PyPI message:
-        f'A file named "{filename}" already exists for',
-        # Warehouse message:
-        'File already exists',
-        # Nexus Repository OSS message:
-        'Repository does not allow updating assets',
-    )
-    msg_403 = 'Not enough permissions to overwrite artifact'
+    if not skip_existing:
+        return False
+
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
-    # 409 or 403 status code. We only want to skip an upload if:
-    # 1. The user has told us to skip existing packages (skip_existing is
-    #    True) AND
-    # 2. a) The response status code is 409 OR
-    # 2. b) The response status code is 400 AND it has a reason that matches
-    #       what we expect PyPI or Nexus OSS to return to us. OR
-    # 2. c) The response status code is 403 AND the text matches what we
-    #       expect Artifactory to return to us.
-    return (skip_existing and (response.status_code == 409 or
-            (response.status_code == 400 and
-             response.reason.startswith(msg_400)) or
-            (response.status_code == 403 and msg_403 in response.text)))
+    # 409 or 403 status code.
+
+    if response.status_code == 400:
+        return response.reason.startswith((
+            # Old PyPI message:
+            f'A file named "{package.basefilename}" already exists',
+            # Warehouse message:
+            'File already exists',
+            # Nexus Repository OSS message:
+            'Repository does not allow updating assets',
+        ))
+
+    if response.status_code == 403:
+        return response.text.startswith((
+            # Artifactory message
+            'Not enough permissions to overwrite artifact',
+        ))
+
+    if response.status_code == 409:
+        return True
+
+    return False
 
 
 def upload(upload_settings, dists):
