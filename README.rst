@@ -215,7 +215,7 @@ Uploads one or more distributions to a repository.
 ``twine check``
 ^^^^^^^^^^^^^^^
 
-Checks whether your distributions long description will render correctly on PyPI.
+Checks whether your distribution's long description will render correctly on PyPI.
 
 .. code-block:: console
 
