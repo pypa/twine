@@ -20,18 +20,16 @@ The goal of ``twine`` is to improve PyPI interaction by improving
 security and testability.
 
 The biggest reason to use ``twine`` is that it securely authenticates
-you to `PyPI`_ over HTTPS using a verified connection regardless of
-the underlying Python version, while whether or not
-``python setup.py upload`` will work correctly and securely depends
-on your build system, your Python version and the underlying operating
-system.
+you to `PyPI`_ over HTTPS using a verified connection, regardless of
+the underlying Python version. Meanwhile, ``python setup.py upload``
+will only work correctly and securely if your build system, Python
+version and the underlying operating system are configured properly.
 
-Secondly, it allows you to precreate your distribution files.
-``python setup.py upload`` only allows you to upload something that you're
-building with ``distutils`` or ``setuptools``, and created in the same
-command invocation. This means that you cannot test the
-exact file you're going to upload to PyPI to ensure that it works before
-uploading it.
+Secondly, ``twine`` allows you to precreate your distribution files. ``python
+setup.py upload`` only allows you to upload a package as a final step after
+building with ``distutils`` or ``setuptools``, within the same command
+invocation. This means that you cannot test the exact file you're going to
+upload to PyPI to ensure that it works before uploading it.
 
 Finally, ``twine`` allows you to pre-sign your files and pass the
 ``.asc`` files into the command line invocation (``twine upload
