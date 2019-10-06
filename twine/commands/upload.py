@@ -22,32 +22,26 @@ from twine import settings
 from twine import utils
 
 
+# NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
+# error message in the reason attribute. Other implementations return a
+# 403 or 409 status code.
+skip_responses = [
+    # Warehouse and old PyPI
+    (400, lambda rsp: bool(re.search(r'file.*exist', rsp.reason))),
+    # Nexus Repository OSS
+    (400, lambda rsp: bool(re.search(r'updating assets', rsp.reason))),
+    # Artifactory
+    (403, lambda rsp: bool(re.search(r'permissions.*overwrite', rsp.text))),
+    # ???
+    (409, lambda rsp: True),
+]
+
+
 def skip_upload(response, skip_existing, package):
-    if not skip_existing:
-        return False
-
-    # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
-    # error message in the reason attribute. Other implementations return a
-    # 409 or 403 status code.
-
-    if response.status_code == 400:
-        return any(
-            re.search(pattern, response.reason) for pattern in [
-                # Warehouse and old PyPI
-                r'file.*exist',
-                # Nexus Repository OSS
-                r'allow updating assets'
-            ]
-        )
-
-    if response.status_code == 403:
-        # Artifactory
-        return bool(re.search(r'permissions.*overwrite', response.text))
-
-    if response.status_code == 409:
-        return True
-
-    return False
+    return skip_existing and any(
+        response.status_code == code and file_exists(response)
+        for code, file_exists in skip_responses
+    )
 
 
 def upload(upload_settings, dists):
