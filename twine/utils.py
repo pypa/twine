@@ -145,6 +145,15 @@ def check_status_code(response, verbose):
               "(or https://test.pypi.org/legacy/) to upload your packages "
               "instead. These are the default URLs for Twine now. More at "
               "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
+    if (response.status_code == 405 and
+            response.url.startswith(("https://pypi.org",
+                                     "https://test.pypi.org"))):
+        print("You probably want one of these two URLs: {} or {}. Check {} for"
+              " more information.".format(
+                  "https://pypi.org/legacy/",
+                  "https://test.pypi.org/legacy/",
+                  "https://warehouse.readthedocs.io/api-reference/legacy/"
+                  "#upload-api"))
     try:
         response.raise_for_status()
     except HTTPError as err:
