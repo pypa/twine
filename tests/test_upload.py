@@ -252,6 +252,15 @@ def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
              "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
              "(user 'twine-deployer' needs DELETE permission).")
 
+def test_skip_existing_skips_files_already_on_new_artifactory(monkeypatch):
+    # Artifactory (https://jfrog.com/artifactory/) responds with 403
+    # when the file already exists.
+    response = pretend.stub(
+        status_code=403,
+        text="Not enough permissions to delete/overwrite artifact "
+             "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
+             "(user 'twine-deployer' needs DELETE permission).")
+
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     assert upload.skip_upload(response=response,
                               skip_existing=True,
@@ -263,6 +272,24 @@ def test_skip_upload_respects_skip_existing(monkeypatch):
         status_code=400,
         reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
                'exists for twine-1.5.0.')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=False,
+                              package=pkg) is False
+
+def test_skip_upload_requires_reason(monkeypatch):
+    response = pretend.stub(
+        status_code=400,
+        reason='Invalid credentials')
+
+    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    assert upload.skip_upload(response=response,
+                              skip_existing=False,
+                              package=pkg) is False
+
+def test_skip_upload_requires_code(monkeypatch):
+    response = pretend.stub(status_code=404)
 
     pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     assert upload.skip_upload(response=response,

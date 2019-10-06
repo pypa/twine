@@ -13,6 +13,7 @@
 # limitations under the License.
 import argparse
 import os.path
+import re
 
 from twine.commands import _find_dists
 from twine.package import PackageFile
@@ -30,20 +31,18 @@ def skip_upload(response, skip_existing, package):
     # 409 or 403 status code.
 
     if response.status_code == 400:
-        return response.reason.startswith((
-            # Old PyPI message:
-            f'A file named "{package.basefilename}" already exists',
-            # Warehouse message:
-            'File already exists',
-            # Nexus Repository OSS message:
-            'Repository does not allow updating assets',
-        ))
+        return any(
+            re.search(pattern, response.reason) for pattern in [
+                # Warehouse and old PyPI
+                r'file.*exist',
+                # Nexus Repository OSS
+                r'allow updating assets'
+            ]
+        )
 
     if response.status_code == 403:
-        return response.text.startswith((
-            # Artifactory message
-            'Not enough permissions to overwrite artifact',
-        ))
+        # Artifactory
+        return bool(re.search(r'permissions.*overwrite', response.text))
 
     if response.status_code == 409:
         return True
