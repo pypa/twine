@@ -13,7 +13,6 @@
 # limitations under the License.
 import argparse
 import os.path
-import re
 
 from twine.commands import _find_dists
 from twine.package import PackageFile
@@ -27,13 +26,13 @@ from twine import utils
 # 403 or 409 status code.
 skip_responses = [
     # Warehouse and old PyPI
-    (400, lambda rsp: bool(re.search(r'file.*exist', rsp.reason))),
+    (400, lambda response: 'already exists' in response.reason),
     # Nexus Repository OSS
-    (400, lambda rsp: bool(re.search(r'updating assets', rsp.reason))),
+    (400, lambda response: 'updating assets' in response.reason),
     # Artifactory
-    (403, lambda rsp: bool(re.search(r'permissions.*overwrite', rsp.text))),
+    (403, lambda response: 'overwrite artifact' in response.text),
     # ???
-    (409, lambda rsp: True),
+    (409, lambda response: True),
 ]
 
 
