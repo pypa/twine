@@ -18,7 +18,12 @@ from twine.commands import _find_dists
 from twine.package import PackageFile
 from twine import exceptions
 from twine import settings
-from twine import utils
+
+from requests.exceptions import HTTPError
+
+
+DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
+TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def skip_upload(response, skip_existing, package):
@@ -46,6 +51,39 @@ def skip_upload(response, skip_existing, package):
             (response.status_code == 400 and
              response.reason.startswith(msg_400)) or
             (response.status_code == 403 and msg_403 in response.text)))
+
+
+def check_status_code(response, verbose):
+    """
+    Additional safety net to catch response code 410 in case the
+    UploadToDeprecatedPyPIDetected exception breaks.
+    Also includes a check for response code 405 and prints helpful error
+    message guiding users to the right repository endpoints.
+    """
+    if (response.status_code == 410 and
+            response.url.startswith(("https://pypi.python.org",
+                                     "https://testpypi.python.org"))):
+        print("It appears you're uploading to pypi.python.org (or "
+              "testpypi.python.org). You've received a 410 error response. "
+              "Uploading to those sites is deprecated. The new sites are "
+              "pypi.org and test.pypi.org. Try using "
+              "https://upload.pypi.org/legacy/ "
+              "(or https://test.pypi.org/legacy/) to upload your packages "
+              "instead. These are the default URLs for Twine now. More at "
+              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
+    elif response.status_code == 405 and "pypi.org" in response.url:
+        print(f"You probably want one of these two URLs: {DEFAULT_REPOSITORY} "
+              f"or {TEST_REPOSITORY}.")
+    try:
+        response.raise_for_status()
+    except HTTPError as err:
+        if response.text:
+            if verbose:
+                print('Content received from server:\n{}'.format(
+                    response.text))
+            else:
+                print('NOTE: Try --verbose to see response content.')
+        raise err
 
 
 def upload(upload_settings, dists):
@@ -99,7 +137,7 @@ def upload(upload_settings, dists):
             print(skip_message)
             continue
 
-        utils.check_status_code(resp, upload_settings.verbose)
+        check_status_code(resp, upload_settings.verbose)
 
         uploaded_packages.append(package)
 

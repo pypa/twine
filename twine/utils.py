@@ -22,7 +22,6 @@ import collections
 import configparser
 from urllib.parse import urlparse, urlunparse
 
-from requests.exceptions import HTTPError
 
 try:
     import keyring  # noqa
@@ -127,37 +126,6 @@ def normalize_repository_url(url):
     if parsed.netloc in _HOSTNAMES:
         return urlunparse(("https",) + parsed[1:])
     return urlunparse(parsed)
-
-
-def check_status_code(response, verbose):
-    """
-    Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
-    exception, but this is in case that breaks and it does.
-    """
-    if (response.status_code == 410 and
-            response.url.startswith(("https://pypi.python.org",
-                                     "https://testpypi.python.org"))):
-        print("It appears you're uploading to pypi.python.org (or "
-              "testpypi.python.org). You've received a 410 error response. "
-              "Uploading to those sites is deprecated. The new sites are "
-              "pypi.org and test.pypi.org. Try using "
-              "https://upload.pypi.org/legacy/ "
-              "(or https://test.pypi.org/legacy/) to upload your packages "
-              "instead. These are the default URLs for Twine now. More at "
-              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
-    elif response.status_code == 405 and "pypi.org" in response.url:
-        print(f"You probably want one of these two URLs: {DEFAULT_REPOSITORY} "
-              f"or {TEST_REPOSITORY}.")
-    try:
-        response.raise_for_status()
-    except HTTPError as err:
-        if response.text:
-            if verbose:
-                print('Content received from server:\n{}'.format(
-                    response.text))
-            else:
-                print('NOTE: Try --verbose to see response content.')
-        raise err
 
 
 def get_userpass_value(cli_value, config, key, prompt_strategy=None):

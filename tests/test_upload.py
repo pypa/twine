@@ -27,6 +27,8 @@ RELEASE_URL = 'https://pypi.org/project/twine/1.5.0/'
 NEW_SDIST_FIXTURE = 'tests/fixtures/twine-1.6.5.tar.gz'
 NEW_WHEEL_FIXTURE = 'tests/fixtures/twine-1.6.5-py2.py3-none-any.whl'
 NEW_RELEASE_URL = 'https://pypi.org/project/twine/1.6.5/'
+DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
+TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def test_successful_upload(make_settings, capsys):
@@ -285,3 +287,20 @@ def test_values_from_env(monkeypatch):
     assert "pypipassword" == upload_settings.password
     assert "pypiuser" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
+
+
+def test_check_status_code(make_settings, capsys):
+    upload_settings = make_settings()
+
+    # override default upload_settings
+    upload_settings.repository_config['repository'] = \
+        "https://upload.pypi.org"
+
+    with pytest.raises(HTTPError):
+        upload.upload(upload_settings, [
+            WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
+        ])
+
+    captured = capsys.readouterr()
+    assert captured.out.count(DEFAULT_REPOSITORY) == 1
+    assert captured.out.count(TEST_REPOSITORY) == 1
