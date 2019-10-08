@@ -18,12 +18,9 @@ from twine.commands import _find_dists
 from twine.package import PackageFile
 from twine import exceptions
 from twine import settings
+from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
 
 from requests.exceptions import HTTPError
-
-
-DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
-TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def skip_upload(response, skip_existing, package):
@@ -67,8 +64,8 @@ def check_status_code(response, verbose):
               "testpypi.python.org). You've received a 410 error response. "
               "Uploading to those sites is deprecated. The new sites are "
               "pypi.org and test.pypi.org. Try using "
-              "https://upload.pypi.org/legacy/ "
-              "(or https://test.pypi.org/legacy/) to upload your packages "
+              f"{DEFAULT_REPOSITORY} "
+              f"(or {TEST_REPOSITORY}) to upload your packages "
               "instead. These are the default URLs for Twine now. More at "
               "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
     elif response.status_code == 405 and "pypi.org" in response.url:

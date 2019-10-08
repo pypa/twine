@@ -18,6 +18,7 @@ from requests.exceptions import HTTPError
 from twine.commands import upload
 from twine import package, cli, exceptions
 import twine
+from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
 
 import helpers
 
@@ -27,8 +28,6 @@ RELEASE_URL = 'https://pypi.org/project/twine/1.5.0/'
 NEW_SDIST_FIXTURE = 'tests/fixtures/twine-1.6.5.tar.gz'
 NEW_WHEEL_FIXTURE = 'tests/fixtures/twine-1.6.5-py2.py3-none-any.whl'
 NEW_RELEASE_URL = 'https://pypi.org/project/twine/1.6.5/'
-DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
-TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
 def test_successful_upload(make_settings, capsys):
@@ -289,10 +288,10 @@ def test_values_from_env(monkeypatch):
     assert "/foo/bar.crt" == upload_settings.cacert
 
 
-def test_check_status_code(make_settings, capsys):
+def test_check_status_code_for_wrong_repo_url(make_settings, capsys):
     upload_settings = make_settings()
 
-    # override default upload_settings
+    # override defaults to use incorrect URL
     upload_settings.repository_config['repository'] = \
         "https://upload.pypi.org"
 
