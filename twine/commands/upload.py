@@ -70,7 +70,7 @@ def check_status_code(response, verbose):
               "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
     elif response.status_code == 405 and "pypi.org" in response.url:
         print(f"You probably want one of these two URLs: {DEFAULT_REPOSITORY} "
-              f"or {TEST_REPOSITORY}.")
+              f"or {TEST_REPOSITORY}. Check your --repository-url value.")
     try:
         response.raise_for_status()
     except HTTPError as err:
