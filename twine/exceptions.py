@@ -85,6 +85,12 @@ class InvalidSigningConfiguration(TwineException):
     pass
 
 
+class InvalidSigningExecutable(TwineException):
+    """Signing executable must be installed on system."""
+
+    pass
+
+
 class InvalidConfiguration(TwineException):
     """Raised when configuration is invalid."""
 

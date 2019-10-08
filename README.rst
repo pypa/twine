@@ -106,7 +106,7 @@ Once keyring is installed you can use the ``keyring`` program to set your
 username and password to use for each package index (repository) you want to
 upload to using Twine.
 
-To set your username and password for test PyPI run the following command.
+To set your username and password for Test PyPI run the following command.
 ``keyring`` will prompt you for your password:
 
 .. code-block:: console
@@ -215,7 +215,7 @@ Uploads one or more distributions to a repository.
 ``twine check``
 ^^^^^^^^^^^^^^^
 
-Checks whether your distributions long description will render correctly on PyPI.
+Checks whether your distribution's long description will render correctly on PyPI.
 
 .. code-block:: console
 
