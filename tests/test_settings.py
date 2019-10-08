@@ -93,13 +93,13 @@ def test_password_is_required_if_no_client_cert(monkeypatch, client_cert):
     assert len(getpass_recorder.calls) > 0
 
 
-def test_password_and_client_cert_are_set_if_both_given(monkeypatch):
+def test_client_cert_is_set_and_password_not_if_both_given(monkeypatch):
     """Verify that if both password and client_cert are given they are set"""
     pwd = 'RandomPassword'
     client_cert = '/random/path'
     with _stubbing_get_pass(monkeypatch, pwd) as getpass_recorder:
         setting_obj = settings.Settings(
             username='fakeuser', password=pwd, client_cert=client_cert)
-    assert setting_obj.password == pwd
+    assert not setting_obj.password
     assert setting_obj.client_cert == client_cert
     assert len(getpass_recorder.calls) == 0
