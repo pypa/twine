@@ -288,12 +288,15 @@ def test_values_from_env(monkeypatch):
     assert "/foo/bar.crt" == upload_settings.cacert
 
 
-def test_check_status_code_for_wrong_repo_url(make_settings, capsys):
+@pytest.mark.parametrize('repo_url', [
+    "https://upload.pypi.org/",
+    "https://test.pypi.org/"
+])
+def test_check_status_code_for_wrong_repo_url(repo_url, make_settings, capsys):
     upload_settings = make_settings()
 
     # override defaults to use incorrect URL
-    upload_settings.repository_config['repository'] = \
-        "https://upload.pypi.org"
+    upload_settings.repository_config['repository'] = repo_url
 
     with pytest.raises(HTTPError):
         upload.upload(upload_settings, [
