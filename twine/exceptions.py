@@ -101,3 +101,11 @@ class InvalidDistribution(TwineException):
     """Raised when a distribution is invalid."""
 
     pass
+
+
+class PyPIMethodNotAllowed(TwineException):
+    """Raised when --repository-url contains pypi.org but the upload
+    method is not supported.
+    """
+
+    pass

@@ -60,17 +60,25 @@ def check_status_code(response, verbose):
     if (response.status_code == 410 and
             response.url.startswith(("https://pypi.python.org",
                                      "https://testpypi.python.org"))):
-        print("It appears you're uploading to pypi.python.org (or "
-              "testpypi.python.org). You've received a 410 error response. "
-              "Uploading to those sites is deprecated. The new sites are "
-              "pypi.org and test.pypi.org. Try using "
-              f"{DEFAULT_REPOSITORY} "
-              f"(or {TEST_REPOSITORY}) to upload your packages "
-              "instead. These are the default URLs for Twine now. More at "
-              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
+        raise exceptions.\
+            UploadToDeprecatedPyPIDetected(f"It appears you're uploading to "
+                                           f"pypi.python.org (or "
+                                           f"testpypi.python.org). You've "
+                                           f"received a 410 error response. "
+                                           f"Uploading to those sites is "
+                                           f"deprecated. The new sites are "
+                                           f"pypi.org and test.pypi.org. Try "
+                                           f"using {DEFAULT_REPOSITORY} (or "
+                                           f"{TEST_REPOSITORY}) to upload your"
+                                           f" packages instead. These are the "
+                                           f"default URLs for Twine now. More "
+                                           f"at https://packaging.python.org/"
+                                           f"guides/migrating-to-pypi-org/.")
     elif response.status_code == 405 and "pypi.org" in response.url:
-        print(f"You probably want one of these two URLs: {DEFAULT_REPOSITORY} "
-              f"or {TEST_REPOSITORY}. Check your --repository-url value.")
+        raise exceptions.PyPIMethodNotAllowed(f"You probably want one of these"
+                                              f"two URLs: {DEFAULT_REPOSITORY}"
+                                              f"or {TEST_REPOSITORY}. Check "
+                                              f"your --repository-url value.")
     try:
         response.raise_for_status()
     except HTTPError as err:
