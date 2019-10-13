@@ -4,13 +4,13 @@
 .. image:: https://img.shields.io/pypi/pyversions/twine.svg
     :target: https://pypi.org/project/twine
    
-.. image:: https://readthedocs.org/projects/twine/badge/?version=latest
+.. image:: https://img.shields.io/readthedocs/twine
     :target: https://twine.readthedocs.io
 
-.. image:: https://travis-ci.org/pypa/twine.svg?branch=master
+.. image:: https://img.shields.io/travis/com/pypa/twine
     :target: https://travis-ci.org/pypa/twine
 
-.. image:: https://codecov.io/gh/pypa/twine/branch/master/graph/badge.svg
+.. image:: https://img.shields.io/codecov/c/github/pypa/twine
     :target: https://codecov.io/gh/pypa/twine
 
 twine
