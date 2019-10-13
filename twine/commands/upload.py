@@ -26,11 +26,11 @@ from twine import utils
 # 403 or 409 status code.
 skip_responses = [
     # Warehouse and old PyPI
-    (400, lambda response: 'already exists' in response.reason),
+    (400, lambda response: 'already exist' in response.reason.lower()),
     # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-    (400, lambda response: 'updating assets' in response.reason),
+    (400, lambda response: 'updating asset' in response.reason.lower()),
     # Artifactory (https://jfrog.com/artifactory/)
-    (403, lambda response: 'overwrite artifact' in response.text),
+    (403, lambda response: 'overwrite artifact' in response.text.lower()),
     # pypiserver (https://pypi.org/project/pypiserver)
     (409, lambda response: True),
 ]
