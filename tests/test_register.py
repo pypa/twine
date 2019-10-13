@@ -12,7 +12,6 @@ from twine import exceptions
 WHEEL_FIXTURE = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
 
 
-@pytest.mark.skip(reason='TODO: Restore after verifying drop in coverage')
 def test_exception_for_redirect(make_settings):
     register_settings = make_settings("""
         [pypi]
