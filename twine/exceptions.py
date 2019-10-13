@@ -103,9 +103,10 @@ class InvalidDistribution(TwineException):
     pass
 
 
-class PyPIMethodNotAllowed(TwineException):
-    """Raised when --repository-url contains pypi.org but the upload
-    method is not supported.
+class InvalidPyPIUploadURL(TwineException):
+    """Repository configuration tries to use PyPI with an incorrect URL.
+
+    For example, https://pypi.org instead of https://upload.pypi.org/legacy.
     """
 
     pass

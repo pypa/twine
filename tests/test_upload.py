@@ -18,8 +18,10 @@ from requests.exceptions import HTTPError
 from twine.commands import upload
 from twine import package, cli, exceptions
 import twine
-from twine.exceptions import PyPIMethodNotAllowed, \
-    UploadToDeprecatedPyPIDetected
+from twine.exceptions import (
+    InvalidPyPIUploadURL,
+    UploadToDeprecatedPyPIDetected,
+)
 
 import helpers
 
@@ -300,7 +302,7 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     # override defaults to use incorrect URL
     upload_settings.repository_config['repository'] = repo_url
 
-    with pytest.raises(PyPIMethodNotAllowed):
+    with pytest.raises(InvalidPyPIUploadURL):
         upload.upload(upload_settings, [
             WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
         ])
