@@ -21,26 +21,27 @@ from twine import settings
 from twine import utils
 
 
-# NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
-# error message in the reason attribute. Other implementations return a
-# 403 or 409 status code.
-skip_responses = [
-    # Warehouse and old PyPI
-    (400, lambda response: 'already exist' in response.reason.lower()),
-    # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-    (400, lambda response: 'updating asset' in response.reason.lower()),
-    # Artifactory (https://jfrog.com/artifactory/)
-    (403, lambda response: 'overwrite artifact' in response.text.lower()),
-    # pypiserver (https://pypi.org/project/pypiserver)
-    (409, lambda response: True),
-]
-
-
 def skip_upload(response, skip_existing, package):
-    return skip_existing and any(
-        response.status_code == code and file_exists(response)
-        for code, file_exists in skip_responses
-    )
+    if not skip_existing:
+        return False
+
+    status = response.status_code
+    reason = getattr(response, 'reason', '').lower()
+    text = getattr(response, 'text', '').lower()
+
+    # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
+    # error message in the reason attribute. Other implementations return a
+    # 403 or 409 status code.
+    return any([
+        # Warehouse and old PyPI
+        status == 400 and 'already exist' in reason,
+        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
+        status == 400 and 'updating asset' in reason,
+        # Artifactory (https://jfrog.com/artifactory/)
+        status == 403 and 'overwrite artifact' in text,
+        # pypiserver (https://pypi.org/project/pypiserver)
+        status == 409,
+    ])
 
 
 def upload(upload_settings, dists):
