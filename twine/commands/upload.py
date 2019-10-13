@@ -27,11 +27,11 @@ from twine import utils
 skip_responses = [
     # Warehouse and old PyPI
     (400, lambda response: 'already exists' in response.reason),
-    # Nexus Repository OSS
+    # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
     (400, lambda response: 'updating assets' in response.reason),
-    # Artifactory
+    # Artifactory (https://jfrog.com/artifactory/)
     (403, lambda response: 'overwrite artifact' in response.text),
-    # ???
+    # pypiserver (https://pypi.org/project/pypiserver)
     (409, lambda response: True),
 ]
 
