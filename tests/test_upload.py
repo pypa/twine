@@ -263,7 +263,7 @@ def test_skip_existing_skips_files_on_repository(response_kwargs):
 def test_skip_upload_doesnt_match(response_kwargs):
     assert not upload.skip_upload(
         response=pretend.stub(**response_kwargs),
-        skip_existing=False,
+        skip_existing=True,
         package=package.PackageFile.from_filename(WHEEL_FIXTURE, None)
     )
 
