@@ -33,7 +33,7 @@ def skip_upload(response, skip_existing, package):
     # error message in the reason attribute. Other implementations return a
     # 403 or 409 status code.
     return any([
-        # Warehouse and old PyPI
+        # PyPI / TestPyPI
         status == 400 and 'already exist' in reason,
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
         status == 400 and 'updating asset' in reason,
