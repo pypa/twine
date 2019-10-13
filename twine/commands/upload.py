@@ -57,9 +57,7 @@ def check_status_code(response, verbose):
     Also includes a check for response code 405 and prints helpful error
     message guiding users to the right repository endpoints.
     """
-    if (response.status_code == 410 and
-            response.url.startswith(("https://pypi.python.org",
-                                     "https://testpypi.python.org"))):
+    if response.status_code == 410 and "pypi.python.org" in response.url:
         raise exceptions.UploadToDeprecatedPyPIDetected(
             f"It appears you're uploading to pypi.python.org (or "
             f"testpypi.python.org). You've received a 410 error response. "
