@@ -1,5 +1,17 @@
-.. image:: https://img.shields.io/travis/pypa/twine/master.svg?label=travis-ci
-   :target: https://travis-ci.org/pypa/twine
+.. image:: https://img.shields.io/pypi/v/twine.svg
+    :target: https://pypi.org/project/twine
+
+.. image:: https://img.shields.io/pypi/pyversions/twine.svg
+    :target: https://pypi.org/project/twine
+   
+.. image:: https://img.shields.io/readthedocs/twine
+    :target: https://twine.readthedocs.io
+
+.. image:: https://img.shields.io/travis/com/pypa/twine
+    :target: https://travis-ci.org/pypa/twine
+
+.. image:: https://img.shields.io/codecov/c/github/pypa/twine
+    :target: https://codecov.io/gh/pypa/twine
 
 twine
 =====
