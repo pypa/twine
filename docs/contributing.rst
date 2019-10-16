@@ -100,7 +100,7 @@ HTTPS. Its three purposes are to be:
    for publishing on any Python package index
 
 
-Currently, twine has two principal functions: uploading new packages
+Currently, twine has two principle functions: uploading new packages
 and registering new `projects`_ (``register`` is no longer supported
 on PyPI, and is in Twine for use with other package indexes).
 
@@ -129,10 +129,10 @@ Adding a maintainer
 
 A checklist for adding a new maintainer to the project.
 
-#. Add her as a Member in the GitHub repo settings. (This will also
-   give her privileges on the `Travis CI project
+#. Add them as a Member in the GitHub repo settings. (This will also
+   give them privileges on the `Travis CI project
    <https://travis-ci.org/pypa/twine>`_.)
-#. Get her Test PyPI and canon PyPI usernames and add her as a
+#. Get them Test PyPI and canon PyPI usernames and add them as a
    Maintainer on `our Test PyPI project
    <https://test.pypi.org/manage/project/twine/collaboration/>`_ and
    `canon PyPI
