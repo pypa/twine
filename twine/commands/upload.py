@@ -32,16 +32,16 @@ def skip_upload(response, skip_existing, package):
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
     # 403 or 409 status code.
-    return any([
-        # PyPI / TestPyPI
-        status == 400 and 'already exist' in reason,
-        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        status == 400 and 'updating asset' in reason,
-        # Artifactory (https://jfrog.com/artifactory/)
-        status == 403 and 'overwrite artifact' in text,
+    return (
         # pypiserver (https://pypi.org/project/pypiserver)
-        status == 409,
-    ])
+        status == 409
+        # PyPI / TestPyPI
+        or (status == 400 and 'already exist' in reason)
+        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
+        or (status == 400 and 'updating asset' in reason)
+        # Artifactory (https://jfrog.com/artifactory/)
+        or (status == 403 and 'overwrite artifact' in text)
+    )
 
 
 def upload(upload_settings, dists):
