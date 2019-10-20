@@ -66,7 +66,8 @@ Using Twine
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine will automatically prompt for your username and password:
+2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine
+will automatically prompt for your username and password:
 
    .. code-block:: console
 
@@ -123,7 +124,8 @@ will prompt for the password:
     $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
 
-The next time you run ``twine`` it will prompt you for a username and will grab the appropriate password from the keyring.
+The next time you run ``twine`` it will prompt you for a username and will grab
+the appropriate password from the keyring.
 
 .. Note:: If you are using Linux in a headless environment (such as on a
     server) you'll need to do some additional steps to ensure that Keyring can
@@ -213,7 +215,8 @@ Uploads one or more distributions to a repository.
 ``twine check``
 ^^^^^^^^^^^^^^^
 
-Checks whether your distribution's long description will render correctly on PyPI.
+Checks whether your distribution's long description will render correctly on
+PyPI.
 
 .. code-block:: console
 
@@ -229,10 +232,10 @@ Checks whether your distribution's long description will render correctly on PyP
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
 
-**WARNING**: The ``register`` command is `no longer necessary if you are uploading to
-pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_ (the new
-PyPI software running on pypi.org). However, you may need this if you are using
-a different package index.
+**WARNING**: The ``register`` command is `no longer necessary if you are
+uploading to pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_
+(the new PyPI software running on pypi.org). However, you may need this if you
+are using a different package index.
 
 For completeness, its usage:
 
