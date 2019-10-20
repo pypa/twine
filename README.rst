@@ -23,9 +23,9 @@ The biggest reason to use ``twine`` is that it securely authenticates
 you to `PyPI`_ over HTTPS using a verified connection, regardless of
 the underlying Python version. Meanwhile, ``python setup.py upload``
 will only work correctly and securely if your build system, Python
-version and the underlying operating system are configured properly.
+version, and underlying operating system are configured properly.
 
-Secondly, ``twine`` allows you to precreate your distribution files. ``python
+Secondly, ``twine`` encourages you to build your distribution files. ``python
 setup.py upload`` only allows you to upload a package as a final step after
 building with ``distutils`` or ``setuptools``, within the same command
 invocation. This means that you cannot test the exact file you're going to
