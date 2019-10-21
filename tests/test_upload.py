@@ -203,71 +203,77 @@ def test_prints_skip_message_for_response(make_settings, capsys):
     assert RELEASE_URL not in captured.out
 
 
-def test_skip_existing_skips_files_already_on_PyPI(monkeypatch):
-    response = pretend.stub(
-        status_code=400,
-        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-               'exists for twine-1.5.0.')
-
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
-
-
-def test_skip_existing_skips_files_already_on_nexus(monkeypatch):
-    # Nexus Repository Manager (https://www.sonatype.com/nexus-repository-oss)
-    # responds with 400 when the file already exists
-    response = pretend.stub(
-        status_code=400,
-        reason="Repository does not allow updating assets: pypi for url: "
-               "http://www.foo.bar")
-
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
-
-
-def test_skip_existing_skips_files_already_on_pypiserver(monkeypatch):
-    # pypiserver (https://pypi.org/project/pypiserver) responds with a
-    # 409 when the file already exists.
-    response = pretend.stub(
-        status_code=409,
-        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-               'exists for twine-1.5.0.')
-
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
-
-
-def test_skip_existing_skips_files_already_on_artifactory(monkeypatch):
-    # Artifactory (https://jfrog.com/artifactory/) responds with 403
-    # when the file already exists.
-    response = pretend.stub(
-        status_code=403,
-        text="Not enough permissions to overwrite artifact "
-             "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
-             "(user 'twine-deployer' needs DELETE permission).")
-
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=True,
-                              package=pkg) is True
+@pytest.mark.parametrize('response_kwargs', [
+    pytest.param(
+        dict(status_code=400, reason=(
+            'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+            'exists for twine-1.5.0.'
+        )),
+        id='pypi'
+    ),
+    pytest.param(
+        dict(status_code=400, reason=(
+            'Repository does not allow updating assets: pypi for url: '
+            'http://www.foo.bar'
+        )),
+        id='nexus'
+    ),
+    pytest.param(
+        dict(status_code=409, reason=(
+            'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
+            'exists for twine-1.5.0.'
+        )),
+        id='pypiserver'
+    ),
+    pytest.param(
+        dict(status_code=403, text=(
+            "Not enough permissions to overwrite artifact "
+            "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
+            "(user 'twine-deployer' needs DELETE permission)."
+        )),
+        id='artifactory_old'
+    ),
+    pytest.param(
+        dict(status_code=403, text=(
+            "Not enough permissions to delete/overwrite artifact "
+            "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
+            "(user 'twine-deployer' needs DELETE permission)."
+        )),
+        id='artifactory_new'
+    ),
+])
+def test_skip_existing_skips_files_on_repository(response_kwargs):
+    assert upload.skip_upload(
+        response=pretend.stub(**response_kwargs),
+        skip_existing=True,
+        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+    )
 
 
-def test_skip_upload_respects_skip_existing(monkeypatch):
-    response = pretend.stub(
-        status_code=400,
-        reason='A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-               'exists for twine-1.5.0.')
+@pytest.mark.parametrize('response_kwargs', [
+    pytest.param(
+        dict(status_code=400, reason='Invalid credentials'),
+        id='wrong_reason'
+    ),
+    pytest.param(
+        dict(status_code=404),
+        id='wrong_code'
+    ),
+])
+def test_skip_upload_doesnt_match(response_kwargs):
+    assert not upload.skip_upload(
+        response=pretend.stub(**response_kwargs),
+        skip_existing=True,
+        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None)
+    )
 
-    pkg = package.PackageFile.from_filename(WHEEL_FIXTURE, None)
-    assert upload.skip_upload(response=response,
-                              skip_existing=False,
-                              package=pkg) is False
+
+def test_skip_upload_respects_skip_existing():
+    assert not upload.skip_upload(
+        response=pretend.stub(),
+        skip_existing=False,
+        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+    )
 
 
 def test_values_from_env(monkeypatch):
