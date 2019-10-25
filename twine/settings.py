@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Optional
+from typing import cast, Optional
 
 import argparse
 
@@ -262,7 +262,7 @@ class Settings:
             repository_url,
         )
         self.repository_config['repository'] = utils.normalize_repository_url(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
         )
 
     def _handle_authentication(
@@ -271,12 +271,12 @@ class Settings:
         password: Optional[str]
     ) -> None:
         self.username = utils.get_username(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
             username,
             self.repository_config
         )
         self.password = utils.get_password(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
             self.username,
             password,
             self.repository_config,
@@ -299,7 +299,7 @@ class Settings:
         :raises:
             :class:`~twine.exceptions.UploadToDeprecatedPyPIDetected`
         """
-        repository_url = self.repository_config['repository']
+        repository_url = cast(str, self.repository_config['repository'])
 
         if repository_url.startswith((repository.LEGACY_PYPI,
                                       repository.LEGACY_TEST_PYPI)):
@@ -312,7 +312,7 @@ class Settings:
     def create_repository(self) -> repository.Repository:
         """Create a new repository for uploading."""
         repo = repository.Repository(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
             self.username,
             self.password,
             self.disable_progress_bar

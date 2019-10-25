@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Callable, DefaultDict, Dict, Optional
+
 import os
 import os.path
 import functools
@@ -24,9 +26,9 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 
-from functools import partial
-from pretend import stub
-from typing import Callable, Dict, Optional, Union
+# TODO: Revisit this import
+# Could set keyring = None in except, and catch AttributeError when called
+# Also not sure if the noqa is necessary
 try:
     import keyring  # noqa
 except ImportError:
@@ -37,12 +39,18 @@ from twine import exceptions
 # Shim for input to allow testing.
 input_func = input
 
-
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
+# TODO: In general, it seems to be assumed that the values retrieved from
+# instances of this type aren't None, except for username and password.
+# Type annotations would be cleaner if this were Dict[str, str], but that
+# requires reworking the username/password handling, probably starting with
+# get_userpass_value.
+RepositoryConfig = Dict[str, Optional[str]]
 
-def get_config(path: str = "~/.pypirc") -> Dict[str, Union[Dict[str, str], Dict[str, Union[None, str]]]]:
+
+def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     # even if the config file does not exist, set up the parser
     # variable to reduce the number of if/else statements
     parser = configparser.RawConfigParser()
@@ -52,7 +60,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, Union[Dict[str, str], Dict[
     index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
-    defaults = {"username": None, "password": None}
+    defaults: RepositoryConfig = {"username": None, "password": None}
 
     # Expand user strings in the path
     path = os.path.expanduser(path)
@@ -70,7 +78,8 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, Union[Dict[str, str], Dict[
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config = collections.defaultdict(lambda: defaults.copy())
+    config: DefaultDict[str, RepositoryConfig] = \
+        collections.defaultdict(lambda: defaults.copy())
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
@@ -91,7 +100,11 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, Union[Dict[str, str], Dict[
     return dict(config)
 
 
-def get_repository_from_config(config_file: str, repository: str, repository_url: Optional[str] = None) -> Dict[str, Union[None, str]]:
+def get_repository_from_config(
+    config_file: str,
+    repository: str,
+    repository_url: Optional[str] = None
+) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
     if repository_url and "://" in repository_url:
@@ -132,7 +145,7 @@ def normalize_repository_url(url: str) -> str:
     return urlunparse(parsed)
 
 
-def check_status_code(response: stub, verbose: bool) -> None:
+def check_status_code(response: requests.Response, verbose: bool) -> None:
     """Generate a helpful message based on the response from the repository.
 
     Raise a custom exception for recognized errors. Otherwise, print the
@@ -167,7 +180,12 @@ def check_status_code(response: stub, verbose: bool) -> None:
         raise err
 
 
-def get_userpass_value(cli_value: Optional[str], config: Dict[str, Union[None, str]], key: str, prompt_strategy: Optional[Union[Callable, partial]] = None) -> Optional[str]:
+def get_userpass_value(
+    cli_value: Optional[str],
+    config: RepositoryConfig,
+    key: str,
+    prompt_strategy: Optional[Callable] = None
+) -> Optional[str]:
     """Gets the username / password from config.
 
     Uses the following rules:
@@ -198,12 +216,18 @@ def get_userpass_value(cli_value: Optional[str], config: Dict[str, Union[None, s
         return None
 
 
+# TODO: Compare this to get_password_from_keyring
+# They seem to do similar things, but this has more exception handling
+# Could they have a similar (maybe simpler) structure?
 def get_username_from_keyring(system: str) -> Optional[str]:
+    # TODO: Is this necessary? Could we catch a NameError instead?
     if 'keyring' not in sys.modules:
-        return
+        return None
 
     try:
-        getter = sys.modules['keyring'].get_credential
+        # TODO: Could this just be keyring.get_credential?
+        # Would need to update monkeypatch in tests
+        getter = sys.modules['keyring'].get_credential  # type: ignore
     except AttributeError:
         return None
 
@@ -214,19 +238,27 @@ def get_username_from_keyring(system: str) -> Optional[str]:
     except Exception as exc:
         warnings.warn(str(exc))
 
+    return None
 
-def password_prompt(prompt_text):  # Always expects unicode for our own sanity
+
+def password_prompt(prompt_text: str) -> str:
     return getpass.getpass(prompt_text)
 
 
+# TODO: See TODOs in get_username_from_keyring
 def get_password_from_keyring(system: str, username: str) -> Optional[str]:
     if 'keyring' not in sys.modules:
-        return
+        return None
 
     try:
-        return sys.modules['keyring'].get_password(system, username)
+        return (
+            sys.modules['keyring']  # type: ignore
+            .get_password(system, username)
+        )
     except Exception as exc:
         warnings.warn(str(exc))
+
+    return None
 
 
 def username_from_keyring_or_prompt(system: str) -> str:
@@ -243,7 +275,11 @@ def password_from_keyring_or_prompt(system: str, username: str) -> str:
     )
 
 
-def get_username(system: str, cli_value: Optional[str], config: Dict[str, Union[None, str]]) -> str:
+def get_username(
+    system: str,
+    cli_value: Optional[str],
+    config: RepositoryConfig,
+) -> Optional[str]:
     return get_userpass_value(
         cli_value,
         config,
@@ -268,7 +304,13 @@ get_clientcert = functools.partial(
 class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
-    def __init__(self, env: str, required: bool = True, default: Optional[str] = None, **kwargs) -> None:
+    def __init__(
+        self,
+        env: str,
+        required: bool = True,
+        default: Optional[str] = None,
+        **kwargs
+    ) -> None:
         default = os.environ.get(env, default)
         self.env = env
         if default:
@@ -279,7 +321,12 @@ class EnvironmentDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def get_password(system: str, username: str, cli_value: Optional[str], config: Dict[str, Union[None, str]]) -> str:
+def get_password(
+    system: str,
+    username: Optional[str],
+    cli_value: Optional[str],
+    config: RepositoryConfig
+) -> Optional[str]:
     return get_userpass_value(
         cli_value,
         config,
@@ -292,6 +339,7 @@ def get_password(system: str, username: str, cli_value: Optional[str], config: D
     )
 
 
+# TODO: Can this be replaced with Python 3 keyword-only arguments?
 def no_positional(allow_self: bool = False) -> Callable:
     """A decorator that doesn't allow for positional arguments.
 
