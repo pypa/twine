@@ -29,6 +29,7 @@ matrix:
       name: Making sure that docs build is healthy
       env:
         TOXENV: docs
+    - python: 3.8
     - python: 3.7
     - python: 3.6
 

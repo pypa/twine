@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :feature:`518` Add Python 3.8 to classifiers.
 * :bug:`332` More robust handling of server response in ``--skip-existing``
 * :release:`2.0.0 <2019-09-24>`
 * :feature:`437` Twine now requires Python 3.6 or later. Use pip

@@ -18,12 +18,12 @@ machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
 development environment.
 
 Clone the twine repository from GitHub, and then make and activate a
-virtual environment that uses Python 3.6 as the default
+virtual environment that uses Python 3.6 or newer as the default
 Python. Example:
 
 .. code-block:: console
 
-  mkvirtualenv -p /usr/bin/python3.6 twine
+  mkvirtualenv -p /usr/bin/python3.7 twine
 
 Then, run the following command:
 
@@ -65,9 +65,9 @@ The HTML of the docs will be visible in :file:`twine/docs/_build/`.
 Testing
 ^^^^^^^
 
-Tests with twine are run using `tox`_, and tested against the following Python
-versions: 3.6 and 3.7. To run these tests locally, you will need to have these
-versions of Python installed on your machine.
+Tests with twine are run using `tox`_, and tested against Python versions 3.6,
+3.7, and 3.8. To run these tests locally, you will need to have these versions
+of Python installed on your machine.
 
 Either use ``tox`` to build against all supported Python versions (if you have
 them installed) or use ``tox -e py{version}`` to test against a specific
@@ -156,7 +156,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Run Twine tests:
 
-   #. ``tox -e py{27,34,35,36,py}``
+   #. ``tox -e py{36,37,38}``
    #. ``tox -e lint`` for the linter
    #. ``tox -e docs`` (this checks the Sphinx docs and uses
       ``readme_renderer`` to check that the ``long_description`` and other
