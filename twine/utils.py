@@ -24,6 +24,9 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 
+from functools import partial
+from pretend import stub
+from typing import Callable, Dict, Optional, Union
 try:
     import keyring  # noqa
 except ImportError:
@@ -39,7 +42,7 @@ DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
 
-def get_config(path="~/.pypirc"):
+def get_config(path: str = "~/.pypirc") -> Dict[str, Union[Dict[str, str], Dict[str, Union[None, str]]]]:
     # even if the config file does not exist, set up the parser
     # variable to reduce the number of if/else statements
     parser = configparser.RawConfigParser()
@@ -88,7 +91,7 @@ def get_config(path="~/.pypirc"):
     return dict(config)
 
 
-def get_repository_from_config(config_file, repository, repository_url=None):
+def get_repository_from_config(config_file: str, repository: str, repository_url: Optional[str] = None) -> Dict[str, Union[None, str]]:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
     if repository_url and "://" in repository_url:
@@ -122,14 +125,14 @@ _HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
               "test.pypi.org"}
 
 
-def normalize_repository_url(url):
+def normalize_repository_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.netloc in _HOSTNAMES:
         return urlunparse(("https",) + parsed[1:])
     return urlunparse(parsed)
 
 
-def check_status_code(response, verbose):
+def check_status_code(response: stub, verbose: bool) -> None:
     """Generate a helpful message based on the response from the repository.
 
     Raise a custom exception for recognized errors. Otherwise, print the
@@ -164,7 +167,7 @@ def check_status_code(response, verbose):
         raise err
 
 
-def get_userpass_value(cli_value, config, key, prompt_strategy=None):
+def get_userpass_value(cli_value: Optional[str], config: Dict[str, Union[None, str]], key: str, prompt_strategy: Optional[Union[Callable, partial]] = None) -> Optional[str]:
     """Gets the username / password from config.
 
     Uses the following rules:
@@ -195,7 +198,7 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
         return None
 
 
-def get_username_from_keyring(system):
+def get_username_from_keyring(system: str) -> Optional[str]:
     if 'keyring' not in sys.modules:
         return
 
@@ -216,7 +219,7 @@ def password_prompt(prompt_text):  # Always expects unicode for our own sanity
     return getpass.getpass(prompt_text)
 
 
-def get_password_from_keyring(system, username):
+def get_password_from_keyring(system: str, username: str) -> Optional[str]:
     if 'keyring' not in sys.modules:
         return
 
@@ -226,21 +229,21 @@ def get_password_from_keyring(system, username):
         warnings.warn(str(exc))
 
 
-def username_from_keyring_or_prompt(system):
+def username_from_keyring_or_prompt(system: str) -> str:
     return (
         get_username_from_keyring(system)
         or input_func('Enter your username: ')
     )
 
 
-def password_from_keyring_or_prompt(system, username):
+def password_from_keyring_or_prompt(system: str, username: str) -> str:
     return (
         get_password_from_keyring(system, username)
         or password_prompt('Enter your password: ')
     )
 
 
-def get_username(system, cli_value, config):
+def get_username(system: str, cli_value: Optional[str], config: Dict[str, Union[None, str]]) -> str:
     return get_userpass_value(
         cli_value,
         config,
@@ -265,7 +268,7 @@ get_clientcert = functools.partial(
 class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
-    def __init__(self, env, required=True, default=None, **kwargs):
+    def __init__(self, env: str, required: bool = True, default: Optional[str] = None, **kwargs) -> None:
         default = os.environ.get(env, default)
         self.env = env
         if default:
@@ -276,7 +279,7 @@ class EnvironmentDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def get_password(system, username, cli_value, config):
+def get_password(system: str, username: str, cli_value: Optional[str], config: Dict[str, Union[None, str]]) -> str:
     return get_userpass_value(
         cli_value,
         config,
@@ -289,7 +292,7 @@ def get_password(system, username, cli_value, config):
     )
 
 
-def no_positional(allow_self=False):
+def no_positional(allow_self: bool = False) -> Callable:
     """A decorator that doesn't allow for positional arguments.
 
     :param bool allow_self:
