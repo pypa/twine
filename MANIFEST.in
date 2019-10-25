@@ -2,6 +2,7 @@ include LICENSE
 include README.rst
 include AUTHORS
 include .coveragerc
+include mypy.ini
 
 recursive-include tests *.py *.whl *.gz deprecated-pypirc
 recursive-include docs *.bat *.empty *.py *.rst Makefile *.txt

@@ -11,19 +11,22 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Dict, List, Tuple
 import sys
 
 from tqdm import tqdm
 
 import requests
-from requests import adapters
 from requests import codes
+from requests.adapters import HTTPAdapter
+from requests.models import Response
 from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import (
     MultipartEncoder, MultipartEncoderMonitor
 )
 from requests_toolbelt.utils import user_agent
 
+from twine.package import PackageFile, MetadataValue
 import twine
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
@@ -47,29 +50,34 @@ class ProgressBar(tqdm):
 
 
 class Repository:
-    def __init__(self, repository_url, username, password,
-                 disable_progress_bar=False):
+    def __init__(
+        self,
+        repository_url: str,
+        username: str,
+        password: str,
+        disable_progress_bar: bool = False
+    ) -> None:
         self.url = repository_url
         self.session = requests.session()
         self.session.auth = (username, password)
         self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
-        self._releases_json_data = {}
+        self._releases_json_data: Dict[str, Dict] = {}
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod
-    def _make_adapter_with_retries():
+    def _make_adapter_with_retries() -> HTTPAdapter:
         retry = util.Retry(
             connect=5,
             total=10,
             method_whitelist=['GET'],
             status_forcelist=[500, 501, 502, 503],
         )
-        return adapters.HTTPAdapter(max_retries=retry)
+        return HTTPAdapter(max_retries=retry)
 
     @staticmethod
-    def _make_user_agent_string():
+    def _make_user_agent_string() -> str:
         from twine import cli
         dependencies = cli.list_dependencies_and_versions()
         return user_agent.UserAgentBuilder(
@@ -82,7 +90,9 @@ class Repository:
         self.session.close()
 
     @staticmethod
-    def _convert_data_to_list_of_tuples(data):
+    def _convert_data_to_list_of_tuples(
+        data: Dict[str, MetadataValue]
+    ) -> List[Tuple[str, MetadataValue]]:
         data_to_send = []
         for key, value in data.items():
             if (key in KEYWORDS_TO_NOT_FLATTEN or
@@ -93,11 +103,11 @@ class Repository:
                     data_to_send.append((key, item))
         return data_to_send
 
-    def set_certificate_authority(self, cacert):
+    def set_certificate_authority(self, cacert: str) -> None:
         if cacert:
             self.session.verify = cacert
 
-    def set_client_certificate(self, clientcert):
+    def set_client_certificate(self, clientcert: Tuple[str, str]) -> None:
         if clientcert:
             self.session.cert = clientcert
 
@@ -122,7 +132,7 @@ class Repository:
         resp.close()
         return resp
 
-    def _upload(self, package):
+    def _upload(self, package: PackageFile) -> Response:
         data = package.metadata_dictionary()
         data.update({
             # action
@@ -157,7 +167,11 @@ class Repository:
 
         return resp
 
-    def upload(self, package, max_redirects=5):
+    def upload(
+        self,
+        package: PackageFile,
+        max_redirects: int = 5
+    ) -> Response:
         number_of_redirects = 0
         while number_of_redirects < max_redirects:
             resp = self._upload(package)
@@ -177,7 +191,11 @@ class Repository:
 
         return resp
 
-    def package_is_uploaded(self, package, bypass_cache=False):
+    def package_is_uploaded(
+        self,
+        package: PackageFile,
+        bypass_cache: bool = False
+    ) -> bool:
         # NOTE(sigmavirus24): Not all indices are PyPI and pypi.io doesn't
         # have a similar interface for finding the package versions.
         if not self.url.startswith((LEGACY_PYPI, WAREHOUSE, OLD_WAREHOUSE)):
@@ -223,7 +241,7 @@ class Repository:
             for package in packages
         }
 
-    def verify_package_integrity(self, package):
+    def verify_package_integrity(self, package: PackageFile):
         # TODO(sigmavirus24): Add a way for users to download the package and
         # check it's hash against what it has locally.
         pass
