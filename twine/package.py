@@ -11,7 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, Optional, Union, Sequence, Tuple
+from typing import Dict, IO, Optional, Union, Sequence, Tuple
+
 import collections
 import hashlib
 import io
@@ -22,18 +23,9 @@ from hashlib import blake2b
 import pkginfo
 import pkg_resources
 
-from pretend import stub
-from typing import Dict, Optional, Union
-
 from twine.wheel import Wheel
 from twine.wininst import WinInst
 from twine import exceptions
-
-try:
-    FileNotFoundError = FileNotFoundError
-except NameError:
-    FileNotFoundError = IOError  # Py2
-
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
@@ -51,7 +43,7 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-MetadataValue = Union[str, Sequence[str]]
+MetadataValue = Union[str, Sequence[str], Tuple[str, IO, str]]
 
 
 class PackageFile:

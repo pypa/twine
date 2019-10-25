@@ -145,7 +145,7 @@ class Repository:
         print(f"Uploading {package.basefilename}")
 
         with open(package.filename, "rb") as fp:
-            data_to_send.append((  # type: ignore
+            data_to_send.append((
                 "content",
                 (package.basefilename, fp, "application/octet-stream"),
             ))
