@@ -225,6 +225,7 @@ def get_username_from_keyring(system: str) -> Optional[str]:
         return None
 
     try:
+        # Workaround mypy error `module has no attribute "get_credential"`
         # TODO: Could this just be keyring.get_credential?
         # Would need to update monkeypatch in tests
         getter = sys.modules['keyring'].get_credential  # type: ignore
@@ -252,6 +253,7 @@ def get_password_from_keyring(system: str, username: str) -> Optional[str]:
 
     try:
         return (
+            # Workaround mypy error `module has no attribute "get_password"`
             sys.modules['keyring']  # type: ignore
             .get_password(system, username)
         )
@@ -339,7 +341,8 @@ def get_password(
     )
 
 
-# TODO: Can this be replaced with Python 3 keyword-only arguments?
+# TODO: Replace this with Python 3 keyword-only arguments
+# See https://github.com/pypa/twine/issues/520
 def no_positional(allow_self: bool = False) -> Callable:
     """A decorator that doesn't allow for positional arguments.
 
