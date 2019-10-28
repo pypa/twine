@@ -51,9 +51,9 @@ def skip_upload(response, skip_existing, package):
 
 
 def check_status_code(response, verbose):
-    """
-    Additional safety net to catch response code 410 in case the
+    """Additional safety net to catch response code 410 in case the
     UploadToDeprecatedPyPIDetected exception breaks.
+
     Also includes a check for response code 405 and prints helpful error
     message guiding users to the right repository endpoints.
     """
