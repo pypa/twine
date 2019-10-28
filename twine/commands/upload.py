@@ -20,8 +20,6 @@ from twine import exceptions
 from twine import settings
 from twine import utils
 
-import requests
-
 
 def skip_upload(response, skip_existing, package):
     filename = package.basefilename
@@ -48,41 +46,6 @@ def skip_upload(response, skip_existing, package):
             (response.status_code == 400 and
              response.reason.startswith(msg_400)) or
             (response.status_code == 403 and msg_403 in response.text)))
-
-
-def check_status_code(response, verbose):
-    """Generate a helpful message based on the response from the repository.
-
-    Raise a custom exception for recognized errors. Otherwise, print the
-    response content (based on the verbose option) before re-raising the
-    HTTPError.
-    """
-    if response.status_code == 410 and "pypi.python.org" in response.url:
-        raise exceptions.UploadToDeprecatedPyPIDetected(
-            f"It appears you're uploading to pypi.python.org (or "
-            f"testpypi.python.org). You've received a 410 error response. "
-            f"Uploading to those sites is deprecated. The new sites are "
-            f"pypi.org and test.pypi.org. Try using {utils.DEFAULT_REPOSITORY}"
-            f" (or {utils.TEST_REPOSITORY}) to upload your packages instead. "
-            f"These are the default URLs for Twine now. More at "
-            f"https://packaging.python.org/guides/migrating-to-pypi-org/.")
-    elif response.status_code == 405 and "pypi.org" in response.url:
-        raise exceptions.InvalidPyPIUploadURL(
-            f"It appears you're trying to upload to pypi.org but have an "
-            f"invalid URL. You probably want one of these two URLs: "
-            f"{utils.DEFAULT_REPOSITORY} or {utils.TEST_REPOSITORY}. Check "
-            f"your --repository-url value.")
-
-    try:
-        response.raise_for_status()
-    except requests.HTTPError as err:
-        if response.text:
-            if verbose:
-                print('Content received from server:\n{}'.format(
-                    response.text))
-            else:
-                print('NOTE: Try --verbose to see response content.')
-        raise err
 
 
 def upload(upload_settings, dists):
@@ -136,7 +99,7 @@ def upload(upload_settings, dists):
             print(skip_message)
             continue
 
-        check_status_code(resp, upload_settings.verbose)
+        utils.check_status_code(resp, upload_settings.verbose)
 
         uploaded_packages.append(package)
 

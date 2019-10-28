@@ -16,8 +16,9 @@ import os.path
 import textwrap
 
 import pytest
+import pretend
 
-from twine import utils
+from twine import utils, exceptions
 
 import helpers
 
@@ -389,3 +390,18 @@ def test_no_positional_on_function():
         t(1)
 
     assert t(foo=True)
+
+
+@pytest.mark.parametrize('repo_url', [
+    "https://pypi.python.org",
+    "https://testpypi.python.org"
+])
+def test_check_status_code_for_deprecated_pypi_url(repo_url):
+    response = pretend.stub(
+        status_code=410,
+        url=repo_url
+    )
+
+    # value of Verbose doesn't matter for this check
+    with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
+        utils.check_status_code(response, False)
