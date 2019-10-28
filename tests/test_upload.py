@@ -298,7 +298,7 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     # override defaults to use incorrect URL
     upload_settings.repository_config['repository'] = repo_url
 
-    with pytest.raises(twine.exceptions.InvalidPyPIUploadURL):
+    with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(upload_settings, [
             WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
         ])
@@ -315,5 +315,5 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     )
 
     # value of Verbose doesn't matter for this check
-    with pytest.raises(twine.exceptions.UploadToDeprecatedPyPIDetected):
+    with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
         upload.check_status_code(response, False)

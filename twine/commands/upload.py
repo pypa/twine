@@ -51,11 +51,11 @@ def skip_upload(response, skip_existing, package):
 
 
 def check_status_code(response, verbose):
-    """Additional safety net to catch response code 410 in case the
-    UploadToDeprecatedPyPIDetected exception breaks.
+    """Generate a helpful message based on the response from the repository.
 
-    Also includes a check for response code 405 and prints helpful error
-    message guiding users to the right repository endpoints.
+    Raise a custom exception for recognized errors. Otherwise, print the
+    response content (based on the verbose option) before re-raising the
+    HTTPError.
     """
     if response.status_code == 410 and "pypi.python.org" in response.url:
         raise exceptions.UploadToDeprecatedPyPIDetected(
@@ -72,6 +72,7 @@ def check_status_code(response, verbose):
             f"invalid URL. You probably want one of these two URLs: "
             f"{utils.DEFAULT_REPOSITORY} or {utils.TEST_REPOSITORY}. Check "
             f"your --repository-url value.")
+
     try:
         response.raise_for_status()
     except requests.HTTPError as err:
