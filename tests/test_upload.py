@@ -18,10 +18,6 @@ from requests.exceptions import HTTPError
 from twine.commands import upload
 from twine import package, cli, exceptions
 import twine
-from twine.exceptions import (
-    InvalidPyPIUploadURL,
-    UploadToDeprecatedPyPIDetected,
-)
 
 import helpers
 
@@ -302,7 +298,7 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     # override defaults to use incorrect URL
     upload_settings.repository_config['repository'] = repo_url
 
-    with pytest.raises(InvalidPyPIUploadURL):
+    with pytest.raises(twine.exceptions.InvalidPyPIUploadURL):
         upload.upload(upload_settings, [
             WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
         ])
@@ -319,5 +315,5 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     )
 
     # value of Verbose doesn't matter for this check
-    with pytest.raises(UploadToDeprecatedPyPIDetected):
+    with pytest.raises(twine.exceptions.UploadToDeprecatedPyPIDetected):
         upload.check_status_code(response, False)

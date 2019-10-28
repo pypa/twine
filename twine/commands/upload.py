@@ -18,9 +18,9 @@ from twine.commands import _find_dists
 from twine.package import PackageFile
 from twine import exceptions
 from twine import settings
-from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
+from twine import utils
 
-from requests.exceptions import HTTPError
+import requests
 
 
 def skip_upload(response, skip_existing, package):
@@ -62,19 +62,19 @@ def check_status_code(response, verbose):
             f"It appears you're uploading to pypi.python.org (or "
             f"testpypi.python.org). You've received a 410 error response. "
             f"Uploading to those sites is deprecated. The new sites are "
-            f"pypi.org and test.pypi.org. Try using {DEFAULT_REPOSITORY} (or "
-            f"{TEST_REPOSITORY}) to upload your packages instead. These are "
-            f"the default URLs for Twine now. More at "
+            f"pypi.org and test.pypi.org. Try using {utils.DEFAULT_REPOSITORY} "
+            f"(or {utils.TEST_REPOSITORY}) to upload your packages instead. "
+            f"These are the default URLs for Twine now. More at "
             f"https://packaging.python.org/guides/migrating-to-pypi-org/.")
     elif response.status_code == 405 and "pypi.org" in response.url:
         raise exceptions.InvalidPyPIUploadURL(
             f"It appears you're trying to upload to pypi.org but have an "
             f"invalid URL. You probably want one of these two URLs: "
-            f"{DEFAULT_REPOSITORY} or {TEST_REPOSITORY}. Check your "
-            f"--repository-url value.")
+            f"{utils.DEFAULT_REPOSITORY} or {utils.TEST_REPOSITORY}. Check your"
+            f" --repository-url value.")
     try:
         response.raise_for_status()
-    except HTTPError as err:
+    except requests.HTTPError as err:
         if response.text:
             if verbose:
                 print('Content received from server:\n{}'.format(
