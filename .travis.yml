@@ -8,9 +8,6 @@ env:
 
 matrix:
   fast_finish: true
-  allow_failures:
-    - env:
-        TOXENV: lint-mypy
 
   include:
     - python: 3.7
@@ -29,13 +26,9 @@ matrix:
       name: Making sure that docs build is healthy
       env:
         TOXENV: docs
+    - python: 3.8
     - python: 3.7
-    - python: 2.7
-    - python: pypy3.5-6.0
     - python: 3.6
-    - python: 3.5
-    - python: 3.4
-    - python: pypy2.7-6.0
 
 install:
   - pip install tox codecov

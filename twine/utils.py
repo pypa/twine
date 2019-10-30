@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
-
 import os
 import os.path
 import functools
@@ -22,18 +19,10 @@ import sys
 import argparse
 import warnings
 import collections
+import configparser
+from urllib.parse import urlparse, urlunparse
 
-from requests.exceptions import HTTPError
-
-try:
-    import configparser
-except ImportError:  # pragma: no cover
-    import ConfigParser as configparser
-
-try:
-    from urlparse import urlparse, urlunparse
-except ImportError:
-    from urllib.parse import urlparse, urlunparse
+import requests
 
 try:
     import keyring  # noqa
@@ -42,12 +31,8 @@ except ImportError:
 
 from twine import exceptions
 
-# Shim for raw_input in python3
-if sys.version_info > (3,):
-    input_func = input
-else:
-    # Ignore "undefined name" for flake8/python3
-    input_func = raw_input  # noqa: F821
+# Shim for input to allow testing.
+input_func = input
 
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
@@ -145,24 +130,31 @@ def normalize_repository_url(url):
 
 
 def check_status_code(response, verbose):
+    """Generate a helpful message based on the response from the repository.
+
+    Raise a custom exception for recognized errors. Otherwise, print the
+    response content (based on the verbose option) before re-raising the
+    HTTPError.
     """
-    Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
-    exception, but this is in case that breaks and it does.
-    """
-    if (response.status_code == 410 and
-            response.url.startswith(("https://pypi.python.org",
-                                     "https://testpypi.python.org"))):
-        print("It appears you're uploading to pypi.python.org (or "
-              "testpypi.python.org). You've received a 410 error response. "
-              "Uploading to those sites is deprecated. The new sites are "
-              "pypi.org and test.pypi.org. Try using "
-              "https://upload.pypi.org/legacy/ "
-              "(or https://test.pypi.org/legacy/) to upload your packages "
-              "instead. These are the default URLs for Twine now. More at "
-              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
+    if response.status_code == 410 and "pypi.python.org" in response.url:
+        raise exceptions.UploadToDeprecatedPyPIDetected(
+            f"It appears you're uploading to pypi.python.org (or "
+            f"testpypi.python.org). You've received a 410 error response. "
+            f"Uploading to those sites is deprecated. The new sites are "
+            f"pypi.org and test.pypi.org. Try using {DEFAULT_REPOSITORY} (or "
+            f"{TEST_REPOSITORY}) to upload your packages instead. These are "
+            f"the default URLs for Twine now. More at "
+            f"https://packaging.python.org/guides/migrating-to-pypi-org/.")
+    elif response.status_code == 405 and "pypi.org" in response.url:
+        raise exceptions.InvalidPyPIUploadURL(
+            f"It appears you're trying to upload to pypi.org but have an "
+            f"invalid URL. You probably want one of these two URLs: "
+            f"{DEFAULT_REPOSITORY} or {TEST_REPOSITORY}. Check your "
+            f"--repository-url value.")
+
     try:
         response.raise_for_status()
-    except HTTPError as err:
+    except requests.HTTPError as err:
         if response.text:
             if verbose:
                 print('Content received from server:\n{}'.format(
@@ -221,11 +213,7 @@ def get_username_from_keyring(system):
 
 
 def password_prompt(prompt_text):  # Always expects unicode for our own sanity
-    prompt = prompt_text
-    # Workaround for https://github.com/pypa/twine/issues/116
-    if os.name == 'nt' and sys.version_info < (3, 0):
-        prompt = prompt_text.encode('utf8')
-    return getpass.getpass(prompt)
+    return getpass.getpass(prompt_text)
 
 
 def get_password_from_keyring(system, username):
@@ -282,11 +270,7 @@ class EnvironmentDefault(argparse.Action):
         self.env = env
         if default:
             required = False
-        super(EnvironmentDefault, self).__init__(
-            default=default,
-            required=required,
-            **kwargs
-        )
+        super().__init__(default=default, required=required, **kwargs)
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)

@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import unicode_literals
-import platform
 from twine import package, exceptions
 
 import pretend
@@ -57,6 +55,44 @@ def test_sign_file_with_identity(monkeypatch):
         pass
     args = ('gpg', '--detach-sign', '--local-user', 'identity', '-a', filename)
     assert replaced_check_call.calls == [pretend.call(args)]
+
+
+def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
+    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
+
+    assert 'executables not available' in err.value.args[0]
+
+
+def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
+    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
+
+    with pytest.raises(exceptions.InvalidSigningExecutable) as err:
+        package.PackageFile.run_gpg(gpg_args)
+
+    assert 'not_gpg executable not available' in err.value.args[0]
+
+
+def test_run_gpg_falls_back_to_gpg2(monkeypatch):
+
+    def check_call(arg_list):
+        if arg_list[0] == 'gpg':
+            raise FileNotFoundError('gpg not found')
+
+    replaced_check_call = pretend.call_recorder(check_call)
+    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
+    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+
+    package.PackageFile.run_gpg(gpg_args)
+
+    gpg2_args = replaced_check_call.calls[1].args
+    assert gpg2_args[0][0] == 'gpg2'
 
 
 def test_package_signed_name_is_correct():
@@ -171,12 +207,6 @@ TWINE_1_5_0_WHEEL_HEXDIGEST = package.Hexdigest(
     'd86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67',
     'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0',
 )
-
-if platform.python_implementation().lower() == 'pypy':
-    # pyblake2 refuses to install on PyPy
-    TWINE_1_5_0_WHEEL_HEXDIGEST = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(
-        blake2=None,
-    )
 
 
 def test_hash_manager():

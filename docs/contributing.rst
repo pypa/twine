@@ -18,12 +18,12 @@ machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
 development environment.
 
 Clone the twine repository from GitHub, and then make and activate a
-virtual environment that uses Python 3.6 as the default
+virtual environment that uses Python 3.6 or newer as the default
 Python. Example:
 
 .. code-block:: console
 
-  mkvirtualenv -p /usr/bin/python3.6 twine
+  mkvirtualenv -p /usr/bin/python3.7 twine
 
 Then, run the following command:
 
@@ -65,13 +65,13 @@ The HTML of the docs will be visible in :file:`twine/docs/_build/`.
 Testing
 ^^^^^^^
 
-Tests with twine are run using `tox`_, and tested against the following Python
-versions: 2.7, 3.4, 3,5, and 3.6. To run these tests locally, you will need to
-have these versions of Python installed on your machine.
+Tests with twine are run using `tox`_, and tested against Python versions 3.6,
+3.7, and 3.8. To run these tests locally, you will need to have these versions
+of Python installed on your machine.
 
-Either use ``tox`` to build against all supported Python versions (if
-you have them installed) or use ``tox -e py{version}`` to test against
-a specific version, e.g., ``tox -e py27`` or ``tox -e py34``.
+Either use ``tox`` to build against all supported Python versions (if you have
+them installed) or use ``tox -e py{version}`` to test against a specific
+version, e.g., ``tox -e py36`` or ``tox -e py37``.
 
 Also, always run ``tox -e lint`` before submitting a pull request.
 
@@ -100,7 +100,7 @@ HTTPS. Its three purposes are to be:
    for publishing on any Python package index
 
 
-Currently, twine has two principal functions: uploading new packages
+Currently, twine has two principle functions: uploading new packages
 and registering new `projects`_ (``register`` is no longer supported
 on PyPI, and is in Twine for use with other package indexes).
 
@@ -129,10 +129,10 @@ Adding a maintainer
 
 A checklist for adding a new maintainer to the project.
 
-#. Add her as a Member in the GitHub repo settings. (This will also
-   give her privileges on the `Travis CI project
+#. Add them as a Member in the GitHub repo settings. (This will also
+   give them privileges on the `Travis CI project
    <https://travis-ci.org/pypa/twine>`_.)
-#. Get her Test PyPI and canon PyPI usernames and add her as a
+#. Get them Test PyPI and canon PyPI usernames and add them as a
    Maintainer on `our Test PyPI project
    <https://test.pypi.org/manage/project/twine/collaboration/>`_ and
    `canon PyPI
@@ -156,7 +156,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Run Twine tests:
 
-   #. ``tox -e py{27,34,35,36,py}``
+   #. ``tox -e py{36,37,38}``
    #. ``tox -e lint`` for the linter
    #. ``tox -e docs`` (this checks the Sphinx docs and uses
       ``readme_renderer`` to check that the ``long_description`` and other

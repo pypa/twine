@@ -85,6 +85,12 @@ class InvalidSigningConfiguration(TwineException):
     pass
 
 
+class InvalidSigningExecutable(TwineException):
+    """Signing executable must be installed on system."""
+
+    pass
+
+
 class InvalidConfiguration(TwineException):
     """Raised when configuration is invalid."""
 
@@ -93,5 +99,14 @@ class InvalidConfiguration(TwineException):
 
 class InvalidDistribution(TwineException):
     """Raised when a distribution is invalid."""
+
+    pass
+
+
+class InvalidPyPIUploadURL(TwineException):
+    """Repository configuration tries to use PyPI with an incorrect URL.
+
+    For example, https://pypi.org instead of https://upload.pypi.org/legacy.
+    """
 
     pass
