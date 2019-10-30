@@ -291,3 +291,20 @@ def test_values_from_env(monkeypatch):
     assert "pypipassword" == upload_settings.password
     assert "pypiuser" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
+
+
+@pytest.mark.parametrize('repo_url', [
+    "https://upload.pypi.org/",
+    "https://test.pypi.org/",
+    "https://pypi.org/"
+])
+def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
+    upload_settings = make_settings()
+
+    # override defaults to use incorrect URL
+    upload_settings.repository_config['repository'] = repo_url
+
+    with pytest.raises(twine.exceptions.InvalidPyPIUploadURL):
+        upload.upload(upload_settings, [
+            WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE
+        ])
