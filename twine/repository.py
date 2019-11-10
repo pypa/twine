@@ -62,7 +62,11 @@ class Repository:
         self.session = requests.session()
         # requests.Session.auth should be Tuple[str, str], ...], but
         # username/password could be None (see TODO for utils.RepositoryConfig)
-        self.session.auth = (username or '', password or '')
+        self.session.auth = (
+            (username or '', password or '')
+            if username or password
+            else None
+        )
         self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
