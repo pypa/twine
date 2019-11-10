@@ -75,4 +75,7 @@ setup(
         "tqdm >= 4.14",
         "keyring >= 15.1",
     ],
+    setup_requires=[
+        'setuptools_scm>=1.15',
+    ],
 )
