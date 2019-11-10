@@ -16,7 +16,7 @@ from setuptools import setup
 
 setup(
     name="twine",
-    version="2.0.0",
+    use_scm_version=True,
 
     description="Collection of utilities for publishing packages on PyPI",
     long_description=open("README.rst").read(),
