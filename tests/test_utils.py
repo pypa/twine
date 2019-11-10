@@ -16,8 +16,9 @@ import os.path
 import textwrap
 
 import pytest
+import pretend
 
-from twine import utils
+from twine import utils, exceptions
 
 import helpers
 
@@ -367,25 +368,16 @@ def test_get_password_runtime_error_suppressed(
     assert 'fail!' in str(warning)
 
 
-def test_no_positional_on_method():
-    class T:
-        @utils.no_positional(allow_self=True)
-        def __init__(self, foo=False):
-            self.foo = foo
+@pytest.mark.parametrize('repo_url', [
+    "https://pypi.python.org",
+    "https://testpypi.python.org"
+])
+def test_check_status_code_for_deprecated_pypi_url(repo_url):
+    response = pretend.stub(
+        status_code=410,
+        url=repo_url
+    )
 
-    with pytest.raises(TypeError):
-        T(1)
-
-    t = T(foo=True)
-    assert t.foo
-
-
-def test_no_positional_on_function():
-    @utils.no_positional()
-    def t(foo=False):
-        return foo
-
-    with pytest.raises(TypeError):
-        t(1)
-
-    assert t(foo=True)
+    # value of Verbose doesn't matter for this check
+    with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
+        utils.check_status_code(response, False)
