@@ -60,8 +60,9 @@ class Repository:
         self.url = repository_url
 
         self.session = requests.session()
-        # requests.Session.auth should be Tuple[str, str], ...], but
-        # username/password could be None (see TODO for utils.RepositoryConfig)
+        # requests.Session.auth should be Union[None, Tuple[str, str], ...]
+        # But username or password could be None
+        # See TODO for utils.RepositoryConfig
         self.session.auth = (
             (username or '', password or '')
             if username or password

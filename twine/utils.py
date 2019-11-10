@@ -26,9 +26,8 @@ from urllib.parse import urlparse, urlunparse
 
 import requests
 
-# TODO: Revisit this import
-# Could set keyring = None in except, and catch AttributeError when called
-# Also not sure if the noqa is necessary
+# TODO: Unconditionally require keyring
+# https://github.com/pypa/twine/issues/524
 try:
     import keyring  # noqa
 except ImportError:
@@ -225,10 +224,12 @@ def get_username_from_keyring(system: str) -> Optional[str]:
         return None
 
     try:
-        # Workaround mypy error `module has no attribute "get_credential"`
-        # TODO: Could this just be keyring.get_credential?
-        # Would need to update monkeypatch in tests
-        getter = sys.modules['keyring'].get_credential  # type: ignore
+        getter = (
+            # Workaround mypy error `module has no attribute "get_credential"`
+            # Revealed type is '_importlib_modulespec.ModuleType*'
+            sys.modules['keyring']  # type: ignore
+            .get_credential
+        )
     except AttributeError:
         return None
 
@@ -254,6 +255,7 @@ def get_password_from_keyring(system: str, username: str) -> Optional[str]:
     try:
         return (
             # Workaround mypy error `module has no attribute "get_password"`
+            # Revealed type is '_importlib_modulespec.ModuleType*'
             sys.modules['keyring']  # type: ignore
             .get_password(system, username)
         )
