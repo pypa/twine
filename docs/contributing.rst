@@ -176,18 +176,6 @@ A checklist for creating, testing, and distributing a new version.
       with git, and test ``zest.releaser`` per directions in `this
       comment
       <https://github.com/pypa/twine/pull/314#issuecomment-370525038>`_.
-   #. Test ``devpi`` support:
-
-      .. code-block:: console
-
-        pip install devpi-client
-        devpi use https://m.devpi.net
-        devpi user -c {username} password={password}
-        devpi login {username} --password={password}
-        devpi index -c testpypi type=mirror mirror_url=https://test.pypi.org/simple/
-        devpi use {username}/testpypi
-        python setup.py sdist
-        twine upload --repository-url https://m.devpi.net/{username}/testpypi/ dist/{testpackage}.tar.gz
 
 #. Create a git tag with ``git tag -sam 'Release v{number}' {number}``.
 
