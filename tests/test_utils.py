@@ -368,30 +368,6 @@ def test_get_password_runtime_error_suppressed(
     assert 'fail!' in str(warning)
 
 
-def test_no_positional_on_method():
-    class T:
-        @utils.no_positional(allow_self=True)
-        def __init__(self, foo=False):
-            self.foo = foo
-
-    with pytest.raises(TypeError):
-        T(1)
-
-    t = T(foo=True)
-    assert t.foo
-
-
-def test_no_positional_on_function():
-    @utils.no_positional()
-    def t(foo=False):
-        return foo
-
-    with pytest.raises(TypeError):
-        t(1)
-
-    assert t(foo=True)
-
-
 @pytest.mark.parametrize('repo_url', [
     "https://pypi.python.org",
     "https://testpypi.python.org"
