@@ -21,20 +21,10 @@ __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 try:
     import importlib.metadata as importlib_metadata
 except ImportError:
-    try:
-        import importlib_metadata
-    except ImportError:
-        importlib_metadata = None
+    import importlib_metadata
 
 
-try:
-    metadata = importlib_metadata.metadata('twine')
-except Exception:
-    class Unknown:
-        @classmethod
-        def __getitem__(cls, key):
-            return 'unknown'
-    metadata = Unknown()
+metadata = importlib_metadata.metadata('twine')
 
 
 __title__ = metadata['name']
