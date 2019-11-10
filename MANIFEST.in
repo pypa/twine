@@ -3,6 +3,7 @@ include README.rst
 include AUTHORS
 include .coveragerc
 include mypy.ini
+include *.toml
 
 recursive-include tests *.py *.whl *.gz deprecated-pypirc
 recursive-include docs *.bat *.empty *.py *.rst Makefile *.txt
