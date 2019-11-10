@@ -35,8 +35,8 @@ class Settings:
         Settings(sign=True, username='fakeusername')
     """
 
-    @utils.no_positional(allow_self=True)
     def __init__(self,
+                 *,
                  sign=False, sign_with='gpg', identity=None,
                  username=None, password=None,
                  comment=None,
