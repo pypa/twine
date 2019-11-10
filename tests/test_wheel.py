@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import unicode_literals
-
 from twine import wheel
 
 import pytest
@@ -32,11 +30,11 @@ def test_version_parsing(example_wheel):
 
 def test_find_metadata_files():
     names = [
-        b'package/lib/__init__.py',
-        b'package/lib/version.py',
-        b'package/METADATA.txt',
-        b'package/METADATA.json',
-        b'package/METADATA',
+        'package/lib/__init__.py',
+        'package/lib/version.py',
+        'package/METADATA.txt',
+        'package/METADATA.json',
+        'package/METADATA',
     ]
     expected = [
         ['package', 'METADATA'],

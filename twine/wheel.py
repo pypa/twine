@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
-
 import os
 import re
 import zipfile
@@ -36,12 +33,6 @@ wheel_file_re = re.compile(
     re.VERBOSE)
 
 
-def try_decode(s):
-    if isinstance(s, bytes):
-        return s.decode('utf8')
-    return s
-
-
 class Wheel(Distribution):
 
     def __init__(self, filename, metadata_version=None):
@@ -58,10 +49,7 @@ class Wheel(Distribution):
     @staticmethod
     def find_candidate_metadata_files(names):
         """Filter files that may be METADATA files."""
-        tuples = [
-            x.split('/') for x in map(try_decode, names)
-            if 'METADATA' in x
-        ]
+        tuples = [x.split('/') for x in names if 'METADATA' in x]
         return [x[1] for x in sorted([(len(x), x) for x in tuples])]
 
     def read(self):
@@ -96,7 +84,7 @@ class Wheel(Distribution):
         )
 
     def parse(self, data):
-        super(Wheel, self).parse(data)
+        super().parse(data)
 
         fp = StringIO(distribution.must_decode(data))
         msg = distribution.parse(fp)
