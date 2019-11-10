@@ -3,6 +3,13 @@
 =========
 Changelog
 =========
+* :feature:`518` Add Python 3.8 to classifiers.
+* :bug:`332` More robust handling of server response in ``--skip-existing``
+* :release:`2.0.0 <2019-09-24>`
+* :feature:`437` Twine now requires Python 3.6 or later. Use pip
+  9 or pin to "twine<2" to install twine on older Python versions.
+* :bug:`491` Require requests 2.20 or later to avoid reported security
+  vulnerabilities in earlier releases.
 * :release:`1.15.0 <2019-09-17>`
 * :feature:`488` Improved output on ``check`` command:
   Prints a message when there are no distributions given to check.
