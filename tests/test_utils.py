@@ -292,7 +292,7 @@ def keyring_missing_get_credentials(monkeypatch):
     Simulate keyring prior to 15.2 that does not have the
     'get_credential' API.
     """
-    monkeypatch.delattr('keyring', 'get_credential', raising=False)
+    monkeypatch.delattr(utils.keyring, 'get_credential')
 
 
 @pytest.fixture
