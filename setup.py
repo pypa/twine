@@ -73,13 +73,9 @@ setup(
         "requests-toolbelt >= 0.8.0, != 0.9.0",
         "setuptools >= 0.7.0",
         "tqdm >= 4.14",
+        "keyring >= 15.1",
     ],
     setup_requires=[
         'setuptools_scm>=1.15',
     ],
-    extras_require={
-        'keyring': [
-            'keyring',
-        ],
-    },
 )

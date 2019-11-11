@@ -3,6 +3,10 @@
 =========
 Changelog
 =========
+* :feature:`524`: Twine now unconditionally requires the keyring library
+  and no longer supports uninstalling ``keyring`` as a means to disable
+  that functionality. Instead, use ``keyring --disable`` keyring functionality
+  if necessary.
 * :feature:`518` Add Python 3.8 to classifiers.
 * :bug:`332` More robust handling of server response in ``--skip-existing``
 * :release:`2.0.0 <2019-09-24>`
