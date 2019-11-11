@@ -1,5 +1,17 @@
-.. image:: https://img.shields.io/travis/pypa/twine/master.svg?label=travis-ci
-   :target: https://travis-ci.org/pypa/twine
+.. image:: https://img.shields.io/pypi/v/twine.svg
+    :target: https://pypi.org/project/twine
+
+.. image:: https://img.shields.io/pypi/pyversions/twine.svg
+    :target: https://pypi.org/project/twine
+
+.. image:: https://img.shields.io/readthedocs/twine
+    :target: https://twine.readthedocs.io
+
+.. image:: https://img.shields.io/travis/com/pypa/twine
+    :target: https://travis-ci.org/pypa/twine
+
+.. image:: https://img.shields.io/codecov/c/github/pypa/twine
+    :target: https://codecov.io/gh/pypa/twine
 
 twine
 =====
@@ -20,18 +32,16 @@ The goal of ``twine`` is to improve PyPI interaction by improving
 security and testability.
 
 The biggest reason to use ``twine`` is that it securely authenticates
-you to `PyPI`_ over HTTPS using a verified connection regardless of
-the underlying Python version, while whether or not
-``python setup.py upload`` will work correctly and securely depends
-on your build system, your Python version and the underlying operating
-system.
+you to `PyPI`_ over HTTPS using a verified connection, regardless of
+the underlying Python version. Meanwhile, ``python setup.py upload``
+will only work correctly and securely if your build system, Python
+version, and underlying operating system are configured properly.
 
-Secondly, it allows you to precreate your distribution files.
-``python setup.py upload`` only allows you to upload something that you're
-building with ``distutils`` or ``setuptools``, and created in the same
-command invocation. This means that you cannot test the
-exact file you're going to upload to PyPI to ensure that it works before
-uploading it.
+Secondly, ``twine`` encourages you to build your distribution files. ``python
+setup.py upload`` only allows you to upload a package as a final step after
+building with ``distutils`` or ``setuptools``, within the same command
+invocation. This means that you cannot test the exact file you're going to
+upload to PyPI to ensure that it works before uploading it.
 
 Finally, ``twine`` allows you to pre-sign your files and pass the
 ``.asc`` files into the command line invocation (``twine upload
@@ -68,7 +78,8 @@ Using Twine
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine will automatically prompt for your username and password:
+2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine
+will automatically prompt for your username and password:
 
    .. code-block:: console
 
@@ -92,31 +103,16 @@ Keyring Support
 ---------------
 
 Instead of typing in your password every time you upload a distribution, Twine
-allows you to store your username and password securely using `keyring`_.
+allows storing a username and password securely using `keyring`_.
+Keyring is installed with Twine but for some systems (Linux mainly) may
+require
+`additional installation steps <https://pypi.org/project/keyring/#linux>`_.
 
-To use the keyring, you must first install the keyring packages:
+Once Twine is installed, use the ``keyring`` program to set a
+username and password to use for each package index (repository) to
+which you may upload.
 
-- On Windows and MacOS you just need to install ``keyring``, for example,
-  ``pip install --user keyring``.
-- On Linux, in addition to the ``keyring`` package you also need to ensure the
-  ``python3-dbus`` system package is installed. For example, ``apt install
-  python3-dbus``. See `Keyring's installation instructions`_ for more details.
-
-Once keyring is installed you can use the ``keyring`` program to set your
-username and password to use for each package index (repository) you want to
-upload to using Twine.
-
-To set your username and password for test PyPI run the following command.
-``keyring`` will prompt you for your password:
-
-.. code-block:: console
-
-    $ keyring set https://test.pypi.org/legacy/ your-username
-    # or
-    $ python3 -m keyring set https://test.pypi.org/legacy/ your-username
-
-To set your username and password for PyPI run this command, again, ``keyring``
-will prompt for the password:
+For example, to set a username and password for PyPI:
 
 .. code-block:: console
 
@@ -124,28 +120,43 @@ will prompt for the password:
     # or
     $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
+And enter the password when prompted.
 
-The next time you run ``twine`` it will prompt you for a username and will grab the appropriate password from the keyring.
+For a different repository, replace the URL with the relevant repository
+URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
+
+The next time you run ``twine``, it will prompt you for a username and will grab
+the appropriate password from the keyring.
 
 .. Note:: If you are using Linux in a headless environment (such as on a
     server) you'll need to do some additional steps to ensure that Keyring can
     store secrets securely. See `Using Keyring on headless systems`_.
 
 .. _`keyring`: https://pypi.org/project/keyring/
-.. _`Keyring's installation instructions`:
-    https://keyring.readthedocs.io/en/latest#installation-instructions
 .. _`Using Keyring on headless systems`:
     https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
 
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
 
-In some cases, the presence of keyring may be problematic. To disable
-keyring and defer to a prompt for passwords, uninstall ``keyring``
-or if that's not an option, you can also configure keyring to be disabled.
+In most cases, simply not setting a password in keyring will allow twine
+to fall back to prompting for a password. In some cases, the presence of
+keyring will cause unexpected or undesirable prompts from the backing
+system. In these cases, it may be desirable to disable keyring altogether.
+To disable keyring, simply invoke:
 
-See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for a
-discussion on ways to do that.
+.. code-block:: console
+
+    $ keyring --disable
+    or
+    $ python -m keyring --disable
+
+That command will configure for the current user the "null" keyring,
+effectively disabling the functionality, and allowing Twine to prompt
+for passwords.
+
+See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
+discussion and background.
 
 Options
 -------
@@ -217,7 +228,8 @@ Uploads one or more distributions to a repository.
 ``twine check``
 ^^^^^^^^^^^^^^^
 
-Checks whether your distributions long description will render correctly on PyPI.
+Checks whether your distribution's long description will render correctly on
+PyPI.
 
 .. code-block:: console
 
@@ -233,10 +245,10 @@ Checks whether your distributions long description will render correctly on PyPI
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
 
-**WARNING**: The ``register`` command is `no longer necessary if you are uploading to
-pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_ (the new
-PyPI software running on pypi.org). However, you may need this if you are using
-a different package index.
+**WARNING**: The ``register`` command is `no longer necessary if you are
+uploading to pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_
+(the new PyPI software running on pypi.org). However, you may need this if you
+are using a different package index.
 
 For completeness, its usage:
 

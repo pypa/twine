@@ -11,38 +11,36 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import unicode_literals
-
 import pretend
 
 from twine.commands import check
 
 
-def test_warningstream_write_match():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(write=pretend.call_recorder(lambda a: None))
+class TestWarningStream:
 
-    stream.write("<string>:2: (WARNING/2) Title underline too short.")
+    def setup(self):
+        self.stream = check._WarningStream()
+        self.stream.output = pretend.stub(
+            write=pretend.call_recorder(lambda a: None),
+            getvalue=lambda: "result",
+        )
 
-    assert stream.output.write.calls == [
-        pretend.call("line 2: Warning: Title underline too short.\n")
-    ]
+    def test_write_match(self):
+        self.stream.write("<string>:2: (WARNING/2) Title underline too short.")
 
+        assert self.stream.output.write.calls == [
+            pretend.call("line 2: Warning: Title underline too short.\n")
+        ]
 
-def test_warningstream_write_nomatch():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(write=pretend.call_recorder(lambda a: None))
+    def test_write_nomatch(self):
+        self.stream.write("this does not match")
 
-    stream.write("this does not match")
+        assert self.stream.output.write.calls == [
+            pretend.call("this does not match")
+        ]
 
-    assert stream.output.write.calls == [pretend.call("this does not match")]
-
-
-def test_warningstream_str():
-    stream = check._WarningStream()
-    stream.output = pretend.stub(getvalue=lambda: "result")
-
-    assert str(stream) == "result"
+    def test_str_representation(self):
+        assert str(self.stream) == "result"
 
 
 def test_check_no_distributions(monkeypatch):
@@ -51,7 +49,7 @@ def test_check_no_distributions(monkeypatch):
     monkeypatch.setattr(check, "_find_dists", lambda a: [])
 
     assert not check.check("dist/*", output_stream=stream)
-    assert stream.getvalue() == ""
+    assert stream.getvalue() == "No files to check.\n"
 
 
 def test_check_passing_distribution(monkeypatch):
@@ -74,10 +72,7 @@ def test_check_passing_distribution(monkeypatch):
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
     assert not check.check("dist/*", output_stream=output_stream)
-    assert (
-        output_stream.getvalue()
-        == "Checking distribution dist/dist.tar.gz: Passed\n"
-    )
+    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
     assert renderer.render.calls == [
         pretend.call("blah", stream=warning_stream)
     ]
@@ -99,11 +94,10 @@ def test_check_no_description(monkeypatch, capsys):
     output_stream = check.StringIO()
     check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
-        'Checking distribution dist/dist.tar.gz: '
-        'warning: `long_description_content_type` missing.  '
+        'Checking dist/dist.tar.gz: PASSED, with warnings\n'
+        '  warning: `long_description_content_type` missing.  '
         'defaulting to `text/x-rst`.\n'
-        'warning: `long_description` missing.\n'
-        'Passed\n'
+        '  warning: `long_description` missing.\n'
     )
 
 
@@ -128,10 +122,10 @@ def test_check_failing_distribution(monkeypatch):
 
     assert check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
-        "Checking distribution dist/dist.tar.gz: Failed\n"
-        "The project's long_description has invalid markup which will not be "
-        "rendered on PyPI. The following syntax errors were detected:\n"
-        "WARNING"
+        "Checking dist/dist.tar.gz: FAILED\n"
+        "  `long_description` has syntax errors in markup and would not be "
+        "rendered on PyPI.\n"
+        "    WARNING"
     )
     assert renderer.render.calls == [
         pretend.call("blah", stream=warning_stream)

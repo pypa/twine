@@ -12,14 +12,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import unicode_literals
-
 from twine import exceptions
 from twine import repository
 from twine import utils
 
 
-class Settings(object):
+class Settings:
     """Object that manages the configuration for Twine.
 
     This object can only be instantiated with keyword arguments.
@@ -37,8 +35,8 @@ class Settings(object):
         Settings(sign=True, username='fakeusername')
     """
 
-    @utils.no_positional(allow_self=True)
     def __init__(self,
+                 *,
                  sign=False, sign_with='gpg', identity=None,
                  username=None, password=None, non_interactive=False,
                  comment=None,

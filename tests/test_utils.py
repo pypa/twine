@@ -11,14 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
 
-import sys
 import os.path
 import textwrap
 
 import pytest
+import pretend
 
 from twine import exceptions, utils
 
@@ -229,7 +227,7 @@ def test_get_password_keyring_overrides_prompt(monkeypatch):
         def get_password(system, user):
             return '{user}@{system} sekure pa55word'.format(**locals())
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'user@system sekure pa55word'
@@ -243,7 +241,7 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch):
         def get_password(system, user):
             return
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'entered pw'
@@ -290,7 +288,7 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
                 raise RuntimeError("unexpected username")
             return cred.password
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     user = utils.get_username('system', None, {})
     assert user == 'real_user'
@@ -299,21 +297,12 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
 
 
 @pytest.fixture
-def keyring_missing(monkeypatch):
-    """
-    Simulate that 'import keyring' raises an ImportError
-    """
-    monkeypatch.delitem(sys.modules, 'keyring', raising=False)
-
-
-@pytest.fixture
 def keyring_missing_get_credentials(monkeypatch):
     """
-    Simulate older versions of keyring that do not have the
-    'get_credentials' API.
+    Simulate keyring prior to 15.2 that does not have the
+    'get_credential' API.
     """
-    monkeypatch.delattr('keyring.backends.KeyringBackend',
-                        'get_credential', raising=False)
+    monkeypatch.delattr(utils.keyring, 'get_credential')
 
 
 @pytest.fixture
@@ -329,11 +318,6 @@ def entered_password(monkeypatch):
 def test_get_username_keyring_missing_get_credentials_prompts(
         entered_username, keyring_missing_get_credentials):
     assert utils.get_username('system', None, {}) == 'entered user'
-
-
-def test_get_password_keyring_missing_prompts(
-        entered_password, keyring_missing):
-    assert utils.get_password('system', 'user', None, {}) == 'entered pw'
 
 
 def test_get_username_keyring_missing_non_interactive_aborts(
@@ -355,11 +339,11 @@ def keyring_no_backends(monkeypatch):
     has no backends for the system, the backend will be a
     fail.Keyring, which raises RuntimeError on get_password.
     """
-    class FailKeyring(object):
+    class FailKeyring:
         @staticmethod
         def get_password(system, username):
             raise RuntimeError("fail!")
-    monkeypatch.setitem(sys.modules, 'keyring', FailKeyring())
+    monkeypatch.setattr(utils, 'keyring', FailKeyring())
 
 
 @pytest.fixture
@@ -367,13 +351,13 @@ def keyring_no_backends_get_credential(monkeypatch):
     """
     Simulate that keyring has no available backends. When keyring
     has no backends for the system, the backend will be a
-    fail.Keyring, which raises RuntimeError on get_password.
+    fail.Keyring, which raises RuntimeError on get_credential.
     """
-    class FailKeyring(object):
+    class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise RuntimeError("fail!")
-    monkeypatch.setitem(sys.modules, 'keyring', FailKeyring())
+    monkeypatch.setattr(utils, 'keyring', FailKeyring())
 
 
 def test_get_username_runtime_error_suppressed(
@@ -392,25 +376,16 @@ def test_get_password_runtime_error_suppressed(
     assert 'fail!' in str(warning)
 
 
-def test_no_positional_on_method():
-    class T(object):
-        @utils.no_positional(allow_self=True)
-        def __init__(self, foo=False):
-            self.foo = foo
+@pytest.mark.parametrize('repo_url', [
+    "https://pypi.python.org",
+    "https://testpypi.python.org"
+])
+def test_check_status_code_for_deprecated_pypi_url(repo_url):
+    response = pretend.stub(
+        status_code=410,
+        url=repo_url
+    )
 
-    with pytest.raises(TypeError):
-        T(1)
-
-    t = T(foo=True)
-    assert t.foo
-
-
-def test_no_positional_on_function():
-    @utils.no_positional()
-    def t(foo=False):
-        return foo
-
-    with pytest.raises(TypeError):
-        t(1)
-
-    assert t(foo=True)
+    # value of Verbose doesn't matter for this check
+    with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
+        utils.check_status_code(response, False)

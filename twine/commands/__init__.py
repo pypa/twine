@@ -11,15 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
+from typing import List
 
 import glob
 import os.path
 
 from twine import exceptions
 
-__all__ = []
+__all__: List[str] = []
 
 
 def _group_wheel_files_first(files):

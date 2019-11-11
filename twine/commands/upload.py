@@ -11,9 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from __future__ import absolute_import, division, print_function
-from __future__ import unicode_literals
-
 import argparse
 import os.path
 
@@ -25,30 +22,26 @@ from twine import utils
 
 
 def skip_upload(response, skip_existing, package):
-    filename = package.basefilename
-    msg_400 = (
-        # Old PyPI message:
-        'A file named "{}" already exists for'.format(filename),
-        # Warehouse message:
-        'File already exists',
-        # Nexus Repository OSS message:
-        'Repository does not allow updating assets',
-    )
-    msg_403 = 'Not enough permissions to overwrite artifact'
+    if not skip_existing:
+        return False
+
+    status = response.status_code
+    reason = getattr(response, 'reason', '').lower()
+    text = getattr(response, 'text', '').lower()
+
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
-    # 409 or 403 status code. We only want to skip an upload if:
-    # 1. The user has told us to skip existing packages (skip_existing is
-    #    True) AND
-    # 2. a) The response status code is 409 OR
-    # 2. b) The response status code is 400 AND it has a reason that matches
-    #       what we expect PyPI or Nexus OSS to return to us. OR
-    # 2. c) The response status code is 403 AND the text matches what we
-    #       expect Artifactory to return to us.
-    return (skip_existing and (response.status_code == 409 or
-            (response.status_code == 400 and
-             response.reason.startswith(msg_400)) or
-            (response.status_code == 403 and msg_403 in response.text)))
+    # 403 or 409 status code.
+    return (
+        # pypiserver (https://pypi.org/project/pypiserver)
+        status == 409
+        # PyPI / TestPyPI
+        or (status == 400 and 'already exist' in reason)
+        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
+        or (status == 400 and 'updating asset' in reason)
+        # Artifactory (https://jfrog.com/artifactory/)
+        or (status == 403 and 'overwrite artifact' in text)
+    )
 
 
 def upload(upload_settings, dists):
@@ -60,7 +53,7 @@ def upload(upload_settings, dists):
     upload_settings.check_repository_url()
     repository_url = upload_settings.repository_config['repository']
 
-    print("Uploading distributions to {}".format(repository_url))
+    print(f"Uploading distributions to {repository_url}")
 
     repository = upload_settings.create_repository()
     uploaded_packages = []

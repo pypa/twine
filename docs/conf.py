@@ -1,5 +1,3 @@
-# -*- coding: utf-8 -*-
-#
 # twine documentation build configuration file, created by
 # sphinx-quickstart on Tue Aug 13 11:51:54 2013.
 #
@@ -59,7 +57,7 @@ master_doc = "index"
 
 # General information about the project.
 project = "twine"
-copyright = "2018, Donald Stufft and individual contributors"
+copyright = "2019, Donald Stufft and individual contributors"
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
