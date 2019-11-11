@@ -105,8 +105,8 @@ Keyring Support
 Instead of typing in your password every time you upload a distribution, Twine
 allows storing a username and password securely using `keyring`_.
 Keyring is installed with Twine but for some systems (Linux mainly) may
-require additional installation steps; refer to the keyring project page
-for details.
+require
+`additional installation steps <https://github.com/jaraco/keyring#linux>`_.
 
 Once Twine is installed, use the ``keyring`` program to set a
 username and password to use for each package index (repository) to
