@@ -199,12 +199,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. View your tag: ``git tag -v {number}``
 #. Push your tag: ``git push upstream {number}``.
-#. Delete old distributions: ``rm dist/*``.
-#. Create distributions with ``python setup.py sdist bdist_wheel``.
-#. Set your TestPyPI and canon PyPI credentials in your session with
-   ``keyring`` (docs forthcoming).
-#. Upload to Test PyPI: :command:`twine upload --repository-url
-   https://test.pypi.org/legacy/ --skip-existing dist/*`
+#. Upload to TestPyPI with ``TWINE_REPOSITORY=https://test.pypi.org/legacy/ tox -e release``
 #. Verify that everything looks good, downloads ok, etc. Make needed fixes.
 #. Merge the last PR before the new release:
 
@@ -218,12 +213,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Create a new git tag with ``git tag -sam 'Release v{number}' {number}``.
 #. View your tag: ``git tag -v {number}``
 #. Push your tag: ``git push upstream {number}``.
-#. Delete old distributions: ``rm dist/*``.
-#. Create distributions with ``python setup.py sdist bdist_wheel``.
-#. On a Monday or Tuesday, upload to canon PyPI: :command:`twine
-   upload --skip-existing dist/*`
-
-   .. note:: Will be replaced by ``tox -e release`` at some point.
+#. On a Monday or Tuesday, upload to PyPI with ``tox -e release``.
 #. Send announcement email to `pypa-dev mailing list`_ and celebrate.
 
 
