@@ -79,10 +79,10 @@ class DevPiEnv(jaraco.envs.ToxEnv):
             '--clientdir', str(client_dir),
         ]
         run(devpi_client + ['use', self.url + 'root/pypi/'])
-        create = ['user', '--create', self.username, f'password={self.password}']
-        run(devpi_client + create)
-        run(
-            devpi_client + ['login', self.username, '--password', self.password])
+        run(devpi_client + [
+            'user', '--create', self.username, f'password={self.password}'])
+        run(devpi_client + [
+            'login', self.username, '--password', self.password])
         run(devpi_client + ['index', '-c', 'dev'])
 
 
