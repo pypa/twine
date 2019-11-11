@@ -1,10 +1,15 @@
 import contextlib
 import textwrap
+import secrets
+import subprocess
+import pathlib
+import functools
 
 import pytest
 import portend
 import requests
 import jaraco.envs
+import munch
 
 from twine import settings
 
@@ -40,26 +45,74 @@ class DevPiEnv(jaraco.envs.ToxEnv):
     Run devpi using tox:testenv:devpi.
     """
     name = 'devpi'
+    username = 'foober'
 
-    def create(self):
+    def create(self, root, password):
         super().create()
+        self.base = root
+        self.password = password
         self.port = portend.find_available_local_port()
+        cmd = [
+            self.exe('devpi-init'),
+            '--serverdir', str(root),
+            '--root-passwd', password,
+        ]
+        subprocess.run(cmd, check=True)
+
+    @property
+    def url(self):
+        return f'http://localhost:{self.port}/'
+
+    @property
+    def repo(self):
+        return f'{self.url}/{self.username}/dev/'
 
     def ready(self):
-        url = 'http://localhost:{port}'.format(port=self.port)
         with contextlib.suppress(Exception):
-            return requests.get(url)
+            return requests.get(self.url)
+
+    def init(self):
+        run = functools.partial(subprocess.run, check=True)
+        client_dir = self.base / 'client'
+        devpi_client = [
+            self.exe('devpi'),
+            '--clientdir', str(client_dir),
+        ]
+        run(devpi_client + ['use', self.url + 'root/pypi/'])
+        create = ['user', '--create', self.username, f'password={self.password}']
+        run(devpi_client + create)
+        run(
+            devpi_client + ['login', self.username, '--password', self.password])
+        run(devpi_client + ['index', '-c', 'dev'])
 
 
 @pytest.fixture(scope='session')
-def devpi_server(request, watcher_getter):
+def devpi_server(request, watcher_getter, tmp_path_factory):
     env = DevPiEnv()
-    env.create()
+    password = secrets.token_urlsafe()
+    root = tmp_path_factory.mktemp('devpi')
+    env.create(root, password)
     proc = watcher_getter(
         name=str(env.exe('devpi-server')),
-        arguments=['--port', str(env.port)],
+        arguments=['--port', str(env.port), '--serverdir', str(root)],
         checker=env.ready,
         # Needed for the correct execution order of finalizers
         request=request,
     )
-    return locals()
+    env.init()
+    username = env.username
+    url = env.repo
+    return munch.Munch.fromDict(locals())
+
+
+dist_names = [
+    'twine-1.5.0.tar.gz',
+    'twine-1.5.0-py2.py3-none-any.whl',
+    'twine-1.6.5.tar.gz',
+    'twine-1.6.5-py2.py3-none-any.whl',
+]
+
+
+@pytest.fixture(params=dist_names)
+def uploadable_dist(request):
+    return pathlib.Path(__file__).parent / 'fixtures' / request.param
