@@ -17,7 +17,6 @@ import os
 import os.path
 import functools
 import getpass
-import sys
 import argparse
 import warnings
 import collections
@@ -25,13 +24,7 @@ import configparser
 from urllib.parse import urlparse, urlunparse
 
 import requests
-
-# TODO: Unconditionally require keyring
-# https://github.com/pypa/twine/issues/524
-try:
-    import keyring  # noqa
-except ImportError:
-    pass
+import keyring
 
 from twine import exceptions
 
@@ -219,24 +212,13 @@ def get_userpass_value(
 # They seem to do similar things, but this has more exception handling
 # Could they have a similar (maybe simpler) structure?
 def get_username_from_keyring(system: str) -> Optional[str]:
-    # TODO: Is this necessary? Could we catch a NameError instead?
-    if 'keyring' not in sys.modules:
-        return None
-
     try:
-        getter = (
-            # Workaround mypy error `module has no attribute "get_credential"`
-            # Revealed type is '_importlib_modulespec.ModuleType*'
-            sys.modules['keyring']  # type: ignore
-            .get_credential
-        )
-    except AttributeError:
-        return None
-
-    try:
-        creds = getter(system, None)
+        creds = keyring.get_credential(system, None)
         if creds:
             return creds.username
+    except AttributeError:
+        # To support keyring prior to 15.2
+        pass
     except Exception as exc:
         warnings.warn(str(exc))
 
@@ -247,18 +229,9 @@ def password_prompt(prompt_text: str) -> str:
     return getpass.getpass(prompt_text)
 
 
-# TODO: See TODOs in get_username_from_keyring
-def get_password_from_keyring(system: str, username: str) -> Optional[str]:
-    if 'keyring' not in sys.modules:
-        return None
-
+def get_password_from_keyring(system, username):
     try:
-        return (
-            # Workaround mypy error `module has no attribute "get_password"`
-            # Revealed type is '_importlib_modulespec.ModuleType*'
-            sys.modules['keyring']  # type: ignore
-            .get_password(system, username)
-        )
+        return keyring.get_password(system, username)
     except Exception as exc:
         warnings.warn(str(exc))
 
