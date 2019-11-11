@@ -2,7 +2,6 @@ import os
 import os.path
 import functools
 import getpass
-import sys
 import argparse
 import warnings
 import collections
@@ -10,11 +9,7 @@ import configparser
 from urllib.parse import urlparse, urlunparse
 
 import requests
-
-try:
-    import keyring  # noqa
-except ImportError:
-    pass
+import keyring
 
 from twine import exceptions
 
@@ -183,18 +178,13 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
 
 
 def get_username_from_keyring(system):
-    if 'keyring' not in sys.modules:
-        return
-
     try:
-        getter = sys.modules['keyring'].get_credential
-    except AttributeError:
-        return None
-
-    try:
-        creds = getter(system, None)
+        creds = keyring.get_credential(system, None)
         if creds:
             return creds.username
+    except AttributeError:
+        # To support keyring prior to 15.2
+        pass
     except Exception as exc:
         warnings.warn(str(exc))
 
@@ -204,11 +194,8 @@ def password_prompt(prompt_text):  # Always expects unicode for our own sanity
 
 
 def get_password_from_keyring(system, username):
-    if 'keyring' not in sys.modules:
-        return
-
     try:
-        return sys.modules['keyring'].get_password(system, username)
+        return keyring.get_password(system, username)
     except Exception as exc:
         warnings.warn(str(exc))
 

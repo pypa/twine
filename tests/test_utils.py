@@ -1,4 +1,3 @@
-import sys
 import os.path
 import textwrap
 
@@ -214,7 +213,7 @@ def test_get_password_keyring_overrides_prompt(monkeypatch):
         def get_password(system, user):
             return '{user}@{system} sekure pa55word'.format(**locals())
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'user@system sekure pa55word'
@@ -228,7 +227,7 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch):
         def get_password(system, user):
             return
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     pw = utils.get_password('system', 'user', None, {})
     assert pw == 'entered pw'
@@ -265,7 +264,7 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
                 raise RuntimeError("unexpected username")
             return cred.password
 
-    monkeypatch.setitem(sys.modules, 'keyring', MockKeyring)
+    monkeypatch.setattr(utils, 'keyring', MockKeyring)
 
     user = utils.get_username('system', None, {})
     assert user == 'real_user'
@@ -274,21 +273,12 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
 
 
 @pytest.fixture
-def keyring_missing(monkeypatch):
-    """
-    Simulate that 'import keyring' raises an ImportError
-    """
-    monkeypatch.delitem(sys.modules, 'keyring', raising=False)
-
-
-@pytest.fixture
 def keyring_missing_get_credentials(monkeypatch):
     """
-    Simulate older versions of keyring that do not have the
-    'get_credentials' API.
+    Simulate keyring prior to 15.2 that does not have the
+    'get_credential' API.
     """
-    monkeypatch.delattr('keyring.backends.KeyringBackend',
-                        'get_credential', raising=False)
+    monkeypatch.delattr(utils.keyring, 'get_credential')
 
 
 @pytest.fixture
@@ -306,11 +296,6 @@ def test_get_username_keyring_missing_get_credentials_prompts(
     assert utils.get_username('system', None, {}) == 'entered user'
 
 
-def test_get_password_keyring_missing_prompts(
-        entered_password, keyring_missing):
-    assert utils.get_password('system', 'user', None, {}) == 'entered pw'
-
-
 @pytest.fixture
 def keyring_no_backends(monkeypatch):
     """
@@ -322,7 +307,7 @@ def keyring_no_backends(monkeypatch):
         @staticmethod
         def get_password(system, username):
             raise RuntimeError("fail!")
-    monkeypatch.setitem(sys.modules, 'keyring', FailKeyring())
+    monkeypatch.setattr(utils, 'keyring', FailKeyring())
 
 
 @pytest.fixture
@@ -330,13 +315,13 @@ def keyring_no_backends_get_credential(monkeypatch):
     """
     Simulate that keyring has no available backends. When keyring
     has no backends for the system, the backend will be a
-    fail.Keyring, which raises RuntimeError on get_password.
+    fail.Keyring, which raises RuntimeError on get_credential.
     """
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise RuntimeError("fail!")
-    monkeypatch.setitem(sys.modules, 'keyring', FailKeyring())
+    monkeypatch.setattr(utils, 'keyring', FailKeyring())
 
 
 def test_get_username_runtime_error_suppressed(
