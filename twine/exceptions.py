@@ -103,6 +103,12 @@ class InvalidDistribution(TwineException):
     pass
 
 
+class NonInteractive(TwineException):
+    """Raised in non-interactive mode when credentials could not be found."""
+
+    pass
+
+
 class InvalidPyPIUploadURL(TwineException):
     """Repository configuration tries to use PyPI with an incorrect URL.
 
