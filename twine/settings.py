@@ -316,7 +316,7 @@ class Settings:
             self.username,
             self.password,
             self.disable_progress_bar,
-            self.verify_ssl
+            self.verify_ssl,
         )
         repo.set_certificate_authority(self.cacert)
         repo.set_client_certificate(self.client_cert)
