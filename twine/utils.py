@@ -229,7 +229,7 @@ def password_prompt(prompt_text: str) -> str:
     return getpass.getpass(prompt_text)
 
 
-def get_password_from_keyring(system, username):
+def get_password_from_keyring(system: str, username: str) -> Optional[str]:
     try:
         return keyring.get_password(system, username)
     except Exception as exc:
@@ -256,11 +256,15 @@ def password_from_keyring_or_prompt(
     )
 
 
-def raises_noninteractive_exc(message):
+def raises_noninteractive_exc(message: str) -> None:
     raise exceptions.NonInteractive(message)
 
 
-def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
+def generate_prompt_func_from(
+    prompt_func: Callable,
+    prompt_type: str,
+    non_interactive: bool = False
+) -> Callable:
     if non_interactive:
         error_message = "Credential not found for {}.".format(prompt_type)
         return functools.partial(
