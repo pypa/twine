@@ -13,17 +13,14 @@
 # limitations under the License.
 from setuptools import setup
 
-import twine
-
 
 setup(
-    name=twine.__title__,
-    version=twine.__version__,
+    name="twine",
+    version="2.0.0",
 
-    description=twine.__summary__,
+    description="Collection of utilities for publishing packages on PyPI",
     long_description=open("README.rst").read(),
-    license=twine.__license__,
-    url=twine.__uri__,
+    url="https://twine.readthedocs.io/",
     project_urls={
         'Packaging tutorial': 'https://packaging.python.org/tutorials/distributing-packages/',
         'Travis CI': 'https://travis-ci.org/pypa/twine',
@@ -31,8 +28,8 @@ setup(
         'Twine source': 'https://github.com/pypa/twine/',
     },
 
-    author=twine.__author__,
-    author_email=twine.__email__,
+    author="Donald Stufft and individual contributors",
+    author_email="donald@stufft.io",
 
     classifiers=[
         "Intended Audience :: Developers",
@@ -73,6 +70,7 @@ setup(
         "requests-toolbelt >= 0.8.0, != 0.9.0",
         "setuptools >= 0.7.0",
         "tqdm >= 4.14",
+        'importlib_metadata; python_version<"3.8"',
         "keyring >= 15.1",
     ],
     setup_requires=[

@@ -47,6 +47,7 @@ class Settings:
         identity: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
+        non_interactive: bool = False,
         comment: Optional[str] = None,
         config_file: str = '~/.pypirc',
         skip_existing: bool = False,
@@ -76,6 +77,11 @@ class Settings:
         :param str password:
             The password used to authenticate to the repository (package
             index).
+        :param bool non_interactive:
+            Do not interactively prompt for username/password if the required
+            credentials are missing.
+
+            This defaults to ``False``.
         :param str comment:
             The comment to include with each distribution file.
         :param str config_file:
@@ -123,7 +129,7 @@ class Settings:
         )
         # The following two rely on the parsed repository config
         self._handle_certificates(cacert, client_cert)
-        self._handle_authentication(username, password)
+        self._handle_authentication(username, password, non_interactive)
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:
@@ -180,6 +186,14 @@ class Settings:
             help="The password to authenticate to the repository "
                  "(package index) with. (Can also be set via "
                  "%(env)s environment variable.)",
+        )
+        parser.add_argument(
+            "--non-interactive",
+            action="store_true",
+            default=False,
+            required=False,
+            help="Do not interactively prompt for username/password if the "
+                 "required credentials are missing."
         )
         parser.add_argument(
             "-c", "--comment",
@@ -268,18 +282,21 @@ class Settings:
     def _handle_authentication(
         self,
         username: Optional[str],
-        password: Optional[str]
+        password: Optional[str],
+        non_interactive: bool
     ) -> None:
         self.username = utils.get_username(
             cast(str, self.repository_config['repository']),
             username,
-            self.repository_config
+            self.repository_config,
+            non_interactive,
         )
         self.password = utils.get_password(
             cast(str, self.repository_config['repository']),
             self.username,
             password,
             self.repository_config,
+            non_interactive,
         )
 
     def _handle_certificates(

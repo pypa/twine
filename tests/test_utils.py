@@ -18,7 +18,7 @@ import textwrap
 import pytest
 import pretend
 
-from twine import utils, exceptions
+from twine import exceptions, utils
 
 import helpers
 
@@ -259,6 +259,16 @@ def test_empty_password_bypasses_prompt(monkeypatch):
     assert pw == ''
 
 
+def test_no_username_non_interactive_aborts():
+    with pytest.raises(exceptions.NonInteractive):
+        utils.get_username('system', None, {'username': None}, True)
+
+
+def test_no_password_non_interactive_aborts():
+    with pytest.raises(exceptions.NonInteractive):
+        utils.get_password('system', 'user', None, {'password': None}, True)
+
+
 def test_get_username_and_password_keyring_overrides_prompt(monkeypatch):
     import collections
     Credential = collections.namedtuple('Credential', 'username password')
@@ -308,6 +318,18 @@ def entered_password(monkeypatch):
 def test_get_username_keyring_missing_get_credentials_prompts(
         entered_username, keyring_missing_get_credentials):
     assert utils.get_username('system', None, {}) == 'entered user'
+
+
+def test_get_username_keyring_missing_non_interactive_aborts(
+        entered_username, keyring_missing_get_credentials):
+    with pytest.raises(exceptions.NonInteractive):
+        utils.get_username('system', None, {}, True)
+
+
+def test_get_password_keyring_missing_non_interactive_aborts(
+        entered_username, keyring_missing_get_credentials):
+    with pytest.raises(exceptions.NonInteractive):
+        utils.get_password('system', 'user', None, {}, True)
 
 
 @pytest.fixture

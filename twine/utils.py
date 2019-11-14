@@ -238,25 +238,54 @@ def get_password_from_keyring(system, username):
     return None
 
 
-def username_from_keyring_or_prompt(system: str) -> str:
+def username_from_keyring_or_prompt(system: str, prompt_func: Callable) -> str:
     return (
         get_username_from_keyring(system)
-        or input_func('Enter your username: ')
+        or prompt_func()
     )
 
 
-def password_from_keyring_or_prompt(system: str, username: str) -> str:
+def password_from_keyring_or_prompt(
+    system: str,
+    username: str,
+    prompt_func: Callable
+) -> str:
     return (
         get_password_from_keyring(system, username)
-        or password_prompt('Enter your password: ')
+        or prompt_func()
     )
+
+
+def raises_noninteractive_exc(message):
+    raise exceptions.NonInteractive(message)
+
+
+def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
+    if non_interactive:
+        error_message = "Credential not found for {}.".format(prompt_type)
+        return functools.partial(
+            raises_noninteractive_exc,
+            error_message,
+        )
+    else:
+        message = "Enter your {}: ".format(prompt_type)
+        return functools.partial(
+            prompt_func,
+            message,
+        )
 
 
 def get_username(
     system: str,
     cli_value: Optional[str],
     config: RepositoryConfig,
+    non_interactive: bool = False
 ) -> Optional[str]:
+    prompt_func = generate_prompt_func_from(
+        input_func,
+        'username',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -264,7 +293,8 @@ def get_username(
         prompt_strategy=functools.partial(
             username_from_keyring_or_prompt,
             system,
-        ),
+            prompt_func,
+        )
     )
 
 
@@ -302,8 +332,14 @@ def get_password(
     system: str,
     username: Optional[str],
     cli_value: Optional[str],
-    config: RepositoryConfig
+    config: RepositoryConfig,
+    non_interactive: bool = False
 ) -> Optional[str]:
+    prompt_func = generate_prompt_func_from(
+        password_prompt,
+        'password',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -312,5 +348,6 @@ def get_password(
             password_from_keyring_or_prompt,
             system,
             username,
+            prompt_func,
         ),
     )
