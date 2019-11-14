@@ -56,7 +56,7 @@ class Repository:
         username: str,
         password: str,
         disable_progress_bar: bool = False,
-        verify_ssl: bool = True
+        verify_ssl: bool = True,
     ) -> None:
         self.url = repository_url
         self.session = requests.session()
