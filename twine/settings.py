@@ -45,6 +45,7 @@ class Settings:
                  repository_name='pypi', repository_url=None,
                  verbose=False,
                  disable_progress_bar=False,
+                 verify_ssl=True,
                  **ignored_kwargs
                  ):
         """Initialize our settings instance.
@@ -103,11 +104,16 @@ class Settings:
             Disable the progress bar.
 
             This defaults to ``False``
+        :param bool verify_ssl:
+            Disable requests SSL certificates verification for HTTPS.
+
+            This defaults to ``True``
         """
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
+        self.verify_ssl = verify_ssl
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name, repository_url=repository_url,
@@ -224,6 +230,13 @@ class Settings:
             help="Show verbose output."
         )
         parser.add_argument(
+            "-v", "--verify",
+            default=True,
+            required=False,
+            action="store_false",
+            help="Upload with or without SSL verification."
+        )
+        parser.add_argument(
             "--disable-progress-bar",
             default=False,
             required=False,
@@ -302,7 +315,8 @@ class Settings:
             self.repository_config['repository'],
             self.username,
             self.password,
-            self.disable_progress_bar
+            self.disable_progress_bar,
+            self.verify_ssl
         )
         repo.set_certificate_authority(self.cacert)
         repo.set_client_certificate(self.client_cert)
