@@ -173,18 +173,6 @@ A checklist for creating, testing, and distributing a new version.
       with git, and test ``zest.releaser`` per directions in `this
       comment
       <https://github.com/pypa/twine/pull/314#issuecomment-370525038>`_.
-   #. Test ``devpi`` support:
-
-      .. code-block:: console
-
-        pip install devpi-client
-        devpi use https://m.devpi.net
-        devpi user -c {username} password={password}
-        devpi login {username} --password={password}
-        devpi index -c testpypi type=mirror mirror_url=https://test.pypi.org/simple/
-        devpi use {username}/testpypi
-        python setup.py sdist
-        twine upload --repository-url https://m.devpi.net/{username}/testpypi/ dist/{testpackage}.tar.gz
 
 #. Create a git tag with ``git tag -sam 'Release v{number}' {number}``.
 
@@ -196,12 +184,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. View your tag: ``git tag -v {number}``
 #. Push your tag: ``git push upstream {number}``.
-#. Delete old distributions: ``rm dist/*``.
-#. Create distributions with ``python setup.py sdist bdist_wheel``.
-#. Set your TestPyPI and canon PyPI credentials in your session with
-   ``keyring`` (docs forthcoming).
-#. Upload to Test PyPI: :command:`twine upload --repository-url
-   https://test.pypi.org/legacy/ --skip-existing dist/*`
+#. Upload to TestPyPI with ``TWINE_REPOSITORY=https://test.pypi.org/legacy/ tox -e release``
 #. Verify that everything looks good, downloads ok, etc. Make needed fixes.
 #. Merge the last PR before the new release:
 
@@ -213,12 +196,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Create a new git tag with ``git tag -sam 'Release v{number}' {number}``.
 #. View your tag: ``git tag -v {number}``
 #. Push your tag: ``git push upstream {number}``.
-#. Delete old distributions: ``rm dist/*``.
-#. Create distributions with ``python setup.py sdist bdist_wheel``.
-#. On a Monday or Tuesday, upload to canon PyPI: :command:`twine
-   upload --skip-existing dist/*`
-
-   .. note:: Will be replaced by ``tox -e release`` at some point.
+#. On a Monday or Tuesday, upload to PyPI with ``tox -e release``.
 #. Send announcement email to `pypa-dev mailing list`_ and celebrate.
 
 

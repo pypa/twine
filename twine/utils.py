@@ -15,7 +15,6 @@ import os
 import os.path
 import functools
 import getpass
-import sys
 import argparse
 import warnings
 import collections
@@ -23,11 +22,7 @@ import configparser
 from urllib.parse import urlparse, urlunparse
 
 import requests
-
-try:
-    import keyring  # noqa
-except ImportError:
-    pass
+import keyring
 
 from twine import exceptions
 
@@ -196,18 +191,13 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
 
 
 def get_username_from_keyring(system):
-    if 'keyring' not in sys.modules:
-        return
-
     try:
-        getter = sys.modules['keyring'].get_credential
-    except AttributeError:
-        return None
-
-    try:
-        creds = getter(system, None)
+        creds = keyring.get_credential(system, None)
         if creds:
             return creds.username
+    except AttributeError:
+        # To support keyring prior to 15.2
+        pass
     except Exception as exc:
         warnings.warn(str(exc))
 
@@ -217,30 +207,51 @@ def password_prompt(prompt_text):  # Always expects unicode for our own sanity
 
 
 def get_password_from_keyring(system, username):
-    if 'keyring' not in sys.modules:
-        return
-
     try:
-        return sys.modules['keyring'].get_password(system, username)
+        return keyring.get_password(system, username)
     except Exception as exc:
         warnings.warn(str(exc))
 
 
-def username_from_keyring_or_prompt(system):
+def username_from_keyring_or_prompt(system, prompt_func):
     return (
         get_username_from_keyring(system)
-        or input_func('Enter your username: ')
+        or prompt_func()
     )
 
 
-def password_from_keyring_or_prompt(system, username):
+def password_from_keyring_or_prompt(system, username, prompt_func):
     return (
         get_password_from_keyring(system, username)
-        or password_prompt('Enter your password: ')
+        or prompt_func()
     )
 
 
-def get_username(system, cli_value, config):
+def raises_noninteractive_exc(message):
+    raise exceptions.NonInteractive(message)
+
+
+def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
+    if non_interactive:
+        error_message = "Credential not found for {}.".format(prompt_type)
+        return functools.partial(
+            raises_noninteractive_exc,
+            error_message,
+        )
+    else:
+        message = "Enter your {}: ".format(prompt_type)
+        return functools.partial(
+            prompt_func,
+            message,
+        )
+
+
+def get_username(system, cli_value, config, non_interactive=False):
+    prompt_func = generate_prompt_func_from(
+        input_func,
+        'username',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -248,7 +259,8 @@ def get_username(system, cli_value, config):
         prompt_strategy=functools.partial(
             username_from_keyring_or_prompt,
             system,
-        ),
+            prompt_func,
+        )
     )
 
 
@@ -276,7 +288,12 @@ class EnvironmentDefault(argparse.Action):
         setattr(namespace, self.dest, values)
 
 
-def get_password(system, username, cli_value, config):
+def get_password(system, username, cli_value, config, non_interactive=False):
+    prompt_func = generate_prompt_func_from(
+        password_prompt,
+        'password',
+        non_interactive,
+    )
     return get_userpass_value(
         cli_value,
         config,
@@ -285,5 +302,6 @@ def get_password(system, username, cli_value, config):
             password_from_keyring_or_prompt,
             system,
             username,
+            prompt_func,
         ),
     )
