@@ -332,7 +332,7 @@ class Settings:
             cast(str, self.repository_config['repository']),
             self.username,
             self.password,
-            self.disable_progress_bar
+            self.disable_progress_bar,
         )
         repo.set_certificate_authority(self.cacert)
         repo.set_client_certificate(self.client_cert)

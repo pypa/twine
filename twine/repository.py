@@ -55,7 +55,7 @@ class Repository:
         repository_url: str,
         username: Optional[str],
         password: Optional[str],
-        disable_progress_bar: bool = False
+        disable_progress_bar: bool = False,
     ) -> None:
         self.url = repository_url
 
