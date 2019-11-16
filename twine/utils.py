@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Callable, DefaultDict, Dict, Optional
+
 import os
 import os.path
 import functools
@@ -26,12 +28,18 @@ from twine import exceptions
 # Shim for input to allow testing.
 input_func = input
 
-
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
+# TODO: In general, it seems to be assumed that the values retrieved from
+# instances of this type aren't None, except for username and password.
+# Type annotations would be cleaner if this were Dict[str, str], but that
+# requires reworking the username/password handling, probably starting with
+# get_userpass_value.
+RepositoryConfig = Dict[str, Optional[str]]
 
-def get_config(path="~/.pypirc"):
+
+def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     # even if the config file does not exist, set up the parser
     # variable to reduce the number of if/else statements
     parser = configparser.RawConfigParser()
@@ -41,7 +49,7 @@ def get_config(path="~/.pypirc"):
     index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
-    defaults = {"username": None, "password": None}
+    defaults: RepositoryConfig = {"username": None, "password": None}
 
     # Expand user strings in the path
     path = os.path.expanduser(path)
@@ -59,7 +67,8 @@ def get_config(path="~/.pypirc"):
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config = collections.defaultdict(lambda: defaults.copy())
+    config: DefaultDict[str, RepositoryConfig] = \
+        collections.defaultdict(lambda: defaults.copy())
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
@@ -80,7 +89,11 @@ def get_config(path="~/.pypirc"):
     return dict(config)
 
 
-def get_repository_from_config(config_file, repository, repository_url=None):
+def get_repository_from_config(
+    config_file: str,
+    repository: str,
+    repository_url: Optional[str] = None
+) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
     if repository_url and "://" in repository_url:
@@ -114,14 +127,14 @@ _HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
               "test.pypi.org"}
 
 
-def normalize_repository_url(url):
+def normalize_repository_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.netloc in _HOSTNAMES:
         return urlunparse(("https",) + parsed[1:])
     return urlunparse(parsed)
 
 
-def check_status_code(response, verbose):
+def check_status_code(response: requests.Response, verbose: bool) -> None:
     """Generate a helpful message based on the response from the repository.
 
     Raise a custom exception for recognized errors. Otherwise, print the
@@ -156,7 +169,12 @@ def check_status_code(response, verbose):
         raise err
 
 
-def get_userpass_value(cli_value, config, key, prompt_strategy=None):
+def get_userpass_value(
+    cli_value: Optional[str],
+    config: RepositoryConfig,
+    key: str,
+    prompt_strategy: Optional[Callable] = None
+) -> Optional[str]:
     """Gets the username / password from config.
 
     Uses the following rules:
@@ -200,7 +218,13 @@ get_clientcert = functools.partial(
 class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
-    def __init__(self, env, required=True, default=None, **kwargs):
+    def __init__(
+        self,
+        env: str,
+        required: bool = True,
+        default: Optional[str] = None,
+        **kwargs
+    ) -> None:
         default = os.environ.get(env, default)
         self.env = env
         if default:

@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Tuple
+from typing import Dict, List, Optional, Tuple
 import sys
 
 from tqdm import tqdm
@@ -53,16 +53,25 @@ class Repository:
     def __init__(
         self,
         repository_url: str,
-        username: str,
-        password: str,
+        username: Optional[str],
+        password: Optional[str],
         disable_progress_bar: bool = False,
     ) -> None:
         self.url = repository_url
+
         self.session = requests.session()
-        self.session.auth = (username, password)
+        # requests.Session.auth should be Union[None, Tuple[str, str], ...]
+        # But username or password could be None
+        # See TODO for utils.RepositoryConfig
+        self.session.auth = (
+            (username or '', password or '')
+            if username or password
+            else None
+        )
         self.session.headers['User-Agent'] = self._make_user_agent_string()
         for scheme in ('http://', 'https://'):
             self.session.mount(scheme, self._make_adapter_with_retries())
+
         self._releases_json_data: Dict[str, Dict] = {}
         self.disable_progress_bar = disable_progress_bar
 
@@ -103,11 +112,11 @@ class Repository:
                     data_to_send.append((key, item))
         return data_to_send
 
-    def set_certificate_authority(self, cacert: str) -> None:
+    def set_certificate_authority(self, cacert: Optional[str]) -> None:
         if cacert:
             self.session.verify = cacert
 
-    def set_client_certificate(self, clientcert: Tuple[str, str]) -> None:
+    def set_client_certificate(self, clientcert: Optional[str]) -> None:
         if clientcert:
             self.session.cert = clientcert
 
