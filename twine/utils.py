@@ -14,15 +14,12 @@
 import os
 import os.path
 import functools
-import getpass
 import argparse
-import warnings
 import collections
 import configparser
 from urllib.parse import urlparse, urlunparse
 
 import requests
-import keyring
 
 from twine import exceptions
 
@@ -190,80 +187,6 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
         return None
 
 
-def get_username_from_keyring(system):
-    try:
-        creds = keyring.get_credential(system, None)
-        if creds:
-            return creds.username
-    except AttributeError:
-        # To support keyring prior to 15.2
-        pass
-    except Exception as exc:
-        warnings.warn(str(exc))
-
-
-def password_prompt(prompt_text):  # Always expects unicode for our own sanity
-    return getpass.getpass(prompt_text)
-
-
-def get_password_from_keyring(system, username):
-    try:
-        return keyring.get_password(system, username)
-    except Exception as exc:
-        warnings.warn(str(exc))
-
-
-def username_from_keyring_or_prompt(system, prompt_func):
-    return (
-        get_username_from_keyring(system)
-        or prompt_func()
-    )
-
-
-def password_from_keyring_or_prompt(system, username, prompt_func):
-    return (
-        get_password_from_keyring(system, username)
-        or prompt_func()
-    )
-
-
-def raises_noninteractive_exc(message):
-    raise exceptions.NonInteractive(message)
-
-
-def generate_prompt_func_from(prompt_func, prompt_type, non_interactive):
-    if non_interactive:
-        error_message = "Credential not found for {}.".format(prompt_type)
-        return functools.partial(
-            raises_noninteractive_exc,
-            error_message,
-        )
-    else:
-        message = "Enter your {}: ".format(prompt_type)
-        return functools.partial(
-            prompt_func,
-            message,
-        )
-
-
-def get_username(system, cli_value, config, non_interactive=False):
-    prompt_func = generate_prompt_func_from(
-        input_func,
-        'username',
-        non_interactive,
-    )
-    return get_userpass_value(
-        cli_value,
-        config,
-        key='username',
-        prompt_strategy=functools.partial(
-            username_from_keyring_or_prompt,
-            system,
-            prompt_func,
-        )
-    )
-
-
 get_cacert = functools.partial(
     get_userpass_value,
     key='ca_cert',
@@ -286,22 +209,3 @@ class EnvironmentDefault(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
-
-
-def get_password(system, username, cli_value, config, non_interactive=False):
-    prompt_func = generate_prompt_func_from(
-        password_prompt,
-        'password',
-        non_interactive,
-    )
-    return get_userpass_value(
-        cli_value,
-        config,
-        key='password',
-        prompt_strategy=functools.partial(
-            password_from_keyring_or_prompt,
-            system,
-            username,
-            prompt_func,
-        ),
-    )

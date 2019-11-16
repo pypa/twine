@@ -15,6 +15,7 @@
 from twine import exceptions
 from twine import repository
 from twine import utils
+from twine import auth
 
 
 class Settings:
@@ -115,9 +116,22 @@ class Settings:
         self._handle_package_signing(
             sign=sign, sign_with=sign_with, identity=identity,
         )
-        # The following two rely on the parsed repository config
+        # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
-        self._handle_authentication(username, password, non_interactive)
+        auth_class = auth.Private if non_interactive else auth.Resolver
+        self.auth = auth_class(self, username, password)
+
+    @property
+    def username(self):
+        return self.auth.username
+
+    @property
+    def password(self):
+        return self.auth.password
+
+    @property
+    def repository(self):
+        return self.repository_config['repository']
 
     @staticmethod
     def register_argparse_arguments(parser):
@@ -256,21 +270,6 @@ class Settings:
         )
         self.repository_config['repository'] = utils.normalize_repository_url(
             self.repository_config['repository'],
-        )
-
-    def _handle_authentication(self, username, password, non_interactive):
-        self.username = utils.get_username(
-            self.repository_config['repository'],
-            username,
-            self.repository_config,
-            non_interactive,
-        )
-        self.password = utils.get_password(
-            self.repository_config['repository'],
-            self.username,
-            password,
-            self.repository_config,
-            non_interactive,
         )
 
     def _handle_certificates(self, cacert, client_cert):
