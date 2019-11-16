@@ -142,7 +142,7 @@ class Settings:
         return self.auth.password
 
     @property
-    def repository(self):
+    def system(self):
         return self.repository_config['repository']
 
     @staticmethod

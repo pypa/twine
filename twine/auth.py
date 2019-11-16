@@ -36,7 +36,7 @@ class Resolver:
 
     @property
     def system(self):
-        return self.settings.repository
+        return self.settings.system
 
     @property
     def config(self):
