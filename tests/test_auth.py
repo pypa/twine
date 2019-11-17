@@ -15,7 +15,7 @@ cred = types.CredentialInput.new
 def settings():
     return munch.Munch(
         repository_config={},
-        repository='system',
+        system='system',
     )
 
 
