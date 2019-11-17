@@ -55,3 +55,29 @@ def test_identity_requires_sign():
     """Verify that if a user passes identity, we require sign=True."""
     with pytest.raises(exceptions.InvalidSigningConfiguration):
         settings.Settings(sign=False, identity='fakeid')
+
+
+def test_password_not_required_if_client_cert(entered_password):
+    """Verify that if client_cert is provided then a password is not."""
+    test_client_cert = '/random/path'
+    settings_obj = settings.Settings(
+        username='fakeuser', client_cert=test_client_cert)
+    assert not settings_obj.password
+    assert settings_obj.client_cert == test_client_cert
+
+
+@pytest.mark.parametrize('client_cert', [None, ""])
+def test_password_is_required_if_no_client_cert(client_cert, entered_password):
+    """Verify that if client_cert is not provided then a password must be."""
+    settings_obj = settings.Settings(
+        username='fakeuser', client_cert=client_cert)
+    assert settings_obj.password == 'entered pw'
+
+
+def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
+    """Verify that if both password and client_cert are given they are set"""
+    client_cert = '/random/path'
+    settings_obj = settings.Settings(
+        username='fakeuser', password='anything', client_cert=client_cert)
+    assert not settings_obj.password
+    assert settings_obj.client_cert == client_cert

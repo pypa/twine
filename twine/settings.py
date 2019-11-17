@@ -141,7 +141,7 @@ class Settings:
 
     @property
     def password(self):
-        return self.auth.password
+        return None if self.client_cert else self.auth.password
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:

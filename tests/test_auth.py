@@ -103,11 +103,6 @@ def entered_username(monkeypatch):
         auth, 'input', lambda prompt: 'entered user', raising=False)
 
 
-@pytest.fixture
-def entered_password(monkeypatch):
-    monkeypatch.setattr(auth.getpass, 'getpass', lambda prompt: 'entered pw')
-
-
 def test_get_username_keyring_missing_get_credentials_prompts(
         entered_username, keyring_missing_get_credentials, config):
     assert auth.Resolver(config, cred()).username == 'entered user'

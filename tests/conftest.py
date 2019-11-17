@@ -4,6 +4,7 @@ import secrets
 import subprocess
 import pathlib
 import functools
+import getpass
 
 import pytest
 import portend
@@ -116,3 +117,8 @@ dist_names = [
 @pytest.fixture(params=dist_names)
 def uploadable_dist(request):
     return pathlib.Path(__file__).parent / 'fixtures' / request.param
+
+
+@pytest.fixture
+def entered_password(monkeypatch):
+    monkeypatch.setattr(getpass, 'getpass', lambda prompt: 'entered pw')
