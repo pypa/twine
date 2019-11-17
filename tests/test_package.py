@@ -58,9 +58,7 @@ def test_sign_file_with_identity(monkeypatch):
 
 
 def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
-    replaced_check_call = pretend.raiser(
-        package.FileNotFoundError('not found')
-    )
+    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
     monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
     gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
 
@@ -71,9 +69,7 @@ def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
 
 
 def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
-    replaced_check_call = pretend.raiser(
-        package.FileNotFoundError('not found')
-    )
+    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
     monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
     gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
 
@@ -87,7 +83,7 @@ def test_run_gpg_falls_back_to_gpg2(monkeypatch):
 
     def check_call(arg_list):
         if arg_list[0] == 'gpg':
-            raise package.FileNotFoundError('gpg not found')
+            raise FileNotFoundError('gpg not found')
 
     replaced_check_call = pretend.call_recorder(check_call)
     monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)

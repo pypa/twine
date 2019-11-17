@@ -14,24 +14,13 @@
 # limitations under the License.
 
 from __future__ import unicode_literals
-import getpass
 import os.path
 import textwrap
-import pretend
-import contextlib
 
 from twine import exceptions
 from twine import settings
 
 import pytest
-
-
-@contextlib.contextmanager
-def _stubbing_get_pass(monkeypatch, pwd):
-    getpass_recorder = pretend.call_recorder(lambda *a, **kw: pwd)
-    with monkeypatch.context() as m:
-        m.setattr(getpass, 'getpass', getpass_recorder)
-        yield getpass_recorder
 
 
 def test_settings_takes_no_positional_arguments():
@@ -70,36 +59,29 @@ def test_identity_requires_sign():
         settings.Settings(sign=False, identity='fakeid')
 
 
-def test_password_not_required_if_client_cert(monkeypatch):
+def test_password_not_required_if_client_cert(monkeypatch, entered_password):
     """Verify that if client_cert is provided then a password is not."""
-    pwd = 'RandomPassword'
     test_client_cert = '/random/path'
-    with _stubbing_get_pass(monkeypatch, pwd) as getpass_recorder:
-        settings_obj = settings.Settings(
-            username='fakeuser', client_cert=test_client_cert)
+    settings_obj = settings.Settings(
+        username='fakeuser', client_cert=test_client_cert)
     assert not settings_obj.password
-    assert len(getpass_recorder.calls) == 0
     assert settings_obj.client_cert == test_client_cert
 
 
 @pytest.mark.parametrize('client_cert', [None, ""])
-def test_password_is_required_if_no_client_cert(monkeypatch, client_cert):
+def test_password_is_required_if_no_client_cert(
+        monkeypatch, client_cert, entered_password):
     """Verify that if client_cert is not provided then a password must be."""
-    pwd = 'RandomPassword'
-    with _stubbing_get_pass(monkeypatch, pwd) as getpass_recorder:
-        settings_obj = settings.Settings(
-            username='fakeuser', client_cert=client_cert)
-    assert settings_obj.password == pwd
-    assert len(getpass_recorder.calls) > 0
+    settings_obj = settings.Settings(
+        username='fakeuser', client_cert=client_cert)
+    assert settings_obj.password == 'entered pw'
 
 
-def test_client_cert_is_set_and_password_not_if_both_given(monkeypatch):
+def test_client_cert_is_set_and_password_not_if_both_given(
+        monkeypatch, entered_password):
     """Verify that if both password and client_cert are given they are set"""
-    pwd = 'RandomPassword'
     client_cert = '/random/path'
-    with _stubbing_get_pass(monkeypatch, pwd) as getpass_recorder:
-        setting_obj = settings.Settings(
-            username='fakeuser', password=pwd, client_cert=client_cert)
-    assert not setting_obj.password
-    assert setting_obj.client_cert == client_cert
-    assert len(getpass_recorder.calls) == 0
+    settings_obj = settings.Settings(
+        username='fakeuser', password='anything', client_cert=client_cert)
+    assert not settings_obj.password
+    assert settings_obj.client_cert == client_cert

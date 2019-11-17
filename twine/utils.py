@@ -11,35 +11,35 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import Callable, DefaultDict, Dict, Optional
+
 import os
 import os.path
 import functools
-import getpass
-import sys
 import argparse
-import warnings
 import collections
 import configparser
 from urllib.parse import urlparse, urlunparse
 
-from requests.exceptions import HTTPError
-
-try:
-    import keyring  # noqa
-except ImportError:
-    pass
+import requests
 
 from twine import exceptions
 
 # Shim for input to allow testing.
 input_func = input
 
-
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
+# TODO: In general, it seems to be assumed that the values retrieved from
+# instances of this type aren't None, except for username and password.
+# Type annotations would be cleaner if this were Dict[str, str], but that
+# requires reworking the username/password handling, probably starting with
+# get_userpass_value.
+RepositoryConfig = Dict[str, Optional[str]]
 
-def get_config(path="~/.pypirc"):
+
+def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     # even if the config file does not exist, set up the parser
     # variable to reduce the number of if/else statements
     parser = configparser.RawConfigParser()
@@ -49,7 +49,7 @@ def get_config(path="~/.pypirc"):
     index_servers = ["pypi", "testpypi"]
 
     # default configuration for each repository
-    defaults = {"username": None, "password": None}
+    defaults: RepositoryConfig = {"username": None, "password": None}
 
     # Expand user strings in the path
     path = os.path.expanduser(path)
@@ -67,7 +67,8 @@ def get_config(path="~/.pypirc"):
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config = collections.defaultdict(lambda: defaults.copy())
+    config: DefaultDict[str, RepositoryConfig] = \
+        collections.defaultdict(lambda: defaults.copy())
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
@@ -88,7 +89,11 @@ def get_config(path="~/.pypirc"):
     return dict(config)
 
 
-def get_repository_from_config(config_file, repository, repository_url=None):
+def get_repository_from_config(
+    config_file: str,
+    repository: str,
+    repository_url: Optional[str] = None
+) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
     if repository_url and "://" in repository_url:
@@ -122,32 +127,39 @@ _HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
               "test.pypi.org"}
 
 
-def normalize_repository_url(url):
+def normalize_repository_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.netloc in _HOSTNAMES:
         return urlunparse(("https",) + parsed[1:])
     return urlunparse(parsed)
 
 
-def check_status_code(response, verbose):
+def check_status_code(response: requests.Response, verbose: bool) -> None:
+    """Generate a helpful message based on the response from the repository.
+
+    Raise a custom exception for recognized errors. Otherwise, print the
+    response content (based on the verbose option) before re-raising the
+    HTTPError.
     """
-    Shouldn't happen, thanks to the UploadToDeprecatedPyPIDetected
-    exception, but this is in case that breaks and it does.
-    """
-    if (response.status_code == 410 and
-            response.url.startswith(("https://pypi.python.org",
-                                     "https://testpypi.python.org"))):
-        print("It appears you're uploading to pypi.python.org (or "
-              "testpypi.python.org). You've received a 410 error response. "
-              "Uploading to those sites is deprecated. The new sites are "
-              "pypi.org and test.pypi.org. Try using "
-              "https://upload.pypi.org/legacy/ "
-              "(or https://test.pypi.org/legacy/) to upload your packages "
-              "instead. These are the default URLs for Twine now. More at "
-              "https://packaging.python.org/guides/migrating-to-pypi-org/ ")
+    if response.status_code == 410 and "pypi.python.org" in response.url:
+        raise exceptions.UploadToDeprecatedPyPIDetected(
+            f"It appears you're uploading to pypi.python.org (or "
+            f"testpypi.python.org). You've received a 410 error response. "
+            f"Uploading to those sites is deprecated. The new sites are "
+            f"pypi.org and test.pypi.org. Try using {DEFAULT_REPOSITORY} (or "
+            f"{TEST_REPOSITORY}) to upload your packages instead. These are "
+            f"the default URLs for Twine now. More at "
+            f"https://packaging.python.org/guides/migrating-to-pypi-org/.")
+    elif response.status_code == 405 and "pypi.org" in response.url:
+        raise exceptions.InvalidPyPIUploadURL(
+            f"It appears you're trying to upload to pypi.org but have an "
+            f"invalid URL. You probably want one of these two URLs: "
+            f"{DEFAULT_REPOSITORY} or {TEST_REPOSITORY}. Check your "
+            f"--repository-url value.")
+
     try:
         response.raise_for_status()
-    except HTTPError as err:
+    except requests.HTTPError as err:
         if response.text:
             if verbose:
                 print('Content received from server:\n{}'.format(
@@ -157,7 +169,12 @@ def check_status_code(response, verbose):
         raise err
 
 
-def get_userpass_value(cli_value, config, key, prompt_strategy=None):
+def get_userpass_value(
+    cli_value: Optional[str],
+    config: RepositoryConfig,
+    key: str,
+    prompt_strategy: Optional[Callable] = None
+) -> Optional[str]:
     """Gets the username / password from config.
 
     Uses the following rules:
@@ -188,63 +205,6 @@ def get_userpass_value(cli_value, config, key, prompt_strategy=None):
         return None
 
 
-def get_username_from_keyring(system):
-    if 'keyring' not in sys.modules:
-        return
-
-    try:
-        getter = sys.modules['keyring'].get_credential
-    except AttributeError:
-        return None
-
-    try:
-        creds = getter(system, None)
-        if creds:
-            return creds.username
-    except Exception as exc:
-        warnings.warn(str(exc))
-
-
-def password_prompt(prompt_text):  # Always expects unicode for our own sanity
-    return getpass.getpass(prompt_text)
-
-
-def get_password_from_keyring(system, username):
-    if 'keyring' not in sys.modules:
-        return
-
-    try:
-        return sys.modules['keyring'].get_password(system, username)
-    except Exception as exc:
-        warnings.warn(str(exc))
-
-
-def username_from_keyring_or_prompt(system):
-    return (
-        get_username_from_keyring(system)
-        or input_func('Enter your username: ')
-    )
-
-
-def password_from_keyring_or_prompt(system, username):
-    return (
-        get_password_from_keyring(system, username)
-        or password_prompt('Enter your password: ')
-    )
-
-
-def get_username(system, cli_value, config):
-    return get_userpass_value(
-        cli_value,
-        config,
-        key='username',
-        prompt_strategy=functools.partial(
-            username_from_keyring_or_prompt,
-            system,
-        ),
-    )
-
-
 get_cacert = functools.partial(
     get_userpass_value,
     key='ca_cert',
@@ -258,7 +218,13 @@ get_clientcert = functools.partial(
 class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
-    def __init__(self, env, required=True, default=None, **kwargs):
+    def __init__(
+        self,
+        env: str,
+        required: bool = True,
+        default: Optional[str] = None,
+        **kwargs
+    ) -> None:
         default = os.environ.get(env, default)
         self.env = env
         if default:
@@ -267,44 +233,3 @@ class EnvironmentDefault(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
-
-
-def get_password(system, username, cli_value, config):
-    return get_userpass_value(
-        cli_value,
-        config,
-        key='password',
-        prompt_strategy=functools.partial(
-            password_from_keyring_or_prompt,
-            system,
-            username,
-        ),
-    )
-
-
-def no_positional(allow_self=False):
-    """A decorator that doesn't allow for positional arguments.
-
-    :param bool allow_self:
-        Whether to allow ``self`` as a positional argument.
-    """
-    def reject_positional_args(function):
-        @functools.wraps(function)
-        def wrapper(*args, **kwargs):
-            allowed_positional_args = 0
-            if allow_self:
-                allowed_positional_args = 1
-            received_positional_args = len(args)
-            if received_positional_args > allowed_positional_args:
-                function_name = function.__name__
-                verb = 'were' if received_positional_args > 1 else 'was'
-                raise TypeError(('{}() takes {} positional arguments but {} '
-                                 '{} given').format(
-                                     function_name,
-                                     allowed_positional_args,
-                                     received_positional_args,
-                                     verb,
-                                ))
-            return function(*args, **kwargs)
-        return wrapper
-    return reject_positional_args
