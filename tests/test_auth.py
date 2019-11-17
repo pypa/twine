@@ -1,25 +1,21 @@
 import pytest
-import munch
 
 from twine import (
     auth,
     exceptions,
-    types,
+    utils,
 )
 
 
-cred = types.CredentialInput.new
+cred = auth.CredentialInput.new
 
 
 @pytest.fixture
-def settings():
-    return munch.Munch(
-        repository_config={},
-        system='system',
-    )
+def config() -> utils.RepositoryConfig:
+    return dict(repository='system')
 
 
-def test_get_password_keyring_overrides_prompt(monkeypatch, settings):
+def test_get_password_keyring_overrides_prompt(monkeypatch, config):
     class MockKeyring:
         @staticmethod
         def get_password(system, user):
@@ -27,12 +23,12 @@ def test_get_password_keyring_overrides_prompt(monkeypatch, settings):
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    pw = auth.Resolver(settings, cred('user')).password
+    pw = auth.Resolver(config, cred('user')).password
     assert pw == 'user@system sekure pa55word'
 
 
 def test_get_password_keyring_defers_to_prompt(
-        monkeypatch, entered_password, settings):
+        monkeypatch, entered_password, config):
     class MockKeyring:
         @staticmethod
         def get_password(system, user):
@@ -40,35 +36,35 @@ def test_get_password_keyring_defers_to_prompt(
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    pw = auth.Resolver(settings, cred('user')).password
+    pw = auth.Resolver(config, cred('user')).password
     assert pw == 'entered pw'
 
 
-def test_no_password_defers_to_prompt(monkeypatch, entered_password, settings):
-    settings.repository_config.update(password=None)
-    pw = auth.Resolver(settings, cred('user')).password
+def test_no_password_defers_to_prompt(monkeypatch, entered_password, config):
+    config.update(password=None)
+    pw = auth.Resolver(config, cred('user')).password
     assert pw == 'entered pw'
 
 
 def test_empty_password_bypasses_prompt(
-        monkeypatch, entered_password, settings):
-    settings.repository_config.update(password='')
-    pw = auth.Resolver(settings, cred('user')).password
+        monkeypatch, entered_password, config):
+    config.update(password='')
+    pw = auth.Resolver(config, cred('user')).password
     assert pw == ''
 
 
-def test_no_username_non_interactive_aborts(settings):
+def test_no_username_non_interactive_aborts(config):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, cred('user')).password
+        auth.Private(config, cred('user')).password
 
 
-def test_no_password_non_interactive_aborts(settings):
+def test_no_password_non_interactive_aborts(config):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, cred('user')).password
+        auth.Private(config, cred('user')).password
 
 
 def test_get_username_and_password_keyring_overrides_prompt(
-        monkeypatch, settings):
+        monkeypatch, config):
 
     class MockKeyring:
         @staticmethod
@@ -87,7 +83,7 @@ def test_get_username_and_password_keyring_overrides_prompt(
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    res = auth.Resolver(settings, cred())
+    res = auth.Resolver(config, cred())
     assert res.username == 'real_user'
     assert res.password == 'real_user@system sekure pa55word'
 
@@ -113,20 +109,20 @@ def entered_password(monkeypatch):
 
 
 def test_get_username_keyring_missing_get_credentials_prompts(
-        entered_username, keyring_missing_get_credentials, settings):
-    assert auth.Resolver(settings, cred()).username == 'entered user'
+        entered_username, keyring_missing_get_credentials, config):
+    assert auth.Resolver(config, cred()).username == 'entered user'
 
 
 def test_get_username_keyring_missing_non_interactive_aborts(
-        entered_username, keyring_missing_get_credentials, settings):
+        entered_username, keyring_missing_get_credentials, config):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, cred()).username
+        auth.Private(config, cred()).username
 
 
 def test_get_password_keyring_missing_non_interactive_aborts(
-        entered_username, keyring_missing_get_credentials, settings):
+        entered_username, keyring_missing_get_credentials, config):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, cred('user')).password
+        auth.Private(config, cred('user')).password
 
 
 @pytest.fixture
@@ -159,16 +155,16 @@ def keyring_no_backends_get_credential(monkeypatch):
 
 def test_get_username_runtime_error_suppressed(
         entered_username, keyring_no_backends_get_credential, recwarn,
-        settings):
-    assert auth.Resolver(settings, cred()).username == 'entered user'
+        config):
+    assert auth.Resolver(config, cred()).username == 'entered user'
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert 'fail!' in str(warning)
 
 
 def test_get_password_runtime_error_suppressed(
-        entered_password, keyring_no_backends, recwarn, settings):
-    assert auth.Resolver(settings, cred('user')).password == 'entered pw'
+        entered_password, keyring_no_backends, recwarn, config):
+    assert auth.Resolver(config, cred('user')).password == 'entered pw'
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert 'fail!' in str(warning)

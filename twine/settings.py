@@ -20,7 +20,6 @@ from twine import exceptions
 from twine import repository
 from twine import utils
 from twine import auth
-from twine import types
 
 
 class Settings:
@@ -131,8 +130,10 @@ class Settings:
         )
         # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
-        creds = types.CredentialInput(username, password)
-        self.auth = auth.Resolver.choose(not non_interactive)(self, creds)
+        self.auth = auth.Resolver.choose(not non_interactive)(
+            self.repository_config,
+            auth.CredentialInput(username, password),
+        )
 
     @property
     def username(self):
@@ -141,10 +142,6 @@ class Settings:
     @property
     def password(self):
         return self.auth.password
-
-    @property
-    def system(self):
-        return self.repository_config['repository']
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:

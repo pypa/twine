@@ -1,17 +1,26 @@
 import warnings
 import getpass
 import functools
+import typing
 
 import keyring
 
 from . import utils
 from . import exceptions
-from .types import CredentialInput
+
+
+class CredentialInput(typing.NamedTuple):
+    username: typing.Optional[str]
+    password: typing.Optional[str]
+
+    @classmethod
+    def new(cls, username=None, password=None):
+        return cls(username, password)
 
 
 class Resolver:
-    def __init__(self, settings, input: CredentialInput):
-        self.settings = settings
+    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput):
+        self.config = config
         self.input = input
 
     @classmethod
@@ -40,11 +49,7 @@ class Resolver:
 
     @property
     def system(self):
-        return self.settings.system
-
-    @property
-    def config(self):
-        return self.settings.repository_config
+        return self.config['repository']
 
     def get_username_from_keyring(self):
         try:
