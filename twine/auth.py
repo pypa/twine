@@ -14,7 +14,7 @@ class Resolver:
         self.settings = settings
         self.input = munch.Munch(username=username, password=password)
 
-    @property
+    @property  # type: ignore  # https://github.com/python/mypy/issues/1362
     @functools.lru_cache()
     def username(self):
         return utils.get_userpass_value(
@@ -24,7 +24,7 @@ class Resolver:
             prompt_strategy=self.username_from_keyring_or_prompt,
         )
 
-    @property
+    @property  # type: ignore  # https://github.com/python/mypy/issues/1362
     @functools.lru_cache()
     def password(self):
         return utils.get_userpass_value(
