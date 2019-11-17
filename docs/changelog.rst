@@ -3,6 +3,8 @@
 =========
 Changelog
 =========
+* :feature:`336`: When a client certificate is indicated, all password
+  processing is disabled.
 * :feature:`524`: Twine now unconditionally requires the keyring library
   and no longer supports uninstalling ``keyring`` as a means to disable
   that functionality. Instead, use ``keyring --disable`` keyring functionality
