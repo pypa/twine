@@ -1,7 +1,14 @@
 import pytest
 import munch
 
-from twine import auth, exceptions
+from twine import (
+    auth,
+    exceptions,
+    types,
+)
+
+
+cred = types.CredentialInput.new
 
 
 @pytest.fixture
@@ -20,7 +27,7 @@ def test_get_password_keyring_overrides_prompt(monkeypatch, settings):
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    pw = auth.Resolver(settings, 'user').password
+    pw = auth.Resolver(settings, cred('user')).password
     assert pw == 'user@system sekure pa55word'
 
 
@@ -33,42 +40,40 @@ def test_get_password_keyring_defers_to_prompt(
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    pw = auth.Resolver(settings, 'user').password
+    pw = auth.Resolver(settings, cred('user')).password
     assert pw == 'entered pw'
 
 
 def test_no_password_defers_to_prompt(monkeypatch, entered_password, settings):
     settings.repository_config.update(password=None)
-    pw = auth.Resolver(settings, 'user').password
+    pw = auth.Resolver(settings, cred('user')).password
     assert pw == 'entered pw'
 
 
 def test_empty_password_bypasses_prompt(
         monkeypatch, entered_password, settings):
     settings.repository_config.update(password='')
-    pw = auth.Resolver(settings, 'user').password
+    pw = auth.Resolver(settings, cred('user')).password
     assert pw == ''
 
 
 def test_no_username_non_interactive_aborts(settings):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, 'user').password
+        auth.Private(settings, cred('user')).password
 
 
 def test_no_password_non_interactive_aborts(settings):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, 'user').password
+        auth.Private(settings, cred('user')).password
 
 
 def test_get_username_and_password_keyring_overrides_prompt(
         monkeypatch, settings):
-    import collections
-    Credential = collections.namedtuple('Credential', 'username password')
 
     class MockKeyring:
         @staticmethod
         def get_credential(system, user):
-            return Credential(
+            return cred(
                 'real_user',
                 'real_user@{system} sekure pa55word'.format(**locals())
             )
@@ -82,7 +87,7 @@ def test_get_username_and_password_keyring_overrides_prompt(
 
     monkeypatch.setattr(auth, 'keyring', MockKeyring)
 
-    res = auth.Resolver(settings)
+    res = auth.Resolver(settings, cred())
     assert res.username == 'real_user'
     assert res.password == 'real_user@system sekure pa55word'
 
@@ -109,19 +114,19 @@ def entered_password(monkeypatch):
 
 def test_get_username_keyring_missing_get_credentials_prompts(
         entered_username, keyring_missing_get_credentials, settings):
-    assert auth.Resolver(settings).username == 'entered user'
+    assert auth.Resolver(settings, cred()).username == 'entered user'
 
 
 def test_get_username_keyring_missing_non_interactive_aborts(
         entered_username, keyring_missing_get_credentials, settings):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings).username
+        auth.Private(settings, cred()).username
 
 
 def test_get_password_keyring_missing_non_interactive_aborts(
         entered_username, keyring_missing_get_credentials, settings):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(settings, 'user').password
+        auth.Private(settings, cred('user')).password
 
 
 @pytest.fixture
@@ -155,7 +160,7 @@ def keyring_no_backends_get_credential(monkeypatch):
 def test_get_username_runtime_error_suppressed(
         entered_username, keyring_no_backends_get_credential, recwarn,
         settings):
-    assert auth.Resolver(settings).username == 'entered user'
+    assert auth.Resolver(settings, cred()).username == 'entered user'
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert 'fail!' in str(warning)
@@ -163,7 +168,7 @@ def test_get_username_runtime_error_suppressed(
 
 def test_get_password_runtime_error_suppressed(
         entered_password, keyring_no_backends, recwarn, settings):
-    assert auth.Resolver(settings, 'user').password == 'entered pw'
+    assert auth.Resolver(settings, cred('user')).password == 'entered pw'
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert 'fail!' in str(warning)

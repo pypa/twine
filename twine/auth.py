@@ -3,16 +3,16 @@ import getpass
 import functools
 
 import keyring
-import munch
 
 from . import utils
 from . import exceptions
+from .types import CredentialInput
 
 
 class Resolver:
-    def __init__(self, settings, username=None, password=None):
+    def __init__(self, settings, input: CredentialInput):
         self.settings = settings
-        self.input = munch.Munch(username=username, password=password)
+        self.input = input
 
     @property  # type: ignore  # https://github.com/python/mypy/issues/1362
     @functools.lru_cache()
