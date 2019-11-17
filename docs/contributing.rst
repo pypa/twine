@@ -149,9 +149,6 @@ A checklist for creating, testing, and distributing a new version.
 #. Merge the last planned PR before the new release:
 
    #. Add new changes to :file:`docs/changelog.rst`.
-   #. Update the ``__version__`` string in :file:`twine/__init__.py`,
-      which is where :file:`setup.py` pulls it from, with ``{number}rc1``
-      for "release candidate 1".
    #. Update copyright dates.
 
 #. Run Twine tests:
@@ -194,8 +191,6 @@ A checklist for creating, testing, and distributing a new version.
    #. Add new changes and new release to :file:`docs/changelog.rst`,
       with the new version ``{number}``, this time without the
       ``rc1`` suffix.
-   #. Update the ``__version__`` string in :file:`twine/__init__.py`
-      with ``{number}``.
 
 #. Run tests again. Check the changelog to verify that it looks right.
 #. Create a new git tag with ``git tag -sam 'Release v{number}' {number}``.
