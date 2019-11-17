@@ -14,6 +14,10 @@ class Resolver:
         self.settings = settings
         self.input = input
 
+    @classmethod
+    def choose(cls, interactive):
+        return cls if interactive else Private
+
     @property  # type: ignore  # https://github.com/python/mypy/issues/1362
     @functools.lru_cache()
     def username(self):

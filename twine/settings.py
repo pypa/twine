@@ -132,8 +132,7 @@ class Settings:
         # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
         creds = types.CredentialInput(username, password)
-        auth_class = auth.Private if non_interactive else auth.Resolver
-        self.auth = auth_class(self, creds)
+        self.auth = auth.Resolver.choose(not non_interactive)(self, creds)
 
     @property
     def username(self):
