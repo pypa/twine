@@ -7,7 +7,7 @@ from twine import (
 )
 
 
-cred = auth.CredentialInput.new
+cred = auth.CredentialInput
 
 
 @pytest.fixture

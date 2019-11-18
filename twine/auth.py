@@ -1,7 +1,6 @@
 import warnings
 import getpass
 import functools
-import typing
 from typing import Optional, Callable
 
 import keyring
@@ -10,13 +9,11 @@ from . import utils
 from . import exceptions
 
 
-class CredentialInput(typing.NamedTuple):
-    username: typing.Optional[str]
-    password: typing.Optional[str]
+class CredentialInput:
 
-    @classmethod
-    def new(cls, username=None, password=None):
-        return cls(username, password)
+    def __init__(self, username: str = None, password: str = None):
+        self.username = username
+        self.password = password
 
 
 class Resolver:
