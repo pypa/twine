@@ -159,13 +159,6 @@ A checklist for creating, testing, and distributing a new version.
       ``readme_renderer`` to check that the ``long_description`` and other
       metadata will render fine on the PyPI description)
 
-#. Run integration tests with downstreams:
-
-   #. Create a test package to upload to Test PyPI, version-control it
-      with git, and test ``zest.releaser`` per directions in `this
-      comment
-      <https://github.com/pypa/twine/pull/314#issuecomment-370525038>`_.
-
 #. Create a git tag with ``git tag -sam 'Release v{number}' {number}``.
 
    * ``{number}``, such as ``1.15.1rc1``
