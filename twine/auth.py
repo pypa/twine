@@ -59,14 +59,14 @@ class Resolver:
             pass
         except Exception as exc:
             warnings.warn(str(exc))
-        return None  # TODO: mypy shouldn't require this
+        return None
 
     def get_password_from_keyring(self) -> Optional[str]:
         try:
             return keyring.get_password(self.system, self.username)
         except Exception as exc:
             warnings.warn(str(exc))
-        return None  # any more than it should require this
+        return None
 
     def username_from_keyring_or_prompt(self) -> str:
         return (
