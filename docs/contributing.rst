@@ -144,44 +144,18 @@ Making a new release
 
 A checklist for creating, testing, and distributing a new version.
 
-#. Choose a version number, e.g., "1.15."
+#. Choose a version number, e.g. "1.15.0"
 
-#. Merge the last planned PR before the new release:
+#. Review the commit history:
 
-   #. Add new changes to :file:`docs/changelog.rst`.
-   #. Update copyright dates.
+   #. Add missing changes to :file:`docs/changelog.rst`.
+   #. Add a release line at the beginning referencing the release
+      and the date of the release.
+   #. Commit, push, ensure CI is green.
 
-#. Run Twine tests:
-
-   #. ``tox -e py{36,37,38}``
-   #. ``tox -e lint`` for the linter
-   #. ``tox -e docs`` (this checks the Sphinx docs and uses
-      ``readme_renderer`` to check that the ``long_description`` and other
-      metadata will render fine on the PyPI description)
-
-#. Create a git tag with ``git tag -sam 'Release v{number}' {number}``.
-
-   * ``{number}``, such as ``1.15.1rc1``
-   * ``-s`` signs it with your PGP key
-   * ``-a`` creates an annotated tag for GitHub
-   * ``-m`` adds the message; optional if you want to compose a longer
-     message
-
-#. View your tag: ``git tag -v {number}``
-#. Push your tag: ``git push upstream {number}``.
-#. Upload to TestPyPI with ``TWINE_REPOSITORY=https://test.pypi.org/legacy/ tox -e release``
-#. Verify that everything looks good, downloads ok, etc. Make needed fixes.
-#. Merge the last PR before the new release:
-
-   #. Add new changes and new release to :file:`docs/changelog.rst`,
-      with the new version ``{number}``, this time without the
-      ``rc1`` suffix.
-
-#. Run tests again. Check the changelog to verify that it looks right.
-#. Create a new git tag with ``git tag -sam 'Release v{number}' {number}``.
-#. View your tag: ``git tag -v {number}``
-#. Push your tag: ``git push upstream {number}``.
-#. On a Monday or Tuesday, upload to PyPI with ``tox -e release``.
+#. Create a new git tag with ``git tag -m tag {number}``.
+#. Push the new tag: ``git push upstream {number}``.
+#. Watch the release `in Travis <https://travis-ci.org/pypa/twine>`_.
 #. Send announcement email to `pypa-dev mailing list`_ and celebrate.
 
 
