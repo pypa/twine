@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :release:`3.0.0 <2019-11-18>`
 * :feature:`336`: When a client certificate is indicated, all password
   processing is disabled.
 * :feature:`524`: Twine now unconditionally requires the keyring library
