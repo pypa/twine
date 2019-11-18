@@ -141,7 +141,7 @@ def sampleproject_dist(tmp_path_factory):
         assert orig != sub
         setup.seek(0)
         setup.write(sub)
-    tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S%f')
     subprocess.run([
         sys.executable,
         'setup.py',
