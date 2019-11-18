@@ -122,3 +122,43 @@ def uploadable_dist(request):
 @pytest.fixture
 def entered_password(monkeypatch):
     monkeypatch.setattr(getpass, 'getpass', lambda prompt: 'entered pw')
+
+
+class PypiserverEnv(jaraco.envs.ToxEnv):
+    """
+    Run pypiserver using tox:testenv:pypiserver.
+    """
+    name = 'pypiserver'
+
+    @property
+    @functools.lru_cache()
+    def port(self):
+        return portend.find_available_local_port()
+
+    @property
+    def url(self):
+        return f'http://localhost:{self.port}/'
+
+    def ready(self):
+        with contextlib.suppress(Exception):
+            return requests.get(self.url)
+
+
+@pytest.fixture(scope='session')
+def pypiserver_instance(request, watcher_getter, tmp_path_factory):
+    env = PypiserverEnv()
+    env.create()
+    proc = watcher_getter(
+        name=str(env.exe('pypi-server')),
+        arguments=[
+            '--port', str(env.port),
+            # allow anonymous uploads
+            '-P', '.', '-a', '.',
+            tmp_path_factory.mktemp('packages'),
+        ],
+        checker=env.ready,
+        # Needed for the correct execution order of finalizers
+        request=request,
+    )
+    url = env.url
+    return munch.Munch.fromDict(locals())

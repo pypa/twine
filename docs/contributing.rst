@@ -161,14 +161,6 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Run integration tests with downstreams:
 
-   #. Test ``pypiserver`` support:
-
-      .. code-block:: console
-
-         git clone git@github.com:pypiserver/pypiserver
-         cd pypiserver
-         tox -e pre_twine
-
    #. Create a test package to upload to Test PyPI, version-control it
       with git, and test ``zest.releaser`` per directions in `this
       comment
