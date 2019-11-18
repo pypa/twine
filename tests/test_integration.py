@@ -30,3 +30,14 @@ def test_pypi_upload(sampleproject_dist):
         str(sampleproject_dist),
     ]
     dispatch(command)
+
+
+def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
+    command = [
+        'upload',
+        '--repository-url', pypiserver_instance.url,
+        '--username', 'any',
+        '--password', 'any',
+        str(uploadable_dist),
+    ]
+    dispatch(command)

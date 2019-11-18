@@ -159,16 +159,6 @@ A checklist for creating, testing, and distributing a new version.
       ``readme_renderer`` to check that the ``long_description`` and other
       metadata will render fine on the PyPI description)
 
-#. Run integration tests with downstreams:
-
-   #. Test ``pypiserver`` support:
-
-      .. code-block:: console
-
-         git clone git@github.com:pypiserver/pypiserver
-         cd pypiserver
-         tox -e pre_twine
-
 #. Create a git tag with ``git tag -sam 'Release v{number}' {number}``.
 
    * ``{number}``, such as ``1.15.1rc1``
