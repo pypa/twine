@@ -22,9 +22,16 @@ matrix:
       name: Making sure that docs build is healthy
       env:
         TOXENV: docs
-    - python: 3.8
+    - python: &latest_py3 3.8
     - python: 3.7
     - python: 3.6
+
+    - stage: deploy
+      if: tag IS present
+      python: *latest_py3
+      env:
+        TOXENV: release
+      after_script: skip
 
 install:
   - pip install tox codecov
