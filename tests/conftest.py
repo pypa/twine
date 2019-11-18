@@ -5,6 +5,8 @@ import subprocess
 import pathlib
 import functools
 import getpass
+import sys
+import datetime
 
 import pytest
 import portend
@@ -122,3 +124,31 @@ def uploadable_dist(request):
 @pytest.fixture
 def entered_password(monkeypatch):
     monkeypatch.setattr(getpass, 'getpass', lambda prompt: 'entered pw')
+
+
+@pytest.fixture
+def sampleproject_dist(tmp_path_factory):
+    checkout = tmp_path_factory.mktemp('sampleproject', numbered=False)
+    subprocess.run([
+        'git',
+        'clone', 'https://github.com/pypa/sampleproject',
+        str(checkout),
+    ])
+    with (checkout / 'setup.py').open('r+') as setup:
+        orig = setup.read()
+        sub = orig.replace(
+            "name='sampleproject'", "name='twine-sampleproject'")
+        assert orig != sub
+        setup.seek(0)
+        setup.write(sub)
+    tag = datetime.datetime.now().strftime('%Y%m%d%H%M%S')
+    subprocess.run([
+        sys.executable,
+        'setup.py',
+        'egg_info', '--tag-build', f'post{tag}',
+        'sdist',
+    ],
+        cwd=str(checkout),
+    )
+    dist, = checkout.joinpath('dist').glob('*')
+    return dist
