@@ -1,7 +1,6 @@
 import warnings
 import getpass
 import functools
-import typing
 from typing import Optional, Callable
 
 import keyring
@@ -10,13 +9,11 @@ from . import utils
 from . import exceptions
 
 
-class CredentialInput(typing.NamedTuple):
-    username: typing.Optional[str]
-    password: typing.Optional[str]
+class CredentialInput:
 
-    @classmethod
-    def new(cls, username=None, password=None):
-        return cls(username, password)
+    def __init__(self, username: str = None, password: str = None):
+        self.username = username
+        self.password = password
 
 
 class Resolver:
@@ -52,7 +49,7 @@ class Resolver:
     def system(self) -> Optional[str]:
         return self.config['repository']
 
-    def get_username_from_keyring(self):
+    def get_username_from_keyring(self) -> Optional[str]:
         try:
             creds = keyring.get_credential(self.system, None)
             if creds:
@@ -62,13 +59,13 @@ class Resolver:
             pass
         except Exception as exc:
             warnings.warn(str(exc))
+        return None  # TODO: mypy shouldn't require this
 
     def get_password_from_keyring(self) -> Optional[str]:
         try:
             return keyring.get_password(self.system, self.username)
         except Exception as exc:
             warnings.warn(str(exc))
-        return None  # TODO: mypy shouldn't require this
         return None  # any more than it should require this
 
     def username_from_keyring_or_prompt(self) -> str:
