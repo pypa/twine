@@ -11,7 +11,8 @@ Changelog
   that functionality. Instead, use ``keyring --disable`` keyring functionality
   if necessary.
 * :feature:`518` Add Python 3.8 to classifiers.
-* :bug:`332 major` More robust handling of server response in ``--skip-existing``
+* :bug:`332 major` More robust handling of server response in
+  ``--skip-existing``
 * :release:`2.0.0 <2019-09-24>`
 * :feature:`437` Twine now requires Python 3.6 or later. Use pip
   9 or pin to "twine<2" to install twine on older Python versions.
