@@ -201,11 +201,13 @@ class Settings:
         )
         parser.add_argument(
             "--non-interactive",
-            action="store_true",
+            action=utils.EnvironmentDefault,
+            env="TWINE_NON_INTERACTIVE",
             default=False,
             required=False,
             help="Do not interactively prompt for username/password if the "
-                 "required credentials are missing."
+                 "required credentials are missing. (Can also be set via "
+                 "%(env)s environment variable.)"
         )
         parser.add_argument(
             "-c", "--comment",

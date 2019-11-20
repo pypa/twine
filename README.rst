@@ -208,7 +208,9 @@ Uploads one or more distributions to a repository.
                             (package index) with. (Can also be set via
                             TWINE_PASSWORD environment variable.)
       --non-interactive     Do not interactively prompt for username/password
-                            if the required credentials are missing.
+                            if the required credentials are missing. (Can also
+                            be set via TWINE_NON_INTERACTIVE environment
+                            variable.)
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file.
       --config-file CONFIG_FILE
@@ -288,7 +290,9 @@ For completeness, its usage:
                             (package index) with. (Can also be set via
                             TWINE_PASSWORD environment variable.)
       --non-interactive     Do not interactively prompt for username/password
-                            if the required credentials are missing.
+                            if the required credentials are missing. (Can also
+                            be set via TWINE_NON_INTERACTIVE environment
+                            variable.)
       -c COMMENT, --comment COMMENT
                             The comment to include with the distribution file.
       --config-file CONFIG_FILE
@@ -315,6 +319,8 @@ example.
 * ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
   self-signed or untrusted certificates.
+* ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
+  if the required credentials are missing.
 
 Resources
 ---------
