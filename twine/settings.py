@@ -12,9 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from typing import cast, Optional
+
+import argparse
+
 from twine import exceptions
 from twine import repository
 from twine import utils
+from twine import auth
 
 
 class Settings:
@@ -35,18 +40,27 @@ class Settings:
         Settings(sign=True, username='fakeusername')
     """
 
-    @utils.no_positional(allow_self=True)
-    def __init__(self,
-                 sign=False, sign_with='gpg', identity=None,
-                 username=None, password=None,
-                 comment=None,
-                 config_file='~/.pypirc', skip_existing=False,
-                 cacert=None, trusted=False, client_cert=None,
-                 repository_name='pypi', repository_url=None,
-                 verbose=False,
-                 disable_progress_bar=False,
-                 **ignored_kwargs
-                 ):
+    def __init__(
+        self,
+        *,
+        sign: bool = False,
+        sign_with: Optional[str] = 'gpg',
+        identity: Optional[str] = None,
+        username: Optional[str] = None,
+        password: Optional[str] = None,
+        non_interactive: bool = False,
+        comment: Optional[str] = None,
+        config_file: str = '~/.pypirc',
+        skip_existing: bool = False,
+        cacert: Optional[str] = None,
+        trusted: bool = False,
+        client_cert: Optional[str] = None,
+        repository_name: str = 'pypi',
+        repository_url: Optional[str] = None,
+        verbose: bool = False,
+        disable_progress_bar: bool = False,
+        **ignored_kwargs
+    ) -> None:
         """Initialize our settings instance.
 
         :param bool sign:
@@ -65,6 +79,11 @@ class Settings:
         :param str password:
             The password used to authenticate to the repository (package
             index).
+        :param bool non_interactive:
+            Do not interactively prompt for username/password if the required
+            credentials are missing.
+
+            This defaults to ``False``.
         :param str comment:
             The comment to include with each distribution file.
         :param str config_file:
@@ -117,12 +136,23 @@ class Settings:
         self._handle_package_signing(
             sign=sign, sign_with=sign_with, identity=identity,
         )
-        # The following two rely on the parsed repository config
+        # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
-        self._handle_authentication(username, password)
+        self.auth = auth.Resolver.choose(not non_interactive)(
+            self.repository_config,
+            auth.CredentialInput(username, password),
+        )
+
+    @property
+    def username(self):
+        return self.auth.username
+
+    @property
+    def password(self):
+        return None if self.client_cert else self.auth.password
 
     @staticmethod
-    def register_argparse_arguments(parser):
+    def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         """Register the arguments for argparse."""
         parser.add_argument(
             "-r", "--repository",
@@ -176,6 +206,14 @@ class Settings:
             help="The password to authenticate to the repository "
                  "(package index) with. (Can also be set via "
                  "%(env)s environment variable.)",
+        )
+        parser.add_argument(
+            "--non-interactive",
+            action="store_true",
+            default=False,
+            required=False,
+            help="Do not interactively prompt for username/password if the "
+                 "required credentials are missing."
         )
         parser.add_argument(
             "-c", "--comment",
@@ -236,14 +274,19 @@ class Settings:
         )
 
     @classmethod
-    def from_argparse(cls, args):
+    def from_argparse(cls, args: argparse.Namespace) -> "Settings":
         """Generate the Settings from parsed arguments."""
         settings = vars(args)
         settings['repository_name'] = settings.pop('repository')
         settings['cacert'] = settings.pop('cert')
         return cls(**settings)
 
-    def _handle_package_signing(self, sign, sign_with, identity):
+    def _handle_package_signing(
+        self,
+        sign: bool,
+        sign_with: Optional[str],
+        identity: Optional[str]
+    ) -> None:
         if not sign and identity:
             raise exceptions.InvalidSigningConfiguration(
                 "sign must be given along with identity"
@@ -252,43 +295,38 @@ class Settings:
         self.sign_with = sign_with
         self.identity = identity
 
-    def _handle_repository_options(self, repository_name, repository_url):
+    def _handle_repository_options(
+        self,
+        repository_name: str,
+        repository_url: Optional[str]
+    ) -> None:
         self.repository_config = utils.get_repository_from_config(
             self.config_file,
             repository_name,
             repository_url,
         )
         self.repository_config['repository'] = utils.normalize_repository_url(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
         )
 
-    def _handle_authentication(self, username, password):
-        self.username = utils.get_username(
-            self.repository_config['repository'],
-            username,
-            self.repository_config
-        )
-        self.password = utils.get_password(
-            self.repository_config['repository'],
-            self.username,
-            password,
-            self.repository_config,
-        )
-
-    def _handle_certificates(self, cacert, client_cert):
+    def _handle_certificates(
+        self,
+        cacert: Optional[str],
+        client_cert: Optional[str]
+    ) -> None:
         self.cacert = utils.get_cacert(cacert, self.repository_config)
         self.client_cert = utils.get_clientcert(
             client_cert,
             self.repository_config,
         )
 
-    def check_repository_url(self):
+    def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.
 
         :raises:
             :class:`~twine.exceptions.UploadToDeprecatedPyPIDetected`
         """
-        repository_url = self.repository_config['repository']
+        repository_url = cast(str, self.repository_config['repository'])
 
         if repository_url.startswith((repository.LEGACY_PYPI,
                                       repository.LEGACY_TEST_PYPI)):
@@ -298,13 +336,13 @@ class Settings:
                 utils.TEST_REPOSITORY
             )
 
-    def create_repository(self):
+    def create_repository(self) -> repository.Repository:
         """Create a new repository for uploading."""
         repo = repository.Repository(
-            self.repository_config['repository'],
+            cast(str, self.repository_config['repository']),
             self.username,
             self.password,
-            self.disable_progress_bar
+            self.disable_progress_bar,
         )
         repo.set_certificate_authority(self.cacert, self.trusted)
         repo.set_client_certificate(self.client_cert)

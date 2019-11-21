@@ -178,7 +178,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(monkeypatch, tmpdir,
         repository_url=DEFAULT_REPOSITORY,
         username='username',
         password='password',
-        disable_progress_bar=disable_progress_bar
+        disable_progress_bar=disable_progress_bar,
     )
 
     repo.session = pretend.stub(

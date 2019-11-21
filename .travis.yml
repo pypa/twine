@@ -15,10 +15,6 @@ matrix:
       env:
         TOXENV: lint-code-style
     - python: 3.7
-      name: Linting distribution metadata
-      env:
-        TOXENV: lint-dist-meta
-    - python: 3.7
       name: Linting type matching
       env:
         TOXENV: lint-mypy
