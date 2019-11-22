@@ -3,10 +3,14 @@
 =========
 Changelog
 =========
+* :feature:`547` Add support for specifying ``--non-interactive`` as an
+  environment variable.
 * :release:`3.0.0 <2019-11-18>`
-* :feature:`336`: When a client certificate is indicated, all password
+* :feature:`336` When a client certificate is indicated, all password
   processing is disabled.
-* :feature:`524`: Twine now unconditionally requires the keyring library
+* :feature:`489` Add ``--non-interactive`` flag to abort upload rather than
+  interactively prompt if credentials are missing.
+* :feature:`524` Twine now unconditionally requires the keyring library
   and no longer supports uninstalling ``keyring`` as a means to disable
   that functionality. Instead, use ``keyring --disable`` keyring functionality
   if necessary.
