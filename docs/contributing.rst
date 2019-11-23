@@ -146,12 +146,12 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Choose a version number, e.g. "1.15.0"
 
-#. Review the commit history:
+#. Update the changelog:
 
    #. Add missing changes to :file:`docs/changelog.rst`.
    #. Add a release line at the beginning referencing the release
       and the date of the release.
-   #. Commit, push, ensure CI is green.
+   #. Commit, push, ensure Travis build passes.
 
 #. Create a new git tag with ``git tag -m tag {number}``.
 #. Push the new tag: ``git push upstream {number}``.
