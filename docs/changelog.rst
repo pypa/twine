@@ -3,6 +3,7 @@
 =========
 Changelog
 =========
+* :release:`3.1.0 <2019-11-23>`
 * :feature:`547` Add support for specifying ``--non-interactive`` as an
   environment variable.
 * :release:`3.0.0 <2019-11-18>`
