@@ -14,6 +14,7 @@
 # limitations under the License.
 import os.path
 import textwrap
+import argparse
 
 from twine import exceptions
 from twine import settings
@@ -81,3 +82,24 @@ def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
         username='fakeuser', password='anything', client_cert=client_cert)
     assert not settings_obj.password
     assert settings_obj.client_cert == client_cert
+
+
+class TestArgumentParsing:
+
+    @staticmethod
+    def parse_args(args):
+        parser = argparse.ArgumentParser()
+        settings.Settings.register_argparse_arguments(parser)
+        return parser.parse_args(args)
+
+    def test_non_interactive_flag(self):
+        args = self.parse_args(['--non-interactive'])
+        assert args.non_interactive
+
+    def test_non_interactive_environment(self, monkeypatch):
+        monkeypatch.setenv("TWINE_NON_INTERACTIVE", "1")
+        args = self.parse_args([])
+        assert args.non_interactive
+        monkeypatch.setenv("TWINE_NON_INTERACTIVE", "0")
+        args = self.parse_args([])
+        assert not args.non_interactive
