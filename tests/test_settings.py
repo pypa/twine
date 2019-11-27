@@ -84,23 +84,22 @@ def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
     assert settings_obj.client_cert == client_cert
 
 
-@pytest.fixture
-def parser():
-    parser = argparse.ArgumentParser()
-    settings.Settings.register_argparse_arguments(parser)
-    return parser
-
-
 class TestArgumentParsing:
 
-    def test_non_interactive_flag(self, parser):
-        args = parser.parse_args(['--non-interactive'])
+    @staticmethod
+    def parse_args(args):
+        parser = argparse.ArgumentParser()
+        settings.Settings.register_argparse_arguments(parser)
+        return parser.parse_args(args)
+
+    def test_non_interactive_flag(self):
+        args = self.parse_args(['--non-interactive'])
         assert args.non_interactive
 
-    def test_non_interactive_environment(self, parser, monkeypatch):
+    def test_non_interactive_environment(self, monkeypatch):
         monkeypatch.setenv("TWINE_NON_INTERACTIVE", "1")
-        args = parser.parse_args([])
+        args = self.parse_args([])
         assert args.non_interactive
         monkeypatch.setenv("TWINE_NON_INTERACTIVE", "0")
-        args = parser.parse_args([])
+        args = self.parse_args([])
         assert not args.non_interactive

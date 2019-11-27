@@ -201,10 +201,8 @@ class Settings:
         )
         parser.add_argument(
             "--non-interactive",
-            action=utils.EnvironmentDefault,
+            action=utils.EnvironmentFlag,
             env="TWINE_NON_INTERACTIVE",
-            default=False,
-            required=False,
             help="Do not interactively prompt for username/password if the "
                  "required credentials are missing. (Can also be set via "
                  "%(env)s environment variable.)"

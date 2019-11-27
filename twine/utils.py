@@ -233,3 +233,27 @@ class EnvironmentDefault(argparse.Action):
 
     def __call__(self, parser, namespace, values, option_string=None):
         setattr(namespace, self.dest, values)
+
+
+class EnvironmentFlag(argparse.Action):
+    """Set boolean flag from environment variable."""
+
+    def __init__(
+        self,
+        env: str,
+        **kwargs
+    ) -> None:
+        default = self.bool_from_env(os.environ.get(env))
+        self.env = env
+        super().__init__(default=default, nargs=0, **kwargs)
+
+    def __call__(self, parser, namespace, values, option_string=None):
+        setattr(namespace, self.dest, True)
+
+    @staticmethod
+    def bool_from_env(val):
+        """
+        Allow '0' and 'false' and 'no' to be False
+        """
+        falsey = {'0', 'false', 'no'}
+        return val and val.lower() not in falsey
