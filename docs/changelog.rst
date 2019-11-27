@@ -3,6 +3,8 @@
 =========
 Changelog
 =========
+* :bug:`548` Restore ``--non-interactive`` as a flag not expecting an
+  argument.
 * :release:`3.1.0 <2019-11-23>`
 * :feature:`547` Add support for specifying ``--non-interactive`` as an
   environment variable.
