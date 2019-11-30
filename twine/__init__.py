@@ -18,10 +18,10 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-
-# This should be importlib.metadata in Python 3.8, but a conditional import
-# with try/except was causing confusing mypy errors
-import importlib_metadata
+try:
+    import importlib.metadata as importlib_metadata
+except ImportError:
+    import importlib_metadata
 
 
 metadata = importlib_metadata.metadata('twine')
