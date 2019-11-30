@@ -18,13 +18,12 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-
 try:
-    # https://github.com/python/mypy/issues/1393
     from importlib.metadata import metadata  # type: ignore
+    # https://github.com/python/mypy/issues/1393
 except ImportError:
-    # https://github.com/python/mypy/issues/1153
     from importlib_metadata import metadata  # type: ignore
+    # https://github.com/python/mypy/issues/1153
 
 
 twine_metadata = metadata('twine')
