@@ -18,21 +18,21 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-try:
-    from importlib.metadata import metadata  # type: ignore
-    # https://github.com/python/mypy/issues/1393
-except ImportError:
-    from importlib_metadata import metadata  # type: ignore
-    # https://github.com/python/mypy/issues/1153
+import sys
+
+if sys.version_info[:2] >= (3, 8):
+    import importlib.metadata as importlib_metadata
+else:
+    import importlib_metadata
 
 
-twine_metadata = metadata('twine')
+metadata = importlib_metadata.metadata('twine')
 
 
-__title__ = twine_metadata['name']
-__summary__ = twine_metadata['summary']
-__uri__ = twine_metadata['home-page']
-__version__ = twine_metadata['version']
-__author__ = twine_metadata['author']
-__email__ = twine_metadata['author-email']
-__license__ = twine_metadata['license']
+__title__ = metadata['name']
+__summary__ = metadata['summary']
+__uri__ = metadata['home-page']
+__version__ = metadata['version']
+__author__ = metadata['author']
+__email__ = metadata['author-email']
+__license__ = metadata['license']
