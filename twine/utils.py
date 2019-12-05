@@ -113,7 +113,7 @@ def get_repository_from_config(
         msg = (
             "Missing '{repo}' section from the configuration file\n"
             "or not a complete URL in --repository-url.\n"
-            "Maybe you have a out-dated '{cfg}' format?\n"
+            "Maybe you have an out-dated '{cfg}' format?\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
         ).format(
