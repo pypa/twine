@@ -44,17 +44,17 @@ class Settings:
         self,
         *,
         sign: bool = False,
-        sign_with: Optional[str] = 'gpg',
+        sign_with: Optional[str] = "gpg",
         identity: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
         non_interactive: bool = False,
         comment: Optional[str] = None,
-        config_file: str = '~/.pypirc',
+        config_file: str = "~/.pypirc",
         skip_existing: bool = False,
         cacert: Optional[str] = None,
         client_cert: Optional[str] = None,
-        repository_name: str = 'pypi',
+        repository_name: str = "pypi",
         repository_url: Optional[str] = None,
         verbose: bool = False,
         disable_progress_bar: bool = False,
@@ -131,8 +131,7 @@ class Settings:
         # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
         self.auth = auth.Resolver.choose(not non_interactive)(
-            self.repository_config,
-            auth.CredentialInput(username, password),
+            self.repository_config, auth.CredentialInput(username, password),
         )
 
     @property
@@ -147,14 +146,15 @@ class Settings:
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:
         """Register the arguments for argparse."""
         parser.add_argument(
-            "-r", "--repository",
+            "-r",
+            "--repository",
             action=utils.EnvironmentDefault,
             env="TWINE_REPOSITORY",
             default="pypi",
             help="The repository (package index) to upload the package to. "
-                 "Should be a section in the config file (default: "
-                 "%(default)s). (Can also be set via %(env)s environment "
-                 "variable.)",
+            "Should be a section in the config file (default: "
+            "%(default)s). (Can also be set via %(env)s environment "
+            "variable.)",
         )
         parser.add_argument(
             "--repository-url",
@@ -163,11 +163,12 @@ class Settings:
             default=None,
             required=False,
             help="The repository (package index) URL to upload the package to."
-                 " This overrides --repository. "
-                 "(Can also be set via %(env)s environment variable.)"
+            " This overrides --repository. "
+            "(Can also be set via %(env)s environment variable.)",
         )
         parser.add_argument(
-            "-s", "--sign",
+            "-s",
+            "--sign",
             action="store_true",
             default=False,
             help="Sign files to upload using GPG.",
@@ -178,37 +179,39 @@ class Settings:
             help="GPG program used to sign uploads (default: %(default)s).",
         )
         parser.add_argument(
-            "-i", "--identity",
-            help="GPG identity used to sign files.",
+            "-i", "--identity", help="GPG identity used to sign files.",
         )
         parser.add_argument(
-            "-u", "--username",
+            "-u",
+            "--username",
             action=utils.EnvironmentDefault,
             env="TWINE_USERNAME",
             required=False,
             help="The username to authenticate to the repository "
-                 "(package index) as. (Can also be set via "
-                 "%(env)s environment variable.)",
+            "(package index) as. (Can also be set via "
+            "%(env)s environment variable.)",
         )
         parser.add_argument(
-            "-p", "--password",
+            "-p",
+            "--password",
             action=utils.EnvironmentDefault,
             env="TWINE_PASSWORD",
             required=False,
             help="The password to authenticate to the repository "
-                 "(package index) with. (Can also be set via "
-                 "%(env)s environment variable.)",
+            "(package index) with. (Can also be set via "
+            "%(env)s environment variable.)",
         )
         parser.add_argument(
             "--non-interactive",
             action=utils.EnvironmentFlag,
             env="TWINE_NON_INTERACTIVE",
             help="Do not interactively prompt for username/password if the "
-                 "required credentials are missing. (Can also be set via "
-                 "%(env)s environment variable.)"
+            "required credentials are missing. (Can also be set via "
+            "%(env)s environment variable.)",
         )
         parser.add_argument(
-            "-c", "--comment",
+            "-c",
+            "--comment",
             help="The comment to include with the distribution file.",
         )
         parser.add_argument(
@@ -221,8 +224,8 @@ class Settings:
             default=False,
             action="store_true",
             help="Continue uploading files if one already exists. (Only valid "
-                 "when uploading to PyPI. Other implementations may not "
-                 "support this.)",
+            "when uploading to PyPI. Other implementations may not "
+            "support this.)",
         )
         parser.add_argument(
             "--cert",
@@ -232,42 +235,39 @@ class Settings:
             required=False,
             metavar="path",
             help="Path to alternate CA bundle (can also be set via %(env)s "
-                 "environment variable).",
+            "environment variable).",
         )
         parser.add_argument(
             "--client-cert",
             metavar="path",
             help="Path to SSL client certificate, a single file containing the"
-                 " private key and the certificate in PEM format.",
+            " private key and the certificate in PEM format.",
         )
         parser.add_argument(
             "--verbose",
             default=False,
             required=False,
             action="store_true",
-            help="Show verbose output."
+            help="Show verbose output.",
         )
         parser.add_argument(
             "--disable-progress-bar",
             default=False,
             required=False,
             action="store_true",
-            help="Disable the progress bar."
+            help="Disable the progress bar.",
         )
 
     @classmethod
     def from_argparse(cls, args: argparse.Namespace) -> "Settings":
         """Generate the Settings from parsed arguments."""
         settings = vars(args)
-        settings['repository_name'] = settings.pop('repository')
-        settings['cacert'] = settings.pop('cert')
+        settings["repository_name"] = settings.pop("repository")
+        settings["cacert"] = settings.pop("cert")
         return cls(**settings)
 
     def _handle_package_signing(
-        self,
-        sign: bool,
-        sign_with: Optional[str],
-        identity: Optional[str]
+        self, sign: bool, sign_with: Optional[str], identity: Optional[str]
     ) -> None:
         if not sign and identity:
             raise exceptions.InvalidSigningConfiguration(
@@ -278,29 +278,20 @@ class Settings:
         self.identity = identity
 
     def _handle_repository_options(
-        self,
-        repository_name: str,
-        repository_url: Optional[str]
+        self, repository_name: str, repository_url: Optional[str]
     ) -> None:
         self.repository_config = utils.get_repository_from_config(
-            self.config_file,
-            repository_name,
-            repository_url,
+            self.config_file, repository_name, repository_url,
         )
-        self.repository_config['repository'] = utils.normalize_repository_url(
-            cast(str, self.repository_config['repository']),
+        self.repository_config["repository"] = utils.normalize_repository_url(
+            cast(str, self.repository_config["repository"]),
         )
 
     def _handle_certificates(
-        self,
-        cacert: Optional[str],
-        client_cert: Optional[str]
+        self, cacert: Optional[str], client_cert: Optional[str]
     ) -> None:
         self.cacert = utils.get_cacert(cacert, self.repository_config)
-        self.client_cert = utils.get_clientcert(
-            client_cert,
-            self.repository_config,
-        )
+        self.client_cert = utils.get_clientcert(client_cert, self.repository_config,)
 
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.
@@ -308,20 +299,19 @@ class Settings:
         :raises:
             :class:`~twine.exceptions.UploadToDeprecatedPyPIDetected`
         """
-        repository_url = cast(str, self.repository_config['repository'])
+        repository_url = cast(str, self.repository_config["repository"])
 
-        if repository_url.startswith((repository.LEGACY_PYPI,
-                                      repository.LEGACY_TEST_PYPI)):
+        if repository_url.startswith(
+            (repository.LEGACY_PYPI, repository.LEGACY_TEST_PYPI)
+        ):
             raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
-                repository_url,
-                utils.DEFAULT_REPOSITORY,
-                utils.TEST_REPOSITORY
+                repository_url, utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY
             )
 
     def create_repository(self) -> repository.Repository:
         """Create a new repository for uploading."""
         repo = repository.Repository(
-            cast(str, self.repository_config['repository']),
+            cast(str, self.repository_config["repository"]),
             self.username,
             self.password,
             self.disable_progress_bar,

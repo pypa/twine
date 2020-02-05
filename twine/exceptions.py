@@ -31,13 +31,15 @@ class RedirectDetected(TwineException):
 
     @classmethod
     def from_args(cls, repository_url, redirect_url):
-        msg = "\n".join([
-            "{} attempted to redirect to {}."
-            .format(repository_url, redirect_url),
-            "If you trust these URLs, set {} as your repository URL."
-            .format(redirect_url),
-            "Aborting."
-        ])
+        msg = "\n".join(
+            [
+                "{} attempted to redirect to {}.".format(repository_url, redirect_url),
+                "If you trust these URLs, set {} as your repository URL.".format(
+                    redirect_url
+                ),
+                "Aborting.",
+            ]
+        )
 
         return cls(msg)
 
@@ -60,14 +62,15 @@ class UploadToDeprecatedPyPIDetected(TwineException):
     @classmethod
     def from_args(cls, target_url, default_url, test_url):
         """Return an UploadToDeprecatedPyPIDetected instance."""
-        return cls("You're trying to upload to the legacy PyPI site '{}'. "
-                   "Uploading to those sites is deprecated. \n "
-                   "The new sites are pypi.org and test.pypi.org. Try using "
-                   "{} (or {}) to upload your packages instead. "
-                   "These are the default URLs for Twine now. \n More at "
-                   "https://packaging.python.org/guides/migrating-to-pypi-org/"
-                   " .".format(target_url, default_url, test_url)
-                   )
+        return cls(
+            "You're trying to upload to the legacy PyPI site '{}'. "
+            "Uploading to those sites is deprecated. \n "
+            "The new sites are pypi.org and test.pypi.org. Try using "
+            "{} (or {}) to upload your packages instead. "
+            "These are the default URLs for Twine now. \n More at "
+            "https://packaging.python.org/guides/migrating-to-pypi-org/"
+            " .".format(target_url, default_url, test_url)
+        )
 
 
 class UnreachableRepositoryURLDetected(TwineException):

@@ -12,8 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 __all__ = (
-    "__title__", "__summary__", "__uri__", "__version__", "__author__",
-    "__email__", "__license__", "__copyright__",
+    "__title__",
+    "__summary__",
+    "__uri__",
+    "__version__",
+    "__author__",
+    "__email__",
+    "__license__",
+    "__copyright__",
 )
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
@@ -26,13 +32,13 @@ else:
     import importlib_metadata
 
 
-metadata = importlib_metadata.metadata('twine')
+metadata = importlib_metadata.metadata("twine")
 
 
-__title__ = metadata['name']
-__summary__ = metadata['summary']
-__uri__ = metadata['home-page']
-__version__ = metadata['version']
-__author__ = metadata['author']
-__email__ = metadata['author-email']
-__license__ = metadata['license']
+__title__ = metadata["name"]
+__summary__ = metadata["summary"]
+__uri__ = metadata["home-page"]
+__version__ = metadata["version"]
+__author__ = metadata["author"]
+__email__ = metadata["author-email"]
+__license__ = metadata["license"]
