@@ -167,7 +167,7 @@ merge into a single tool; see `ongoing discussion
 .. _`the GitHub repository`: https://github.com/pypa/twine
 .. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
-.. _`virtual environment`: https://docs.python.org/3/tutorial/venv.html
+.. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
