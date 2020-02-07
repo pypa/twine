@@ -1,7 +1,7 @@
 Contributing
 ============
 
-We are happy you have decided to contribute to ``twine``.
+We are happy you have decided to contribute to twine.
 
 Please see `the GitHub repository`_ for code and more documentation,
 and the `official Python Packaging User Guide`_ for user documentation. You can
@@ -11,45 +11,41 @@ mailing list`_, to ask questions or get involved.
 Getting started
 ---------------
 
-We recommend you use a development environment. Using a ``virtualenv``
-keeps your development environment isolated, so ``twine`` and its
+We recommend you use a `virtual environment`_, so that twine and its
 dependencies do not interfere with other packages installed on your
-machine.  You can use `virtualenv`_ or `pipenv`_ to isolate your
-development environment.
+machine.
 
-Clone the twine repository from GitHub, and then make and activate a
+Clone the twine repository from GitHub, then make and activate a
 virtual environment that uses Python 3.6 or newer as the default
-Python. Example:
+Python. For example:
 
 .. code-block:: console
 
-  mkvirtualenv -p /usr/bin/python3.7 twine
+  cd /path/to/your/local/twine
+  python3.8 -m venv venv
+  source venv/bin/activate
 
 Then, run the following command:
 
 .. code-block:: console
 
-  pip install -e /path/to/your/local/twine
+  pip install -e .
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
 when you make changes, you can easily see their effect.
+
+We use `tox`_ to run tests, check code style, and build the documentation.
+To install ``tox`` in your active your virtual environment, run:
+
+.. code-block:: console
+
+  pip install tox
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 Additions and edits to twine's documentation are welcome and
 appreciated.
-
-We use ``tox`` to build docs. Activate your virtual environment, then
-install ``tox``.
-
-.. code-block:: console
-
-  pip install tox
-
-If you are using ``pipenv`` to manage your virtual environment, you
-may need the `tox-pipenv`_ plugin so that tox can use pipenv
-environments instead of virtualenvs.
 
 After making docs changes, lint and build the docs locally, using
 ``tox``, before making a pull request. Activate your virtual
@@ -65,12 +61,11 @@ The HTML of the docs will be visible in :file:`twine/docs/_build/`.
 Testing
 ^^^^^^^
 
-Tests with twine are run using `tox`_, and tested against Python versions 3.6,
-3.7, and 3.8. To run these tests locally, you will need to have these versions
-of Python installed on your machine.
+Twine is tested against Python versions 3.6, 3.7, and 3.8. To run these tests
+locally, you will need these versions of Python installed on your machine.
 
-Either use ``tox`` to build against all supported Python versions (if you have
-them installed) or use ``tox -e py{version}`` to test against a specific
+Either run ``tox`` to build against all supported Python versions (if you have
+them installed) or run ``tox -e py{version}`` to test against a specific
 version, e.g., ``tox -e py36`` or ``tox -e py37``.
 
 Also, always run ``tox -e lint`` before submitting a pull request.
@@ -172,10 +167,8 @@ merge into a single tool; see `ongoing discussion
 .. _`the GitHub repository`: https://github.com/pypa/twine
 .. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
-.. _`virtualenv`: https://virtualenv.pypa.io/en/stable/
-.. _`pipenv`: https://pipenv.readthedocs.io/en/latest/
+.. _`virtual environment`: https://docs.python.org/3/tutorial/venv.html
 .. _`tox`: https://tox.readthedocs.io/en/latest/
-.. _`tox-pipenv`: https://pypi.org/project/tox-pipenv
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`open issues`: https://github.com/pypa/twine/issues
