@@ -172,7 +172,7 @@ merge into a single tool; see `ongoing discussion
 .. _`the GitHub repository`: https://github.com/pypa/twine
 .. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
-.. _`virtualenv`: https://virtualenv.pypa.io/en/stable/installation/
+.. _`virtualenv`: https://virtualenv.pypa.io/en/stable/
 .. _`pipenv`: https://pipenv.readthedocs.io/en/latest/
 .. _`tox`: https://tox.readthedocs.io/en/latest/
 .. _`tox-pipenv`: https://pypi.org/project/tox-pipenv
