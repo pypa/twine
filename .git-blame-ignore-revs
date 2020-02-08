@@ -1,0 +1,8 @@
+# When making commits that are strictly formatting/style changes, add the
+# commit hash here, so git blame can ignore the change.
+# Use as needed with:
+#     git blame --ignore-revs-file .git-blame-ignore-revs
+# Or automatically with:
+#     git config blame.ignoreRevsFile .git-blame-ignore-revs
+
+a12ad693137d82770e6118ea8d90955e2c753305  # Format twine and tests with black
