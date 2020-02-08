@@ -26,8 +26,8 @@ def skip_upload(response, skip_existing, package):
         return False
 
     status = response.status_code
-    reason = getattr(response, 'reason', '').lower()
-    text = getattr(response, 'text', '').lower()
+    reason = getattr(response, "reason", "").lower()
+    text = getattr(response, "text", "").lower()
 
     # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
     # error message in the reason attribute. Other implementations return a
@@ -36,11 +36,11 @@ def skip_upload(response, skip_existing, package):
         # pypiserver (https://pypi.org/project/pypiserver)
         status == 409
         # PyPI / TestPyPI
-        or (status == 400 and 'already exist' in reason)
+        or (status == 400 and "already exist" in reason)
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        or (status == 400 and 'updating asset' in reason)
+        or (status == 400 and "updating asset" in reason)
         # Artifactory (https://jfrog.com/artifactory/)
-        or (status == 403 and 'overwrite artifact' in text)
+        or (status == 403 and "overwrite artifact" in text)
     )
 
 
@@ -51,7 +51,7 @@ def upload(upload_settings, dists):
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
     uploads = [i for i in dists if not i.endswith(".asc")]
     upload_settings.check_repository_url()
-    repository_url = upload_settings.repository_config['repository']
+    repository_url = upload_settings.repository_config["repository"]
 
     print(f"Uploading distributions to {repository_url}")
 
@@ -60,16 +60,14 @@ def upload(upload_settings, dists):
 
     for filename in uploads:
         package = PackageFile.from_filename(filename, upload_settings.comment)
-        skip_message = (
-            "  Skipping {} because it appears to already exist".format(
-                package.basefilename)
+        skip_message = "  Skipping {} because it appears to already exist".format(
+            package.basefilename
         )
 
         # Note: The skip_existing check *needs* to be first, because otherwise
         #       we're going to generate extra HTTP requests against a hardcoded
         #       URL for no reason.
-        if (upload_settings.skip_existing and
-                repository.package_is_uploaded(package)):
+        if upload_settings.skip_existing and repository.package_is_uploaded(package):
             print(skip_message)
             continue
 
@@ -87,8 +85,7 @@ def upload(upload_settings, dists):
         # redirects as well.
         if resp.is_redirect:
             raise exceptions.RedirectDetected.from_args(
-                repository_url,
-                resp.headers["location"],
+                repository_url, resp.headers["location"],
             )
 
         if skip_upload(resp, upload_settings.skip_existing, package):
@@ -101,7 +98,7 @@ def upload(upload_settings, dists):
 
     release_urls = repository.release_urls(uploaded_packages)
     if release_urls:
-        print('\nView at:')
+        print("\nView at:")
         for url in release_urls:
             print(url)
 
@@ -118,9 +115,9 @@ def main(args):
         nargs="+",
         metavar="dist",
         help="The distribution files to upload to the repository "
-             "(package index). Usually dist/* . May additionally contain "
-             "a .asc file to include an existing signature with the "
-             "file upload.",
+        "(package index). Usually dist/* . May additionally contain "
+        "a .asc file to include an existing signature with the "
+        "file upload.",
     )
 
     args = parser.parse_args(args)

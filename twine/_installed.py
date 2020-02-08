@@ -14,16 +14,15 @@ import pkginfo
 
 
 class Installed(pkginfo.Installed):
-
     def read(self):
         opj = os.path.join
         if self.package is not None:
             package = self.package.__package__
             if package is None:
                 package = self.package.__name__
-            egg_pattern = '%s*.egg-info' % package
-            dist_pattern = '%s*.dist-info' % package
-            file = getattr(self.package, '__file__', None)
+            egg_pattern = "%s*.egg-info" % package
+            dist_pattern = "%s*.dist-info" % package
+            file = getattr(self.package, "__file__", None)
             if file is not None:
                 candidates = []
 
@@ -32,27 +31,28 @@ class Installed(pkginfo.Installed):
 
                 for entry in sys.path:
                     if file.startswith(entry):
-                        _add_candidate(opj(entry, 'METADATA'))  # egg?
-                        _add_candidate(opj(entry, 'EGG-INFO'))  # egg?
+                        _add_candidate(opj(entry, "METADATA"))  # egg?
+                        _add_candidate(opj(entry, "EGG-INFO"))  # egg?
                         # dist-installed?
                         _add_candidate(opj(entry, egg_pattern))
                         _add_candidate(opj(entry, dist_pattern))
                 dir, name = os.path.split(self.package.__file__)
                 _add_candidate(opj(dir, egg_pattern))
                 _add_candidate(opj(dir, dist_pattern))
-                _add_candidate(opj(dir, '..', egg_pattern))
-                _add_candidate(opj(dir, '..', dist_pattern))
+                _add_candidate(opj(dir, "..", egg_pattern))
+                _add_candidate(opj(dir, "..", dist_pattern))
 
                 for candidate in candidates:
                     if os.path.isdir(candidate):
-                        path = opj(candidate, 'PKG-INFO')
+                        path = opj(candidate, "PKG-INFO")
                         if not os.path.exists(path):
-                            path = opj(candidate, 'METADATA')
+                            path = opj(candidate, "METADATA")
                     else:
                         path = candidate
                     if os.path.exists(path):
                         with open(path) as f:
                             return f.read()
 
-        warnings.warn('No PKG-INFO or METADATA found for package: %s' %
-                      self.package_name)
+        warnings.warn(
+            "No PKG-INFO or METADATA found for package: %s" % self.package_name
+        )

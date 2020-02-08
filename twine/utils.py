@@ -67,8 +67,9 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
             if parser.has_option("server-login", key):
                 defaults[key] = parser.get("server-login", key)
 
-    config: DefaultDict[str, RepositoryConfig] = \
-        collections.defaultdict(lambda: defaults.copy())
+    config: DefaultDict[str, RepositoryConfig] = collections.defaultdict(
+        lambda: defaults.copy()
+    )
 
     # don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
@@ -78,8 +79,11 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     # optional configuration values for individual repositories
     for repository in index_servers:
         for key in [
-            "username", "repository", "password",
-            "ca_cert", "client_cert",
+            "username",
+            "repository",
+            "password",
+            "ca_cert",
+            "client_cert",
         ]:
             if parser.has_option(repository, key):
                 config[repository][key] = parser.get(repository, key)
@@ -90,9 +94,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
 
 
 def get_repository_from_config(
-    config_file: str,
-    repository: str,
-    repository_url: Optional[str] = None
+    config_file: str, repository: str, repository_url: Optional[str] = None
 ) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
@@ -106,7 +108,8 @@ def get_repository_from_config(
     if repository_url and "://" not in repository_url:
         raise exceptions.UnreachableRepositoryURLDetected(
             "Repository URL {} has no protocol. Please add "
-            "'https://'. \n".format(repository_url))
+            "'https://'. \n".format(repository_url)
+        )
     try:
         return get_config(config_file)[repository]
     except KeyError:
@@ -116,15 +119,16 @@ def get_repository_from_config(
             "Maybe you have an out-dated '{cfg}' format?\n"
             "more info: "
             "https://docs.python.org/distutils/packageindex.html#pypirc\n"
-        ).format(
-            repo=repository,
-            cfg=config_file
-        )
+        ).format(repo=repository, cfg=config_file)
         raise exceptions.InvalidConfiguration(msg)
 
 
-_HOSTNAMES = {"pypi.python.org", "testpypi.python.org", "upload.pypi.org",
-              "test.pypi.org"}
+_HOSTNAMES = {
+    "pypi.python.org",
+    "testpypi.python.org",
+    "upload.pypi.org",
+    "test.pypi.org",
+}
 
 
 def normalize_repository_url(url: str) -> str:
@@ -149,23 +153,24 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
             f"pypi.org and test.pypi.org. Try using {DEFAULT_REPOSITORY} (or "
             f"{TEST_REPOSITORY}) to upload your packages instead. These are "
             f"the default URLs for Twine now. More at "
-            f"https://packaging.python.org/guides/migrating-to-pypi-org/.")
+            f"https://packaging.python.org/guides/migrating-to-pypi-org/."
+        )
     elif response.status_code == 405 and "pypi.org" in response.url:
         raise exceptions.InvalidPyPIUploadURL(
             f"It appears you're trying to upload to pypi.org but have an "
             f"invalid URL. You probably want one of these two URLs: "
             f"{DEFAULT_REPOSITORY} or {TEST_REPOSITORY}. Check your "
-            f"--repository-url value.")
+            f"--repository-url value."
+        )
 
     try:
         response.raise_for_status()
     except requests.HTTPError as err:
         if response.text:
             if verbose:
-                print('Content received from server:\n{}'.format(
-                    response.text))
+                print("Content received from server:\n{}".format(response.text))
             else:
-                print('NOTE: Try --verbose to see response content.')
+                print("NOTE: Try --verbose to see response content.")
         raise err
 
 
@@ -173,7 +178,7 @@ def get_userpass_value(
     cli_value: Optional[str],
     config: RepositoryConfig,
     key: str,
-    prompt_strategy: Optional[Callable] = None
+    prompt_strategy: Optional[Callable] = None,
 ) -> Optional[str]:
     """Gets the username / password from config.
 
@@ -205,25 +210,15 @@ def get_userpass_value(
         return None
 
 
-get_cacert = functools.partial(
-    get_userpass_value,
-    key='ca_cert',
-)
-get_clientcert = functools.partial(
-    get_userpass_value,
-    key='client_cert',
-)
+get_cacert = functools.partial(get_userpass_value, key="ca_cert",)
+get_clientcert = functools.partial(get_userpass_value, key="client_cert",)
 
 
 class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
     def __init__(
-        self,
-        env: str,
-        required: bool = True,
-        default: Optional[str] = None,
-        **kwargs
+        self, env: str, required: bool = True, default: Optional[str] = None, **kwargs
     ) -> None:
         default = os.environ.get(env, default)
         self.env = env
@@ -238,11 +233,7 @@ class EnvironmentDefault(argparse.Action):
 class EnvironmentFlag(argparse.Action):
     """Set boolean flag from environment variable."""
 
-    def __init__(
-        self,
-        env: str,
-        **kwargs
-    ) -> None:
+    def __init__(self, env: str, **kwargs) -> None:
         default = self.bool_from_env(os.environ.get(env))
         self.env = env
         super().__init__(default=default, nargs=0, **kwargs)
@@ -255,5 +246,5 @@ class EnvironmentFlag(argparse.Action):
         """
         Allow '0' and 'false' and 'no' to be False
         """
-        falsey = {'0', 'false', 'no'}
+        falsey = {"0", "false", "no"}
         return val and val.lower() not in falsey

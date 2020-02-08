@@ -19,104 +19,100 @@ import pytest
 
 def test_sign_file(monkeypatch):
     replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
-    filename = 'tests/fixtures/deprecated-pypirc'
+    monkeypatch.setattr(package.subprocess, "check_call", replaced_check_call)
+    filename = "tests/fixtures/deprecated-pypirc"
 
     pkg = package.PackageFile(
         filename=filename,
         comment=None,
         metadata=pretend.stub(name="deprecated-pypirc"),
         python_version=None,
-        filetype=None
+        filetype=None,
     )
     try:
-        pkg.sign('gpg2', None)
+        pkg.sign("gpg2", None)
     except IOError:
         pass
-    args = ('gpg2', '--detach-sign', '-a', filename)
+    args = ("gpg2", "--detach-sign", "-a", filename)
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
 def test_sign_file_with_identity(monkeypatch):
     replaced_check_call = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
-    filename = 'tests/fixtures/deprecated-pypirc'
+    monkeypatch.setattr(package.subprocess, "check_call", replaced_check_call)
+    filename = "tests/fixtures/deprecated-pypirc"
 
     pkg = package.PackageFile(
         filename=filename,
         comment=None,
         metadata=pretend.stub(name="deprecated-pypirc"),
         python_version=None,
-        filetype=None
+        filetype=None,
     )
     try:
-        pkg.sign('gpg', 'identity')
+        pkg.sign("gpg", "identity")
     except IOError:
         pass
-    args = ('gpg', '--detach-sign', '--local-user', 'identity', '-a', filename)
+    args = ("gpg", "--detach-sign", "--local-user", "identity", "-a", filename)
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
 def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
-    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
-    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
-    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+    replaced_check_call = pretend.raiser(FileNotFoundError("not found"))
+    monkeypatch.setattr(package.subprocess, "check_call", replaced_check_call)
+    gpg_args = ("gpg", "--detach-sign", "-a", "pypircfile")
 
     with pytest.raises(exceptions.InvalidSigningExecutable) as err:
         package.PackageFile.run_gpg(gpg_args)
 
-    assert 'executables not available' in err.value.args[0]
+    assert "executables not available" in err.value.args[0]
 
 
 def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
-    replaced_check_call = pretend.raiser(FileNotFoundError('not found'))
-    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
-    gpg_args = ('not_gpg', '--detach-sign', '-a', 'pypircfile')
+    replaced_check_call = pretend.raiser(FileNotFoundError("not found"))
+    monkeypatch.setattr(package.subprocess, "check_call", replaced_check_call)
+    gpg_args = ("not_gpg", "--detach-sign", "-a", "pypircfile")
 
     with pytest.raises(exceptions.InvalidSigningExecutable) as err:
         package.PackageFile.run_gpg(gpg_args)
 
-    assert 'not_gpg executable not available' in err.value.args[0]
+    assert "not_gpg executable not available" in err.value.args[0]
 
 
 def test_run_gpg_falls_back_to_gpg2(monkeypatch):
-
     def check_call(arg_list):
-        if arg_list[0] == 'gpg':
-            raise FileNotFoundError('gpg not found')
+        if arg_list[0] == "gpg":
+            raise FileNotFoundError("gpg not found")
 
     replaced_check_call = pretend.call_recorder(check_call)
-    monkeypatch.setattr(package.subprocess, 'check_call', replaced_check_call)
-    gpg_args = ('gpg', '--detach-sign', '-a', 'pypircfile')
+    monkeypatch.setattr(package.subprocess, "check_call", replaced_check_call)
+    gpg_args = ("gpg", "--detach-sign", "-a", "pypircfile")
 
     package.PackageFile.run_gpg(gpg_args)
 
     gpg2_args = replaced_check_call.calls[1].args
-    assert gpg2_args[0][0] == 'gpg2'
+    assert gpg2_args[0][0] == "gpg2"
 
 
 def test_package_signed_name_is_correct():
-    filename = 'tests/fixtures/deprecated-pypirc'
+    filename = "tests/fixtures/deprecated-pypirc"
 
     pkg = package.PackageFile(
         filename=filename,
         comment=None,
         metadata=pretend.stub(name="deprecated-pypirc"),
         python_version=None,
-        filetype=None
+        filetype=None,
     )
 
     assert pkg.signed_basefilename == "deprecated-pypirc.asc"
-    assert pkg.signed_filename == (filename + '.asc')
+    assert pkg.signed_filename == (filename + ".asc")
 
 
-@pytest.mark.parametrize('gpg_signature', [
-    (None),
-    (pretend.stub()),
-])
+@pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
 def test_metadata_dictionary(gpg_signature):
     meta = pretend.stub(
-        name='whatever',
+        name="whatever",
         version=pretend.stub(),
         metadata_version=pretend.stub(),
         summary=pretend.stub(),
@@ -146,7 +142,7 @@ def test_metadata_dictionary(gpg_signature):
     )
 
     pkg = package.PackageFile(
-        filename='tests/fixtures/twine-1.5.0-py2.py3-none-any.whl',
+        filename="tests/fixtures/twine-1.5.0-py2.py3-none-any.whl",
         comment=pretend.stub(),
         metadata=meta,
         python_version=pretend.stub(),
@@ -157,61 +153,61 @@ def test_metadata_dictionary(gpg_signature):
     result = pkg.metadata_dictionary()
 
     # identify release
-    assert result['name'] == pkg.safe_name
-    assert result['version'] == meta.version
+    assert result["name"] == pkg.safe_name
+    assert result["version"] == meta.version
 
     # file content
-    assert result['filetype'] == pkg.filetype
-    assert result['pyversion'] == pkg.python_version
+    assert result["filetype"] == pkg.filetype
+    assert result["pyversion"] == pkg.python_version
 
     # additional meta-data
-    assert result['metadata_version'] == meta.metadata_version
-    assert result['summary'] == meta.summary
-    assert result['home_page'] == meta.home_page
-    assert result['author'] == meta.author
-    assert result['author_email'] == meta.author_email
-    assert result['maintainer'] == meta.maintainer
-    assert result['maintainer_email'] == meta.maintainer_email
-    assert result['license'] == meta.license
-    assert result['description'] == meta.description
-    assert result['keywords'] == meta.keywords
-    assert result['platform'] == meta.platforms
-    assert result['classifiers'] == meta.classifiers
-    assert result['download_url'] == meta.download_url
-    assert result['supported_platform'] == meta.supported_platforms
-    assert result['comment'] == pkg.comment
+    assert result["metadata_version"] == meta.metadata_version
+    assert result["summary"] == meta.summary
+    assert result["home_page"] == meta.home_page
+    assert result["author"] == meta.author
+    assert result["author_email"] == meta.author_email
+    assert result["maintainer"] == meta.maintainer
+    assert result["maintainer_email"] == meta.maintainer_email
+    assert result["license"] == meta.license
+    assert result["description"] == meta.description
+    assert result["keywords"] == meta.keywords
+    assert result["platform"] == meta.platforms
+    assert result["classifiers"] == meta.classifiers
+    assert result["download_url"] == meta.download_url
+    assert result["supported_platform"] == meta.supported_platforms
+    assert result["comment"] == pkg.comment
 
     # PEP 314
-    assert result['provides'] == meta.provides
-    assert result['requires'] == meta.requires
-    assert result['obsoletes'] == meta.obsoletes
+    assert result["provides"] == meta.provides
+    assert result["requires"] == meta.requires
+    assert result["obsoletes"] == meta.obsoletes
 
     # Metadata 1.2
-    assert result['project_urls'] == meta.project_urls
-    assert result['provides_dist'] == meta.provides_dist
-    assert result['obsoletes_dist'] == meta.obsoletes_dist
-    assert result['requires_dist'] == meta.requires_dist
-    assert result['requires_external'] == meta.requires_external
-    assert result['requires_python'] == meta.requires_python
+    assert result["project_urls"] == meta.project_urls
+    assert result["provides_dist"] == meta.provides_dist
+    assert result["obsoletes_dist"] == meta.obsoletes_dist
+    assert result["requires_dist"] == meta.requires_dist
+    assert result["requires_external"] == meta.requires_external
+    assert result["requires_python"] == meta.requires_python
 
     # Metadata 2.1
-    assert result['provides_extras'] == meta.provides_extras
-    assert result['description_content_type'] == meta.description_content_type
+    assert result["provides_extras"] == meta.provides_extras
+    assert result["description_content_type"] == meta.description_content_type
 
     # GPG signature
-    assert result.get('gpg_signature') == gpg_signature
+    assert result.get("gpg_signature") == gpg_signature
 
 
 TWINE_1_5_0_WHEEL_HEXDIGEST = package.Hexdigest(
-    '1919f967e990bee7413e2a4bc35fd5d1',
-    'd86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67',
-    'b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0',
+    "1919f967e990bee7413e2a4bc35fd5d1",
+    "d86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67",
+    "b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0",
 )
 
 
 def test_hash_manager():
     """Verify our HashManager works."""
-    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     hasher = package.HashManager(filename)
     hasher.hash()
     assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
@@ -219,10 +215,10 @@ def test_hash_manager():
 
 def test_fips_hash_manager(monkeypatch):
     """Verify the behaviour if hashlib is using FIPS mode."""
-    replaced_md5 = pretend.raiser(ValueError('fipsmode'))
-    monkeypatch.setattr(package.hashlib, 'md5', replaced_md5)
+    replaced_md5 = pretend.raiser(ValueError("fipsmode"))
+    monkeypatch.setattr(package.hashlib, "md5", replaced_md5)
 
-    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     hasher = package.HashManager(filename)
     hasher.hash()
     hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(md5=None)
@@ -231,9 +227,9 @@ def test_fips_hash_manager(monkeypatch):
 
 def test_no_blake2_hash_manager(monkeypatch):
     """Verify the behaviour with missing blake2."""
-    monkeypatch.setattr(package, 'blake2b', None)
+    monkeypatch.setattr(package, "blake2b", None)
 
-    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     hasher = package.HashManager(filename)
     hasher.hash()
     hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
@@ -251,9 +247,9 @@ def test_pkginfo_returns_no_metadata(monkeypatch):
         return pretend.stub(name=None, version=None)
 
     monkeypatch.setattr(package, "DIST_TYPES", {"bdist_wheel": EmptyDist})
-    filename = 'tests/fixtures/twine-1.5.0-py2.py3-none-any.whl'
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
 
     with pytest.raises(exceptions.InvalidDistribution) as err:
         package.PackageFile.from_filename(filename, comment=None)
 
-    assert 'Invalid distribution metadata' in err.value.args[0]
+    assert "Invalid distribution metadata" in err.value.args[0]

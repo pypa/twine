@@ -62,8 +62,8 @@ class PackageFile:
         self.python_version = python_version
         self.filetype = filetype
         self.safe_name = pkg_resources.safe_name(metadata.name)
-        self.signed_filename = self.filename + '.asc'
-        self.signed_basefilename = self.basefilename + '.asc'
+        self.signed_filename = self.filename + ".asc"
+        self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
 
         hasher = HashManager(filename)
@@ -75,7 +75,7 @@ class PackageFile:
         self.blake2_256_digest = hexdigest.blake2
 
     @classmethod
-    def from_filename(cls, filename: str, comment: None) -> 'PackageFile':
+    def from_filename(cls, filename: str, comment: None) -> "PackageFile":
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
@@ -83,8 +83,7 @@ class PackageFile:
                 break
         else:
             raise exceptions.InvalidDistribution(
-                "Unknown distribution format: '%s'" %
-                os.path.basename(filename)
+                "Unknown distribution format: '%s'" % os.path.basename(filename)
             )
 
         # If pkginfo encounters a metadata version it doesn't support, it may
@@ -92,8 +91,7 @@ class PackageFile:
         # and version
         if not (meta.name and meta.version):
             raise exceptions.InvalidDistribution(
-                "Invalid distribution metadata. Try upgrading twine if "
-                "possible."
+                "Invalid distribution metadata. Try upgrading twine if possible."
             )
 
         py_version: Optional[str]
@@ -115,11 +113,9 @@ class PackageFile:
             # identify release
             "name": self.safe_name,
             "version": meta.version,
-
             # file content
             "filetype": self.filetype,
             "pyversion": self.python_version,
-
             # additional meta-data
             "metadata_version": meta.metadata_version,
             "summary": meta.summary,
@@ -139,12 +135,10 @@ class PackageFile:
             "md5_digest": self.md5_digest,
             "sha256_digest": self.sha2_digest,
             "blake2_256_digest": self.blake2_256_digest,
-
             # PEP 314
             "provides": meta.provides,
             "requires": meta.requires,
             "obsoletes": meta.obsoletes,
-
             # Metadata 1.2
             "project_urls": meta.project_urls,
             "provides_dist": meta.provides_dist,
@@ -152,26 +146,19 @@ class PackageFile:
             "requires_dist": meta.requires_dist,
             "requires_external": meta.requires_external,
             "requires_python": meta.requires_python,
-
             # Metadata 2.1
             "provides_extras": meta.provides_extras,
             "description_content_type": meta.description_content_type,
         }
 
         if self.gpg_signature is not None:
-            data['gpg_signature'] = self.gpg_signature
+            data["gpg_signature"] = self.gpg_signature
 
         return data
 
-    def add_gpg_signature(
-        self,
-        signature_filepath: str,
-        signature_filename: str
-    ):
+    def add_gpg_signature(self, signature_filepath: str, signature_filename: str):
         if self.gpg_signature is not None:
-            raise exceptions.InvalidDistribution(
-                'GPG Signature can only be added once'
-            )
+            raise exceptions.InvalidDistribution("GPG Signature can only be added once")
 
         with open(signature_filepath, "rb") as gpg:
             self.gpg_signature = (signature_filename, gpg.read())
@@ -194,7 +181,8 @@ class PackageFile:
         except FileNotFoundError:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
-                    "{} executable not available.".format(gpg_args[0]))
+                    "{} executable not available.".format(gpg_args[0])
+                )
 
         print("gpg executable not available. Attempting fallback to gpg2.")
         try:
@@ -208,7 +196,7 @@ class PackageFile:
             )
 
 
-Hexdigest = collections.namedtuple('Hexdigest', ['md5', 'sha2', 'blake2'])
+Hexdigest = collections.namedtuple("Hexdigest", ["md5", "sha2", "blake2"])
 
 
 class HashManager:
@@ -264,7 +252,7 @@ class HashManager:
     def hash(self) -> None:
         """Hash the file contents."""
         with open(self.filename, "rb") as fp:
-            for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b''):
+            for content in iter(lambda: fp.read(io.DEFAULT_BUFFER_SIZE), b""):
                 self._md5_update(content)
                 self._sha2_update(content)
                 self._blake_update(content)
@@ -272,7 +260,5 @@ class HashManager:
     def hexdigest(self) -> Hexdigest:
         """Return the hexdigest for the file."""
         return Hexdigest(
-            self._md5_hexdigest(),
-            self._sha2_hexdigest(),
-            self._blake_hexdigest(),
+            self._md5_hexdigest(), self._sha2_hexdigest(), self._blake_hexdigest(),
         )

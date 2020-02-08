@@ -30,11 +30,11 @@ wheel_file_re = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
         ((-(?P<build>\d.*?))?-(?P<pyver>.+?)-(?P<abi>.+?)-(?P<plat>.+?)
         \.whl|\.dist-info)$""",
-    re.VERBOSE)
+    re.VERBOSE,
+)
 
 
 class Wheel(Distribution):
-
     def __init__(self, filename, metadata_version=None):
         self.filename = filename
         self.basefilename = os.path.basename(self.filename)
@@ -49,39 +49,34 @@ class Wheel(Distribution):
     @staticmethod
     def find_candidate_metadata_files(names):
         """Filter files that may be METADATA files."""
-        tuples = [x.split('/') for x in names if 'METADATA' in x]
+        tuples = [x.split("/") for x in names if "METADATA" in x]
         return [x[1] for x in sorted([(len(x), x) for x in tuples])]
 
     def read(self):
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
-            raise exceptions.InvalidDistribution(
-                'No such file: %s' % fqn
-            )
+            raise exceptions.InvalidDistribution("No such file: %s" % fqn)
 
-        if fqn.endswith('.whl'):
+        if fqn.endswith(".whl"):
             archive = zipfile.ZipFile(fqn)
             names = archive.namelist()
 
             def read_file(name):
                 return archive.read(name)
+
         else:
-            raise exceptions.InvalidDistribution(
-                'Not a known archive format: %s' % fqn
-            )
+            raise exceptions.InvalidDistribution("Not a known archive format: %s" % fqn)
 
         try:
             for path in self.find_candidate_metadata_files(names):
-                candidate = '/'.join(path)
+                candidate = "/".join(path)
                 data = read_file(candidate)
-                if b'Metadata-Version' in data:
+                if b"Metadata-Version" in data:
                     return data
         finally:
             archive.close()
 
-        raise exceptions.InvalidDistribution(
-            'No METADATA in archive: %s' % fqn
-        )
+        raise exceptions.InvalidDistribution("No METADATA in archive: %s" % fqn)
 
     def parse(self, data):
         super().parse(data)

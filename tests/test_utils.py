@@ -27,14 +27,18 @@ def test_get_config(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+        fp.write(
+            textwrap.dedent(
+                """
             [distutils]
             index-servers = pypi
 
             [pypi]
             username = testuser
             password = testpassword
-        """))
+        """
+            )
+        )
 
     assert utils.get_config(pypirc) == {
         "pypi": {
@@ -53,11 +57,15 @@ def test_get_config_no_distutils(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+        fp.write(
+            textwrap.dedent(
+                """
             [pypi]
             username = testuser
             password = testpassword
-        """))
+        """
+            )
+        )
 
     assert utils.get_config(pypirc) == {
         "pypi": {
@@ -77,14 +85,18 @@ def test_get_config_no_section(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+        fp.write(
+            textwrap.dedent(
+                """
             [distutils]
             index-servers = pypi foo
 
             [pypi]
             username = testuser
             password = testpassword
-        """))
+        """
+            )
+        )
 
     assert utils.get_config(pypirc) == {
         "pypi": {
@@ -99,12 +111,16 @@ def test_get_config_override_pypi_url(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+        fp.write(
+            textwrap.dedent(
+                """
             [pypi]
             repository = http://pypiproxy
-        """))
+        """
+            )
+        )
 
-    assert utils.get_config(pypirc)['pypi']['repository'] == 'http://pypiproxy'
+    assert utils.get_config(pypirc)["pypi"]["repository"] == "http://pypiproxy"
 
 
 def test_get_config_missing(tmpdir):
@@ -119,7 +135,7 @@ def test_get_config_missing(tmpdir):
         "testpypi": {
             "repository": utils.TEST_REPOSITORY,
             "username": None,
-            "password": None
+            "password": None,
         },
     }
 
@@ -132,16 +148,20 @@ def test_empty_userpass(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
-        fp.write(textwrap.dedent("""
+        fp.write(
+            textwrap.dedent(
+                """
             [pypi]
             username=
             password=
-        """))
+        """
+            )
+        )
 
     config = utils.get_config(pypirc)
-    pypi = config['pypi']
+    pypi = config["pypi"]
 
-    assert pypi['username'] == pypi['password'] == ''
+    assert pypi["username"] == pypi["password"] == ""
 
 
 def test_get_repository_config_missing(tmpdir):
@@ -153,22 +173,19 @@ def test_get_repository_config_missing(tmpdir):
         "username": None,
         "password": None,
     }
-    assert (utils.get_repository_from_config(pypirc, 'foo', repository_url) ==
-            exp)
-    assert (utils.get_repository_from_config(pypirc, 'pypi', repository_url) ==
-            exp)
+    assert utils.get_repository_from_config(pypirc, "foo", repository_url) == exp
+    assert utils.get_repository_from_config(pypirc, "pypi", repository_url) == exp
     exp = {
-            "repository": utils.DEFAULT_REPOSITORY,
-            "username": None,
-            "password": None,
-        }
+        "repository": utils.DEFAULT_REPOSITORY,
+        "username": None,
+        "password": None,
+    }
     assert utils.get_repository_from_config(pypirc, "pypi") == exp
 
 
 def test_get_config_deprecated_pypirc():
     tests_dir = os.path.dirname(os.path.abspath(__file__))
-    deprecated_pypirc_path = os.path.join(tests_dir, 'fixtures',
-                                          'deprecated-pypirc')
+    deprecated_pypirc_path = os.path.join(tests_dir, "fixtures", "deprecated-pypirc")
 
     assert utils.get_config(deprecated_pypirc_path) == {
         "pypi": {
@@ -185,11 +202,11 @@ def test_get_config_deprecated_pypirc():
 
 
 @pytest.mark.parametrize(
-    ('cli_value', 'config', 'key', 'strategy', 'expected'),
+    ("cli_value", "config", "key", "strategy", "expected"),
     (
-        ('cli', {}, 'key', lambda: 'fallback', 'cli'),
-        (None, {'key': 'value'}, 'key', lambda: 'fallback', 'value'),
-        (None, {}, 'key', lambda: 'fallback', 'fallback'),
+        ("cli", {}, "key", lambda: "fallback", "cli"),
+        (None, {"key": "value"}, "key", lambda: "fallback", "value"),
+        (None, {}, "key", lambda: "fallback", "fallback"),
     ),
 )
 def test_get_userpass_value(cli_value, config, key, strategy, expected):
@@ -198,38 +215,30 @@ def test_get_userpass_value(cli_value, config, key, strategy, expected):
 
 
 @pytest.mark.parametrize(
-    ('env_name', 'default', 'environ', 'expected'),
+    ("env_name", "default", "environ", "expected"),
     [
-        ('MY_PASSWORD', None, {}, None),
-        ('MY_PASSWORD', None, {'MY_PASSWORD': 'foo'}, 'foo'),
-        ('URL', 'https://example.org', {}, 'https://example.org'),
-        ('URL', 'https://example.org', {'URL': 'https://pypi.org'},
-            'https://pypi.org'),
+        ("MY_PASSWORD", None, {}, None),
+        ("MY_PASSWORD", None, {"MY_PASSWORD": "foo"}, "foo"),
+        ("URL", "https://example.org", {}, "https://example.org"),
+        ("URL", "https://example.org", {"URL": "https://pypi.org"}, "https://pypi.org"),
     ],
 )
 def test_default_to_environment_action(env_name, default, environ, expected):
-    option_strings = ('-x', '--example')
-    dest = 'example'
+    option_strings = ("-x", "--example")
+    dest = "example"
     with helpers.set_env(**environ):
         action = utils.EnvironmentDefault(
-            env=env_name,
-            default=default,
-            option_strings=option_strings,
-            dest=dest,
+            env=env_name, default=default, option_strings=option_strings, dest=dest,
         )
     assert action.env == env_name
     assert action.default == expected
 
 
-@pytest.mark.parametrize('repo_url', [
-    "https://pypi.python.org",
-    "https://testpypi.python.org"
-])
+@pytest.mark.parametrize(
+    "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"]
+)
 def test_check_status_code_for_deprecated_pypi_url(repo_url):
-    response = pretend.stub(
-        status_code=410,
-        url=repo_url
-    )
+    response = pretend.stub(status_code=410, url=repo_url)
 
     # value of Verbose doesn't matter for this check
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):

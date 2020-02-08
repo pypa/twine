@@ -10,7 +10,6 @@ from . import exceptions
 
 
 class CredentialInput:
-
     def __init__(self, username: str = None, password: str = None):
         self.username = username
         self.password = password
@@ -31,7 +30,7 @@ class Resolver:
         return utils.get_userpass_value(
             self.input.username,
             self.config,
-            key='username',
+            key="username",
             prompt_strategy=self.username_from_keyring_or_prompt,
         )
 
@@ -41,13 +40,13 @@ class Resolver:
         return utils.get_userpass_value(
             self.input.password,
             self.config,
-            key='password',
+            key="password",
             prompt_strategy=self.password_from_keyring_or_prompt,
         )
 
     @property
     def system(self) -> Optional[str]:
-        return self.config['repository']
+        return self.config["repository"]
 
     def get_username_from_keyring(self) -> Optional[str]:
         try:
@@ -69,15 +68,11 @@ class Resolver:
         return None
 
     def username_from_keyring_or_prompt(self) -> str:
-        return (
-            self.get_username_from_keyring()
-            or self.prompt('username', input)
-        )
+        return self.get_username_from_keyring() or self.prompt("username", input)
 
     def password_from_keyring_or_prompt(self) -> str:
-        return (
-            self.get_password_from_keyring()
-            or self.prompt('password', getpass.getpass)
+        return self.get_password_from_keyring() or self.prompt(
+            "password", getpass.getpass
         )
 
     def prompt(self, what: str, how: Callable) -> str:

@@ -78,16 +78,15 @@ def _check_file(filename, render_warning_stream):
 
     if description_content_type is None:
         warnings.append(
-            '`long_description_content_type` missing.  '
-            'defaulting to `text/x-rst`.'
+            "`long_description_content_type` missing. defaulting to `text/x-rst`."
         )
-        description_content_type = 'text/x-rst'
+        description_content_type = "text/x-rst"
 
     content_type, params = cgi.parse_header(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
-    if description in {None, 'UNKNOWN\n\n\n'}:
-        warnings.append('`long_description` missing.')
+    if description in {None, "UNKNOWN\n\n\n"}:
+        warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
             description, stream=render_warning_stream, **params
@@ -101,10 +100,12 @@ def _check_file(filename, render_warning_stream):
 # TODO: Replace with textwrap.indent when Python 2 support is dropped
 def _indented(text, prefix):
     """Adds 'prefix' to all non-empty lines on 'text'."""
+
     def prefixed_lines():
         for line in text.splitlines(True):
             yield (prefix + line if line.strip() else line)
-    return ''.join(prefixed_lines())
+
+    return "".join(prefixed_lines())
 
 
 def check(dists, output_stream=sys.stdout):
@@ -138,7 +139,7 @@ def check(dists, output_stream=sys.stdout):
 
         # Print warnings after the status and/or error
         for message in warnings:
-            output_stream.write('  warning: ' + message + '\n')
+            output_stream.write("  warning: " + message + "\n")
 
     return failure
 

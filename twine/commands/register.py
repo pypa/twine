@@ -20,7 +20,7 @@ from twine import settings
 
 
 def register(register_settings, package):
-    repository_url = register_settings.repository_config['repository']
+    repository_url = register_settings.repository_config["repository"]
 
     print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
@@ -37,8 +37,7 @@ def register(register_settings, package):
 
     if resp.is_redirect:
         raise exceptions.RedirectDetected.from_args(
-            repository_url,
-            resp.headers["location"],
+            repository_url, resp.headers["location"],
         )
 
     resp.raise_for_status()
