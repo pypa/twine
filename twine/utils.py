@@ -11,14 +11,13 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Callable, DefaultDict, Dict, Optional
-
-import os
-import os.path
-import functools
 import argparse
 import collections
 import configparser
+import functools
+import os
+import os.path
+from typing import Callable, DefaultDict, Dict, Optional
 from urllib.parse import urlparse, urlunparse
 
 import requests

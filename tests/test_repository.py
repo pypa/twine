@@ -11,14 +11,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+from contextlib import contextmanager
+
+import pretend
+import pytest
 import requests
 
 from twine import repository
 from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
-
-import pretend
-import pytest
-from contextlib import contextmanager
 
 
 def test_gpg_signature_structure_is_preserved():

@@ -15,12 +15,11 @@
 import os.path
 import textwrap
 
-import pytest
 import pretend
-
-from twine import exceptions, utils
+import pytest
 
 import helpers
+from twine import exceptions, utils
 
 
 def test_get_config(tmpdir):

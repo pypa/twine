@@ -12,14 +12,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import cast, Optional
-
 import argparse
+from typing import Optional, cast
 
-from twine import exceptions
-from twine import repository
-from twine import utils
-from twine import auth
+from twine import auth, exceptions, repository, utils
 
 
 class Settings:

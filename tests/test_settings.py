@@ -1,4 +1,5 @@
 """Tests for the Settings class and module."""
+import argparse
 # Copyright 2018 Ian Stapleton Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -14,12 +15,10 @@
 # limitations under the License.
 import os.path
 import textwrap
-import argparse
-
-from twine import exceptions
-from twine import settings
 
 import pytest
+
+from twine import exceptions, settings
 
 
 def test_settings_takes_no_positional_arguments():
