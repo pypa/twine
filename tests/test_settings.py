@@ -12,14 +12,14 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import os.path
 import textwrap
-import argparse
+
+import pytest
 
 from twine import exceptions
 from twine import settings
-
-import pytest
 
 
 def test_settings_takes_no_positional_arguments():

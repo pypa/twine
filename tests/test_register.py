@@ -1,10 +1,10 @@
 from __future__ import unicode_literals
 
-import pytest
 import pretend
+import pytest
 
-from twine.commands import register
 from twine import exceptions
+from twine.commands import register
 
 
 # TODO: Copied from test_upload.py. Extract to helpers?

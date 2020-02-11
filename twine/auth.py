@@ -1,12 +1,12 @@
-import warnings
-import getpass
 import functools
-from typing import Optional, Callable
+import getpass
+from typing import Callable, Optional
+import warnings
 
 import keyring
 
-from . import utils
 from . import exceptions
+from . import utils
 
 
 class CredentialInput:

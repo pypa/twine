@@ -14,9 +14,9 @@
 import argparse
 import os.path
 
-from twine.package import PackageFile
 from twine import exceptions
 from twine import settings
+from twine.package import PackageFile
 
 
 def register(register_settings, package):

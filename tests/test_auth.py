@@ -1,10 +1,6 @@
 import pytest
 
-from twine import (
-    auth,
-    exceptions,
-    utils,
-)
+from twine import auth, exceptions, utils
 
 
 cred = auth.CredentialInput

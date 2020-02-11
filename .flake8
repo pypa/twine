@@ -1,5 +1,0 @@
-[flake8]
-# Matching black's default
-max-line-length = 88
-import-order-style = google
-application-import-names = twine,helpers

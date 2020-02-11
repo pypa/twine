@@ -13,9 +13,9 @@
 # limitations under the License.
 import argparse
 import cgi
+from io import StringIO
 import re
 import sys
-from io import StringIO
 
 import readme_renderer.rst
 

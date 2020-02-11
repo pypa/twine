@@ -11,21 +11,20 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, IO, Optional, Union, Sequence, Tuple
-
 import collections
 import hashlib
+from hashlib import blake2b
 import io
 import os
 import subprocess
-from hashlib import blake2b
+from typing import Dict, IO, Optional, Sequence, Tuple, Union
 
-import pkginfo
 import pkg_resources
+import pkginfo
 
+from twine import exceptions
 from twine.wheel import Wheel
 from twine.wininst import WinInst
-from twine import exceptions
 
 DIST_TYPES = {
     "bdist_wheel": Wheel,
