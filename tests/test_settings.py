@@ -1,5 +1,4 @@
 """Tests for the Settings class and module."""
-import argparse
 # Copyright 2018 Ian Stapleton Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,6 +12,7 @@ import argparse
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import os.path
 import textwrap
 
