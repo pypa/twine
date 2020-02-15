@@ -16,7 +16,8 @@ import pytest
 import requests
 
 import helpers
-from twine import cli, exceptions, package as package_file
+from twine import cli, exceptions
+from twine import package as package_file
 from twine.commands import upload
 
 SDIST_FIXTURE = "tests/fixtures/twine-1.5.0.tar.gz"
