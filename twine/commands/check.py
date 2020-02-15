@@ -19,7 +19,8 @@ import sys
 
 import readme_renderer.rst
 
-from twine import commands, package as package_file
+from twine import commands
+from twine import package as package_file
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None

@@ -15,7 +15,8 @@ import io
 
 import pretend
 
-from twine import commands, package as package_file
+from twine import commands
+from twine import package as package_file
 from twine.commands import check
 
 
