@@ -22,7 +22,7 @@ from requests import adapters
 from requests_toolbelt.utils import user_agent
 
 import twine
-from twine import package
+from twine import package as package_file
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
 
@@ -95,8 +95,8 @@ class Repository:
 
     @staticmethod
     def _convert_data_to_list_of_tuples(
-        data: Dict[str, package.MetadataValue]
-    ) -> List[Tuple[str, package.MetadataValue]]:
+        data: Dict[str, package_file.MetadataValue]
+    ) -> List[Tuple[str, package_file.MetadataValue]]:
         data_to_send = []
         for key, value in data.items():
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
@@ -114,11 +114,11 @@ class Repository:
         if clientcert:
             self.session.cert = clientcert
 
-    def register(self, pkg):
-        data = pkg.metadata_dictionary()
+    def register(self, package):
+        data = package.metadata_dictionary()
         data.update({":action": "submit", "protocol_version": "1"})
 
-        print(f"Registering {pkg.basefilename}")
+        print(f"Registering {package.basefilename}")
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
         encoder = requests_toolbelt.MultipartEncoder(data_to_send)
@@ -132,8 +132,8 @@ class Repository:
         resp.close()
         return resp
 
-    def _upload(self, pkg: package.PackageFile) -> requests.Response:
-        data = pkg.metadata_dictionary()
+    def _upload(self, package: package_file.PackageFile) -> requests.Response:
+        data = package.metadata_dictionary()
         data.update(
             {
                 # action
@@ -144,11 +144,11 @@ class Repository:
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
 
-        print(f"Uploading {pkg.basefilename}")
+        print(f"Uploading {package.basefilename}")
 
-        with open(pkg.filename, "rb") as fp:
+        with open(package.filename, "rb") as fp:
             data_to_send.append(
-                ("content", (pkg.basefilename, fp, "application/octet-stream"),)
+                ("content", (package.basefilename, fp, "application/octet-stream"),)
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
             with ProgressBar(
@@ -174,11 +174,11 @@ class Repository:
         return resp
 
     def upload(
-        self, pkg: package.PackageFile, max_redirects: int = 5
+        self, package: package_file.PackageFile, max_redirects: int = 5
     ) -> requests.Response:
         number_of_redirects = 0
         while number_of_redirects < max_redirects:
-            resp = self._upload(pkg)
+            resp = self._upload(package)
 
             if resp.status_code == requests.codes.OK:
                 return resp
@@ -198,21 +198,21 @@ class Repository:
         return resp
 
     def package_is_uploaded(
-        self, pkg: package.PackageFile, bypass_cache: bool = False
+        self, package: package_file.PackageFile, bypass_cache: bool = False
     ) -> bool:
         # NOTE(sigmavirus24): Not all indices are PyPI and pypi.io doesn't
         # have a similar interface for finding the package versions.
         if not self.url.startswith((LEGACY_PYPI, WAREHOUSE, OLD_WAREHOUSE)):
             return False
 
-        safe_name = pkg.safe_name
+        safe_name = package.safe_name
         releases = None
 
         if not bypass_cache:
             releases = self._releases_json_data.get(safe_name)
 
         if releases is None:
-            url = "{url}pypi/{pkg}/json".format(pkg=safe_name, url=LEGACY_PYPI)
+            url = "{url}pypi/{package}/json".format(package=safe_name, url=LEGACY_PYPI)
             headers = {"Accept": "application/json"}
             response = self.session.get(url, headers=headers)
             if response.status_code == 200:
@@ -221,10 +221,10 @@ class Repository:
                 releases = {}
             self._releases_json_data[safe_name] = releases
 
-        packages = releases.get(pkg.metadata.version, [])
+        packages = releases.get(package.metadata.version, [])
 
         for uploaded_package in packages:
-            if uploaded_package["filename"] == pkg.basefilename:
+            if uploaded_package["filename"] == package.basefilename:
                 return True
 
         return False
@@ -238,11 +238,11 @@ class Repository:
             return set()
 
         return {
-            "{}project/{}/{}/".format(url, pkg.safe_name, pkg.metadata.version)
-            for pkg in packages
+            "{}project/{}/{}/".format(url, package.safe_name, package.metadata.version)
+            for package in packages
         }
 
-    def verify_package_integrity(self, pkg: package.PackageFile):
+    def verify_package_integrity(self, package: package_file.PackageFile):
         # TODO(sigmavirus24): Add a way for users to download the package and
         # check it's hash against what it has locally.
         pass

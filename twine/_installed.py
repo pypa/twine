@@ -17,11 +17,11 @@ class Installed(pkginfo.Installed):
     def read(self):
         opj = os.path.join
         if self.package is not None:
-            pkg = self.package.__package__
-            if pkg is None:
-                pkg = self.package.__name__
-            egg_pattern = "%s*.egg-info" % pkg
-            dist_pattern = "%s*.dist-info" % pkg
+            package = self.package.__package__
+            if package is None:
+                package = self.package.__name__
+            egg_pattern = "%s*.egg-info" % package
+            dist_pattern = "%s*.dist-info" % package
             file = getattr(self.package, "__file__", None)
             if file is not None:
                 candidates = []

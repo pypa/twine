@@ -16,7 +16,7 @@ import pytest
 import requests
 
 import helpers
-from twine import cli, exceptions, package
+from twine import cli, exceptions, package as package_file
 from twine.commands import upload
 
 SDIST_FIXTURE = "tests/fixtures/twine-1.5.0.tar.gz"
@@ -35,7 +35,7 @@ def test_successful_upload(make_settings, capsys):
     )
 
     stub_repository = pretend.stub(
-        upload=lambda pkg: stub_response,
+        upload=lambda package: stub_response,
         close=lambda: None,
         release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
     )
@@ -68,7 +68,7 @@ def test_exception_for_http_status(verbose, make_settings, capsys):
     )
 
     stub_repository = pretend.stub(
-        upload=lambda pkg: stub_response, close=lambda: None,
+        upload=lambda package: stub_response, close=lambda: None,
     )
 
     upload_settings.create_repository = lambda: stub_repository
@@ -148,7 +148,9 @@ def test_exception_for_redirect(make_settings):
         headers={"location": "https://test.pypi.org/legacy/"},
     )
 
-    stub_repository = pretend.stub(upload=lambda pkg: stub_response, close=lambda: None)
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response, close=lambda: None
+    )
 
     upload_settings.create_repository = lambda: stub_repository
 
@@ -163,7 +165,7 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
 
     stub_repository = pretend.stub(
         # Short-circuit the upload, so no need for a stub response
-        package_is_uploaded=lambda pkg: True,
+        package_is_uploaded=lambda package: True,
         release_urls=lambda packages: {},
         close=lambda: None,
     )
@@ -187,9 +189,9 @@ def test_prints_skip_message_for_response(make_settings, capsys):
 
     stub_repository = pretend.stub(
         # Do the upload, triggering the error response
-        package_is_uploaded=lambda pkg: False,
+        package_is_uploaded=lambda package: False,
         release_urls=lambda packages: {},
-        upload=lambda pkg: stub_response,
+        upload=lambda package: stub_response,
         close=lambda: None,
     )
 
@@ -266,7 +268,7 @@ def test_skip_existing_skips_files_on_repository(response_kwargs):
     assert upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -283,7 +285,7 @@ def test_skip_upload_doesnt_match(response_kwargs):
     assert not upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -291,7 +293,7 @@ def test_skip_upload_respects_skip_existing():
     assert not upload.skip_upload(
         response=pretend.stub(),
         skip_existing=False,
-        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 

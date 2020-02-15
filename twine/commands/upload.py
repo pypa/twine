@@ -14,10 +14,10 @@
 import argparse
 import os.path
 
-from twine import commands, exceptions, package, settings, utils
+from twine import commands, exceptions, package as package_file, settings, utils
 
 
-def skip_upload(response, skip_existing, pkg):
+def skip_upload(response, skip_existing, package):
     if not skip_existing:
         return False
 
@@ -55,25 +55,27 @@ def upload(upload_settings, dists):
     uploaded_packages = []
 
     for filename in uploads:
-        pkg = package.PackageFile.from_filename(filename, upload_settings.comment)
+        package = package_file.PackageFile.from_filename(
+            filename, upload_settings.comment
+        )
         skip_message = "  Skipping {} because it appears to already exist".format(
-            pkg.basefilename
+            package.basefilename
         )
 
         # Note: The skip_existing check *needs* to be first, because otherwise
         #       we're going to generate extra HTTP requests against a hardcoded
         #       URL for no reason.
-        if upload_settings.skip_existing and repository.package_is_uploaded(pkg):
+        if upload_settings.skip_existing and repository.package_is_uploaded(package):
             print(skip_message)
             continue
 
-        signed_name = pkg.signed_basefilename
+        signed_name = package.signed_basefilename
         if signed_name in signatures:
-            pkg.add_gpg_signature(signatures[signed_name], signed_name)
+            package.add_gpg_signature(signatures[signed_name], signed_name)
         elif upload_settings.sign:
-            pkg.sign(upload_settings.sign_with, upload_settings.identity)
+            package.sign(upload_settings.sign_with, upload_settings.identity)
 
-        resp = repository.upload(pkg)
+        resp = repository.upload(package)
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
@@ -84,13 +86,13 @@ def upload(upload_settings, dists):
                 repository_url, resp.headers["location"],
             )
 
-        if skip_upload(resp, upload_settings.skip_existing, pkg):
+        if skip_upload(resp, upload_settings.skip_existing, package):
             print(skip_message)
             continue
 
         utils.check_status_code(resp, upload_settings.verbose)
 
-        uploaded_packages.append(pkg)
+        uploaded_packages.append(package)
 
     release_urls = repository.release_urls(uploaded_packages)
     if release_urls:

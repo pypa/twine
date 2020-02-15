@@ -19,7 +19,7 @@ import sys
 
 import readme_renderer.rst
 
-from twine import commands, package
+from twine import commands, package as package_file
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
@@ -69,9 +69,9 @@ def _check_file(filename, render_warning_stream):
     warnings = []
     is_ok = True
 
-    pkg = package.PackageFile.from_filename(filename, comment=None)
+    package = package_file.PackageFile.from_filename(filename, comment=None)
 
-    metadata = pkg.metadata_dictionary()
+    metadata = package.metadata_dictionary()
     description = metadata["description"]
     description_content_type = metadata["description_content_type"]
 

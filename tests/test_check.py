@@ -15,7 +15,7 @@ import io
 
 import pretend
 
-from twine import commands, package
+from twine import commands, package as package_file
 from twine.commands import check
 
 
@@ -53,7 +53,7 @@ def test_check_no_distributions(monkeypatch):
 
 def test_check_passing_distribution(monkeypatch):
     renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: "valid"))
-    pkg = pretend.stub(
+    package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": "blah",
             "description_content_type": "text/markdown",
@@ -65,7 +65,9 @@ def test_check_passing_distribution(monkeypatch):
     monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        package, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: pkg),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
@@ -75,7 +77,7 @@ def test_check_passing_distribution(monkeypatch):
 
 
 def test_check_no_description(monkeypatch, capsys):
-    pkg = pretend.stub(
+    package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": None,
             "description_content_type": None,
@@ -84,7 +86,9 @@ def test_check_no_description(monkeypatch, capsys):
 
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        package, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: pkg),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
 
     # used to crash with `AttributeError`
@@ -100,7 +104,7 @@ def test_check_no_description(monkeypatch, capsys):
 
 def test_check_failing_distribution(monkeypatch):
     renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
-    pkg = pretend.stub(
+    package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": "blah",
             "description_content_type": "text/markdown",
@@ -112,7 +116,9 @@ def test_check_failing_distribution(monkeypatch):
     monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        package, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: pkg),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 

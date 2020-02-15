@@ -113,9 +113,9 @@ def test_package_is_uploaded_404s():
         password="password",
     )
     repo.session = pretend.stub(get=lambda url, headers: response_with(status_code=404))
-    pkg = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(pkg) is False
+    assert repo.package_is_uploaded(package) is False
 
 
 def test_package_is_uploaded_200s_with_no_releases():
@@ -129,9 +129,9 @@ def test_package_is_uploaded_200s_with_no_releases():
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
         ),
     )
-    pkg = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(pkg) is False
+    assert repo.package_is_uploaded(package) is False
 
 
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
@@ -167,7 +167,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
     def dictfunc():
         return {"name": "fake"}
 
-    pkg = pretend.stub(
+    package = pretend.stub(
         safe_name="fake",
         metadata=pretend.stub(version="2.12.0"),
         basefilename="fake.whl",
@@ -175,7 +175,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         metadata_dictionary=dictfunc,
     )
 
-    repo.upload(pkg)
+    repo.upload(package)
 
 
 @pytest.mark.parametrize(

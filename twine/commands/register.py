@@ -14,20 +14,22 @@
 import argparse
 import os.path
 
-from twine import exceptions, package, settings
+from twine import exceptions, package as package_file, settings
 
 
-def register(register_settings, pkg):
+def register(register_settings, package):
     repository_url = register_settings.repository_config["repository"]
 
     print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
 
-    if not os.path.exists(pkg):
-        raise exceptions.PackageNotFound(f'"{pkg}" does not exist on the file system.')
+    if not os.path.exists(package):
+        raise exceptions.PackageNotFound(
+            f'"{package}" does not exist on the file system.'
+        )
 
     resp = repository.register(
-        package.PackageFile.from_filename(pkg, register_settings.comment)
+        package_file.PackageFile.from_filename(package, register_settings.comment)
     )
     repository.close()
 
