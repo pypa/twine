@@ -12,8 +12,7 @@
 
 import pretend
 
-from twine import __main__ as dunder_main
-from twine import cli, exceptions
+from twine import __main__ as dunder_main, cli, exceptions
 
 
 def test_exception_handling(monkeypatch):

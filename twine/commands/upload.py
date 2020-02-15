@@ -14,9 +14,7 @@
 import argparse
 import os.path
 
-from twine import commands, exceptions
-from twine import package as package_file
-from twine import settings, utils
+from twine import commands, exceptions, package as package_file, settings, utils
 
 
 def skip_upload(response, skip_existing, package):

@@ -14,8 +14,7 @@
 import pretend
 import pytest
 
-from twine import exceptions
-from twine import package as package_file
+from twine import exceptions, package as package_file
 
 
 def test_sign_file(monkeypatch):
