@@ -2,8 +2,8 @@ import os
 
 import pytest
 
-from twine.commands import _find_dists, _group_wheel_files_first
 from twine import exceptions
+from twine.commands import _find_dists, _group_wheel_files_first
 
 
 def test_ensure_wheel_files_uploaded_first():

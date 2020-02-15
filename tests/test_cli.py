@@ -14,8 +14,8 @@
 import pretend
 import pytest
 
-from twine import cli
 import twine.commands.upload
+from twine import cli
 
 
 def test_dispatch_to_subcommand(monkeypatch):

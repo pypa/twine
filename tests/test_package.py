@@ -11,10 +11,10 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from twine import package, exceptions
-
 import pretend
 import pytest
+
+from twine import exceptions, package
 
 
 def test_sign_file(monkeypatch):

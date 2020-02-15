@@ -12,13 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import pkg_resources
-import setuptools
 
-import tqdm
+import pkg_resources
+import pkginfo
 import requests
 import requests_toolbelt
-import pkginfo
+import setuptools
+import tqdm
 
 import twine
 from twine._installed import Installed

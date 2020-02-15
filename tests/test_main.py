@@ -10,10 +10,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import pretend
+
 from twine import __main__ as dunder_main
 from twine import exceptions
-
-import pretend
 
 
 def test_exception_handling(monkeypatch):

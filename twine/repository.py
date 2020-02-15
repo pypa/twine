@@ -11,10 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-from typing import Dict, List, Optional, Tuple
 import sys
-
-from tqdm import tqdm
+from typing import Dict, List, Optional, Tuple
 
 import requests
 from requests import codes
@@ -23,9 +21,10 @@ from requests.models import Response
 from requests.packages.urllib3 import util
 from requests_toolbelt.multipart import MultipartEncoder, MultipartEncoderMonitor
 from requests_toolbelt.utils import user_agent
+from tqdm import tqdm
 
-from twine.package import PackageFile, MetadataValue
 import twine
+from twine.package import MetadataValue, PackageFile
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
 
