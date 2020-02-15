@@ -13,14 +13,13 @@
 # limitations under the License.
 import argparse
 import cgi
+import io
 import re
 import sys
-from io import StringIO
 
 import readme_renderer.rst
 
-from twine.commands import _find_dists
-from twine.package import PackageFile
+from twine import commands, package
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
@@ -44,7 +43,7 @@ _REPORT_RE = re.compile(
 
 class _WarningStream:
     def __init__(self):
-        self.output = StringIO()
+        self.output = io.StringIO()
 
     def write(self, text):
         matched = _REPORT_RE.search(text)
@@ -70,9 +69,9 @@ def _check_file(filename, render_warning_stream):
     warnings = []
     is_ok = True
 
-    package = PackageFile.from_filename(filename, comment=None)
+    pkg = package.PackageFile.from_filename(filename, comment=None)
 
-    metadata = package.metadata_dictionary()
+    metadata = pkg.metadata_dictionary()
     description = metadata["description"]
     description_content_type = metadata["description_content_type"]
 
@@ -109,7 +108,7 @@ def _indented(text, prefix):
 
 
 def check(dists, output_stream=sys.stdout):
-    uploads = [i for i in _find_dists(dists) if not i.endswith(".asc")]
+    uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
         return False

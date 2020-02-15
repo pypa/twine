@@ -28,7 +28,7 @@ def test_exception_for_redirect(make_settings):
     )
 
     stub_repository = pretend.stub(
-        register=lambda package: stub_response, close=lambda: None
+        register=lambda pkg: stub_response, close=lambda: None
     )
 
     register_settings.create_repository = lambda: stub_repository

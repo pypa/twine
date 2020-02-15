@@ -2,14 +2,14 @@ import os
 import re
 import zipfile
 
-from pkginfo.distribution import Distribution
+from pkginfo import distribution
 
 from twine import exceptions
 
 wininst_file_re = re.compile(r".*py(?P<pyver>\d+\.\d+)\.exe$")
 
 
-class WinInst(Distribution):
+class WinInst(distribution.Distribution):
     def __init__(self, filename, metadata_version=None):
         self.filename = filename
         self.metadata_version = metadata_version

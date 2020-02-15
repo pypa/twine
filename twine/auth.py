@@ -5,7 +5,7 @@ from typing import Callable, Optional
 
 import keyring
 
-from . import exceptions, utils
+from twine import exceptions, utils
 
 
 class CredentialInput:

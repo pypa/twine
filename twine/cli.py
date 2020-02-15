@@ -21,7 +21,7 @@ import setuptools
 import tqdm
 
 import twine
-from twine._installed import Installed
+from twine import _installed
 
 
 def _registered_commands(group="twine.registered_commands"):
@@ -31,7 +31,7 @@ def _registered_commands(group="twine.registered_commands"):
 
 def list_dependencies_and_versions():
     return [
-        ("pkginfo", Installed(pkginfo).version),
+        ("pkginfo", _installed.Installed(pkginfo).version),
         ("requests", requests.__version__),
         ("setuptools", setuptools.__version__),
         ("requests-toolbelt", requests_toolbelt.__version__),

@@ -14,13 +14,13 @@
 import pretend
 import pytest
 
-import twine.commands.upload
 from twine import cli
+from twine.commands import upload
 
 
 def test_dispatch_to_subcommand(monkeypatch):
     replaced_main = pretend.call_recorder(lambda args: None)
-    monkeypatch.setattr(twine.commands.upload, "main", replaced_main)
+    monkeypatch.setattr(upload, "main", replaced_main)
 
     cli.dispatch(["upload", "path/to/file"])
 

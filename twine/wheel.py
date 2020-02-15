@@ -11,13 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
 import os
 import re
 import zipfile
-from io import StringIO
 
 from pkginfo import distribution
-from pkginfo.distribution import Distribution
 
 from twine import exceptions
 
@@ -34,7 +33,7 @@ wheel_file_re = re.compile(
 )
 
 
-class Wheel(Distribution):
+class Wheel(distribution.Distribution):
     def __init__(self, filename, metadata_version=None):
         self.filename = filename
         self.basefilename = os.path.basename(self.filename)
@@ -81,6 +80,6 @@ class Wheel(Distribution):
     def parse(self, data):
         super().parse(data)
 
-        fp = StringIO(distribution.must_decode(data))
+        fp = io.StringIO(distribution.must_decode(data))
         msg = distribution.parse(fp)
         self.description = msg.get_payload()

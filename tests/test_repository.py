@@ -17,8 +17,7 @@ import pretend
 import pytest
 import requests
 
-from twine import repository
-from twine.utils import DEFAULT_REPOSITORY, TEST_REPOSITORY
+from twine import repository, utils
 
 
 def test_gpg_signature_structure_is_preserved():
@@ -57,7 +56,9 @@ def test_iterables_are_flattened():
 
 def test_set_client_certificate():
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY, username="username", password="password",
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
     )
 
     assert repo.session.cert is None
@@ -68,7 +69,9 @@ def test_set_client_certificate():
 
 def test_set_certificate_authority():
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY, username="username", password="password",
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
     )
 
     assert repo.session.verify is True
@@ -79,7 +82,9 @@ def test_set_certificate_authority():
 
 def test_make_user_agent_string():
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY, username="username", password="password",
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
     )
 
     assert "User-Agent" in repo.session.headers
@@ -103,26 +108,30 @@ def response_with(**kwattrs):
 
 def test_package_is_uploaded_404s():
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY, username="username", password="password",
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
     )
     repo.session = pretend.stub(get=lambda url, headers: response_with(status_code=404))
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    pkg = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(package) is False
+    assert repo.package_is_uploaded(pkg) is False
 
 
 def test_package_is_uploaded_200s_with_no_releases():
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY, username="username", password="password",
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
     )
     repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
         ),
     )
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    pkg = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(package) is False
+    assert repo.package_is_uploaded(pkg) is False
 
 
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
@@ -142,7 +151,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
 
     monkeypatch.setattr(repository, "ProgressBar", progressbarstub)
     repo = repository.Repository(
-        repository_url=DEFAULT_REPOSITORY,
+        repository_url=utils.DEFAULT_REPOSITORY,
         username="username",
         password="password",
         disable_progress_bar=disable_progress_bar,
@@ -158,7 +167,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
     def dictfunc():
         return {"name": "fake"}
 
-    package = pretend.stub(
+    pkg = pretend.stub(
         safe_name="fake",
         metadata=pretend.stub(version="2.12.0"),
         basefilename="fake.whl",
@@ -166,7 +175,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         metadata_dictionary=dictfunc,
     )
 
-    repo.upload(package)
+    repo.upload(pkg)
 
 
 @pytest.mark.parametrize(
@@ -175,25 +184,25 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         # Single package
         (
             [("fake", "2.12.0")],
-            DEFAULT_REPOSITORY,
+            utils.DEFAULT_REPOSITORY,
             {"https://pypi.org/project/fake/2.12.0/"},
         ),
         # Single package to testpypi
         (
             [("fake", "2.12.0")],
-            TEST_REPOSITORY,
+            utils.TEST_REPOSITORY,
             {"https://test.pypi.org/project/fake/2.12.0/"},
         ),
         # Multiple packages (faking a wheel and an sdist)
         (
             [("fake", "2.12.0"), ("fake", "2.12.0")],
-            DEFAULT_REPOSITORY,
+            utils.DEFAULT_REPOSITORY,
             {"https://pypi.org/project/fake/2.12.0/"},
         ),
         # Multiple releases
         (
             [("fake", "2.12.0"), ("fake", "2.12.1")],
-            DEFAULT_REPOSITORY,
+            utils.DEFAULT_REPOSITORY,
             {
                 "https://pypi.org/project/fake/2.12.0/",
                 "https://pypi.org/project/fake/2.12.1/",
@@ -202,7 +211,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         # Not pypi
         ([("fake", "2.12.0")], "http://devpi.example.com", set(),),
         # No packages
-        ([], DEFAULT_REPOSITORY, set(),),
+        ([], utils.DEFAULT_REPOSITORY, set(),),
     ],
 )
 def test_release_urls(package_meta, repository_url, release_urls):

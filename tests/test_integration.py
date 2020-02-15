@@ -1,4 +1,4 @@
-from twine.cli import dispatch
+from twine import cli
 
 
 def test_devpi_upload(devpi_server, uploadable_dist):
@@ -12,7 +12,7 @@ def test_devpi_upload(devpi_server, uploadable_dist):
         devpi_server.password,
         str(uploadable_dist),
     ]
-    dispatch(command)
+    cli.dispatch(command)
 
 
 twine_sampleproject_token = (
@@ -35,7 +35,7 @@ def test_pypi_upload(sampleproject_dist):
         twine_sampleproject_token,
         str(sampleproject_dist),
     ]
-    dispatch(command)
+    cli.dispatch(command)
 
 
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
@@ -49,4 +49,4 @@ def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
         "any",
         str(uploadable_dist),
     ]
-    dispatch(command)
+    cli.dispatch(command)

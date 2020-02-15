@@ -16,19 +16,16 @@ import hashlib
 import io
 import os
 import subprocess
-from hashlib import blake2b
 from typing import IO, Dict, Optional, Sequence, Tuple, Union
 
 import pkg_resources
 import pkginfo
 
-from twine import exceptions
-from twine.wheel import Wheel
-from twine.wininst import WinInst
+from twine import exceptions, wheel, wininst
 
 DIST_TYPES = {
-    "bdist_wheel": Wheel,
-    "bdist_wininst": WinInst,
+    "bdist_wheel": wheel.Wheel,
+    "bdist_wininst": wininst.WinInst,
     "bdist_egg": pkginfo.BDist,
     "sdist": pkginfo.SDist,
 }
@@ -217,9 +214,7 @@ class HashManager:
 
         self._sha2_hasher = hashlib.sha256()
 
-        self._blake_hasher = None
-        if blake2b is not None:
-            self._blake_hasher = blake2b(digest_size=256 // 8)
+        self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
 
     def _md5_update(self, content: bytes) -> None:
         if self._md5_hasher is not None:

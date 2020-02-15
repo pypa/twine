@@ -225,17 +225,6 @@ def test_fips_hash_manager(monkeypatch):
     assert hasher.hexdigest() == hashes
 
 
-def test_no_blake2_hash_manager(monkeypatch):
-    """Verify the behaviour with missing blake2."""
-    monkeypatch.setattr(package, "blake2b", None)
-
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
-    hasher = package.HashManager(filename)
-    hasher.hash()
-    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
-    assert hasher.hexdigest() == hashes
-
-
 def test_pkginfo_returns_no_metadata(monkeypatch):
     """
     Fail gracefully if pkginfo can't interpret the metadata (possibly due to

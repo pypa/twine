@@ -15,16 +15,14 @@ import sys
 from typing import Dict, List, Optional, Tuple
 
 import requests
-from requests import codes
-from requests.adapters import HTTPAdapter
-from requests.models import Response
-from requests.packages.urllib3 import util
-from requests_toolbelt.multipart import MultipartEncoder, MultipartEncoderMonitor
+import requests_toolbelt
+import tqdm
+import urllib3
+from requests import adapters
 from requests_toolbelt.utils import user_agent
-from tqdm import tqdm
 
 import twine
-from twine.package import MetadataValue, PackageFile
+from twine import package
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
 
@@ -36,7 +34,7 @@ TEST_WAREHOUSE = "https://test.pypi.org/"
 WAREHOUSE_WEB = "https://pypi.org/"
 
 
-class ProgressBar(tqdm):
+class ProgressBar(tqdm.tqdm):
     def update_to(self, n):
         """Update the bar in the way compatible with requests-toolbelt.
 
@@ -71,14 +69,14 @@ class Repository:
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod
-    def _make_adapter_with_retries() -> HTTPAdapter:
-        retry = util.Retry(
+    def _make_adapter_with_retries() -> adapters.HTTPAdapter:
+        retry = urllib3.Retry(
             connect=5,
             total=10,
             method_whitelist=["GET"],
             status_forcelist=[500, 501, 502, 503],
         )
-        return HTTPAdapter(max_retries=retry)
+        return adapters.HTTPAdapter(max_retries=retry)
 
     @staticmethod
     def _make_user_agent_string() -> str:
@@ -97,8 +95,8 @@ class Repository:
 
     @staticmethod
     def _convert_data_to_list_of_tuples(
-        data: Dict[str, MetadataValue]
-    ) -> List[Tuple[str, MetadataValue]]:
+        data: Dict[str, package.MetadataValue]
+    ) -> List[Tuple[str, package.MetadataValue]]:
         data_to_send = []
         for key, value in data.items():
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
@@ -116,14 +114,14 @@ class Repository:
         if clientcert:
             self.session.cert = clientcert
 
-    def register(self, package):
-        data = package.metadata_dictionary()
+    def register(self, pkg):
+        data = pkg.metadata_dictionary()
         data.update({":action": "submit", "protocol_version": "1"})
 
-        print(f"Registering {package.basefilename}")
+        print(f"Registering {pkg.basefilename}")
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
-        encoder = MultipartEncoder(data_to_send)
+        encoder = requests_toolbelt.MultipartEncoder(data_to_send)
         resp = self.session.post(
             self.url,
             data=encoder,
@@ -134,8 +132,8 @@ class Repository:
         resp.close()
         return resp
 
-    def _upload(self, package: PackageFile) -> Response:
-        data = package.metadata_dictionary()
+    def _upload(self, pkg: package.PackageFile) -> requests.Response:
+        data = pkg.metadata_dictionary()
         data.update(
             {
                 # action
@@ -146,13 +144,13 @@ class Repository:
 
         data_to_send = self._convert_data_to_list_of_tuples(data)
 
-        print(f"Uploading {package.basefilename}")
+        print(f"Uploading {pkg.basefilename}")
 
-        with open(package.filename, "rb") as fp:
+        with open(pkg.filename, "rb") as fp:
             data_to_send.append(
-                ("content", (package.basefilename, fp, "application/octet-stream"),)
+                ("content", (pkg.basefilename, fp, "application/octet-stream"),)
             )
-            encoder = MultipartEncoder(data_to_send)
+            encoder = requests_toolbelt.MultipartEncoder(data_to_send)
             with ProgressBar(
                 total=encoder.len,
                 unit="B",
@@ -162,7 +160,7 @@ class Repository:
                 file=sys.stdout,
                 disable=self.disable_progress_bar,
             ) as bar:
-                monitor = MultipartEncoderMonitor(
+                monitor = requests_toolbelt.MultipartEncoderMonitor(
                     encoder, lambda monitor: bar.update_to(monitor.bytes_read)
                 )
 
@@ -175,12 +173,14 @@ class Repository:
 
         return resp
 
-    def upload(self, package: PackageFile, max_redirects: int = 5) -> Response:
+    def upload(
+        self, pkg: package.PackageFile, max_redirects: int = 5
+    ) -> requests.Response:
         number_of_redirects = 0
         while number_of_redirects < max_redirects:
-            resp = self._upload(package)
+            resp = self._upload(pkg)
 
-            if resp.status_code == codes.OK:
+            if resp.status_code == requests.codes.OK:
                 return resp
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
@@ -198,21 +198,21 @@ class Repository:
         return resp
 
     def package_is_uploaded(
-        self, package: PackageFile, bypass_cache: bool = False
+        self, pkg: package.PackageFile, bypass_cache: bool = False
     ) -> bool:
         # NOTE(sigmavirus24): Not all indices are PyPI and pypi.io doesn't
         # have a similar interface for finding the package versions.
         if not self.url.startswith((LEGACY_PYPI, WAREHOUSE, OLD_WAREHOUSE)):
             return False
 
-        safe_name = package.safe_name
+        safe_name = pkg.safe_name
         releases = None
 
         if not bypass_cache:
             releases = self._releases_json_data.get(safe_name)
 
         if releases is None:
-            url = "{url}pypi/{package}/json".format(package=safe_name, url=LEGACY_PYPI)
+            url = "{url}pypi/{pkg}/json".format(pkg=safe_name, url=LEGACY_PYPI)
             headers = {"Accept": "application/json"}
             response = self.session.get(url, headers=headers)
             if response.status_code == 200:
@@ -221,10 +221,10 @@ class Repository:
                 releases = {}
             self._releases_json_data[safe_name] = releases
 
-        packages = releases.get(package.metadata.version, [])
+        packages = releases.get(pkg.metadata.version, [])
 
         for uploaded_package in packages:
-            if uploaded_package["filename"] == package.basefilename:
+            if uploaded_package["filename"] == pkg.basefilename:
                 return True
 
         return False
@@ -238,11 +238,11 @@ class Repository:
             return set()
 
         return {
-            "{}project/{}/{}/".format(url, package.safe_name, package.metadata.version)
-            for package in packages
+            "{}project/{}/{}/".format(url, pkg.safe_name, pkg.metadata.version)
+            for pkg in packages
         }
 
-    def verify_package_integrity(self, package: PackageFile):
+    def verify_package_integrity(self, pkg: package.PackageFile):
         # TODO(sigmavirus24): Add a way for users to download the package and
         # check it's hash against what it has locally.
         pass

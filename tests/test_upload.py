@@ -13,10 +13,9 @@
 # limitations under the License.
 import pretend
 import pytest
-from requests.exceptions import HTTPError
+import requests
 
 import helpers
-import twine
 from twine import cli, exceptions, package
 from twine.commands import upload
 
@@ -36,7 +35,7 @@ def test_successful_upload(make_settings, capsys):
     )
 
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response,
+        upload=lambda pkg: stub_response,
         close=lambda: None,
         release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
     )
@@ -65,16 +64,16 @@ def test_exception_for_http_status(verbose, make_settings, capsys):
         is_redirect=False,
         status_code=403,
         text="Invalid or non-existent authentication information",
-        raise_for_status=pretend.raiser(HTTPError),
+        raise_for_status=pretend.raiser(requests.HTTPError),
     )
 
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response, close=lambda: None,
+        upload=lambda pkg: stub_response, close=lambda: None,
     )
 
     upload_settings.create_repository = lambda: stub_repository
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(requests.HTTPError):
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
     captured = capsys.readouterr()
@@ -149,9 +148,7 @@ def test_exception_for_redirect(make_settings):
         headers={"location": "https://test.pypi.org/legacy/"},
     )
 
-    stub_repository = pretend.stub(
-        upload=lambda package: stub_response, close=lambda: None
-    )
+    stub_repository = pretend.stub(upload=lambda pkg: stub_response, close=lambda: None)
 
     upload_settings.create_repository = lambda: stub_repository
 
@@ -166,7 +163,7 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
 
     stub_repository = pretend.stub(
         # Short-circuit the upload, so no need for a stub response
-        package_is_uploaded=lambda package: True,
+        package_is_uploaded=lambda pkg: True,
         release_urls=lambda packages: {},
         close=lambda: None,
     )
@@ -190,9 +187,9 @@ def test_prints_skip_message_for_response(make_settings, capsys):
 
     stub_repository = pretend.stub(
         # Do the upload, triggering the error response
-        package_is_uploaded=lambda package: False,
+        package_is_uploaded=lambda pkg: False,
         release_urls=lambda packages: {},
-        upload=lambda package: stub_response,
+        upload=lambda pkg: stub_response,
         close=lambda: None,
     )
 
@@ -269,7 +266,7 @@ def test_skip_existing_skips_files_on_repository(response_kwargs):
     assert upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -286,7 +283,7 @@ def test_skip_upload_doesnt_match(response_kwargs):
     assert not upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -294,7 +291,7 @@ def test_skip_upload_respects_skip_existing():
     assert not upload.skip_upload(
         response=pretend.stub(),
         skip_existing=False,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        pkg=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -303,7 +300,7 @@ def test_values_from_env(monkeypatch):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
-    monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
+    monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
         "TWINE_USERNAME": "pypiuser",
         "TWINE_PASSWORD": "pypipassword",
@@ -327,7 +324,7 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     # override defaults to use incorrect URL
     upload_settings.repository_config["repository"] = repo_url
 
-    with pytest.raises(twine.exceptions.InvalidPyPIUploadURL):
+    with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(
             upload_settings,
             [WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE],
