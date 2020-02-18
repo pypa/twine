@@ -18,7 +18,8 @@ import textwrap
 
 import pytest
 
-from twine import exceptions, settings
+from twine import exceptions
+from twine import settings
 
 
 def test_settings_takes_no_positional_arguments():

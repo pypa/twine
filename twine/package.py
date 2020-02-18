@@ -16,12 +16,19 @@ import hashlib
 import io
 import os
 import subprocess
-from typing import IO, Dict, Optional, Sequence, Tuple, Union
+from typing import IO
+from typing import Dict
+from typing import Optional
+from typing import Sequence
+from typing import Tuple
+from typing import Union
 
 import pkg_resources
 import pkginfo
 
-from twine import exceptions, wheel, wininst
+from twine import exceptions
+from twine import wheel
+from twine import wininst
 
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,

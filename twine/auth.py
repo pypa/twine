@@ -1,11 +1,13 @@
 import functools
 import getpass
 import warnings
-from typing import Callable, Optional
+from typing import Callable
+from typing import Optional
 
 import keyring
 
-from twine import exceptions, utils
+from twine import exceptions
+from twine import utils
 
 
 class CredentialInput:

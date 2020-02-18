@@ -17,7 +17,8 @@ import pretend
 import pytest
 import requests
 
-from twine import repository, utils
+from twine import repository
+from twine import utils
 
 
 def test_gpg_signature_structure_is_preserved():

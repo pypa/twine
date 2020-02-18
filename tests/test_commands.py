@@ -2,7 +2,8 @@ import os
 
 import pytest
 
-from twine import commands, exceptions
+from twine import commands
+from twine import exceptions
 
 
 def test_ensure_wheel_files_uploaded_first():

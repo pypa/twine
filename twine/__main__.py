@@ -16,7 +16,8 @@ import sys
 
 import requests
 
-from twine import cli, exceptions
+from twine import cli
+from twine import exceptions
 
 
 def main():
