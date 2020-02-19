@@ -6,3 +6,4 @@
 #     git config blame.ignoreRevsFile .git-blame-ignore-revs
 
 a12ad693137d82770e6118ea8d90955e2c753305  # Format twine and tests with black
+f468612c021eae225b07f1b654bdb620d1500bf1  # Sort imports with isort
