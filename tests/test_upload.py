@@ -13,11 +13,12 @@
 # limitations under the License.
 import pretend
 import pytest
-from requests.exceptions import HTTPError
+import requests
 
 import helpers
-import twine
-from twine import cli, exceptions, package
+from twine import cli
+from twine import exceptions
+from twine import package as package_file
 from twine.commands import upload
 
 SDIST_FIXTURE = "tests/fixtures/twine-1.5.0.tar.gz"
@@ -65,7 +66,7 @@ def test_exception_for_http_status(verbose, make_settings, capsys):
         is_redirect=False,
         status_code=403,
         text="Invalid or non-existent authentication information",
-        raise_for_status=pretend.raiser(HTTPError),
+        raise_for_status=pretend.raiser(requests.HTTPError),
     )
 
     stub_repository = pretend.stub(
@@ -74,7 +75,7 @@ def test_exception_for_http_status(verbose, make_settings, capsys):
 
     upload_settings.create_repository = lambda: stub_repository
 
-    with pytest.raises(HTTPError):
+    with pytest.raises(requests.HTTPError):
         upload.upload(upload_settings, [WHEEL_FIXTURE])
 
     captured = capsys.readouterr()
@@ -269,7 +270,7 @@ def test_skip_existing_skips_files_on_repository(response_kwargs):
     assert upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -286,7 +287,7 @@ def test_skip_upload_doesnt_match(response_kwargs):
     assert not upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -294,7 +295,7 @@ def test_skip_upload_respects_skip_existing():
     assert not upload.skip_upload(
         response=pretend.stub(),
         skip_existing=False,
-        package=package.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
     )
 
 
@@ -303,7 +304,7 @@ def test_values_from_env(monkeypatch):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
-    monkeypatch.setattr(twine.commands.upload, "upload", replaced_upload)
+    monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
         "TWINE_USERNAME": "pypiuser",
         "TWINE_PASSWORD": "pypipassword",
@@ -327,7 +328,7 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     # override defaults to use incorrect URL
     upload_settings.repository_config["repository"] = repo_url
 
-    with pytest.raises(twine.exceptions.InvalidPyPIUploadURL):
+    with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(
             upload_settings,
             [WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE],

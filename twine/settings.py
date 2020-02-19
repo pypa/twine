@@ -13,9 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-from typing import Optional, cast
+from typing import Optional
+from typing import cast
 
-from twine import auth, exceptions, repository, utils
+from twine import auth
+from twine import exceptions
+from twine import repository
+from twine import utils
 
 
 class Settings:

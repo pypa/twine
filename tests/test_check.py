@@ -11,8 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
+
 import pretend
 
+from twine import commands
+from twine import package as package_file
 from twine.commands import check
 
 
@@ -40,9 +44,9 @@ class TestWarningStream:
 
 
 def test_check_no_distributions(monkeypatch):
-    stream = check.StringIO()
+    stream = io.StringIO()
 
-    monkeypatch.setattr(check, "_find_dists", lambda a: [])
+    monkeypatch.setattr(commands, "_find_dists", lambda a: [])
 
     assert not check.check("dist/*", output_stream=stream)
     assert stream.getvalue() == "No files to check.\n"
@@ -56,13 +60,15 @@ def test_check_passing_distribution(monkeypatch):
             "description_content_type": "text/markdown",
         }
     )
-    output_stream = check.StringIO()
+    output_stream = io.StringIO()
     warning_stream = ""
 
     monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(check, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        check, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: package),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
@@ -79,13 +85,15 @@ def test_check_no_description(monkeypatch, capsys):
         }
     )
 
-    monkeypatch.setattr(check, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        check, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: package),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
 
     # used to crash with `AttributeError`
-    output_stream = check.StringIO()
+    output_stream = io.StringIO()
     check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: PASSED, with warnings\n"
@@ -103,13 +111,15 @@ def test_check_failing_distribution(monkeypatch):
             "description_content_type": "text/markdown",
         }
     )
-    output_stream = check.StringIO()
+    output_stream = io.StringIO()
     warning_stream = "WARNING"
 
     monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(check, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
-        check, "PackageFile", pretend.stub(from_filename=lambda *a, **kw: package),
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 

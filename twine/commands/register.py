@@ -14,8 +14,9 @@
 import argparse
 import os.path
 
-from twine import exceptions, settings
-from twine.package import PackageFile
+from twine import exceptions
+from twine import package as package_file
+from twine import settings
 
 
 def register(register_settings, package):
@@ -30,7 +31,7 @@ def register(register_settings, package):
         )
 
     resp = repository.register(
-        PackageFile.from_filename(package, register_settings.comment)
+        package_file.PackageFile.from_filename(package, register_settings.comment)
     )
     repository.close()
 

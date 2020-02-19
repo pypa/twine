@@ -14,9 +14,11 @@
 import argparse
 import os.path
 
-from twine import exceptions, settings, utils
-from twine.commands import _find_dists
-from twine.package import PackageFile
+from twine import commands
+from twine import exceptions
+from twine import package as package_file
+from twine import settings
+from twine import utils
 
 
 def skip_upload(response, skip_existing, package):
@@ -43,7 +45,7 @@ def skip_upload(response, skip_existing, package):
 
 
 def upload(upload_settings, dists):
-    dists = _find_dists(dists)
+    dists = commands._find_dists(dists)
 
     # Determine if the user has passed in pre-signed distributions
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
@@ -57,7 +59,9 @@ def upload(upload_settings, dists):
     uploaded_packages = []
 
     for filename in uploads:
-        package = PackageFile.from_filename(filename, upload_settings.comment)
+        package = package_file.PackageFile.from_filename(
+            filename, upload_settings.comment
+        )
         skip_message = "  Skipping {} because it appears to already exist".format(
             package.basefilename
         )

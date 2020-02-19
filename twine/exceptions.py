@@ -47,7 +47,7 @@ class RedirectDetected(TwineException):
 class PackageNotFound(TwineException):
     """A package file was provided that could not be found on the file system.
 
-    This is only used when attempting to register a package.
+    This is only used when attempting to register a package_file.
     """
 
     pass

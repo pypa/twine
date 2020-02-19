@@ -17,8 +17,12 @@ import configparser
 import functools
 import os
 import os.path
-from typing import Callable, DefaultDict, Dict, Optional
-from urllib.parse import urlparse, urlunparse
+from typing import Callable
+from typing import DefaultDict
+from typing import Dict
+from typing import Optional
+from urllib.parse import urlparse
+from urllib.parse import urlunparse
 
 import requests
 
