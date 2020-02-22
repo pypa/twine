@@ -55,7 +55,7 @@ environment, then, in the root directory, run:
 
   tox -e docs
 
-The HTML of the docs will be visible in :file:`twine/docs/_build/`.
+The HTML of the docs will be written to :file:`docs/_build/html`.
 
 Code style
 ^^^^^^^^^^
