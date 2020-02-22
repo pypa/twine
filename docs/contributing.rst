@@ -57,6 +57,16 @@ environment, then, in the root directory, run:
 
 The HTML of the docs will be visible in :file:`twine/docs/_build/`.
 
+Code style
+^^^^^^^^^^
+
+Run ``tox -e format`` to automatically reformat your changes. Run
+``tox -e lint`` to see any remaining code smells or type errors that
+need to be fixed manually.
+
+Additionally, the Twine maintainers prefer that ``import`` statements
+be used for packages and modules only, rather than individual classes
+or functions.
 
 Testing
 ^^^^^^^
@@ -68,14 +78,12 @@ Either run ``tox`` to build against all supported Python versions (if you have
 them installed) or run ``tox -e py{version}`` to test against a specific
 version, e.g., ``tox -e py36`` or ``tox -e py37``.
 
-Also, always run ``tox -e lint`` before submitting a pull request.
-
 Submitting changes
 ^^^^^^^^^^^^^^^^^^
 
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
-3. Run the tests with ``tox`` and lint any docs changes with ``tox -e docs``.
+3. Run the tests, check code style, and build the docs as described above.
 4. Ensure that your name is added to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
