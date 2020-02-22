@@ -11,13 +11,13 @@ matrix:
 
   include:
     - python: 3.7
-      name: Linting code smells
+      name: Linting code style
       env:
-        TOXENV: lint-code-style
+        TOXENV: code-style
     - python: 3.7
-      name: Linting type matching
+      name: Linting type annotations
       env:
-        TOXENV: lint-mypy
+        TOXENV: typing
     - python: 3.7
       name: Making sure that docs build is healthy
       env:
