@@ -1,17 +1,17 @@
 .. image:: https://img.shields.io/pypi/v/twine.svg
-    :target: https://pypi.org/project/twine
+   :target: https://pypi.org/project/twine
 
 .. image:: https://img.shields.io/pypi/pyversions/twine.svg
-    :target: https://pypi.org/project/twine
+   :target: https://pypi.org/project/twine
 
 .. image:: https://img.shields.io/readthedocs/twine
-    :target: https://twine.readthedocs.io
+   :target: https://twine.readthedocs.io
 
 .. image:: https://img.shields.io/travis/com/pypa/twine
-    :target: https://travis-ci.org/pypa/twine
+   :target: https://travis-ci.org/pypa/twine
 
 .. image:: https://img.shields.io/codecov/c/github/pypa/twine
-    :target: https://codecov.io/gh/pypa/twine
+   :target: https://codecov.io/gh/pypa/twine
 
 twine
 =====
@@ -105,8 +105,7 @@ Keyring Support
 Instead of typing in your password every time you upload a distribution, Twine
 allows storing a username and password securely using `keyring`_.
 Keyring is installed with Twine but for some systems (Linux mainly) may
-require
-`additional installation steps <https://pypi.org/project/keyring/#installation-linux>`_.
+require `additional installation steps`_.
 
 Once Twine is installed, use the ``keyring`` program to set a
 username and password to use for each package index (repository) to
@@ -117,10 +116,14 @@ For example, to set a username and password for PyPI:
 .. code-block:: console
 
     $ keyring set https://upload.pypi.org/legacy/ your-username
-    # or
+
+or
+
+.. code-block:: console
+
     $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
-And enter the password when prompted.
+and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
 URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
@@ -128,13 +131,10 @@ URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
 The next time you run ``twine``, it will prompt you for a username and will grab
 the appropriate password from the keyring.
 
-.. Note:: If you are using Linux in a headless environment (such as on a
-    server) you'll need to do some additional steps to ensure that Keyring can
-    store secrets securely. See `Using Keyring on headless systems`_.
+**Note:** If you are using Linux in a headless environment (such as on a server)
+you'll need to do some additional steps to ensure that Keyring can store secrets
+securely. See `Using Keyring on headless systems`_.
 
-.. _`keyring`: https://pypi.org/project/keyring/
-.. _`Using Keyring on headless systems`:
-    https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
 
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
@@ -148,7 +148,11 @@ To disable keyring, simply invoke:
 .. code-block:: console
 
     $ keyring --disable
-    or
+
+or
+
+.. code-block:: console
+
     $ python -m keyring --disable
 
 That command will configure for the current user the "null" keyring,
@@ -169,7 +173,6 @@ Uploads one or more distributions to a repository.
 .. code-block:: console
 
     $ twine upload -h
-
     usage: twine upload [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
                         [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
                         [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
@@ -239,10 +242,10 @@ PyPI.
     usage: twine check [-h] dist [dist ...]
 
     positional arguments:
-    dist        The distribution files to check, usually dist/*
+      dist        The distribution files to check, usually dist/*
 
     optional arguments:
-    -h, --help  show this help message and exit
+      -h, --help  show this help message and exit
 
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
@@ -309,13 +312,13 @@ Environment Variables
 Twine also supports configuration via environment variables. Options passed on
 the command line will take precedence over options set via environment
 variables. Definition via environment variable is helpful in environments where
-it is not convenient to create a `.pypirc` file, such as a CI/build server, for
-example.
+it is not convenient to create a ``.pypirc`` file (for example,
+on a CI/build server).
 
 * ``TWINE_USERNAME`` - the username to use for authentication to the repository.
 * ``TWINE_PASSWORD`` - the password to use for authentication to the repository.
 * ``TWINE_REPOSITORY`` - the repository configuration, either defined as a
-  section in `.pypirc` or provided as a full URL.
+  section in ``.pypirc`` or provided as a full URL.
 * ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
   self-signed or untrusted certificates.
@@ -348,13 +351,22 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
-.. _`Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`Python Packaging User Guide`:
+   https://packaging.python.org/tutorials/distributing-packages/
+.. _`keyring`: https://pypi.org/project/keyring/
+.. _`Using Keyring on headless systems`:
+   https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
+.. _`additional installation steps`:
+   https://pypi.org/project/keyring/#installation-linux
 .. _`documentation`: https://twine.readthedocs.io/
-.. _`developer documentation`: https://twine.readthedocs.io/en/latest/contributing.html
+.. _`developer documentation`:
+   https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-project
-.. _`distributions`: https://packaging.python.org/glossary/#term-distribution-package
+.. _`distributions`:
+   https://packaging.python.org/glossary/#term-distribution-package
 .. _`PyPA Code of Conduct`: https://www.pypa.io/en/latest/code-of-conduct/
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-wheel
-.. _`no longer necessary if you are uploading to pypi.org`: https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
+.. _`no longer necessary if you are uploading to pypi.org`:
+   https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
