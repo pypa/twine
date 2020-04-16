@@ -78,8 +78,8 @@ Using Twine
 
        $ python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right. Twine
-will automatically prompt for your username and password:
+2. Upload with ``twine`` to `Test PyPI`_ and verify things look right.
+   Twine will automatically prompt for your username and password:
 
    .. code-block:: console
 
