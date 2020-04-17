@@ -81,9 +81,10 @@ def _check_file(filename, render_warning_stream):
             "`long_description_content_type` missing. defaulting to `text/x-rst`."
         )
         description_content_type = "text/x-rst"
-
-    content_type, params = cgi.parse_header(description_content_type)
-    renderer = _RENDERERS.get(content_type, _RENDERERS[None])
+        renderer = _RENDERERS[None]
+    else:
+        content_type, params = cgi.parse_header(description_content_type)
+        renderer = _RENDERERS.get(content_type)
 
     if description in {None, "UNKNOWN\n\n\n"}:
         warnings.append("`long_description` missing.")
@@ -93,6 +94,8 @@ def _check_file(filename, render_warning_stream):
         )
         if rendering_result is None:
             is_ok = False
+    else:
+        warnings.append("`long_description_content_type` has unknown value `{}` and would be rejected by PyPI".format(description_content_type))
 
     return warnings, is_ok
 

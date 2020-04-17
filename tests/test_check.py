@@ -63,7 +63,7 @@ def test_check_passing_distribution(monkeypatch):
     output_stream = io.StringIO()
     warning_stream = ""
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
+    monkeypatch.setattr(check, "_RENDERERS", {"text/markdown": renderer})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
         package_file,
@@ -114,7 +114,7 @@ def test_check_failing_distribution(monkeypatch):
     output_stream = io.StringIO()
     warning_stream = "WARNING"
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
+    monkeypatch.setattr(check, "_RENDERERS", {"text/markdown": renderer})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
         package_file,
@@ -143,6 +143,7 @@ def test_check_invalid_content_type(monkeypatch):
     output_stream = io.StringIO()
     warning_stream = "WARNING"
 
+    monkeypatch.setattr(check, "_RENDERERS", {})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
         package_file,
@@ -151,10 +152,10 @@ def test_check_invalid_content_type(monkeypatch):
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
-    assert check.check("dist/*", output_stream=output_stream)
+    assert not check.check("dist/*", output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: FAILED\n"
-        "  `long_description_content_type` has unknown value `text/x-invalid`"
+        "  `long_description_content_type` has unknown value `text/x-invalid` "
         "and would be rejected by PyPI.\n"
         "    WARNING"
     )
