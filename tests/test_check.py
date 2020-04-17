@@ -133,6 +133,34 @@ def test_check_failing_distribution(monkeypatch):
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
 
 
+def test_check_invalid_content_type(monkeypatch):
+    package = pretend.stub(
+        metadata_dictionary=lambda: {
+            "description": "blah",
+            "description_content_type": "text/x-invalid",
+        }
+    )
+    output_stream = io.StringIO()
+    warning_stream = "WARNING"
+
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
+    )
+    monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+
+    assert check.check("dist/*", output_stream=output_stream)
+    assert output_stream.getvalue() == (
+        "Checking dist/dist.tar.gz: FAILED\n"
+        "  `long_description_content_type` has unknown value `text/x-invalid`"
+        "and would be rejected by PyPI.\n"
+        "    WARNING"
+    )
+    assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+
+
 def test_main(monkeypatch):
     check_result = pretend.stub()
     check_stub = pretend.call_recorder(lambda a: check_result)
