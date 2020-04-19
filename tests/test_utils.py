@@ -17,6 +17,7 @@ import textwrap
 
 import pretend
 import pytest
+import requests
 
 import helpers
 from twine import exceptions
@@ -183,6 +184,27 @@ def test_get_repository_config_missing(tmpdir):
     assert utils.get_repository_from_config(pypirc, "pypi") == exp
 
 
+def test_get_repository_config_invalid_url(tmpdir):
+    """
+    Test if we get an URL without a protocol
+    """
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    repository_url = "foo.bar"
+    with pytest.raises(exceptions.UnreachableRepositoryURLDetected):
+        utils.get_repository_from_config(pypirc, "foo.bar", repository_url)
+
+
+def test_get_repository_config_missing_config(tmpdir):
+    """
+    Test if a invalid section is being looked for
+    in the config file
+    """
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+    with pytest.raises(exceptions.InvalidConfiguration):
+        utils.get_repository_from_config(pypirc, "foobar")
+
+
 def test_get_config_deprecated_pypirc():
     tests_dir = os.path.dirname(os.path.abspath(__file__))
     deprecated_pypirc_path = os.path.join(tests_dir, "fixtures", "deprecated-pypirc")
@@ -243,3 +265,31 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     # value of Verbose doesn't matter for this check
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
         utils.check_status_code(response, False)
+
+
+@pytest.mark.parametrize(
+    "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
+)
+def test_check_status_code_for_missing_status_code(capsys, repo_url):
+    """
+    Test if the status code returned is not an explicitly checked one
+    """
+    response = pretend.stub(
+        status_code=403,
+        url=repo_url,
+        raise_for_status=pretend.raiser(requests.exceptions.HTTPError),
+        text="Forbidden",
+    )
+
+    with pytest.raises(requests.exceptions.HTTPError):
+        utils.check_status_code(response, True)
+
+    # Different messages are printed based on the verbose level
+    captured = capsys.readouterr()
+    assert captured.out == "Content received from server:\nForbidden\n"
+
+    with pytest.raises(requests.exceptions.HTTPError):
+        utils.check_status_code(response, False)
+
+    captured = capsys.readouterr()
+    assert captured.out == "NOTE: Try --verbose to see response content.\n"
