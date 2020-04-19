@@ -273,6 +273,11 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
+# Avoid errors due to GitHub rate limit
+# https://github.com/sphinx-doc/sphinx/issues/7388
+linkcheck_ignore = [
+    "https://github.com/pypa/twine/issues/*"
+]
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {"https://docs.python.org/": None}
