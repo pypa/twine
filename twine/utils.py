@@ -17,19 +17,17 @@ import configparser
 import functools
 import os
 import os.path
-from argparse import ArgumentParser
-from argparse import Namespace
 from typing import Any
 from typing import Callable
 from typing import DefaultDict
 from typing import Dict
-from typing import List
 from typing import Optional
+from typing import Union
+from typing import Sequence
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import requests
-from requests.models import Response
 
 from twine import exceptions
 
@@ -234,7 +232,13 @@ class EnvironmentDefault(argparse.Action):
             required = False
         super().__init__(default=default, required=required, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Union[str, Sequence[Any], None],
+        option_string: Optional[str] = None,
+    ) -> None:
         setattr(namespace, self.dest, values)
 
 
@@ -248,17 +252,17 @@ class EnvironmentFlag(argparse.Action):
 
     def __call__(
         self,
-        parser: ArgumentParser,
-        namespace: Namespace,
-        values: List[Any],
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Union[str, Sequence[Any], None],
         option_string: Optional[str] = None,
     ) -> None:
         setattr(namespace, self.dest, True)
 
     @staticmethod
-    def bool_from_env(val: Optional[str]) -> Optional[bool]:
+    def bool_from_env(val: Optional[str]) -> bool:
         """
         Allow '0' and 'false' and 'no' to be False
         """
         falsey = {"0", "false", "no"}
-        return val and val.lower() not in falsey
+        return bool(val and val.lower() not in falsey)
