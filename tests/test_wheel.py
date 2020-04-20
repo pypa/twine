@@ -12,8 +12,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from io import BytesIO
-from textwrap import dedent
 from zipfile import ZipFile
 
 import pytest
@@ -82,31 +80,12 @@ def test_read_invalid_wheel_extension():
         wheel.Wheel(file_name)
 
 
-def test_read_wheel_without_metadata(capsys, tmpdir):
-    """Test reading a wheel file with empty metadata"""
+def test_read_wheel_empty_metadata(tmpdir):
+    """Test reading a wheel file with an empty METADATA file"""
 
-    def create_empty_metadata_wheel(name, version):
-        def add_file(path, text):
-            contents = text.encode("utf-8")
-            z.writestr(path, contents)
-            records.append((path, text, str(len(text))))
-
-        dist_info = "{}-{}.dist-info".format(name, version)
-        record_path = "{}/RECORD".format(dist_info)
-        records = []
-        buf = BytesIO()
-        with ZipFile(buf, "w") as z:
-            add_file("{}/WHEEL".format(dist_info), "Wheel-Version: 1.0")
-            add_file(
-                "{}/METADATA".format(dist_info), dedent(""),
-            )
-            z.writestr(record_path, "\n".join(",".join(r) for r in records))
-        buf.seek(0)
-        return buf.read()
-
-    wheel_data = create_empty_metadata_wheel("badwheel", "1.0")
-    whl_file = tmpdir.mkdir("wheel").join("badwheel.whl")
-    whl_file.write(wheel_data, mode="wb")
+    whl_file = tmpdir.mkdir("wheel").join("not-a-wheel.whl")
+    with ZipFile(whl_file, "w") as zip_file:
+        zip_file.writestr("METADATA", "")
 
     with pytest.raises(
         exceptions.InvalidDistribution, match=f"No METADATA in archive: {whl_file}"
