@@ -12,6 +12,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+from typing import Dict
+from typing import List
+from typing import Tuple
 
 import pkg_resources
 import pkginfo
@@ -19,17 +22,20 @@ import requests
 import requests_toolbelt
 import setuptools
 import tqdm
+from pkg_resources import EntryPoint
 
 import twine
 from twine import _installed
 
 
-def _registered_commands(group="twine.registered_commands"):
+def _registered_commands(
+    group: str = "twine.registered_commands",
+) -> Dict[str, EntryPoint]:
     registered_commands = pkg_resources.iter_entry_points(group=group)
     return {c.name: c for c in registered_commands}
 
 
-def list_dependencies_and_versions():
+def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     return [
         ("pkginfo", _installed.Installed(pkginfo).version),
         ("requests", requests.__version__),
@@ -39,13 +45,13 @@ def list_dependencies_and_versions():
     ]
 
 
-def dep_versions():
+def dep_versions() -> str:
     return ", ".join(
         "{}: {}".format(*dependency) for dependency in list_dependencies_and_versions()
     )
 
 
-def dispatch(argv):
+def dispatch(argv: List[str]) -> None:
     registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
