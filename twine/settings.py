@@ -135,12 +135,17 @@ class Settings:
         )
 
     @property
-    def username(self):
-        return self.auth.username
+    def username(self) -> Optional[str]:
+        # Workaround for https://github.com/python/mypy/issues/5858
+        return cast(Optional[str], self.auth.username)
 
     @property
-    def password(self):
-        return None if self.client_cert else self.auth.password
+    def password(self) -> Optional[str]:
+        if self.client_cert:
+            return None
+
+        # Workaround for https://github.com/python/mypy/issues/5858
+        return cast(Optional[str], self.auth.password)
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:
