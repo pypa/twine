@@ -17,6 +17,7 @@ from textwrap import dedent
 from zipfile import ZipFile
 
 import pytest
+from tests.conftest import TESTS_DIR
 
 from twine import exceptions
 from twine import wheel
@@ -29,7 +30,7 @@ from twine import wheel
     ]
 )
 def example_wheel(request):
-    file_name = os.path.join(os.path.dirname(__file__), request.param)
+    file_name = os.path.join(TESTS_DIR, request.param)
     return wheel.Wheel(file_name)
 
 
@@ -75,10 +76,10 @@ def test_read_invalid_wheel_extension():
     """Test reading a wheel file without a .whl extension"""
 
     file_name = os.path.join(os.path.dirname(__file__), "fixtures/twine-1.5.0.tar.gz")
-    with pytest.raises(exceptions.InvalidDistribution) as excinfo:
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"Not a known archive format: {file_name}"
+    ):
         wheel.Wheel(file_name)
-
-    assert "Not a known archive format: {}".format(file_name) == str(excinfo.value)
 
 
 def test_read_wheel_without_metadata(capsys, tmpdir):
@@ -107,7 +108,7 @@ def test_read_wheel_without_metadata(capsys, tmpdir):
     whl_file = tmpdir.mkdir("wheel").join("badwheel.whl")
     whl_file.write(wheel_data, mode="wb")
 
-    with pytest.raises(exceptions.InvalidDistribution) as excinfo:
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"No METADATA in archive: {whl_file}"
+    ):
         wheel.Wheel(whl_file)
-
-    assert "No METADATA in archive: {}".format(whl_file) == str(excinfo.value)
