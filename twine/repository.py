@@ -18,6 +18,7 @@ from typing import List
 from typing import Optional
 from typing import Set
 from typing import Tuple
+from typing import cast
 
 import requests
 import requests_toolbelt
@@ -89,12 +90,14 @@ class Repository:
         from twine import cli
 
         dependencies = cli.list_dependencies_and_versions()
-        return (
-            user_agent.UserAgentBuilder("twine", twine.__version__,)
+        user_agent_string = (
+            user_agent.UserAgentBuilder("twine", twine.__version__)
             .include_extras(dependencies)
             .include_implementation()
             .build()
         )
+
+        return cast(str, user_agent_string)
 
     def close(self) -> None:
         self.session.close()

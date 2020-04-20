@@ -4,6 +4,7 @@ import warnings
 from typing import Callable
 from typing import Optional
 from typing import Type
+from typing import cast
 
 import keyring
 
@@ -54,7 +55,7 @@ class Resolver:
         try:
             creds = keyring.get_credential(self.system, None)
             if creds:
-                return creds.username
+                return cast(str, creds.username)
         except AttributeError:
             # To support keyring prior to 15.2
             pass
@@ -64,7 +65,7 @@ class Resolver:
 
     def get_password_from_keyring(self) -> Optional[str]:
         try:
-            return keyring.get_password(self.system, self.username)
+            return cast(str, keyring.get_password(self.system, self.username))
         except Exception as exc:
             warnings.warn(str(exc))
         return None

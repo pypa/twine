@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Tuple
@@ -50,7 +51,7 @@ def dep_versions() -> str:
     )
 
 
-def dispatch(argv: List[str]) -> None:
+def dispatch(argv: List[str]) -> Any:
     registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
