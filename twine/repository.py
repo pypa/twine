@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
@@ -69,7 +70,8 @@ class Repository:
         for scheme in ("http://", "https://"):
             self.session.mount(scheme, self._make_adapter_with_retries())
 
-        self._releases_json_data: Dict[str, Dict] = {}
+        # Working around https://github.com/python/typing/issues/182
+        self._releases_json_data: Dict[str, Dict[str, Any]] = {}
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod

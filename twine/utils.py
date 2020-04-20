@@ -184,7 +184,7 @@ def get_userpass_value(
     cli_value: Optional[str],
     config: RepositoryConfig,
     key: str,
-    prompt_strategy: Optional[Callable] = None,
+    prompt_strategy: Optional[Callable[[], str]] = None,
 ) -> Optional[str]:
     """Gets the username / password from config.
 

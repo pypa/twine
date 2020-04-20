@@ -77,10 +77,10 @@ class Resolver:
             "password", getpass.getpass
         )
 
-    def prompt(self, what: str, how: Callable) -> str:
+    def prompt(self, what: str, how: Callable[..., str]) -> str:
         return how(f"Enter your {what}: ")
 
 
 class Private(Resolver):
-    def prompt(self, what: str, how: Optional[Callable] = None) -> str:
+    def prompt(self, what: str, how: Optional[Callable[..., str]] = None) -> str:
         raise exceptions.NonInteractive(f"Credential not found for {what}.")
