@@ -17,14 +17,19 @@ import configparser
 import functools
 import os
 import os.path
+from argparse import ArgumentParser
+from argparse import Namespace
+from typing import Any
 from typing import Callable
 from typing import DefaultDict
 from typing import Dict
+from typing import List
 from typing import Optional
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import requests
+from requests.models import Response
 
 from twine import exceptions
 
@@ -241,11 +246,17 @@ class EnvironmentFlag(argparse.Action):
         self.env = env
         super().__init__(default=default, nargs=0, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: ArgumentParser,
+        namespace: Namespace,
+        values: List[Any],
+        option_string: Optional[str] = None,
+    ) -> None:
         setattr(namespace, self.dest, True)
 
     @staticmethod
-    def bool_from_env(val):
+    def bool_from_env(val: Optional[str]) -> Optional[bool]:
         """
         Allow '0' and 'false' and 'no' to be False
         """
