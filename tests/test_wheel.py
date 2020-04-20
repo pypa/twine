@@ -64,10 +64,10 @@ def test_read_non_existent_wheel_file_name():
     """Test reading a wheel file which doesn't exist"""
 
     file_name = "/foo/bar/baz.whl"
-    with pytest.raises(exceptions.InvalidDistribution) as excinfo:
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"No such file: {file_name}"
+    ):
         wheel.Wheel(file_name)
-
-    assert "No such file: {}".format(file_name) == str(excinfo.value)
 
 
 def test_read_invalid_wheel_extension():
