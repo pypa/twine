@@ -25,7 +25,6 @@ from typing import Union
 
 import pkg_resources
 import pkginfo
-from pkginfo.distribution import Distribution
 
 from twine import exceptions
 from twine import wheel
@@ -178,10 +177,7 @@ class PackageFile:
         self.add_gpg_signature(self.signed_filename, self.signed_basefilename)
 
     @classmethod
-    def run_gpg(
-        cls,
-        gpg_args: Union[Tuple[str, str, str, str, str, str], Tuple[str, str, str, str]],
-    ) -> None:
+    def run_gpg(cls, gpg_args: Tuple[str, ...]) -> None:
         try:
             subprocess.check_call(gpg_args)
             return
