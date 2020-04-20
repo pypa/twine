@@ -12,20 +12,28 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+from typing import IO
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Sequence
+from typing import Set
 from typing import Tuple
+from typing import Union
 
 import requests
 import requests_toolbelt
 import tqdm
 import urllib3
+from pretend import stub
 from requests import adapters
+from requests.adapters import HTTPAdapter
+from requests.models import Response
 from requests_toolbelt.utils import user_agent
 
 import twine
 from twine import package as package_file
+from twine.package import PackageFile
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
 
@@ -38,7 +46,7 @@ WAREHOUSE_WEB = "https://pypi.org/"
 
 
 class ProgressBar(tqdm.tqdm):
-    def update_to(self, n):
+    def update_to(self, n: int) -> None:
         """Update the bar in the way compatible with requests-toolbelt.
 
         This is identical to tqdm.update, except ``n`` will be the current
@@ -232,7 +240,7 @@ class Repository:
 
         return False
 
-    def release_urls(self, packages):
+    def release_urls(self, packages: List[stub]) -> Set[str]:
         if self.url.startswith(WAREHOUSE):
             url = WAREHOUSE_WEB
         elif self.url.startswith(TEST_WAREHOUSE):
