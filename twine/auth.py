@@ -2,7 +2,9 @@ import functools
 import getpass
 import warnings
 from typing import Callable
+from typing import Dict
 from typing import Optional
+from typing import Type
 
 import keyring
 
@@ -11,18 +13,18 @@ from twine import utils
 
 
 class CredentialInput:
-    def __init__(self, username: str = None, password: str = None):
+    def __init__(self, username: str = None, password: str = None) -> None:
         self.username = username
         self.password = password
 
 
 class Resolver:
-    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput):
+    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput) -> None:
         self.config = config
         self.input = input
 
     @classmethod
-    def choose(cls, interactive):
+    def choose(cls, interactive: bool) -> Type[Resolver]:
         return cls if interactive else Private
 
     @property  # type: ignore  # https://github.com/python/mypy/issues/1362
