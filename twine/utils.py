@@ -22,8 +22,8 @@ from typing import Callable
 from typing import DefaultDict
 from typing import Dict
 from typing import Optional
-from typing import Union
 from typing import Sequence
+from typing import Union
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
