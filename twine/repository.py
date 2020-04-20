@@ -94,7 +94,7 @@ class Repository:
             .build()
         )
 
-    def close(self):
+    def close(self) -> None:
         self.session.close()
 
     @staticmethod
@@ -118,7 +118,7 @@ class Repository:
         if clientcert:
             self.session.cert = clientcert
 
-    def register(self, package):
+    def register(self, package: package_file.PackageFile) -> requests.Response:
         data = package.metadata_dictionary()
         data.update({":action": "submit", "protocol_version": "1"})
 
