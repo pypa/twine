@@ -2,7 +2,6 @@ import functools
 import getpass
 import warnings
 from typing import Callable
-from typing import Dict
 from typing import Optional
 from typing import Type
 
@@ -24,7 +23,7 @@ class Resolver:
         self.input = input
 
     @classmethod
-    def choose(cls, interactive: bool) -> Type[Resolver]:
+    def choose(cls, interactive: bool) -> Type["Resolver"]:
         return cls if interactive else Private
 
     @property  # type: ignore  # https://github.com/python/mypy/issues/1362
