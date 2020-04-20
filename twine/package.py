@@ -159,14 +159,16 @@ class PackageFile:
 
         return data
 
-    def add_gpg_signature(self, signature_filepath: str, signature_filename: str):
+    def add_gpg_signature(
+        self, signature_filepath: str, signature_filename: str
+    ) -> None:
         if self.gpg_signature is not None:
             raise exceptions.InvalidDistribution("GPG Signature can only be added once")
 
         with open(signature_filepath, "rb") as gpg:
             self.gpg_signature = (signature_filename, gpg.read())
 
-    def sign(self, sign_with: str, identity: Optional[str]):
+    def sign(self, sign_with: str, identity: Optional[str]) -> None:
         print(f"Signing {self.basefilename}")
         gpg_args: Tuple[str, ...] = (sign_with, "--detach-sign")
         if identity:

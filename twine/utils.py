@@ -224,7 +224,11 @@ class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
     def __init__(
-        self, env: str, required: bool = True, default: Optional[str] = None, **kwargs
+        self,
+        env: str,
+        required: bool = True,
+        default: Optional[str] = None,
+        **kwargs: Any,
     ) -> None:
         default = os.environ.get(env, default)
         self.env = env
@@ -245,7 +249,7 @@ class EnvironmentDefault(argparse.Action):
 class EnvironmentFlag(argparse.Action):
     """Set boolean flag from environment variable."""
 
-    def __init__(self, env: str, **kwargs) -> None:
+    def __init__(self, env: str, **kwargs: Any) -> None:
         default = self.bool_from_env(os.environ.get(env))
         self.env = env
         super().__init__(default=default, nargs=0, **kwargs)

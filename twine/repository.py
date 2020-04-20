@@ -246,7 +246,7 @@ class Repository:
             for package in packages
         }
 
-    def verify_package_integrity(self, package: package_file.PackageFile):
+    def verify_package_integrity(self, package: package_file.PackageFile) -> None:
         # TODO(sigmavirus24): Add a way for users to download the package and
         # check it's hash against what it has locally.
         pass
