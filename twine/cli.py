@@ -22,7 +22,6 @@ import requests
 import requests_toolbelt
 import setuptools
 import tqdm
-from pkg_resources import EntryPoint
 
 import twine
 from twine import _installed
@@ -30,7 +29,7 @@ from twine import _installed
 
 def _registered_commands(
     group: str = "twine.registered_commands",
-) -> Dict[str, EntryPoint]:
+) -> Dict[str, pkg_resources.EntryPoint]:
     registered_commands = pkg_resources.iter_entry_points(group=group)
     return {c.name: c for c in registered_commands}
 
