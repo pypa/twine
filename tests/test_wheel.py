@@ -77,7 +77,8 @@ def test_read_invalid_wheel_extension():
 
     file_name = os.path.join(os.path.dirname(__file__), "fixtures/twine-1.5.0.tar.gz")
     with pytest.raises(
-        exceptions.InvalidDistribution, match=f"Not a known archive format: {file_name}"
+        exceptions.InvalidDistribution,
+        match=f"Not a known archive format for file: {file_name}",
     ):
         wheel.Wheel(file_name)
 
