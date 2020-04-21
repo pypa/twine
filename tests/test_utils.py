@@ -277,18 +277,18 @@ def test_check_status_code_for_missing_status_code(capsys, repo_url):
     response = pretend.stub(
         status_code=403,
         url=repo_url,
-        raise_for_status=pretend.raiser(requests.exceptions.HTTPError),
+        raise_for_status=pretend.raiser(requests.HTTPError),
         text="Forbidden",
     )
 
-    with pytest.raises(requests.exceptions.HTTPError):
+    with pytest.raises(requests.HTTPError):
         utils.check_status_code(response, True)
 
     # Different messages are printed based on the verbose level
     captured = capsys.readouterr()
     assert captured.out == "Content received from server:\nForbidden\n"
 
-    with pytest.raises(requests.exceptions.HTTPError):
+    with pytest.raises(requests.HTTPError):
         utils.check_status_code(response, False)
 
     captured = capsys.readouterr()

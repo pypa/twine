@@ -11,19 +11,27 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+import pathlib
+import zipfile
+
 import pytest
 
+from twine import exceptions
 from twine import wheel
+
+TESTS_DIR = pathlib.Path(__file__).parent
 
 
 @pytest.fixture(
     params=[
-        "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl",
-        "tests/alt-fixtures/twine-1.5.0-py2.py3-none-any.whl",
+        "fixtures/twine-1.5.0-py2.py3-none-any.whl",
+        "alt-fixtures/twine-1.5.0-py2.py3-none-any.whl",
     ]
 )
 def example_wheel(request):
-    return wheel.Wheel(request.param)
+    file_name = os.path.join(TESTS_DIR, request.param)
+    return wheel.Wheel(file_name)
 
 
 def test_version_parsing(example_wheel):
@@ -45,3 +53,43 @@ def test_find_metadata_files():
     ]
     candidates = wheel.Wheel.find_candidate_metadata_files(names)
     assert expected == candidates
+
+
+def test_read_valid(example_wheel):
+    """Test reading a valid wheel file"""
+    metadata = example_wheel.read().decode().splitlines()
+    assert "Name: twine" in metadata
+    assert "Version: 1.5.0" in metadata
+
+
+def test_read_non_existent_wheel_file_name():
+    """Test reading a wheel file which doesn't exist"""
+
+    file_name = "/foo/bar/baz.whl"
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"No such file: {file_name}"
+    ):
+        wheel.Wheel(file_name)
+
+
+def test_read_invalid_wheel_extension():
+    """Test reading a wheel file without a .whl extension"""
+
+    file_name = os.path.join(os.path.dirname(__file__), "fixtures/twine-1.5.0.tar.gz")
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"Not a known archive format: {file_name}"
+    ):
+        wheel.Wheel(file_name)
+
+
+def test_read_wheel_empty_metadata(tmpdir):
+    """Test reading a wheel file with an empty METADATA file"""
+
+    whl_file = tmpdir.mkdir("wheel").join("not-a-wheel.whl")
+    with zipfile.ZipFile(whl_file, "w") as zip_file:
+        zip_file.writestr("METADATA", "")
+
+    with pytest.raises(
+        exceptions.InvalidDistribution, match=f"No METADATA in archive: {whl_file}"
+    ):
+        wheel.Wheel(whl_file)
