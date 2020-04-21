@@ -12,13 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-from zipfile import ZipFile
+import pathlib
+import zipfile
 
 import pytest
-from tests.conftest import TESTS_DIR
 
 from twine import exceptions
 from twine import wheel
+
+TESTS_DIR = pathlib.Path(__file__).parent
 
 
 @pytest.fixture(
@@ -84,7 +86,7 @@ def test_read_wheel_empty_metadata(tmpdir):
     """Test reading a wheel file with an empty METADATA file"""
 
     whl_file = tmpdir.mkdir("wheel").join("not-a-wheel.whl")
-    with ZipFile(whl_file, "w") as zip_file:
+    with zipfile.ZipFile(whl_file, "w") as zip_file:
         zip_file.writestr("METADATA", "")
 
     with pytest.raises(

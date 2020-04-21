@@ -16,8 +16,6 @@ import requests
 
 from twine import settings
 
-TESTS_DIR = pathlib.Path(__file__).parent
-
 
 @pytest.fixture()
 def pypirc(tmpdir):
