@@ -104,14 +104,15 @@ def get_repository_from_config(
 ) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
-    if repository_url and "://" in repository_url:
+    parsed = urlparse(repository_url)
+    if repository_url and parsed.scheme:
         # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
             "username": None,
             "password": None,
         }
-    if repository_url and "://" not in repository_url:
+    if repository_url and not parsed.scheme:
         raise exceptions.UnreachableRepositoryURLDetected(
             "Repository URL {} has no protocol. Please add "
             "'https://'. \n".format(repository_url)
