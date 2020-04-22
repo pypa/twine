@@ -36,7 +36,9 @@ class WinInst(distribution.Distribution):
                 return archive.read(name)
 
         else:
-            raise exceptions.InvalidDistribution("Not a known archive format: %s" % fqn)
+            raise exceptions.InvalidDistribution(
+                "Not a known archive format for file: %s" % fqn
+            )
 
         try:
             tuples = [

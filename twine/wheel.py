@@ -64,7 +64,9 @@ class Wheel(distribution.Distribution):
                 return archive.read(name)
 
         else:
-            raise exceptions.InvalidDistribution("Not a known archive format: %s" % fqn)
+            raise exceptions.InvalidDistribution(
+                "Not a known archive format for file: %s" % fqn
+            )
 
         try:
             for path in self.find_candidate_metadata_files(names):
