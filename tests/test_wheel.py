@@ -12,15 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
-import pathlib
 import zipfile
 
 import pytest
 
+import helpers
 from twine import exceptions
 from twine import wheel
-
-TESTS_DIR = pathlib.Path(__file__).parent
 
 
 @pytest.fixture(
@@ -30,7 +28,7 @@ TESTS_DIR = pathlib.Path(__file__).parent
     ]
 )
 def example_wheel(request):
-    file_name = os.path.join(TESTS_DIR, request.param)
+    file_name = os.path.join(helpers.TESTS_DIR, request.param)
     return wheel.Wheel(file_name)
 
 
