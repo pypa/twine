@@ -15,6 +15,10 @@
 
 import contextlib
 import os
+import pathlib
+
+TESTS_DIR = pathlib.Path(__file__).parent
+WHEEL_FIXTURE = os.path.join(TESTS_DIR, "fixtures/twine-1.5.0-py2.py3-none-any.whl")
 
 
 @contextlib.contextmanager

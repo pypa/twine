@@ -3,16 +3,17 @@ from __future__ import unicode_literals
 import pretend
 import pytest
 
+import helpers
+from twine import cli
 from twine import exceptions
 from twine.commands import register
 
-# TODO: Copied from test_upload.py. Extract to helpers?
 
-WHEEL_FIXTURE = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+@pytest.fixture()
+def register_settings(make_settings):
+    """Returns a factory function for settings.Settings for register"""
 
-
-def test_exception_for_redirect(make_settings):
-    register_settings = make_settings(
+    return make_settings(
         """
         [pypi]
         repository: https://test.pypi.org/legacy
@@ -21,10 +22,15 @@ def test_exception_for_redirect(make_settings):
     """
     )
 
+
+def test_successful_register(register_settings):
+    """Test a successful package registration"""
+
     stub_response = pretend.stub(
-        is_redirect=True,
-        status_code=301,
+        is_redirect=False,
+        status_code=200,
         headers={"location": "https://test.pypi.org/legacy/"},
+        raise_for_status=lambda: None,
     )
 
     stub_repository = pretend.stub(
@@ -33,7 +39,68 @@ def test_exception_for_redirect(make_settings):
 
     register_settings.create_repository = lambda: stub_repository
 
-    with pytest.raises(exceptions.RedirectDetected) as err:
-        register.register(register_settings, WHEEL_FIXTURE)
+    result = register.register(register_settings, helpers.WHEEL_FIXTURE)
 
-    assert "https://test.pypi.org/legacy/" in err.value.args[0]
+    assert result is None
+
+
+def test_exception_for_redirect(register_settings):
+    """Test a repository url redirection during registration"""
+
+    repository_url = register_settings.repository_config["repository"]
+    redirect_url = "https://malicious.website.org/danger"
+
+    stub_response = pretend.stub(
+        is_redirect=True, status_code=301, headers={"location": redirect_url},
+    )
+
+    stub_repository = pretend.stub(
+        register=lambda package: stub_response, close=lambda: None
+    )
+
+    register_settings.create_repository = lambda: stub_repository
+
+    err_msg = (
+        f"{repository_url} attempted to redirect to {redirect_url}.\n"
+        f"If you trust these URLs, set {redirect_url} as your repository URL.\n"
+        f"Aborting."
+    )
+
+    with pytest.raises(exceptions.RedirectDetected, match=err_msg):
+        register.register(register_settings, helpers.WHEEL_FIXTURE)
+
+
+def test_non_existent_package(register_settings):
+    """Test a non-existent package registration"""
+
+    stub_repository = pretend.stub()
+
+    register_settings.create_repository = lambda: stub_repository
+
+    package = "/foo/bar/baz.whl"
+    with pytest.raises(
+        exceptions.PackageNotFound,
+        match=f'"{package}" does not exist on the file system.',
+    ):
+        register.register(register_settings, package)
+
+
+def test_values_from_env(monkeypatch):
+    """Test calling main via cli"""
+
+    def none_register(*args, **settings_kwargs):
+        pass
+
+    replaced_register = pretend.call_recorder(none_register)
+    monkeypatch.setattr(register, "register", replaced_register)
+    testenv = {
+        "TWINE_USERNAME": "pypiuser",
+        "TWINE_PASSWORD": "pypipassword",
+        "TWINE_CERT": "/foo/bar.crt",
+    }
+    with helpers.set_env(**testenv):
+        cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    register_settings = replaced_register.calls[0].args[0]
+    assert "pypipassword" == register_settings.password
+    assert "pypiuser" == register_settings.username
+    assert "/foo/bar.crt" == register_settings.cacert
