@@ -23,19 +23,15 @@ from twine import utils
 
 @pytest.fixture()
 def repo():
-
-    repo = repository.Repository(
+    return repository.Repository(
         repository_url=utils.DEFAULT_REPOSITORY,
         username="username",
         password="password",
     )
 
-    return repo
-
 
 def test_gpg_signature_structure_is_preserved():
     """Test that gpg signature structure doesn't change"""
-
     data = {
         "gpg_signature": ("filename.asc", "filecontent"),
     }
@@ -46,7 +42,6 @@ def test_gpg_signature_structure_is_preserved():
 
 def test_content_structure_is_preserved():
     """Test that content structure doesn't change"""
-
     data = {
         "content": ("filename", "filecontent"),
     }
@@ -57,7 +52,6 @@ def test_content_structure_is_preserved():
 
 def test_iterables_are_flattened():
     """Test that iterables structures are changed and flattened"""
-
     data = {
         "platform": ["UNKNOWN"],
     }
@@ -75,7 +69,6 @@ def test_iterables_are_flattened():
 
 def test_set_client_certificate(repo):
     """Test that setting client certificate is successful"""
-
     assert repo.session.cert is None
 
     repo.set_client_certificate(("/path/to/cert", "/path/to/key"))
@@ -84,7 +77,6 @@ def test_set_client_certificate(repo):
 
 def test_set_certificate_authority(repo):
     """Test that setting certificate authority is successful"""
-
     assert repo.session.verify is True
 
     repo.set_certificate_authority("/path/to/cert")
@@ -93,7 +85,6 @@ def test_set_certificate_authority(repo):
 
 def test_make_user_agent_string(repo):
     """Test that dependencies are present in user agent string"""
-
     assert "User-Agent" in repo.session.headers
 
     user_agent = repo.session.headers["User-Agent"]
@@ -120,7 +111,6 @@ def test_package_is_uploaded_404s(repo):
 
 def test_package_is_uploaded_200s_with_no_releases(repo):
     """Test that a package upload succeeds with 200 but has no releases"""
-
     repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
@@ -133,7 +123,6 @@ def test_package_is_uploaded_200s_with_no_releases(repo):
 
 def test_package_is_uploaded_with_releases_using_cache(repo):
     """Test that a package upload succeeds without bypassing cache"""
-
     repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
     package = pretend.stub(
         safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
@@ -144,7 +133,6 @@ def test_package_is_uploaded_with_releases_using_cache(repo):
 
 def test_package_is_uploaded_with_releases_not_using_cache(repo):
     """Test that a package upload succeeds bypassing cache"""
-
     repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
@@ -161,7 +149,6 @@ def test_package_is_uploaded_with_releases_not_using_cache(repo):
 
 def test_package_is_uploaded_different_filenames(repo):
     """Test that a package upload fails as safe name and basefilename differ"""
-
     repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
@@ -184,7 +171,6 @@ def test_package_is_uploaded_incorrect_repo_url(repo):
 
 def test_package_is_registered(repo):
     """Test that a package is registered successfully"""
-
     package = pretend.stub(
         basefilename="fake.whl", metadata_dictionary=lambda: {"name": "fake"}
     )
@@ -238,7 +224,6 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
 
 def test_upload_retry(tmpdir, repo, capsys):
     """Test that retry works while uploading"""
-
     repo.disable_progress_bar = True
     status_code = 500
     reason = "Internal server error"
@@ -316,6 +301,7 @@ def test_upload_retry(tmpdir, repo, capsys):
     ],
 )
 def test_release_urls(package_meta, repository_url, release_urls, repo):
+    """Test that the correct release urls are read"""
     packages = [
         pretend.stub(safe_name=name, metadata=pretend.stub(version=version),)
         for name, version in package_meta
