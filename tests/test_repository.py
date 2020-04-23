@@ -21,7 +21,21 @@ from twine import repository
 from twine import utils
 
 
+@pytest.fixture()
+def repo():
+
+    repo = repository.Repository(
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
+    )
+
+    return repo
+
+
 def test_gpg_signature_structure_is_preserved():
+    """Test that gpg signature structure doesn't change"""
+
     data = {
         "gpg_signature": ("filename.asc", "filecontent"),
     }
@@ -31,6 +45,8 @@ def test_gpg_signature_structure_is_preserved():
 
 
 def test_content_structure_is_preserved():
+    """Test that content structure doesn't change"""
+
     data = {
         "content": ("filename", "filecontent"),
     }
@@ -40,6 +56,8 @@ def test_content_structure_is_preserved():
 
 
 def test_iterables_are_flattened():
+    """Test that iterables structures are changed and flattened"""
+
     data = {
         "platform": ["UNKNOWN"],
     }
@@ -55,12 +73,8 @@ def test_iterables_are_flattened():
     assert tuples == [("platform", "UNKNOWN"), ("platform", "ANOTHERPLATFORM")]
 
 
-def test_set_client_certificate():
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-    )
+def test_set_client_certificate(repo):
+    """Test that setting client certificate is successful"""
 
     assert repo.session.cert is None
 
@@ -68,12 +82,8 @@ def test_set_client_certificate():
     assert repo.session.cert == ("/path/to/cert", "/path/to/key")
 
 
-def test_set_certificate_authority():
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-    )
+def test_set_certificate_authority(repo):
+    """Test that setting certificate authority is successful"""
 
     assert repo.session.verify is True
 
@@ -81,21 +91,14 @@ def test_set_certificate_authority():
     assert repo.session.verify == "/path/to/cert"
 
 
-def test_make_user_agent_string():
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-    )
+def test_make_user_agent_string(repo):
+    """Test that dependencies are present in user agent string"""
 
     assert "User-Agent" in repo.session.headers
 
     user_agent = repo.session.headers["User-Agent"]
-    assert "twine/" in user_agent
-    assert "requests/" in user_agent
-    assert "requests-toolbelt/" in user_agent
-    assert "pkginfo/" in user_agent
-    assert "setuptools/" in user_agent
+    packages = ("twine/", "requests/", "requests-toolbelt/", "pkginfo/", "setuptools/")
+    assert all(p in user_agent for p in packages)
 
 
 def response_with(**kwattrs):
@@ -107,24 +110,17 @@ def response_with(**kwattrs):
     return resp
 
 
-def test_package_is_uploaded_404s():
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-    )
+def test_package_is_uploaded_404s(repo):
+    """Test that a package upload fails with 404"""
     repo.session = pretend.stub(get=lambda url, headers: response_with(status_code=404))
     package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
     assert repo.package_is_uploaded(package) is False
 
 
-def test_package_is_uploaded_200s_with_no_releases():
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-    )
+def test_package_is_uploaded_200s_with_no_releases(repo):
+    """Test that a package upload succeeds with 200 but has no releases"""
+
     repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
@@ -135,9 +131,75 @@ def test_package_is_uploaded_200s_with_no_releases():
     assert repo.package_is_uploaded(package) is False
 
 
+def test_package_is_uploaded_with_releases_using_cache(repo):
+    """Test that a package upload succeeds without bypassing cache"""
+
+    repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
+    package = pretend.stub(
+        safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
+    )
+
+    assert repo.package_is_uploaded(package) is True
+
+
+def test_package_is_uploaded_with_releases_not_using_cache(repo):
+    """Test that a package upload succeeds bypassing cache"""
+
+    repo.session = pretend.stub(
+        get=lambda url, headers: response_with(
+            status_code=200,
+            _content=b'{"releases": {"0.1": [{"filename": "fake.whl"}]}}',
+            _content_consumed=True,
+        ),
+    )
+    package = pretend.stub(
+        safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
+    )
+
+    assert repo.package_is_uploaded(package, bypass_cache=True) is True
+
+
+def test_package_is_uploaded_different_filenames(repo):
+    """Test that a package upload fails as safe name and basefilename differ"""
+
+    repo.session = pretend.stub(
+        get=lambda url, headers: response_with(
+            status_code=200,
+            _content=b'{"releases": {"0.1": [{"filename": "fake.whl"}]}}',
+            _content_consumed=True,
+        ),
+    )
+    package = pretend.stub(
+        safe_name="fake", basefilename="foo.whl", metadata=pretend.stub(version="0.1"),
+    )
+
+    assert repo.package_is_uploaded(package) is False
+
+
+def test_package_is_uploaded_incorrect_repo_url(repo):
+    """Test that a package upload fails on providing wrong repo url"""
+    repo.url = "https://bad.repo.com/legacy"
+    assert repo.package_is_uploaded(None) is False
+
+
+def test_package_is_registered(repo):
+    """Test that a package is registered successfully"""
+
+    package = pretend.stub(
+        basefilename="fake.whl", metadata_dictionary=lambda: {"name": "fake"}
+    )
+
+    resp = response_with(status_code=200)
+    setattr(resp, "raw", pretend.stub())
+    setattr(resp.raw, "close", lambda: None)
+    repo.session = pretend.stub(post=lambda url, data, allow_redirects, headers: resp)
+
+    assert repo.register(package)
+
+
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
 def test_disable_progress_bar_is_forwarded_to_tqdm(
-    monkeypatch, tmpdir, disable_progress_bar
+    monkeypatch, tmpdir, disable_progress_bar, repo
 ):
     """Test whether the disable flag is passed to tqdm
         when the disable_progress_bar option is passed to the
@@ -151,12 +213,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         yield
 
     monkeypatch.setattr(repository, "ProgressBar", progressbarstub)
-    repo = repository.Repository(
-        repository_url=utils.DEFAULT_REPOSITORY,
-        username="username",
-        password="password",
-        disable_progress_bar=disable_progress_bar,
-    )
+    repo.disable_progress_bar = disable_progress_bar
 
     repo.session = pretend.stub(
         post=lambda url, data, allow_redirects, headers: response_with(status_code=200)
@@ -177,6 +234,49 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
     )
 
     repo.upload(package)
+
+
+def test_upload_retry(tmpdir, repo, capsys):
+    """Test that retry works while uploading"""
+
+    repo.disable_progress_bar = True
+    status_code = 500
+    reason = "Internal server error"
+    max_redirects = 2
+    wheel_name = "fake.whl"
+
+    repo.session = pretend.stub(
+        post=lambda url, data, allow_redirects, headers: response_with(
+            status_code=status_code, reason=reason
+        )
+    )
+
+    fakefile = tmpdir.join(wheel_name)
+    fakefile.write(".")
+
+    def dictfunc():
+        return {"name": "fake"}
+
+    package = pretend.stub(
+        safe_name="fake",
+        metadata=pretend.stub(version="2.12.0"),
+        basefilename="fake.whl",
+        filename=str(fakefile),
+        metadata_dictionary=dictfunc,
+    )
+
+    repo.upload(package, max_redirects=max_redirects)
+
+    msg = []
+    for i in range(1, max_redirects + 1):
+        msg.append(
+            f"Uploading {wheel_name}\n"
+            f'Received "{status_code}: {reason}" '
+            f"Package upload appears to have failed.  Retry {i} of 5"
+        )
+
+    captured = capsys.readouterr()
+    assert captured.out == "\n".join(msg) + "\n"
 
 
 @pytest.mark.parametrize(
@@ -215,14 +315,11 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         ([], utils.DEFAULT_REPOSITORY, set(),),
     ],
 )
-def test_release_urls(package_meta, repository_url, release_urls):
+def test_release_urls(package_meta, repository_url, release_urls, repo):
     packages = [
         pretend.stub(safe_name=name, metadata=pretend.stub(version=version),)
         for name, version in package_meta
     ]
 
-    repo = repository.Repository(
-        repository_url=repository_url, username="username", password="password",
-    )
-
+    repo.url = repository_url
     assert repo.release_urls(packages) == release_urls
