@@ -17,10 +17,13 @@ import configparser
 import functools
 import os
 import os.path
+from typing import Any
 from typing import Callable
 from typing import DefaultDict
 from typing import Dict
 from typing import Optional
+from typing import Sequence
+from typing import Union
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -181,7 +184,7 @@ def get_userpass_value(
     cli_value: Optional[str],
     config: RepositoryConfig,
     key: str,
-    prompt_strategy: Optional[Callable] = None,
+    prompt_strategy: Optional[Callable[[], str]] = None,
 ) -> Optional[str]:
     """Gets the username / password from config.
 
@@ -221,7 +224,11 @@ class EnvironmentDefault(argparse.Action):
     """Get values from environment variable."""
 
     def __init__(
-        self, env: str, required: bool = True, default: Optional[str] = None, **kwargs
+        self,
+        env: str,
+        required: bool = True,
+        default: Optional[str] = None,
+        **kwargs: Any,
     ) -> None:
         default = os.environ.get(env, default)
         self.env = env
@@ -229,25 +236,37 @@ class EnvironmentDefault(argparse.Action):
             required = False
         super().__init__(default=default, required=required, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Union[str, Sequence[Any], None],
+        option_string: Optional[str] = None,
+    ) -> None:
         setattr(namespace, self.dest, values)
 
 
 class EnvironmentFlag(argparse.Action):
     """Set boolean flag from environment variable."""
 
-    def __init__(self, env: str, **kwargs) -> None:
+    def __init__(self, env: str, **kwargs: Any) -> None:
         default = self.bool_from_env(os.environ.get(env))
         self.env = env
         super().__init__(default=default, nargs=0, **kwargs)
 
-    def __call__(self, parser, namespace, values, option_string=None):
+    def __call__(
+        self,
+        parser: argparse.ArgumentParser,
+        namespace: argparse.Namespace,
+        values: Union[str, Sequence[Any], None],
+        option_string: Optional[str] = None,
+    ) -> None:
         setattr(namespace, self.dest, True)
 
     @staticmethod
-    def bool_from_env(val):
+    def bool_from_env(val: Optional[str]) -> bool:
         """
         Allow '0' and 'false' and 'no' to be False
         """
         falsey = {"0", "false", "no"}
-        return val and val.lower() not in falsey
+        return bool(val and val.lower() not in falsey)

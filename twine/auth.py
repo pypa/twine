@@ -3,6 +3,8 @@ import getpass
 import warnings
 from typing import Callable
 from typing import Optional
+from typing import Type
+from typing import cast
 
 import keyring
 
@@ -11,18 +13,18 @@ from twine import utils
 
 
 class CredentialInput:
-    def __init__(self, username: str = None, password: str = None):
+    def __init__(self, username: str = None, password: str = None) -> None:
         self.username = username
         self.password = password
 
 
 class Resolver:
-    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput):
+    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput) -> None:
         self.config = config
         self.input = input
 
     @classmethod
-    def choose(cls, interactive):
+    def choose(cls, interactive: bool) -> Type["Resolver"]:
         return cls if interactive else Private
 
     @property  # type: ignore  # https://github.com/python/mypy/issues/1362
@@ -53,7 +55,7 @@ class Resolver:
         try:
             creds = keyring.get_credential(self.system, None)
             if creds:
-                return creds.username
+                return cast(str, creds.username)
         except AttributeError:
             # To support keyring prior to 15.2
             pass
@@ -63,7 +65,7 @@ class Resolver:
 
     def get_password_from_keyring(self) -> Optional[str]:
         try:
-            return keyring.get_password(self.system, self.username)
+            return cast(str, keyring.get_password(self.system, self.username))
         except Exception as exc:
             warnings.warn(str(exc))
         return None
@@ -76,10 +78,10 @@ class Resolver:
             "password", getpass.getpass
         )
 
-    def prompt(self, what: str, how: Callable) -> str:
+    def prompt(self, what: str, how: Callable[..., str]) -> str:
         return how(f"Enter your {what}: ")
 
 
 class Private(Resolver):
-    def prompt(self, what: str, how: Optional[Callable] = None) -> str:
+    def prompt(self, what: str, how: Optional[Callable[..., str]] = None) -> str:
         raise exceptions.NonInteractive(f"Credential not found for {what}.")

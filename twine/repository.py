@@ -12,10 +12,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
+from typing import Any
 from typing import Dict
 from typing import List
 from typing import Optional
+from typing import Set
 from typing import Tuple
+from typing import cast
 
 import requests
 import requests_toolbelt
@@ -38,7 +41,7 @@ WAREHOUSE_WEB = "https://pypi.org/"
 
 
 class ProgressBar(tqdm.tqdm):
-    def update_to(self, n):
+    def update_to(self, n: int) -> None:
         """Update the bar in the way compatible with requests-toolbelt.
 
         This is identical to tqdm.update, except ``n`` will be the current
@@ -68,7 +71,8 @@ class Repository:
         for scheme in ("http://", "https://"):
             self.session.mount(scheme, self._make_adapter_with_retries())
 
-        self._releases_json_data: Dict[str, Dict] = {}
+        # Working around https://github.com/python/typing/issues/182
+        self._releases_json_data: Dict[str, Dict[str, Any]] = {}
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod
@@ -86,14 +90,16 @@ class Repository:
         from twine import cli
 
         dependencies = cli.list_dependencies_and_versions()
-        return (
-            user_agent.UserAgentBuilder("twine", twine.__version__,)
+        user_agent_string = (
+            user_agent.UserAgentBuilder("twine", twine.__version__)
             .include_extras(dependencies)
             .include_implementation()
             .build()
         )
 
-    def close(self):
+        return cast(str, user_agent_string)
+
+    def close(self) -> None:
         self.session.close()
 
     @staticmethod
@@ -117,7 +123,7 @@ class Repository:
         if clientcert:
             self.session.cert = clientcert
 
-    def register(self, package):
+    def register(self, package: package_file.PackageFile) -> requests.Response:
         data = package.metadata_dictionary()
         data.update({":action": "submit", "protocol_version": "1"})
 
@@ -232,7 +238,7 @@ class Repository:
 
         return False
 
-    def release_urls(self, packages):
+    def release_urls(self, packages: List[package_file.PackageFile]) -> Set[str]:
         if self.url.startswith(WAREHOUSE):
             url = WAREHOUSE_WEB
         elif self.url.startswith(TEST_WAREHOUSE):
@@ -245,7 +251,7 @@ class Repository:
             for package in packages
         }
 
-    def verify_package_integrity(self, package: package_file.PackageFile):
+    def verify_package_integrity(self, package: package_file.PackageFile) -> None:
         # TODO(sigmavirus24): Add a way for users to download the package and
         # check it's hash against what it has locally.
         pass
