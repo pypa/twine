@@ -16,8 +16,14 @@ import cgi
 import io
 import re
 import sys
+from io import StringIO
+from typing import Any
+from typing import List
+from typing import Tuple
+from typing import Union
 
 import readme_renderer.rst
+from pretend import stub
 
 from twine import commands
 from twine import package as package_file
@@ -43,10 +49,10 @@ _REPORT_RE = re.compile(
 
 
 class _WarningStream:
-    def __init__(self):
+    def __init__(self) -> None:
         self.output = io.StringIO()
 
-    def write(self, text):
+    def write(self, text: str) -> None:
         matched = _REPORT_RE.search(text)
 
         if not matched:
@@ -61,11 +67,13 @@ class _WarningStream:
             )
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.output.getvalue()
 
 
-def _check_file(filename, render_warning_stream):
+def _check_file(
+    filename: str, render_warning_stream: Union[str, _WarningStream]
+) -> Union[Tuple[List[Any], bool], Tuple[List[str], bool]]:
     """Check given distribution."""
     warnings = []
     is_ok = True
@@ -98,7 +106,7 @@ def _check_file(filename, render_warning_stream):
 
 
 # TODO: Replace with textwrap.indent when Python 2 support is dropped
-def _indented(text, prefix):
+def _indented(text: str, prefix: str) -> str:
     """Adds 'prefix' to all non-empty lines on 'text'."""
 
     def prefixed_lines():
@@ -108,7 +116,7 @@ def _indented(text, prefix):
     return "".join(prefixed_lines())
 
 
-def check(dists, output_stream=sys.stdout):
+def check(dists: str, output_stream: StringIO = sys.stdout) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -144,7 +152,7 @@ def check(dists, output_stream=sys.stdout):
     return failure
 
 
-def main(args):
+def main(args: List[str]) -> stub:
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
         "dists",
