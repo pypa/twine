@@ -1,6 +1,7 @@
 import os
 import re
 import zipfile
+from typing import Optional
 
 from pkginfo import distribution
 
@@ -10,20 +11,20 @@ wininst_file_re = re.compile(r".*py(?P<pyver>\d+\.\d+)\.exe$")
 
 
 class WinInst(distribution.Distribution):
-    def __init__(self, filename, metadata_version=None):
+    def __init__(self, filename: str, metadata_version: Optional[str] = None) -> None:
         self.filename = filename
         self.metadata_version = metadata_version
         self.extractMetadata()
 
     @property
-    def py_version(self):
+    def py_version(self) -> str:
         m = wininst_file_re.match(self.filename)
         if m is None:
             return "any"
         else:
             return m.group("pyver")
 
-    def read(self):
+    def read(self) -> bytes:
         fqn = os.path.abspath(os.path.normpath(self.filename))
         if not os.path.exists(fqn):
             raise exceptions.InvalidDistribution("No such file: %s" % fqn)
@@ -32,7 +33,7 @@ class WinInst(distribution.Distribution):
             archive = zipfile.ZipFile(fqn)
             names = archive.namelist()
 
-            def read_file(name):
+            def read_file(name: str) -> bytes:
                 return archive.read(name)
 
         else:
