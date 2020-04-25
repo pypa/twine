@@ -44,7 +44,7 @@ class Settings:
         self,
         *,
         sign: bool = False,
-        sign_with: Optional[str] = "gpg",
+        sign_with: str = "gpg",
         identity: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
@@ -272,7 +272,7 @@ class Settings:
         return cls(**settings)
 
     def _handle_package_signing(
-        self, sign: bool, sign_with: Optional[str], identity: Optional[str]
+        self, sign: bool, sign_with: str, identity: Optional[str]
     ) -> None:
         if not sign and identity:
             raise exceptions.InvalidSigningConfiguration(

@@ -20,7 +20,7 @@ from twine import exceptions
 __all__: List[str] = []
 
 
-def _group_wheel_files_first(files):
+def _group_wheel_files_first(files: List[str]) -> List[str]:
     if not any(fname for fname in files if fname.endswith(".whl")):
         # Return early if there's no wheel files
         return files
@@ -30,7 +30,7 @@ def _group_wheel_files_first(files):
     return files
 
 
-def _find_dists(dists):
+def _find_dists(dists: List[str]) -> List[str]:
     uploads = []
     for filename in dists:
         if os.path.exists(filename):

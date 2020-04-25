@@ -30,7 +30,7 @@ class RedirectDetected(TwineException):
     """
 
     @classmethod
-    def from_args(cls, repository_url, redirect_url):
+    def from_args(cls, repository_url: str, redirect_url: str) -> "RedirectDetected":
         msg = "\n".join(
             [
                 "{} attempted to redirect to {}.".format(repository_url, redirect_url),
@@ -60,7 +60,9 @@ class UploadToDeprecatedPyPIDetected(TwineException):
     """
 
     @classmethod
-    def from_args(cls, target_url, default_url, test_url):
+    def from_args(
+        cls, target_url: str, default_url: str, test_url: str
+    ) -> "UploadToDeprecatedPyPIDetected":
         """Return an UploadToDeprecatedPyPIDetected instance."""
         return cls(
             "You're trying to upload to the legacy PyPI site '{}'. "
