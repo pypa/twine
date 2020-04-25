@@ -13,6 +13,10 @@
 # limitations under the License.
 import argparse
 import os.path
+from typing import List
+from typing import cast
+
+import requests
 
 from twine import commands
 from twine import exceptions
@@ -21,7 +25,9 @@ from twine import settings
 from twine import utils
 
 
-def skip_upload(response, skip_existing, package):
+def skip_upload(
+    response: requests.Response, skip_existing: bool, package: package_file.PackageFile
+) -> bool:
     if not skip_existing:
         return False
 
@@ -44,14 +50,14 @@ def skip_upload(response, skip_existing, package):
     )
 
 
-def upload(upload_settings, dists):
+def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     dists = commands._find_dists(dists)
 
     # Determine if the user has passed in pre-signed distributions
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
     uploads = [i for i in dists if not i.endswith(".asc")]
     upload_settings.check_repository_url()
-    repository_url = upload_settings.repository_config["repository"]
+    repository_url = cast(str, upload_settings.repository_config["repository"])
 
     print(f"Uploading distributions to {repository_url}")
 
@@ -109,7 +115,7 @@ def upload(upload_settings, dists):
     repository.close()
 
 
-def main(args):
+def main(args: List[str]) -> None:
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
@@ -122,8 +128,8 @@ def main(args):
         "file upload.",
     )
 
-    args = parser.parse_args(args)
-    upload_settings = settings.Settings.from_argparse(args)
+    parsed_args = parser.parse_args(args)
+    upload_settings = settings.Settings.from_argparse(parsed_args)
 
     # Call the upload function with the arguments from the command line
-    return upload(upload_settings, args.dists)
+    return upload(upload_settings, parsed_args.dists)

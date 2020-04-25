@@ -78,7 +78,7 @@ class PackageFile:
         self.blake2_256_digest = hexdigest.blake2
 
     @classmethod
-    def from_filename(cls, filename: str, comment: None) -> "PackageFile":
+    def from_filename(cls, filename: str, comment: Optional[str]) -> "PackageFile":
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
