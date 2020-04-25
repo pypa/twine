@@ -14,6 +14,7 @@
 import os
 import zipfile
 
+import pretend
 import pytest
 
 import helpers
@@ -34,6 +35,12 @@ def example_wheel(request):
 
 def test_version_parsing(example_wheel):
     assert example_wheel.py_version == "py2.py3"
+
+
+def test_version_parsing_missing_pyver(monkeypatch, example_wheel):
+
+    wheel.wheel_file_re = pretend.stub(match=lambda a: None)
+    assert example_wheel.py_version == "any"
 
 
 def test_find_metadata_files():
