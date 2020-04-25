@@ -22,7 +22,7 @@ from twine import utils
 
 
 @pytest.fixture()
-def repo():
+def default_repo():
     return repository.Repository(
         repository_url=utils.DEFAULT_REPOSITORY,
         username="username",
@@ -67,27 +67,27 @@ def test_iterables_are_flattened():
     assert tuples == [("platform", "UNKNOWN"), ("platform", "ANOTHERPLATFORM")]
 
 
-def test_set_client_certificate(repo):
+def test_set_client_certificate(default_repo):
     """Test that setting client certificate is successful"""
-    assert repo.session.cert is None
+    assert default_repo.session.cert is None
 
-    repo.set_client_certificate(("/path/to/cert", "/path/to/key"))
-    assert repo.session.cert == ("/path/to/cert", "/path/to/key")
+    default_repo.set_client_certificate(("/path/to/cert", "/path/to/key"))
+    assert default_repo.session.cert == ("/path/to/cert", "/path/to/key")
 
 
-def test_set_certificate_authority(repo):
+def test_set_certificate_authority(default_repo):
     """Test that setting certificate authority is successful"""
-    assert repo.session.verify is True
+    assert default_repo.session.verify is True
 
-    repo.set_certificate_authority("/path/to/cert")
-    assert repo.session.verify == "/path/to/cert"
+    default_repo.set_certificate_authority("/path/to/cert")
+    assert default_repo.session.verify == "/path/to/cert"
 
 
-def test_make_user_agent_string(repo):
+def test_make_user_agent_string(default_repo):
     """Test that dependencies are present in user agent string"""
-    assert "User-Agent" in repo.session.headers
+    assert "User-Agent" in default_repo.session.headers
 
-    user_agent = repo.session.headers["User-Agent"]
+    user_agent = default_repo.session.headers["User-Agent"]
     packages = ("twine/", "requests/", "requests-toolbelt/", "pkginfo/", "setuptools/")
     assert all(p in user_agent for p in packages)
 
@@ -101,39 +101,41 @@ def response_with(**kwattrs):
     return resp
 
 
-def test_package_is_uploaded_404s(repo):
+def test_package_is_uploaded_404s(default_repo):
     """Test that a package upload fails with 404"""
-    repo.session = pretend.stub(get=lambda url, headers: response_with(status_code=404))
+    default_repo.session = pretend.stub(
+        get=lambda url, headers: response_with(status_code=404)
+    )
     package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(package) is False
+    assert default_repo.package_is_uploaded(package) is False
 
 
-def test_package_is_uploaded_200s_with_no_releases(repo):
+def test_package_is_uploaded_200s_with_no_releases(default_repo):
     """Test that a package upload succeeds with 200 but has no releases"""
-    repo.session = pretend.stub(
+    default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
         ),
     )
     package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
 
-    assert repo.package_is_uploaded(package) is False
+    assert default_repo.package_is_uploaded(package) is False
 
 
-def test_package_is_uploaded_with_releases_using_cache(repo):
+def test_package_is_uploaded_with_releases_using_cache(default_repo):
     """Test that a package upload succeeds without bypassing cache"""
-    repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
+    default_repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
     package = pretend.stub(
         safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
     )
 
-    assert repo.package_is_uploaded(package) is True
+    assert default_repo.package_is_uploaded(package) is True
 
 
-def test_package_is_uploaded_with_releases_not_using_cache(repo):
+def test_package_is_uploaded_with_releases_not_using_cache(default_repo):
     """Test that a package upload succeeds bypassing cache"""
-    repo.session = pretend.stub(
+    default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
             _content=b'{"releases": {"0.1": [{"filename": "fake.whl"}]}}',
@@ -144,12 +146,12 @@ def test_package_is_uploaded_with_releases_not_using_cache(repo):
         safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
     )
 
-    assert repo.package_is_uploaded(package, bypass_cache=True) is True
+    assert default_repo.package_is_uploaded(package, bypass_cache=True) is True
 
 
-def test_package_is_uploaded_different_filenames(repo):
+def test_package_is_uploaded_different_filenames(default_repo):
     """Test that a package upload fails as safe name and basefilename differ"""
-    repo.session = pretend.stub(
+    default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
             _content=b'{"releases": {"0.1": [{"filename": "fake.whl"}]}}',
@@ -160,16 +162,10 @@ def test_package_is_uploaded_different_filenames(repo):
         safe_name="fake", basefilename="foo.whl", metadata=pretend.stub(version="0.1"),
     )
 
-    assert repo.package_is_uploaded(package) is False
+    assert default_repo.package_is_uploaded(package) is False
 
 
-def test_package_is_uploaded_incorrect_repo_url(repo):
-    """Test that a package upload fails on providing wrong repo url"""
-    repo.url = "https://bad.repo.com/legacy"
-    assert repo.package_is_uploaded(None) is False
-
-
-def test_package_is_registered(repo):
+def test_package_is_registered(default_repo):
     """Test that a package is registered successfully"""
     package = pretend.stub(
         basefilename="fake.whl", metadata_dictionary=lambda: {"name": "fake"}
@@ -178,14 +174,16 @@ def test_package_is_registered(repo):
     resp = response_with(status_code=200)
     setattr(resp, "raw", pretend.stub())
     setattr(resp.raw, "close", lambda: None)
-    repo.session = pretend.stub(post=lambda url, data, allow_redirects, headers: resp)
+    default_repo.session = pretend.stub(
+        post=lambda url, data, allow_redirects, headers: resp
+    )
 
-    assert repo.register(package)
+    assert default_repo.register(package)
 
 
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
 def test_disable_progress_bar_is_forwarded_to_tqdm(
-    monkeypatch, tmpdir, disable_progress_bar, repo
+    monkeypatch, tmpdir, disable_progress_bar, default_repo
 ):
     """Test whether the disable flag is passed to tqdm
         when the disable_progress_bar option is passed to the
@@ -199,9 +197,9 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         yield
 
     monkeypatch.setattr(repository, "ProgressBar", progressbarstub)
-    repo.disable_progress_bar = disable_progress_bar
+    default_repo.disable_progress_bar = disable_progress_bar
 
-    repo.session = pretend.stub(
+    default_repo.session = pretend.stub(
         post=lambda url, data, allow_redirects, headers: response_with(status_code=200)
     )
 
@@ -219,18 +217,18 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
         metadata_dictionary=dictfunc,
     )
 
-    repo.upload(package)
+    default_repo.upload(package)
 
 
-def test_upload_retry(tmpdir, repo, capsys):
+def test_upload_retry(tmpdir, default_repo, capsys):
     """Test that retry works while uploading"""
-    repo.disable_progress_bar = True
+    default_repo.disable_progress_bar = True
     status_code = 500
     reason = "Internal server error"
     max_redirects = 2
     wheel_name = "fake.whl"
 
-    repo.session = pretend.stub(
+    default_repo.session = pretend.stub(
         post=lambda url, data, allow_redirects, headers: response_with(
             status_code=status_code, reason=reason
         )
@@ -250,7 +248,7 @@ def test_upload_retry(tmpdir, repo, capsys):
         metadata_dictionary=dictfunc,
     )
 
-    repo.upload(package, max_redirects=max_redirects)
+    default_repo.upload(package, max_redirects=max_redirects)
 
     msg = []
     for i in range(1, max_redirects + 1):
@@ -300,12 +298,26 @@ def test_upload_retry(tmpdir, repo, capsys):
         ([], utils.DEFAULT_REPOSITORY, set(),),
     ],
 )
-def test_release_urls(package_meta, repository_url, release_urls, repo):
+def test_release_urls(package_meta, repository_url, release_urls):
     """Test that the correct release urls are read"""
     packages = [
         pretend.stub(safe_name=name, metadata=pretend.stub(version=version),)
         for name, version in package_meta
     ]
 
-    repo.url = repository_url
+    repo = repository.Repository(
+        repository_url=repository_url, username="username", password="password",
+    )
     assert repo.release_urls(packages) == release_urls
+
+
+def test_package_is_uploaded_incorrect_repo_url():
+    """Test that a package upload fails on providing wrong repo url"""
+    repo = repository.Repository(
+        repository_url="https://bad.repo.com/legacy",
+        username="username",
+        password="password",
+    )
+
+    repo.url = "https://bad.repo.com/legacy"
+    assert repo.package_is_uploaded(None) is False
