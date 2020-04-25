@@ -48,7 +48,7 @@ def test_check_no_distributions(monkeypatch):
 
     monkeypatch.setattr(commands, "_find_dists", lambda a: [])
 
-    assert not check.check("dist/*", output_stream=stream)
+    assert not check.check(["dist/*"], output_stream=stream)
     assert stream.getvalue() == "No files to check.\n"
 
 
@@ -72,7 +72,7 @@ def test_check_passing_distribution(monkeypatch):
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
-    assert not check.check("dist/*", output_stream=output_stream)
+    assert not check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
 
@@ -94,7 +94,7 @@ def test_check_no_description(monkeypatch, capsys):
 
     # used to crash with `AttributeError`
     output_stream = io.StringIO()
-    check.check("dist/*", output_stream=output_stream)
+    check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: PASSED, with warnings\n"
         "  warning: `long_description_content_type` missing. "
@@ -123,7 +123,7 @@ def test_check_failing_distribution(monkeypatch):
     )
     monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
 
-    assert check.check("dist/*", output_stream=output_stream)
+    assert check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: FAILED\n"
         "  `long_description` has syntax errors in markup and would not be "

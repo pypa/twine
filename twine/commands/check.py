@@ -16,14 +16,13 @@ import cgi
 import io
 import re
 import sys
-from io import StringIO
-from typing import Any
+import textwrap
+from typing import IO
 from typing import List
 from typing import Tuple
-from typing import Union
+from typing import cast
 
 import readme_renderer.rst
-from pretend import stub
 
 from twine import commands
 from twine import package as package_file
@@ -72,8 +71,8 @@ class _WarningStream:
 
 
 def _check_file(
-    filename: str, render_warning_stream: Union[str, _WarningStream]
-) -> Union[Tuple[List[Any], bool], Tuple[List[str], bool]]:
+    filename: str, render_warning_stream: _WarningStream
+) -> Tuple[List[str], bool]:
     """Check given distribution."""
     warnings = []
     is_ok = True
@@ -90,7 +89,7 @@ def _check_file(
         )
         description_content_type = "text/x-rst"
 
-    content_type, params = cgi.parse_header(description_content_type)
+    content_type, params = cgi.parse_header(cast(str, description_content_type))
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description in {None, "UNKNOWN\n\n\n"}:
@@ -105,18 +104,7 @@ def _check_file(
     return warnings, is_ok
 
 
-# TODO: Replace with textwrap.indent when Python 2 support is dropped
-def _indented(text: str, prefix: str) -> str:
-    """Adds 'prefix' to all non-empty lines on 'text'."""
-
-    def prefixed_lines():
-        for line in text.splitlines(True):
-            yield (prefix + line if line.strip() else line)
-
-    return "".join(prefixed_lines())
-
-
-def check(dists: str, output_stream: StringIO = sys.stdout) -> bool:
+def check(dists: List[str], output_stream: IO[str] = sys.stdout) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -138,8 +126,8 @@ def check(dists: str, output_stream: StringIO = sys.stdout) -> bool:
                 "`long_description` has syntax errors in markup and "
                 "would not be rendered on PyPI.\n"
             )
-            output_stream.write(_indented(error_text, "  "))
-            output_stream.write(_indented(str(render_warning_stream), "    "))
+            output_stream.write(textwrap.indent(error_text, "  "))
+            output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
         elif warnings:
             output_stream.write("PASSED, with warnings\n")
         else:
@@ -152,7 +140,7 @@ def check(dists: str, output_stream: StringIO = sys.stdout) -> bool:
     return failure
 
 
-def main(args: List[str]) -> stub:
+def main(args: List[str]) -> bool:
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
         "dists",
@@ -161,7 +149,7 @@ def main(args: List[str]) -> stub:
         help="The distribution files to check, usually dist/*",
     )
 
-    args = parser.parse_args(args)
+    parsed_args = parser.parse_args(args)
 
     # Call the check function with the arguments from the command line
-    return check(args.dists)
+    return check(parsed_args.dists)
