@@ -223,40 +223,34 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
 def test_upload_retry(tmpdir, default_repo, capsys):
     """Test that retry works while uploading"""
     default_repo.disable_progress_bar = True
-    status_code = 500
-    reason = "Internal server error"
-    max_redirects = 2
-    wheel_name = "fake.whl"
 
     default_repo.session = pretend.stub(
         post=lambda url, data, allow_redirects, headers: response_with(
-            status_code=status_code, reason=reason
+            status_code=500, reason="Internal server error"
         )
     )
 
-    fakefile = tmpdir.join(wheel_name)
+    fakefile = tmpdir.join("fake.whl")
     fakefile.write(".")
-
-    def dictfunc():
-        return {"name": "fake"}
 
     package = pretend.stub(
         safe_name="fake",
         metadata=pretend.stub(version="2.12.0"),
         basefilename="fake.whl",
         filename=str(fakefile),
-        metadata_dictionary=dictfunc,
+        metadata_dictionary=lambda: {"name": "fake"},
     )
 
-    default_repo.upload(package, max_redirects=max_redirects)
+    default_repo.upload(package)
 
-    msg = []
-    for i in range(1, max_redirects + 1):
-        msg.append(
-            f"Uploading {wheel_name}\n"
-            f'Received "{status_code}: {reason}" '
+    msg = [
+        (
+            "Uploading fake.whl\n"
+            'Received "500: Internal server error" '
             f"Package upload appears to have failed.  Retry {i} of 5"
         )
+        for i in range(1, 6)  # default max_redirects == 5
+    ]
 
     captured = capsys.readouterr()
     assert captured.out == "\n".join(msg) + "\n"
@@ -308,6 +302,7 @@ def test_release_urls(package_meta, repository_url, release_urls):
     repo = repository.Repository(
         repository_url=repository_url, username="username", password="password",
     )
+
     assert repo.release_urls(packages) == release_urls
 
 
@@ -320,4 +315,5 @@ def test_package_is_uploaded_incorrect_repo_url():
     )
 
     repo.url = "https://bad.repo.com/legacy"
+
     assert repo.package_is_uploaded(None) is False
