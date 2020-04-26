@@ -80,8 +80,8 @@ def _check_file(
     package = package_file.PackageFile.from_filename(filename, comment=None)
 
     metadata = package.metadata_dictionary()
-    description = metadata["description"]
-    description_content_type = metadata["description_content_type"]
+    description = cast(str, metadata["description"])
+    description_content_type = cast(str, metadata["description_content_type"])
 
     if description_content_type is None:
         warnings.append(
@@ -89,7 +89,7 @@ def _check_file(
         )
         description_content_type = "text/x-rst"
 
-    content_type, params = cgi.parse_header(cast(str, description_content_type))
+    content_type, params = cgi.parse_header(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description in {None, "UNKNOWN\n\n\n"}:

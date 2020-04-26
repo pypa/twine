@@ -103,9 +103,7 @@ class Repository:
         self.session.close()
 
     @staticmethod
-    def _convert_data_to_list_of_tuples(
-        data: Dict[str, package_file.MetadataValue]
-    ) -> List[Tuple[str, package_file.MetadataValue]]:
+    def _convert_data_to_list_of_tuples(data: Dict[str, Any]) -> List[Tuple[str, Any]]:
         data_to_send = []
         for key, value in data.items():
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
