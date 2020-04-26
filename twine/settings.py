@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+from typing import Any
 from typing import Optional
 from typing import cast
 
@@ -58,7 +59,7 @@ class Settings:
         repository_url: Optional[str] = None,
         verbose: bool = False,
         disable_progress_bar: bool = False,
-        **ignored_kwargs
+        **ignored_kwargs: Any,
     ) -> None:
         """Initialize our settings instance.
 

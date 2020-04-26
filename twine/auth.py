@@ -13,7 +13,9 @@ from twine import utils
 
 
 class CredentialInput:
-    def __init__(self, username: str = None, password: str = None) -> None:
+    def __init__(
+        self, username: Optional[str] = None, password: Optional[str] = None
+    ) -> None:
         self.username = username
         self.password = password
 
