@@ -12,10 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-from typing import Any
 from typing import Dict
 from typing import List
+from typing import Optional
 from typing import Tuple
+from typing import cast
 
 import pkg_resources
 import pkginfo
@@ -26,6 +27,8 @@ import tqdm
 
 import twine
 from twine import _installed
+
+CommandResult = Optional[bool]
 
 
 def _registered_commands(
@@ -51,7 +54,7 @@ def dep_versions() -> str:
     )
 
 
-def dispatch(argv: List[str]) -> Any:
+def dispatch(argv: List[str]) -> CommandResult:
     registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
@@ -70,4 +73,4 @@ def dispatch(argv: List[str]) -> Any:
 
     main = registered_commands[args.command].load()
 
-    return main(args.args)
+    return cast(CommandResult, main(args.args))

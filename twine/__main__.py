@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from typing import Any
+from typing import Union
 
 import requests
 
@@ -21,7 +21,7 @@ from twine import cli
 from twine import exceptions
 
 
-def main() -> Any:
+def main() -> Union[cli.CommandResult, str]:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
