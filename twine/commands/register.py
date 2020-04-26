@@ -13,15 +13,16 @@
 # limitations under the License.
 import argparse
 import os.path
+from typing import List
+from typing import cast
 
 from twine import exceptions
 from twine import package as package_file
 from twine import settings
 
 
-def register(register_settings, package):
-    repository_url = register_settings.repository_config["repository"]
-
+def register(register_settings: settings.Settings, package: str) -> None:
+    repository_url = cast(str, register_settings.repository_config["repository"])
     print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
 
@@ -43,7 +44,7 @@ def register(register_settings, package):
     resp.raise_for_status()
 
 
-def main(args):
+def main(args: List[str]) -> None:
     parser = argparse.ArgumentParser(
         prog="twine register",
         description="register operation is not required with PyPI.org",
@@ -55,8 +56,8 @@ def main(args):
         help="File from which we read the package metadata.",
     )
 
-    args = parser.parse_args(args)
-    register_settings = settings.Settings.from_argparse(args)
+    parsed_args = parser.parse_args(args)
+    register_settings = settings.Settings.from_argparse(parsed_args)
 
     # Call the register function with the args from the command line
-    register(register_settings, args.package)
+    register(register_settings, parsed_args.package)
