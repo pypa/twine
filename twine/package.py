@@ -11,12 +11,12 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import collections
 import hashlib
 import io
 import os
 import subprocess
 from typing import Dict
+from typing import NamedTuple
 from typing import Optional
 from typing import Sequence
 from typing import Tuple
@@ -200,7 +200,10 @@ class PackageFile:
             )
 
 
-Hexdigest = collections.namedtuple("Hexdigest", ["md5", "sha2", "blake2"])
+class Hexdigest(NamedTuple):
+    md5: Optional[str]
+    sha2: Optional[str]
+    blake2: Optional[str]
 
 
 class HashManager:
