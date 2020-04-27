@@ -193,10 +193,12 @@ class Repository:
                 number_of_redirects += 1
                 print(
                     'Received "{status_code}: {reason}" Package upload '
-                    "appears to have failed.  Retry {retry} of 5".format(
+                    "appears to have failed.  Retry {retry} of "
+                    "{max_redirects}".format(
                         status_code=resp.status_code,
                         reason=resp.reason,
                         retry=number_of_redirects,
+                        max_redirects=max_redirects,
                     )
                 )
             else:
