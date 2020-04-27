@@ -16,6 +16,11 @@ import cgi
 import io
 import re
 import sys
+import textwrap
+from typing import IO
+from typing import List
+from typing import Tuple
+from typing import cast
 
 import readme_renderer.rst
 
@@ -43,10 +48,10 @@ _REPORT_RE = re.compile(
 
 
 class _WarningStream:
-    def __init__(self):
+    def __init__(self) -> None:
         self.output = io.StringIO()
 
-    def write(self, text):
+    def write(self, text: str) -> None:
         matched = _REPORT_RE.search(text)
 
         if not matched:
@@ -61,11 +66,13 @@ class _WarningStream:
             )
         )
 
-    def __str__(self):
+    def __str__(self) -> str:
         return self.output.getvalue()
 
 
-def _check_file(filename, render_warning_stream):
+def _check_file(
+    filename: str, render_warning_stream: _WarningStream
+) -> Tuple[List[str], bool]:
     """Check given distribution."""
     warnings = []
     is_ok = True
@@ -73,8 +80,8 @@ def _check_file(filename, render_warning_stream):
     package = package_file.PackageFile.from_filename(filename, comment=None)
 
     metadata = package.metadata_dictionary()
-    description = metadata["description"]
-    description_content_type = metadata["description_content_type"]
+    description = cast(str, metadata["description"])
+    description_content_type = cast(str, metadata["description_content_type"])
 
     if description_content_type is None:
         warnings.append(
@@ -97,18 +104,7 @@ def _check_file(filename, render_warning_stream):
     return warnings, is_ok
 
 
-# TODO: Replace with textwrap.indent when Python 2 support is dropped
-def _indented(text, prefix):
-    """Adds 'prefix' to all non-empty lines on 'text'."""
-
-    def prefixed_lines():
-        for line in text.splitlines(True):
-            yield (prefix + line if line.strip() else line)
-
-    return "".join(prefixed_lines())
-
-
-def check(dists, output_stream=sys.stdout):
+def check(dists: List[str], output_stream: IO[str] = sys.stdout) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -130,8 +126,8 @@ def check(dists, output_stream=sys.stdout):
                 "`long_description` has syntax errors in markup and "
                 "would not be rendered on PyPI.\n"
             )
-            output_stream.write(_indented(error_text, "  "))
-            output_stream.write(_indented(str(render_warning_stream), "    "))
+            output_stream.write(textwrap.indent(error_text, "  "))
+            output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
         elif warnings:
             output_stream.write("PASSED, with warnings\n")
         else:
@@ -144,7 +140,7 @@ def check(dists, output_stream=sys.stdout):
     return failure
 
 
-def main(args):
+def main(args: List[str]) -> bool:
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
         "dists",
@@ -153,7 +149,7 @@ def main(args):
         help="The distribution files to check, usually dist/*",
     )
 
-    args = parser.parse_args(args)
+    parsed_args = parser.parse_args(args)
 
     # Call the check function with the arguments from the command line
-    return check(args.dists)
+    return check(parsed_args.dists)

@@ -16,7 +16,6 @@ import hashlib
 import io
 import os
 import subprocess
-from typing import IO
 from typing import Dict
 from typing import Optional
 from typing import Sequence
@@ -46,7 +45,7 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-MetadataValue = Union[str, Sequence[str], Tuple[str, IO, str]]
+MetadataValue = Union[str, Sequence[str]]
 
 
 class PackageFile:
