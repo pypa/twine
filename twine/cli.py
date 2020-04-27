@@ -14,9 +14,7 @@
 import argparse
 from typing import Dict
 from typing import List
-from typing import Optional
 from typing import Tuple
-from typing import cast
 
 import pkg_resources
 import pkginfo
@@ -27,8 +25,6 @@ import tqdm
 
 import twine
 from twine import _installed
-
-CommandResult = Optional[bool]
 
 
 def _registered_commands(
@@ -54,7 +50,7 @@ def dep_versions() -> str:
     )
 
 
-def dispatch(argv: List[str]) -> CommandResult:
+def dispatch(argv: List[str]) -> bool:
     registered_commands = _registered_commands()
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
@@ -73,4 +69,4 @@ def dispatch(argv: List[str]) -> CommandResult:
 
     main = registered_commands[args.command].load()
 
-    return cast(CommandResult, main(args.args))
+    return bool(main(args.args))

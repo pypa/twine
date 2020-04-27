@@ -21,7 +21,7 @@ from twine import cli
 from twine import exceptions
 
 
-def main() -> Union[cli.CommandResult, str]:
+def main() -> Union[bool, str]:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
