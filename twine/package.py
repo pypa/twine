@@ -21,6 +21,7 @@ from typing import Optional
 from typing import Sequence
 from typing import Tuple
 from typing import Union
+from typing import cast
 
 import pkg_resources
 import pkginfo
@@ -45,7 +46,8 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-MetadataValue = Union[str, Sequence[str]]
+GpgSignature = Optional[Tuple[str, bytes]]
+MetadataValue = Union[Optional[str], Sequence[str], GpgSignature]
 
 
 class PackageFile:
@@ -63,10 +65,10 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = pkg_resources.safe_name(metadata.name)
+        self.safe_name = pkg_resources.safe_name(cast(str, metadata.name))
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
-        self.gpg_signature: Optional[Tuple[str, bytes]] = None
+        self.gpg_signature: GpgSignature = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -111,7 +113,7 @@ class PackageFile:
 
     def metadata_dictionary(self) -> Dict[str, MetadataValue]:
         meta = self.metadata
-        data = {
+        data: Dict[str, MetadataValue] = {
             # identify release
             "name": self.safe_name,
             "version": meta.version,

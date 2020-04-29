@@ -17,6 +17,7 @@ import re
 import zipfile
 from typing import List
 from typing import Optional
+from typing import Union
 
 from pkginfo import distribution
 
@@ -84,7 +85,7 @@ class Wheel(distribution.Distribution):
 
         raise exceptions.InvalidDistribution("No METADATA in archive: %s" % fqn)
 
-    def parse(self, data: bytes) -> None:
+    def parse(self, data: Union[str, bytes]) -> None:
         super().parse(data)
 
         fp = io.StringIO(distribution.must_decode(data))
