@@ -1,0 +1,9 @@
+[flake8]
+filenames = *.pyi
+# Matching black's default
+max-line-length = 88
+extend_ignore =
+    E301
+    E302
+    E305
+    F401
