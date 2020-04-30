@@ -16,6 +16,7 @@ from typing import Any
 from typing import Dict
 from typing import List
 from typing import Tuple
+from typing import cast
 
 import pkg_resources
 import pkginfo
@@ -37,7 +38,7 @@ def _registered_commands(
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     return [
-        ("pkginfo", _installed.Installed(pkginfo).version),
+        ("pkginfo", cast(str, _installed.Installed(pkginfo).version)),
         ("requests", requests.__version__),
         ("setuptools", setuptools.__version__),
         ("requests-toolbelt", requests_toolbelt.__version__),
