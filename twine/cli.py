@@ -69,4 +69,6 @@ def dispatch(argv: List[str]) -> bool:
 
     main = registered_commands[args.command].load()
 
+    # Normalizing return type for simplicity
+    # register() and upload() returns None, check() returns bool
     return bool(main(args.args))
