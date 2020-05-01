@@ -103,9 +103,9 @@ class PackageFile:
             pkgd = pkg_resources.Distribution.from_filename(filename)
             py_version = pkgd.py_version
         elif dtype == "bdist_wheel":
-            py_version = meta.py_version
+            py_version = cast(wheel.Wheel, meta).py_version
         elif dtype == "bdist_wininst":
-            py_version = meta.py_version
+            py_version = cast(wininst.WinInst, meta).py_version
         else:
             py_version = None
 
