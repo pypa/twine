@@ -21,26 +21,29 @@ HEADER_ATTRS_2_1: HeaderAttrs
 HEADER_ATTRS: Dict[str, HeaderAttrs]
 
 class Distribution:
+    # Required in all versions, but treated as optional by Distribution subclasses
     metadata_version: Optional[str]
-    # version 1.0
-    name: Optional[str]
-    version: Optional[str]
+    # version 1.0, PEP 241
+    # Some attributes are non-optional because they're required in all versions,
+    # and make downstream type annotations cleaner.
+    name: str
+    version: str
     platforms: Sequence[str]
     supported_platforms: Sequence[str]
-    summary: Optional[str]
+    summary: str
     description: Optional[str]
     keywords: Optional[str]
     home_page: Optional[str]
     author: Optional[str]
     author_email: Optional[str]
     license: Optional[str]
-    # version 1.1
+    # version 1.1, PEP 314
     classifiers: Sequence[str]
     download_url: Optional[str]
     requires: Sequence[str]
     provides: Sequence[str]
     obsoletes: Sequence[str]
-    # version 1.2
+    # version 1.2, PEP 345
     maintainer: Optional[str]
     maintainer_email: Optional[str]
     requires_python: Optional[str]
@@ -49,7 +52,7 @@ class Distribution:
     provides_dist: Sequence[str]
     obsoletes_dist: Sequence[str]
     project_urls: Sequence[str]
-    # version 2.1
+    # version 2.1, PEP 566
     provides_extras: Sequence[str]
     description_content_type: Optional[str]
     def extractMetadata(self) -> None: ...
