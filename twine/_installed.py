@@ -9,12 +9,13 @@ import glob
 import os
 import sys
 import warnings
+from typing import Optional
 
 import pkginfo
 
 
 class Installed(pkginfo.Installed):
-    def read(self):
+    def read(self) -> Optional[str]:
         opj = os.path.join
         if self.package is not None:
             package = self.package.__package__
@@ -22,11 +23,11 @@ class Installed(pkginfo.Installed):
                 package = self.package.__name__
             egg_pattern = "%s*.egg-info" % package
             dist_pattern = "%s*.dist-info" % package
-            file = getattr(self.package, "__file__", None)
+            file: Optional[str] = getattr(self.package, "__file__", None)
             if file is not None:
                 candidates = []
 
-                def _add_candidate(where):
+                def _add_candidate(where: str) -> None:
                     candidates.extend(glob.glob(where))
 
                 for entry in sys.path:
@@ -56,3 +57,4 @@ class Installed(pkginfo.Installed):
         warnings.warn(
             "No PKG-INFO or METADATA found for package: %s" % self.package_name
         )
+        return None

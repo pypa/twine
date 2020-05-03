@@ -19,6 +19,7 @@ import sys
 import textwrap
 from typing import IO
 from typing import List
+from typing import Optional
 from typing import Tuple
 from typing import cast
 
@@ -80,8 +81,8 @@ def _check_file(
     package = package_file.PackageFile.from_filename(filename, comment=None)
 
     metadata = package.metadata_dictionary()
-    description = cast(str, metadata["description"])
-    description_content_type = cast(str, metadata["description_content_type"])
+    description = cast(Optional[str], metadata["description"])
+    description_content_type = cast(Optional[str], metadata["description_content_type"])
 
     if description_content_type is None:
         warnings.append(
