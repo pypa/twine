@@ -14,7 +14,7 @@ matrix:
       name: Linting code style
       env:
         TOXENV: code-style
-    - python: 3.7
+    - python: 3.6
       name: Linting type annotations
       env:
         TOXENV: typing
