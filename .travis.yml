@@ -15,11 +15,6 @@ matrix:
     - python: &latest_py3 3.8
 
     - python: 3.7
-      name: Linting code style
-      env:
-        TOXENV: lint
-
-    - python: 3.7
       name: Making sure that docs build is healthy
       env:
         TOXENV: docs
