@@ -22,11 +22,11 @@ matrix:
     - python: *latest_py3
       name: Checking type annotations (latest Python)
       env:
-        TOXENV: typing
+        TOXENV: types
     - python: *oldest_py3
       name: Checking type annotations (oldest Python)
       env:
-        TOXENV: typing
+        TOXENV: types
 
     - python: 3.7
       name: Making sure that docs build is healthy
