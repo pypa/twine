@@ -17,7 +17,7 @@ matrix:
     - python: 3.7
       name: Linting code style
       env:
-        TOXENV: code-style
+        TOXENV: lint
 
     - python: *latest_py3
       name: Checking type annotations (latest Python)

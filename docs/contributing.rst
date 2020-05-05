@@ -61,8 +61,8 @@ Code style
 ^^^^^^^^^^
 
 Run ``tox -e format`` to automatically reformat your changes. Run
-``tox -e lint`` to see any remaining code smells or type errors that
-need to be fixed manually.
+``tox -e lint,types`` to see any remaining code smells or type errors
+that need to be fixed manually.
 
 Additionally, the Twine maintainers prefer that ``import`` statements
 be used for packages and modules only, rather than individual classes
