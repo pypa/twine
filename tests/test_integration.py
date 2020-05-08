@@ -1,7 +1,8 @@
 from twine import cli
+from twine import utils
 
 
-def test_devpi_upload(devpi_server, uploadable_dist):
+def test_devpi_upload(devpi_server, uploadable_dist, monkeypatch):
     command = [
         "upload",
         "--repository-url",
@@ -12,6 +13,9 @@ def test_devpi_upload(devpi_server, uploadable_dist):
         devpi_server.password,
         str(uploadable_dist),
     ]
+
+    # Patching validate url to return https for devpiserver url
+    monkeypatch.setattr(utils, "validate_url", lambda repository_url: "https")
     cli.dispatch(command)
 
 
@@ -38,7 +42,7 @@ def test_pypi_upload(sampleproject_dist):
     cli.dispatch(command)
 
 
-def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
+def test_pypiserver_upload(pypiserver_instance, uploadable_dist, monkeypatch):
     command = [
         "upload",
         "--repository-url",
@@ -49,4 +53,7 @@ def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
         "any",
         str(uploadable_dist),
     ]
+
+    # Patching validate url to return https for pypiserver url
+    monkeypatch.setattr(utils, "validate_url", lambda repository_url: "https")
     cli.dispatch(command)
