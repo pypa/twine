@@ -230,7 +230,7 @@ class Repository:
                 releases = {}
             self._releases_json_data[safe_name] = releases
 
-        packages = releases.get(package.metadata.version, [])
+        packages = releases.get(cast(str, package.metadata.version), [])
 
         for uploaded_package in packages:
             if uploaded_package["filename"] == package.basefilename:
