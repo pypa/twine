@@ -1,0 +1,3 @@
+from email.message import Message
+
+def metadata(distribution_name: str) -> Message: ...
