@@ -10,21 +10,28 @@ matrix:
   fast_finish: true
 
   include:
+    - python: &latest_py3 3.8
+    - python: 3.7
+    - python: &oldest_py3 3.6
+
     - python: 3.7
       name: Linting code style
       env:
-        TOXENV: code-style
-    - python: 3.7
-      name: Linting type annotations
+        TOXENV: lint
+
+    - python: *latest_py3
+      name: Checking type annotations (latest Python)
       env:
-        TOXENV: typing
+        TOXENV: types
+    - python: *oldest_py3
+      name: Checking type annotations (oldest Python)
+      env:
+        TOXENV: types
+
     - python: 3.7
       name: Making sure that docs build is healthy
       env:
         TOXENV: docs
-    - python: &latest_py3 3.8
-    - python: 3.7
-    - python: 3.6
 
     - stage: deploy
       if: tag IS present
