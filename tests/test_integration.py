@@ -14,8 +14,8 @@ def test_devpi_upload(devpi_server, uploadable_dist, monkeypatch):
         str(uploadable_dist),
     ]
 
-    # Patching validate url to return https for devpiserver url
-    monkeypatch.setattr(utils, "validate_url", lambda repository_url: "https")
+    # Patching validate url to validate devpi server url by allowing http
+    monkeypatch.setattr(utils, "validate_url", lambda repository_url: True)
     cli.dispatch(command)
 
 
@@ -54,6 +54,6 @@ def test_pypiserver_upload(pypiserver_instance, uploadable_dist, monkeypatch):
         str(uploadable_dist),
     ]
 
-    # Patching validate url to return https for pypiserver url
-    monkeypatch.setattr(utils, "validate_url", lambda repository_url: "https")
+    # Patching validate url to validate devpi server url by allowing http
+    monkeypatch.setattr(utils, "validate_url", lambda repository_url: True)
     cli.dispatch(command)

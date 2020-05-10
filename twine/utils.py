@@ -101,11 +101,11 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     return dict(config)
 
 
-def validate_url(repository_url: Optional[str]) -> Any:
+def validate_url(repository_url: Optional[str]) -> bool:
     """Validate the given url for allowed schemes and components"""
 
     if not repository_url:
-        return None
+        return False
 
     # Scheme should always be https, and the url should at minimum
     # contain scheme and host
@@ -120,9 +120,9 @@ def validate_url(repository_url: Optional[str]) -> Any:
     try:
         validator.validate(url)
     except Exception:
-        return None
+        return False
 
-    return url.scheme
+    return True
 
 
 def get_repository_from_config(
