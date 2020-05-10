@@ -184,15 +184,51 @@ def test_get_repository_config_missing(tmpdir):
     assert utils.get_repository_from_config(pypirc, "pypi") == exp
 
 
-def test_get_repository_config_invalid_url(tmpdir):
+def test_get_repository_config_invalid_scheme(tmpdir):
     """
-    Test if we get an URL without a protocol
+    Test if we get an URL with a invalid scheme
+    """
+
+    import re
+
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with pytest.raises(
+        exceptions.UnreachableRepositoryURLDetected,
+        match=re.escape(
+            r"Repository URL has an invalid scheme. "
+            r"scheme was required to be one of ['http', 'https'] but was 'ftp'"
+        ),
+    ):
+        utils.get_repository_from_config(pypirc, "foo.bar", "ftp://test.pypi.org")
+
+
+def test_get_repository_config_missing_components(tmpdir):
+    """
+    Test if we get an URL with missing components
     """
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
-    repository_url = "foo.bar"
-    with pytest.raises(exceptions.UnreachableRepositoryURLDetected):
-        utils.get_repository_from_config(pypirc, "foo.bar", repository_url)
+    with pytest.raises(
+        exceptions.UnreachableRepositoryURLDetected,
+        match="Repository URL has missing components. "
+        "host was required but missing.",
+    ):
+        utils.get_repository_from_config(pypirc, "foo.bar", "https:/")
+
+    with pytest.raises(
+        exceptions.UnreachableRepositoryURLDetected,
+        match="Repository URL has missing components. "
+        "scheme was required but missing.",
+    ):
+        utils.get_repository_from_config(pypirc, "foo.bar", "//test.pypi.org")
+
+    with pytest.raises(
+        exceptions.UnreachableRepositoryURLDetected,
+        match="Repository URL has missing components. "
+        "host, scheme were required but missing.",
+    ):
+        utils.get_repository_from_config(pypirc, "foo.bar", "foo.bar")
 
 
 def test_get_repository_config_missing_config(tmpdir):
