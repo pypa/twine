@@ -28,6 +28,7 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import requests
+from rfc3986 import exceptions as rfc_exceptions
 from rfc3986 import uri_reference
 from rfc3986 import validators
 
@@ -101,28 +102,19 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     return dict(config)
 
 
-def validate_url(repository_url: Optional[str]) -> bool:
+def validate_url(repository_url: str) -> None:
     """Validate the given url for allowed schemes and components"""
 
-    if not repository_url:
-        return False
-
-    # Scheme should always be https, and the url should at minimum
-    # contain scheme and host
+    # Allowed schemes are http and https, based on whether the repository
+    # supports TLS or not, and scheme and host must be present in the URL
     validator = (
         validators.Validator()
-        .allow_schemes("https")
+        .allow_schemes("http", "https")
         .require_presence_of("scheme", "host")
     )
 
-    # Only return scheme when the url is valid
     url = uri_reference(repository_url)
-    try:
-        validator.validate(url)
-    except Exception:
-        return False
-
-    return True
+    validator.validate(url)
 
 
 def get_repository_from_config(
@@ -130,19 +122,24 @@ def get_repository_from_config(
 ) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
-    scheme = validate_url(repository_url)
-    if repository_url and scheme:
+
+    if repository_url:
+        try:
+            validate_url(repository_url)
+        except rfc_exceptions.MissingComponentError as exc:
+            raise exceptions.UnreachableRepositoryURLDetected(
+                "Repository URL has missing components. {}.".format(exc.args[0])
+            )
+        except rfc_exceptions.UnpermittedComponentError as exc:
+            raise exceptions.UnreachableRepositoryURLDetected(
+                "Repository URL has an invalid scheme. {}".format(exc.args[0])
+            )
         # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
             "username": None,
             "password": None,
         }
-    if repository_url and not scheme:
-        raise exceptions.UnreachableRepositoryURLDetected(
-            "Repository URL {} has no protocol. Please add "
-            "'https://'. \n".format(repository_url)
-        )
     try:
         return get_config(config_file)[repository]
     except KeyError:
