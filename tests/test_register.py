@@ -3,10 +3,11 @@ from __future__ import unicode_literals
 import pretend
 import pytest
 
-import helpers
 from twine import cli
 from twine import exceptions
 from twine.commands import register
+
+from . import helpers
 
 
 @pytest.fixture()

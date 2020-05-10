@@ -17,9 +17,10 @@ import zipfile
 import pretend
 import pytest
 
-import helpers
 from twine import exceptions
 from twine import wheel
+
+from . import helpers
 
 
 @pytest.fixture(

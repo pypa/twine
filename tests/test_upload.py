@@ -15,11 +15,12 @@ import pretend
 import pytest
 import requests
 
-import helpers
 from twine import cli
 from twine import exceptions
 from twine import package as package_file
 from twine.commands import upload
+
+from . import helpers
 
 SDIST_FIXTURE = "tests/fixtures/twine-1.5.0.tar.gz"
 WHEEL_FIXTURE = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
