@@ -1,3 +1,8 @@
+"""
+Verify that twine passes type-checking when used as a library.
+
+https://mypy.readthedocs.io/en/stable/installed_packages.html#making-pep-561-compatible-packages
+"""
 import subprocess
 import textwrap
 
@@ -6,6 +11,7 @@ import pytest
 
 @pytest.fixture
 def example_py(tmpdir, monkeypatch):
+    # Changing directory so that mypy uses installed twine, instead of source
     monkeypatch.chdir(tmpdir)
     return tmpdir / "example.py"
 
