@@ -28,9 +28,7 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import requests
-from rfc3986 import exceptions as rfc_exceptions
-from rfc3986 import uri_reference
-from rfc3986 import validators
+import rfc3986
 
 from twine import exceptions
 
@@ -108,12 +106,12 @@ def validate_url(repository_url: str) -> None:
     # Allowed schemes are http and https, based on whether the repository
     # supports TLS or not, and scheme and host must be present in the URL
     validator = (
-        validators.Validator()
+        rfc3986.validators.Validator()
         .allow_schemes("http", "https")
         .require_presence_of("scheme", "host")
     )
 
-    url = uri_reference(repository_url)
+    url = rfc3986.uri_reference(repository_url)
     validator.validate(url)
 
 
@@ -126,13 +124,9 @@ def get_repository_from_config(
     if repository_url:
         try:
             validate_url(repository_url)
-        except rfc_exceptions.MissingComponentError as exc:
+        except rfc3986.exceptions.RFC3986Exception as exc:
             raise exceptions.UnreachableRepositoryURLDetected(
-                "Repository URL has missing components. {}.".format(exc.args[0])
-            )
-        except rfc_exceptions.UnpermittedComponentError as exc:
-            raise exceptions.UnreachableRepositoryURLDetected(
-                "Repository URL has an invalid scheme. {}".format(exc.args[0])
+                f"Invalid repository URL: {exc.args[0]}."
             )
         # prefer CLI `repository_url` over `repository` or .pypirc
         return {
