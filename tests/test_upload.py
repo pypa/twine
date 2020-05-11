@@ -16,17 +16,14 @@ import pytest
 import requests
 
 from twine import cli
+from twine import commands
 from twine import exceptions
 from twine import package as package_file
 from twine.commands import upload
 
 from . import helpers
 
-SDIST_FIXTURE = "tests/fixtures/twine-1.5.0.tar.gz"
-WHEEL_FIXTURE = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
 RELEASE_URL = "https://pypi.org/project/twine/1.5.0/"
-NEW_SDIST_FIXTURE = "tests/fixtures/twine-1.6.5.tar.gz"
-NEW_WHEEL_FIXTURE = "tests/fixtures/twine-1.6.5-py2.py3-none-any.whl"
 NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 
 
@@ -47,7 +44,12 @@ def test_successful_upload(make_settings, capsys):
 
     result = upload.upload(
         upload_settings,
-        [WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE],
+        [
+            helpers.WHEEL_FIXTURE,
+            helpers.SDIST_FIXTURE,
+            helpers.NEW_SDIST_FIXTURE,
+            helpers.NEW_WHEEL_FIXTURE,
+        ],
     )
 
     # A truthy result means the upload failed
@@ -56,6 +58,118 @@ def test_successful_upload(make_settings, capsys):
     captured = capsys.readouterr()
     assert captured.out.count(RELEASE_URL) == 1
     assert captured.out.count(NEW_RELEASE_URL) == 1
+
+
+def test_successful_upload_add_gpg_signature(make_settings, capsys, monkeypatch):
+    """Test uploading package when gpg signature are added to it"""
+
+    # Create a custom package object and monkeypatch signed_basefilename attribute
+    # with the gps signature file name
+    package = package_file.PackageFile(
+        filename=helpers.WHEEL_FIXTURE,
+        comment=None,
+        metadata=pretend.stub(name="twine"),
+        python_version=None,
+        filetype=None,
+    )
+    package.signed_basefilename = "twine.asc"
+
+    # Patch from_filename to return our custom patched package
+    monkeypatch.setattr(
+        package_file.PackageFile, "from_filename", lambda filename, comment: package
+    )
+
+    # Create a call recorder to record calls to add_gpg_signature
+    replaced_add_gpg_signature = pretend.call_recorder(
+        lambda signature_filepath, signature_filename: None
+    )
+    monkeypatch.setattr(package, "add_gpg_signature", replaced_add_gpg_signature)
+
+    # Patch _find_dists to return the provided list of dists along with gpg
+    # signature file
+    monkeypatch.setattr(
+        commands,
+        "_find_dists",
+        lambda dists: [helpers.WHEEL_FIXTURE, "/foo/bar/twine.asc"],
+    )
+
+    upload_settings = make_settings()
+
+    # Stub create_repository to mock successful upload of package
+    stub_response = pretend.stub(
+        is_redirect=False, status_code=201, raise_for_status=lambda: None
+    )
+
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response,
+        close=lambda: None,
+        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, None)
+
+    # A truthy result means the upload failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert captured.out.count(RELEASE_URL) == 1
+    assert captured.out.count(NEW_RELEASE_URL) == 1
+    args = ("/foo/bar/twine.asc", "twine.asc")
+    assert replaced_add_gpg_signature.calls == [pretend.call(*args)]
+
+
+def test_successful_upload_sign_package(make_settings, capsys, monkeypatch):
+    """Test uploading package when package is signed"""
+
+    # Create a custom package object
+    package = package_file.PackageFile(
+        filename=helpers.WHEEL_FIXTURE,
+        comment=None,
+        metadata=pretend.stub(name="twine"),
+        python_version=None,
+        filetype=None,
+    )
+
+    # Create a call recorder to record calls to package.sign
+    replaced_sign = pretend.call_recorder(lambda sign_with, identity: None)
+    monkeypatch.setattr(package, "sign", replaced_sign)
+
+    # Patch from_filename to return our custom package
+    monkeypatch.setattr(
+        package_file.PackageFile, "from_filename", lambda filename, comment: package
+    )
+
+    # Update upload settings with attributes used to sign packages
+    upload_settings = make_settings()
+    upload_settings.sign = True
+    upload_settings.sign_with = "gpg"
+    upload_settings.identity = "identity"
+
+    # Stub create_repository to mock successful upload of package
+    stub_response = pretend.stub(
+        is_redirect=False, status_code=201, raise_for_status=lambda: None
+    )
+
+    stub_repository = pretend.stub(
+        upload=lambda package: stub_response,
+        close=lambda: None,
+        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
+    )
+
+    upload_settings.create_repository = lambda: stub_repository
+
+    result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
+
+    # A truthy result means the upload failed
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert captured.out.count(RELEASE_URL) == 1
+    assert captured.out.count(NEW_RELEASE_URL) == 1
+    args = ("gpg", "identity")
+    assert replaced_sign.calls == [pretend.call(*args)]
 
 
 @pytest.mark.parametrize("verbose", [False, True])
@@ -77,7 +191,7 @@ def test_exception_for_http_status(verbose, make_settings, capsys):
     upload_settings.create_repository = lambda: stub_repository
 
     with pytest.raises(requests.HTTPError):
-        upload.upload(upload_settings, [WHEEL_FIXTURE])
+        upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     captured = capsys.readouterr()
     assert RELEASE_URL not in captured.out
@@ -122,7 +236,7 @@ def test_deprecated_repo(make_settings):
         """
         )
 
-        upload.upload(upload_settings, [WHEEL_FIXTURE])
+        upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     assert all(
         text in err.value.args[0]
@@ -158,7 +272,7 @@ def test_exception_for_redirect(make_settings):
     upload_settings.create_repository = lambda: stub_repository
 
     with pytest.raises(exceptions.RedirectDetected) as err:
-        upload.upload(upload_settings, [WHEEL_FIXTURE])
+        upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     assert "https://test.pypi.org/legacy/" in err.value.args[0]
 
@@ -175,7 +289,7 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
+    result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     # A truthy result means the upload failed
     assert result is None
@@ -200,7 +314,7 @@ def test_prints_skip_message_for_response(make_settings, capsys):
 
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, [WHEEL_FIXTURE])
+    result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     # A truthy result means the upload failed
     assert result is None
@@ -271,7 +385,7 @@ def test_skip_existing_skips_files_on_repository(response_kwargs):
     assert upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(helpers.WHEEL_FIXTURE, None),
     )
 
 
@@ -288,7 +402,7 @@ def test_skip_upload_doesnt_match(response_kwargs):
     assert not upload.skip_upload(
         response=pretend.stub(**response_kwargs),
         skip_existing=True,
-        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(helpers.WHEEL_FIXTURE, None),
     )
 
 
@@ -296,7 +410,7 @@ def test_skip_upload_respects_skip_existing():
     assert not upload.skip_upload(
         response=pretend.stub(),
         skip_existing=False,
-        package=package_file.PackageFile.from_filename(WHEEL_FIXTURE, None),
+        package=package_file.PackageFile.from_filename(helpers.WHEEL_FIXTURE, None),
     )
 
 
@@ -332,5 +446,10 @@ def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
     with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(
             upload_settings,
-            [WHEEL_FIXTURE, SDIST_FIXTURE, NEW_SDIST_FIXTURE, NEW_WHEEL_FIXTURE],
+            [
+                helpers.WHEEL_FIXTURE,
+                helpers.SDIST_FIXTURE,
+                helpers.NEW_SDIST_FIXTURE,
+                helpers.NEW_WHEEL_FIXTURE,
+            ],
         )
