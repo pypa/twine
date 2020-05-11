@@ -77,6 +77,32 @@ def test_check_passing_distribution(monkeypatch):
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
 
 
+def test_check_passing_distribution_with_none_renderer(monkeypatch):
+    """Test when a distribution passes twine check with renderers returning None"""
+
+    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
+    package = pretend.stub(
+        metadata_dictionary=lambda: {
+            "description": "blah",
+            "description_content_type": "text/markdown",
+        }
+    )
+    output_stream = io.StringIO()
+
+    monkeypatch.setattr(check, "_RENDERERS", {None: None})
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
+    )
+
+    assert not check.check(["dist/*"], output_stream=output_stream)
+    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
+
+    assert renderer.render.calls == []
+
+
 def test_check_no_description(monkeypatch, capsys):
     package = pretend.stub(
         metadata_dictionary=lambda: {
