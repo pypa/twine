@@ -100,7 +100,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     return dict(config)
 
 
-def validate_url(repository_url: str) -> None:
+def _validate_repository_url(repository_url: str) -> None:
     """Validate the given url for allowed schemes and components"""
 
     # Allowed schemes are http and https, based on whether the repository
@@ -110,9 +110,12 @@ def validate_url(repository_url: str) -> None:
         .allow_schemes("http", "https")
         .require_presence_of("scheme", "host")
     )
-
-    url = rfc3986.uri_reference(repository_url)
-    validator.validate(url)
+    try:
+        validator.validate(rfc3986.uri_reference(repository_url))
+    except rfc3986.exceptions.RFC3986Exception as exc:
+        raise exceptions.UnreachableRepositoryURLDetected(
+            f"Invalid repository URL: {exc.args[0]}."
+        )
 
 
 def get_repository_from_config(
@@ -122,12 +125,7 @@ def get_repository_from_config(
     # repository name and URL, or the .pypirc file
 
     if repository_url:
-        try:
-            validate_url(repository_url)
-        except rfc3986.exceptions.RFC3986Exception as exc:
-            raise exceptions.UnreachableRepositoryURLDetected(
-                f"Invalid repository URL: {exc.args[0]}."
-            )
+        _validate_repository_url(repository_url)
         # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
