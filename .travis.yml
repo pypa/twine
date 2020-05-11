@@ -48,10 +48,3 @@ script:
 
 after_script:
   - codecov --env TRAVIS_OS_NAME,TOXENV
-
-notifications:
-  irc:
-    channels:
-      - "irc.freenode.org#pypa-dev"
-    use_notice: true
-    skip_join: true
