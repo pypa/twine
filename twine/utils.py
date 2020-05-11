@@ -28,6 +28,7 @@ from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
 import requests
+import rfc3986
 
 from twine import exceptions
 
@@ -99,23 +100,38 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     return dict(config)
 
 
+def _validate_repository_url(repository_url: str) -> None:
+    """Validate the given url for allowed schemes and components"""
+
+    # Allowed schemes are http and https, based on whether the repository
+    # supports TLS or not, and scheme and host must be present in the URL
+    validator = (
+        rfc3986.validators.Validator()
+        .allow_schemes("http", "https")
+        .require_presence_of("scheme", "host")
+    )
+    try:
+        validator.validate(rfc3986.uri_reference(repository_url))
+    except rfc3986.exceptions.RFC3986Exception as exc:
+        raise exceptions.UnreachableRepositoryURLDetected(
+            f"Invalid repository URL: {exc.args[0]}."
+        )
+
+
 def get_repository_from_config(
     config_file: str, repository: str, repository_url: Optional[str] = None
 ) -> RepositoryConfig:
     # Get our config from, if provided, command-line values for the
     # repository name and URL, or the .pypirc file
-    if repository_url and "://" in repository_url:
+
+    if repository_url:
+        _validate_repository_url(repository_url)
         # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
             "username": None,
             "password": None,
         }
-    if repository_url and "://" not in repository_url:
-        raise exceptions.UnreachableRepositoryURLDetected(
-            "Repository URL {} has no protocol. Please add "
-            "'https://'. \n".format(repository_url)
-        )
     try:
         return get_config(config_file)[repository]
     except KeyError:
