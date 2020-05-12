@@ -19,9 +19,10 @@ import pretend
 import pytest
 import requests
 
-import helpers
 from twine import exceptions
 from twine import utils
+
+from . import helpers
 
 
 def test_get_config(tmpdir):
