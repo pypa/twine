@@ -3,6 +3,3 @@ readme-renderer>=17.4
 releases>=1.4.0
 Sphinx>=1.7.0
 sphinx_rtd_theme>=0.2.4
-
-# workaround for #492
-semantic-version<2.7
