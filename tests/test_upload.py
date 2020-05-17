@@ -16,7 +16,6 @@ import pytest
 import requests
 
 from twine import cli
-from twine import commands
 from twine import exceptions
 from twine import package as package_file
 from twine.commands import upload
@@ -60,11 +59,14 @@ def test_successful_upload(make_settings, capsys):
     assert captured.out.count(NEW_RELEASE_URL) == 1
 
 
-def test_successful_upload_add_gpg_signature(make_settings, capsys, monkeypatch):
+def test_successful_upload_add_gpg_signature(make_settings, monkeypatch):
     """Test uploading package when gpg signature are added to it"""
 
-    # Create a custom package object and monkeypatch signed_basefilename attribute
-    # with the gps signature file name
+    # Create a pre-signed distribution
+    dists = [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".asc"]
+
+    # Create a custom package object and patch
+    # from_filename to return our custom patched package
     package = package_file.PackageFile(
         filename=helpers.WHEEL_FIXTURE,
         comment=None,
@@ -72,52 +74,30 @@ def test_successful_upload_add_gpg_signature(make_settings, capsys, monkeypatch)
         python_version=None,
         filetype=None,
     )
-    package.signed_basefilename = "twine.asc"
-
-    # Patch from_filename to return our custom patched package
     monkeypatch.setattr(
-        package_file.PackageFile, "from_filename", lambda filename, comment: package
+        package_file, "PackageFile", pretend.stub(from_filename=lambda *_: package),
     )
 
-    # Create a call recorder to record calls to add_gpg_signature
-    replaced_add_gpg_signature = pretend.call_recorder(
-        lambda signature_filepath, signature_filename: None
-    )
-    monkeypatch.setattr(package, "add_gpg_signature", replaced_add_gpg_signature)
-
-    # Patch _find_dists to return the provided list of dists along with gpg
-    # signature file
-    monkeypatch.setattr(
-        commands,
-        "_find_dists",
-        lambda dists: [helpers.WHEEL_FIXTURE, "/foo/bar/twine.asc"],
-    )
-
-    upload_settings = make_settings()
-
-    # Stub create_repository to mock successful upload of package
     stub_response = pretend.stub(
         is_redirect=False, status_code=201, raise_for_status=lambda: None
     )
 
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response,
-        close=lambda: None,
-        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
+        upload=lambda _: stub_response, close=lambda: None, release_urls=lambda _: None,
     )
 
+    # Stub create_repository to mock successful upload of package
+    upload_settings = make_settings()
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, None)
-
-    # A truthy result means the upload failed
+    result = upload.upload(upload_settings, dists)
     assert result is None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(RELEASE_URL) == 1
-    assert captured.out.count(NEW_RELEASE_URL) == 1
-    args = ("/foo/bar/twine.asc", "twine.asc")
-    assert replaced_add_gpg_signature.calls == [pretend.call(*args)]
+    # Test that the signature has been added to the package
+    assert package.gpg_signature == (
+        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        b"signature",
+    )
 
 
 def test_successful_upload_sign_package(make_settings, capsys, monkeypatch):
