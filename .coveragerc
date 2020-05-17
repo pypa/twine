@@ -17,3 +17,6 @@ omit =
     #   and exists only to provide setuptools and python -m a place to point
     #   at.
     */twine/__main__.py
+
+[html]
+show_contexts = True
