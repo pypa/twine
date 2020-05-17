@@ -1,6 +1,5 @@
 [run]
 branch = True
-dynamic_context = test_function
 
 [report]
 # Regexes for lines to exclude from consideration
