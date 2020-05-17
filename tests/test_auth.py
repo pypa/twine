@@ -164,33 +164,6 @@ def test_get_password_runtime_error_suppressed(
     assert "fail!" in str(warning)
 
 
-def test_get_username_raises_attribute_error(entered_username, monkeypatch, config):
-    """Test when Keyring's get_credential raises an AttributeError"""
-
-    class FailKeyring:
-        @staticmethod
-        def get_credential(system, username):
-            raise AttributeError("fail!")
-
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
-    assert auth.Resolver(config, cred()).username == "entered user"
-
-
-def test_get_username_raises_exception(entered_username, monkeypatch, recwarn, config):
-    """Test when Keyring's get_credential raises an Exception"""
-
-    class FailKeyring:
-        @staticmethod
-        def get_credential(system, username):
-            raise Exception("fail!")
-
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
-    assert auth.Resolver(config, cred()).username == "entered user"
-    assert len(recwarn) == 1
-    warning = recwarn.pop(UserWarning)
-    assert "fail!" in str(warning)
-
-
 def test_get_username_return_none(entered_username, monkeypatch, config):
     """Test when Keyring's get_credential returns None"""
 
