@@ -100,7 +100,7 @@ def test_successful_upload_add_gpg_signature(make_settings, monkeypatch):
     )
 
 
-def test_successful_upload_sign_package(make_settings, capsys, monkeypatch):
+def test_successful_upload_sign_package(make_settings, monkeypatch):
     """Test uploading package when package is signed"""
 
     # Create a custom package object
@@ -112,20 +112,16 @@ def test_successful_upload_sign_package(make_settings, capsys, monkeypatch):
         filetype=None,
     )
 
-    # Create a call recorder to record calls to package.sign
-    replaced_sign = pretend.call_recorder(lambda sign_with, identity: None)
-    monkeypatch.setattr(package, "sign", replaced_sign)
+    # Patch run_gpg to avoid checking gpg executable,
+    # and patch from_filename to return our custom package
+    replaced_run_gpg = pretend.call_recorder(lambda *_: None)
+    monkeypatch.setattr(package, "run_gpg", replaced_run_gpg)
 
-    # Patch from_filename to return our custom package
-    monkeypatch.setattr(
-        package_file.PackageFile, "from_filename", lambda filename, comment: package
-    )
+    monkeypatch.setattr(package_file.PackageFile, "from_filename", lambda *_: package)
 
-    # Update upload settings with attributes used to sign packages
+    # Update upload settings to enable self-signing
     upload_settings = make_settings()
     upload_settings.sign = True
-    upload_settings.sign_with = "gpg"
-    upload_settings.identity = "identity"
 
     # Stub create_repository to mock successful upload of package
     stub_response = pretend.stub(
@@ -133,23 +129,20 @@ def test_successful_upload_sign_package(make_settings, capsys, monkeypatch):
     )
 
     stub_repository = pretend.stub(
-        upload=lambda package: stub_response,
-        close=lambda: None,
-        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
+        upload=lambda _: stub_response, close=lambda: None, release_urls=lambda _: None,
     )
 
     upload_settings.create_repository = lambda: stub_repository
-
     result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     # A truthy result means the upload failed
     assert result is None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(RELEASE_URL) == 1
-    assert captured.out.count(NEW_RELEASE_URL) == 1
-    args = ("gpg", "identity")
-    assert replaced_sign.calls == [pretend.call(*args)]
+    # Test that the signature has been added to the package
+    assert package.gpg_signature == (
+        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        b"signature",
+    )
 
 
 @pytest.mark.parametrize("verbose", [False, True])
