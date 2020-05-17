@@ -162,3 +162,15 @@ def test_get_password_runtime_error_suppressed(
     assert len(recwarn) == 1
     warning = recwarn.pop(UserWarning)
     assert "fail!" in str(warning)
+
+
+def test_get_username_return_none(entered_username, monkeypatch, config):
+    """Test when Keyring's get_credential returns None"""
+
+    class FailKeyring:
+        @staticmethod
+        def get_credential(system, username):
+            return None
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    assert auth.Resolver(config, cred()).username == "entered user"

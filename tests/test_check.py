@@ -14,6 +14,7 @@
 import io
 
 import pretend
+import pytest
 
 from twine import commands
 from twine import package as package_file
@@ -75,6 +76,29 @@ def test_check_passing_distribution(monkeypatch):
     assert not check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+
+
+@pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
+def test_check_passing_distribution_with_none_renderer(content_type, monkeypatch):
+    """Test when a distribution passes twine check with renderers returning None"""
+
+    package = pretend.stub(
+        metadata_dictionary=lambda: {
+            "description": "blah",
+            "description_content_type": content_type,
+        }
+    )
+
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
+    )
+
+    output_stream = io.StringIO()
+    assert not check.check(["dist/*"], output_stream=output_stream)
+    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
 
 
 def test_check_no_description(monkeypatch, capsys):
