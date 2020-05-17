@@ -14,6 +14,7 @@
 import io
 
 import pretend
+import pytest
 
 from twine import commands
 from twine import package as package_file
@@ -77,19 +78,17 @@ def test_check_passing_distribution(monkeypatch):
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
 
 
-def test_check_passing_distribution_with_none_renderer(monkeypatch):
+@pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
+def test_check_passing_distribution_with_none_renderer(content_type, monkeypatch):
     """Test when a distribution passes twine check with renderers returning None"""
 
-    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
     package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": "blah",
-            "description_content_type": "text/markdown",
+            "description_content_type": content_type,
         }
     )
-    output_stream = io.StringIO()
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: None})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
     monkeypatch.setattr(
         package_file,
@@ -97,10 +96,9 @@ def test_check_passing_distribution_with_none_renderer(monkeypatch):
         pretend.stub(from_filename=lambda *a, **kw: package),
     )
 
+    output_stream = io.StringIO()
     assert not check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
-
-    assert renderer.render.calls == []
 
 
 def test_check_no_description(monkeypatch, capsys):
