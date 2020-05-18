@@ -59,41 +59,33 @@ def test_successful_upload(make_settings, capsys):
     assert captured.out.count(NEW_RELEASE_URL) == 1
 
 
-def test_successful_upload_add_gpg_signature(make_settings, monkeypatch):
+def test_successful_upload_add_gpg_signature(make_settings):
     """Test uploading package when gpg signature are added to it"""
 
-    # Use a pre-signed distribution for upload()
-    dists = [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".asc"]
-
-    # Patch from_filename() to use an object that we can make assertions on
-    package = package_file.PackageFile(
-        filename=helpers.WHEEL_FIXTURE,
-        comment=None,
-        metadata=pretend.stub(name="twine"),
-        python_version=None,
-        filetype=None,
-    )
-    monkeypatch.setattr(
-        package_file, "PackageFile", pretend.stub(from_filename=lambda *_: package),
-    )
-
     # Patch create_repository() to mock successful upload of package
+    # and allow us to make assertions on the uploaded package
 
     stub_response = pretend.stub(
         is_redirect=False, status_code=201, raise_for_status=lambda: None
     )
 
     stub_repository = pretend.stub(
-        upload=lambda _: stub_response, close=lambda: None, release_urls=lambda _: None,
+        upload=pretend.call_recorder(lambda package: stub_response),
+        close=lambda: None,
+        release_urls=lambda _: None,
     )
 
     upload_settings = make_settings()
     upload_settings.create_repository = lambda: stub_repository
 
-    result = upload.upload(upload_settings, dists)
+    # Upload a pre-signed distribution
+    result = upload.upload(
+        upload_settings, [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".asc"]
+    )
     assert result is None
 
     # The signature shoud be added via package.add_gpg_signature()
+    package = stub_repository.upload.calls[0].args[0]
     assert package.gpg_signature == (
         "twine-1.5.0-py2.py3-none-any.whl.asc",
         b"signature",
@@ -103,29 +95,17 @@ def test_successful_upload_add_gpg_signature(make_settings, monkeypatch):
 def test_successful_upload_sign_package(make_settings, monkeypatch):
     """Test uploading package when package is signed"""
 
-    # Use an unsigned distribution for upload()
-    dists = [helpers.WHEEL_FIXTURE]
-
-    # Patch from_filename() to use an object that we can make assertions on
-    package = package_file.PackageFile(
-        filename=helpers.WHEEL_FIXTURE,
-        comment=None,
-        metadata=pretend.stub(name="twine"),
-        python_version=None,
-        filetype=None,
-    )
-    monkeypatch.setattr(
-        package_file, "PackageFile", pretend.stub(from_filename=lambda *_: package),
-    )
-
     # Patch create_repository() to mock successful upload of package
+    # and allow us to make assertions on the uploaded package
 
     stub_response = pretend.stub(
         is_redirect=False, status_code=201, raise_for_status=lambda: None
     )
 
     stub_repository = pretend.stub(
-        upload=lambda _: stub_response, close=lambda: None, release_urls=lambda _: None,
+        upload=pretend.call_recorder(lambda package: stub_response),
+        close=lambda: None,
+        release_urls=lambda _: None,
     )
 
     upload_settings = make_settings()
@@ -136,15 +116,19 @@ def test_successful_upload_sign_package(make_settings, monkeypatch):
     upload_settings.sign = True
     upload_settings.sign_with = "gpg"
     monkeypatch.setattr(
-        package, "run_gpg", pretend.call_recorder(lambda gpg_args: None),
+        package_file.PackageFile,
+        "run_gpg",
+        pretend.call_recorder(lambda _, gpg_args: None),
     )
 
-    result = upload.upload(upload_settings, dists)
+    # Upload an unsigned distribution
+    result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
     assert result is None
 
     # The signature shoud be added via package.sign()
+    package = stub_repository.upload.calls[0].args[0]
     assert len(package.run_gpg.calls) == 1
-    assert helpers.WHEEL_FIXTURE in package.run_gpg.calls[0].args[0]
+    assert helpers.WHEEL_FIXTURE in package.run_gpg.calls[0].args[1]
     assert package.gpg_signature == (
         "twine-1.5.0-py2.py3-none-any.whl.asc",
         b"signature",
