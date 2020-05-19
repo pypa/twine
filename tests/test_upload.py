@@ -27,15 +27,16 @@ NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 
 
 @pytest.fixture
-def stub_repository():
-    """
-    Mock successful upload of package and allow assertions on the uploaded package
-    """
-
-    stub_response = pretend.stub(
+def stub_response():
+    """Mock successful upload of a package."""
+    return pretend.stub(
         is_redirect=False, status_code=201, raise_for_status=lambda: None
     )
 
+
+@pytest.fixture
+def stub_repository(stub_response):
+    """Allow assertions on the uploaded package."""
     return pretend.stub(
         upload=pretend.call_recorder(lambda package: stub_response),
         close=lambda: None,
@@ -114,22 +115,13 @@ def test_successful_upload_sign_package(upload_settings, stub_repository, monkey
 
 
 @pytest.mark.parametrize("verbose", [False, True])
-def test_exception_for_http_status(verbose, make_settings, capsys):
-    upload_settings = make_settings()
+def test_exception_for_http_status(verbose, upload_settings, stub_response, capsys):
     upload_settings.verbose = verbose
 
-    stub_response = pretend.stub(
-        is_redirect=False,
-        status_code=403,
-        text="Invalid or non-existent authentication information",
-        raise_for_status=pretend.raiser(requests.HTTPError),
-    )
-
-    stub_repository = pretend.stub(
-        upload=lambda package: stub_response, close=lambda: None,
-    )
-
-    upload_settings.create_repository = lambda: stub_repository
+    stub_response.is_redirect = False
+    stub_response.status_code = 403
+    stub_response.text = "Invalid or non-existent authentication information"
+    stub_response.raise_for_status = pretend.raiser(requests.HTTPError)
 
     with pytest.raises(requests.HTTPError):
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
@@ -191,6 +183,8 @@ def test_deprecated_repo(make_settings):
 
 
 def test_exception_for_redirect(make_settings):
+    # Not using fixtures because this setup is significantly different
+
     upload_settings = make_settings(
         """
         [pypi]
@@ -218,21 +212,15 @@ def test_exception_for_redirect(make_settings):
     assert "https://test.pypi.org/legacy/" in err.value.args[0]
 
 
-def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
-    upload_settings = make_settings(skip_existing=True)
+def test_prints_skip_message_for_uploaded_package(
+    upload_settings, stub_repository, capsys
+):
+    upload_settings.skip_existing = True
 
-    stub_repository = pretend.stub(
-        # Short-circuit the upload, so no need for a stub response
-        package_is_uploaded=lambda package: True,
-        release_urls=lambda packages: {},
-        close=lambda: None,
-    )
-
-    upload_settings.create_repository = lambda: stub_repository
+    # Short-circuit the upload
+    stub_repository.package_is_uploaded = lambda package: True
 
     result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
-
-    # A truthy result means the upload failed
     assert result is None
 
     captured = capsys.readouterr()
@@ -240,24 +228,17 @@ def test_prints_skip_message_for_uploaded_package(make_settings, capsys):
     assert RELEASE_URL not in captured.out
 
 
-def test_prints_skip_message_for_response(make_settings, capsys):
-    upload_settings = make_settings(skip_existing=True)
+def test_prints_skip_message_for_response(
+    upload_settings, stub_response, stub_repository, capsys
+):
+    upload_settings.skip_existing = True
 
-    stub_response = pretend.stub(is_redirect=False, status_code=409,)
+    stub_response.status_code = 409
 
-    stub_repository = pretend.stub(
-        # Do the upload, triggering the error response
-        package_is_uploaded=lambda package: False,
-        release_urls=lambda packages: {},
-        upload=lambda package: stub_response,
-        close=lambda: None,
-    )
-
-    upload_settings.create_repository = lambda: stub_repository
+    # Do the upload, triggering the error response
+    stub_repository.package_is_uploaded = lambda package: False
 
     result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
-
-    # A truthy result means the upload failed
     assert result is None
 
     captured = capsys.readouterr()
