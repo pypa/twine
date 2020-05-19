@@ -26,20 +26,32 @@ RELEASE_URL = "https://pypi.org/project/twine/1.5.0/"
 NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 
 
-def test_successful_upload(make_settings, capsys):
-    upload_settings = make_settings()
+@pytest.fixture
+def stub_repository():
+    """
+    Mock successful upload of package and allow assertions on the uploaded package
+    """
 
     stub_response = pretend.stub(
         is_redirect=False, status_code=201, raise_for_status=lambda: None
     )
 
-    stub_repository = pretend.stub(
-        upload=lambda package: stub_response,
+    return pretend.stub(
+        upload=pretend.call_recorder(lambda package: stub_response),
         close=lambda: None,
-        release_urls=lambda packages: {RELEASE_URL, NEW_RELEASE_URL},
+        release_urls=lambda packages: set(),
     )
 
+
+@pytest.fixture
+def upload_settings(make_settings, stub_repository):
+    upload_settings = make_settings()
     upload_settings.create_repository = lambda: stub_repository
+    return upload_settings
+
+
+def test_successful_upload(upload_settings, stub_repository, capsys):
+    stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
 
     result = upload.upload(
         upload_settings,
@@ -50,8 +62,6 @@ def test_successful_upload(make_settings, capsys):
             helpers.NEW_WHEEL_FIXTURE,
         ],
     )
-
-    # A truthy result means the upload failed
     assert result is None
 
     captured = capsys.readouterr()
@@ -59,24 +69,8 @@ def test_successful_upload(make_settings, capsys):
     assert captured.out.count(NEW_RELEASE_URL) == 1
 
 
-def test_successful_upload_add_gpg_signature(make_settings):
+def test_successful_upload_add_gpg_signature(upload_settings, stub_repository):
     """Test uploading package when gpg signature are added to it"""
-
-    # Patch create_repository() to mock successful upload of package
-    # and allow us to make assertions on the uploaded package
-
-    stub_response = pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
-    )
-
-    stub_repository = pretend.stub(
-        upload=pretend.call_recorder(lambda package: stub_response),
-        close=lambda: None,
-        release_urls=lambda _: None,
-    )
-
-    upload_settings = make_settings()
-    upload_settings.create_repository = lambda: stub_repository
 
     # Upload a pre-signed distribution
     result = upload.upload(
@@ -92,24 +86,8 @@ def test_successful_upload_add_gpg_signature(make_settings):
     )
 
 
-def test_successful_upload_sign_package(make_settings, monkeypatch):
+def test_successful_upload_sign_package(upload_settings, stub_repository, monkeypatch):
     """Test uploading package when package is signed"""
-
-    # Patch create_repository() to mock successful upload of package
-    # and allow us to make assertions on the uploaded package
-
-    stub_response = pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
-    )
-
-    stub_repository = pretend.stub(
-        upload=pretend.call_recorder(lambda package: stub_response),
-        close=lambda: None,
-        release_urls=lambda _: None,
-    )
-
-    upload_settings = make_settings()
-    upload_settings.create_repository = lambda: stub_repository
 
     # Indicate that upload() should run_gpg() to generate the signature, which
     # we'll stub out to use WHEEL_FIXTURE + ".asc"
@@ -118,7 +96,7 @@ def test_successful_upload_sign_package(make_settings, monkeypatch):
     monkeypatch.setattr(
         package_file.PackageFile,
         "run_gpg",
-        pretend.call_recorder(lambda _, gpg_args: None),
+        pretend.call_recorder(lambda cls, gpg_args: None),
     )
 
     # Upload an unsigned distribution
