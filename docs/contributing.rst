@@ -60,13 +60,28 @@ The HTML of the docs will be written to :file:`docs/_build/html`.
 Code style
 ^^^^^^^^^^
 
-Run ``tox -e format`` to automatically reformat your changes. Run
-``tox -e lint,types`` to see any remaining code smells or type errors
-that need to be fixed manually.
+To automatically reformat your changes with `isort`_ and `black`_, run:
 
-Additionally, the Twine maintainers prefer that ``import`` statements
-be used for packages and modules only, rather than individual classes
-or functions.
+.. code-block:: console
+
+  tox -e format
+
+To detect any remaining code smells with `flake8`_, run:
+
+.. code-block:: console
+
+  tox -e lint
+
+To perform strict type-checking using `mypy`_, run:
+
+.. code-block:: console
+
+  tox -e types
+
+Any errors from ``lint`` or ``types`` need to be fixed manually.
+
+Additionally, we prefer that ``import`` statements be used for packages and
+modules only, rather than individual classes or functions.
 
 Testing
 ^^^^^^^
@@ -177,6 +192,10 @@ merge into a single tool; see `ongoing discussion
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/en/latest/
+.. _`isort`: https://timothycrosley.github.io/isort/
+.. _`black`: https://black.readthedocs.io/en/stable/
+.. _`flake8`: https://flake8.pycqa.org/en/latest/
+.. _`mypy`: https://mypy.readthedocs.io/en/stable/
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`open issues`: https://github.com/pypa/twine/issues
