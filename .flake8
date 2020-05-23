@@ -1,3 +1,10 @@
 [flake8]
 # Matching black's default
 max-line-length = 88
+
+extend-ignore =
+    # TODO: Use per-file-ignores to iterate towards complete docstrings
+    D1,    # Missing docstrings
+    D2,    # Whitespace issues
+    D400,  # First line should end with a period
+    D401,  # First line should be in imperative mood
