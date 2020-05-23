@@ -21,15 +21,15 @@ Python. For example:
 
 .. code-block:: console
 
-  cd /path/to/your/local/twine
-  python3.8 -m venv venv
-  source venv/bin/activate
+    cd /path/to/your/local/twine
+    python3.8 -m venv venv
+    source venv/bin/activate
 
 Then, run the following command:
 
 .. code-block:: console
 
-  pip install -e .
+    pip install -e .
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
 when you make changes, you can easily see their effect.
@@ -39,7 +39,7 @@ To install ``tox`` in your active your virtual environment, run:
 
 .. code-block:: console
 
-  pip install tox
+    pip install tox
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -53,7 +53,7 @@ environment, then, in the root directory, run:
 
 .. code-block:: console
 
-  tox -e docs
+    tox -e docs
 
 The HTML of the docs will be written to :file:`docs/_build/html`.
 
@@ -64,19 +64,19 @@ To automatically reformat your changes with `isort`_ and `black`_, run:
 
 .. code-block:: console
 
-  tox -e format
+    tox -e format
 
 To detect any remaining code smells with `flake8`_, run:
 
 .. code-block:: console
 
-  tox -e lint
+    tox -e lint
 
 To perform strict type-checking using `mypy`_, run:
 
 .. code-block:: console
 
-  tox -e types
+    tox -e types
 
 Any errors from ``lint`` or ``types`` need to be fixed manually.
 
