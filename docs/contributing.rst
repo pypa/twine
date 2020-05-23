@@ -91,7 +91,7 @@ off the coverage report, run:
 
 .. code-block:: console
 
-  export PYTEST_ADDOPTS=-k "not integration" --cov-report=
+  export PYTEST_ADDOPTS='-k "not integration" --cov-report='
 
 Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `Travis`_.
 To run the tests against a specific version, e.g. Python 3.6, you will need it
