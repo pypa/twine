@@ -191,11 +191,11 @@ merge into a single tool; see `ongoing discussion
 .. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
-.. _`tox`: https://tox.readthedocs.io/en/latest/
+.. _`tox`: https://tox.readthedocs.io/
 .. _`isort`: https://timothycrosley.github.io/isort/
-.. _`black`: https://black.readthedocs.io/en/stable/
-.. _`flake8`: https://flake8.pycqa.org/en/latest/
-.. _`mypy`: https://mypy.readthedocs.io/en/stable/
+.. _`black`: https://black.readthedocs.io/
+.. _`flake8`: https://flake8.pycqa.org/
+.. _`mypy`: https://mypy.readthedocs.io/
 .. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-project
 .. _`open issues`: https://github.com/pypa/twine/issues
