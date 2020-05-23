@@ -24,7 +24,7 @@ def pypirc(tmpdir):
 
 @pytest.fixture()
 def make_settings(pypirc):
-    """Returns a factory function for settings.Settings with defaults."""
+    """Return a factory function for settings.Settings with defaults."""
 
     default_pypirc = """
         [pypi]

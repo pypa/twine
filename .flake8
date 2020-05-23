@@ -7,4 +7,3 @@ extend-ignore =
     D1,    # Missing docstrings
     D2,    # Whitespace issues
     D400,  # First line should end with a period
-    D401,  # First line should be in imperative mood

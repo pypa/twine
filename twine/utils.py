@@ -202,7 +202,7 @@ def get_userpass_value(
     key: str,
     prompt_strategy: Optional[Callable[[], str]] = None,
 ) -> Optional[str]:
-    """Gets the username / password from config.
+    """Get the username / password from config.
 
     Uses the following rules:
 
