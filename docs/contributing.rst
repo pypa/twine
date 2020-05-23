@@ -85,6 +85,14 @@ To pass options to ``pytest``, e.g. the name of a test, run:
 
   tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
+You can also set the ``PYTEST_ADDOPTS`` environment variable to use the same
+options on every test run. For example, to skip integration tests and turn
+off the coverage report, run:
+
+.. code-block:: console
+
+  export PYTEST_ADDOPTS=-k "not integration" --cov-report=
+
 Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `Travis`_.
 To run the tests against a specific version, e.g. Python 3.6, you will need it
 installed on your machine. Then, run:
