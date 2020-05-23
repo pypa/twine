@@ -4,7 +4,12 @@ max-line-length = 88
 
 extend-ignore =
     # TODO: Use per-file-ignores to iterate towards complete docstrings
-    D1 # Missing docstrings
+    D100,  # Missing docstring in public module
+    D101,  # Missing docstring in public class
+    D102,  # Missing docstring in public method
+    D103,  # Missing docstring in public function
+    D104,  # Missing docstring in public package
+    D107,  # Missing docstring in __init__
 
 per-file-ignores = 
     # TODO: Rewrite test docstrings https://github.com/pypa/twine/issues/628
