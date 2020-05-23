@@ -4,6 +4,12 @@ max-line-length = 88
 
 extend-ignore =
     # TODO: Use per-file-ignores to iterate towards complete docstrings
-    D1,    # Missing docstrings
-    D2,    # Whitespace issues
-    D400,  # First line should end with a period
+    D1 # Missing docstrings
+
+per-file-ignores = 
+    # TODO: Rewrite test docstrings https://github.com/pypa/twine/issues/628
+    # D200 One-line docstring should fit on one line with quotes
+    # D202 No blank lines allowed after function docstring
+    # D205 1 blank line required between summary line and description
+    # D400 First line should end with a period
+    tests/*:D200,D202,D205,D400
