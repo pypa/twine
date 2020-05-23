@@ -35,7 +35,7 @@ Now, in your virtual environment, ``twine`` is pointing at your local copy, so
 when you make changes, you can easily see their effect.
 
 We use `tox`_ to run tests, check code style, and build the documentation.
-To install ``tox`` in your active your virtual environment, run:
+To install ``tox`` in your active virtual environment, run:
 
 .. code-block:: console
 
