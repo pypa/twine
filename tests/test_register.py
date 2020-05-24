@@ -12,8 +12,7 @@ from . import helpers
 
 @pytest.fixture()
 def register_settings(make_settings):
-    """Returns a factory function for settings.Settings for register"""
-
+    """Return a factory function for settings.Settings for register."""
     return make_settings(
         """
         [pypi]
@@ -25,8 +24,7 @@ def register_settings(make_settings):
 
 
 def test_successful_register(register_settings):
-    """Test a successful package registration"""
-
+    """Return a successful result for a valid repository url and package."""
     stub_response = pretend.stub(
         is_redirect=False,
         status_code=200,
@@ -46,8 +44,7 @@ def test_successful_register(register_settings):
 
 
 def test_exception_for_redirect(register_settings):
-    """Test a repository url redirection during registration"""
-
+    """Raise an exception when repository URL results in a redirect."""
     repository_url = register_settings.repository_config["repository"]
     redirect_url = "https://malicious.website.org/danger"
 
@@ -72,8 +69,7 @@ def test_exception_for_redirect(register_settings):
 
 
 def test_non_existent_package(register_settings):
-    """Test a non-existent package registration"""
-
+    """Raise an exception when package file doesn't exist."""
     stub_repository = pretend.stub()
 
     register_settings.create_repository = lambda: stub_repository
@@ -87,7 +83,7 @@ def test_non_existent_package(register_settings):
 
 
 def test_values_from_env(monkeypatch):
-    """Test calling main via cli"""
+    """Use env vars for settings when run from command line."""
 
     def none_register(*args, **settings_kwargs):
         pass
