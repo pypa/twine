@@ -7,40 +7,14 @@ extend-ignore =
 
 per-file-ignores = 
     # TODO: Incrementally add missing docstrings
-    twine/__init__.py: D1
-    twine/__main__.py: D1
-    twine/_installed.py: D1
-    twine/auth.py: D1
-    twine/cli.py: D1
-    twine/commands/__init__.py: D1
-    twine/commands/check.py: D1
-    twine/commands/register.py: D1
-    twine/commands/upload.py: D1
-    twine/exceptions.py: D1
-    twine/package.py: D1
-    twine/repository.py: D1
-    twine/settings.py: D1
-    twine/utils.py: D1
-    twine/wheel.py: D1
-    twine/wininst.py: D1
-
-    # TODO: Incrementally add missing docstrings
+    # D100 Missing docstring in public module
+    # D101 Missing docstring in public class
+    # D102 Missing docstring in public method
+    # D103 Missing docstring in public function
+    # D104 Missing docstring in public package
+    twine/*: D100,D101,D102,D103,D104
+    twine/commands/*: D100,D101,D102,D103,D104
     # TODO: Rewrite test docstrings https://github.com/pypa/twine/issues/628
     # D205 1 blank line required between summary line and description
     # D400 First line should end with a period
-    tests/__init__.py: D1
-    tests/conftest.py: D1
-    tests/test_auth.py: D1,D205,D400
-    tests/test_check.py: D1,D400
-    tests/test_cli.py: D1
-    tests/test_commands.py: D1
-    tests/test_integration.py: D1
-    tests/test_main.py: D1
-    tests/test_package.py: D1,D205,D400
-    tests/test_register.py: D1
-    tests/test_repository.py: D1,D400
-    tests/test_settings.py: D1,D400
-    tests/test_upload.py: D1
-    tests/test_utils.py: D1,D205,D400
-    tests/test_wheel.py: D1,D400
-
+    tests/*: D100,D101,D102,D103,D104,D205,D400
