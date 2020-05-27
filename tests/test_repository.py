@@ -185,10 +185,7 @@ def test_package_is_registered(default_repo):
 def test_disable_progress_bar_is_forwarded_to_tqdm(
     monkeypatch, tmpdir, disable_progress_bar, default_repo
 ):
-    """Test whether the disable flag is passed to tqdm
-        when the disable_progress_bar option is passed to the
-        repository
-    """
+    """Test that the disable flag is passed to tqdm"""
 
     @contextmanager
     def progressbarstub(*args, **kwargs):

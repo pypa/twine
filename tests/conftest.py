@@ -24,8 +24,7 @@ def pypirc(tmpdir):
 
 @pytest.fixture()
 def make_settings(pypirc):
-    """Returns a factory function for settings.Settings with defaults."""
-
+    """Return a factory function for settings.Settings with defaults."""
     default_pypirc = """
         [pypi]
         username:foo
@@ -44,9 +43,7 @@ def make_settings(pypirc):
 
 
 class DevPiEnv(jaraco.envs.ToxEnv):
-    """
-    Run devpi using tox:testenv:devpi.
-    """
+    """Run devpi using tox:testenv:devpi."""
 
     name = "devpi"
     username = "foober"
@@ -153,9 +150,7 @@ def sampleproject_dist(tmp_path_factory):
 
 
 class PypiserverEnv(jaraco.envs.ToxEnv):
-    """
-    Run pypiserver using tox:testenv:pypiserver.
-    """
+    """Run pypiserver using tox:testenv:pypiserver."""
 
     name = "pypiserver"
 

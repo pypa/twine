@@ -101,8 +101,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
 
 
 def _validate_repository_url(repository_url: str) -> None:
-    """Validate the given url for allowed schemes and components"""
-
+    """Validate the given url for allowed schemes and components."""
     # Allowed schemes are http and https, based on whether the repository
     # supports TLS or not, and scheme and host must be present in the URL
     validator = (
@@ -202,7 +201,7 @@ def get_userpass_value(
     key: str,
     prompt_strategy: Optional[Callable[[], str]] = None,
 ) -> Optional[str]:
-    """Gets the username / password from config.
+    """Get the username / password from config.
 
     Uses the following rules:
 
@@ -281,8 +280,6 @@ class EnvironmentFlag(argparse.Action):
 
     @staticmethod
     def bool_from_env(val: Optional[str]) -> bool:
-        """
-        Allow '0' and 'false' and 'no' to be False
-        """
+        """Allow '0' and 'false' and 'no' to be False."""
         falsey = {"0", "false", "no"}
         return bool(val and val.lower() not in falsey)
