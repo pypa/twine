@@ -35,7 +35,7 @@ Now, in your virtual environment, ``twine`` is pointing at your local copy, so
 when you make changes, you can easily see their effect.
 
 We use `tox`_ to run tests, check code style, and build the documentation.
-To install ``tox`` in your active your virtual environment, run:
+To install ``tox`` in your active virtual environment, run:
 
 .. code-block:: console
 
@@ -86,12 +86,42 @@ modules only, rather than individual classes or functions.
 Testing
 ^^^^^^^
 
-Twine is tested against Python versions 3.6, 3.7, and 3.8. To run these tests
-locally, you will need these versions of Python installed on your machine.
+We use `pytest`_ for writing and running tests.
 
-Either run ``tox`` to build against all supported Python versions (if you have
-them installed) or run ``tox -e py{version}`` to test against a specific
-version, e.g., ``tox -e py36`` or ``tox -e py37``.
+To run the tests in your virtual environment, run:
+
+.. code-block:: console
+
+    tox -e py
+
+To pass options to ``pytest``, e.g. the name of a test, run:
+
+.. code-block:: console
+
+    tox -e py -- tests/test_upload.py::test_exception_for_http_status
+
+You can also set the ``PYTEST_ADDOPTS`` environment variable to use the same
+options on every test run. For example, to always skip integration tests:
+
+.. code-block:: console
+
+    export PYTEST_ADDOPTS='-k "not integration"'
+
+Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `Travis`_.
+To run the tests against a specific version, e.g. Python 3.6, you will need it
+installed on your machine. Then, run:
+
+.. code-block:: console
+
+    tox -e py36
+
+To run the tests against all supported Python versions, check code style,
+and build the documentation, run:
+
+.. code-block:: console
+
+    tox
+
 
 Submitting changes
 ^^^^^^^^^^^^^^^^^^
@@ -192,6 +222,8 @@ merge into a single tool; see `ongoing discussion
 .. _`pypa-dev mailing list`: https://groups.google.com/forum/#!forum/pypa-dev
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/
+.. _`pytest`: https://docs.pytest.org/
+.. _`Travis`: https://travis-ci.org/github/pypa/twine
 .. _`isort`: https://timothycrosley.github.io/isort/
 .. _`black`: https://black.readthedocs.io/
 .. _`flake8`: https://flake8.pycqa.org/
