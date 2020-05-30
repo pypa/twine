@@ -106,7 +106,7 @@ def test_package_is_uploaded_404s(default_repo):
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(status_code=404)
     )
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"))
 
     assert default_repo.package_is_uploaded(package) is False
 
@@ -118,7 +118,7 @@ def test_package_is_uploaded_200s_with_no_releases(default_repo):
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
         ),
     )
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"),)
+    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"))
 
     assert default_repo.package_is_uploaded(package) is False
 
@@ -300,15 +300,15 @@ def test_upload_retry(tmpdir, default_repo, capsys):
             },
         ),
         # Not pypi
-        ([("fake", "2.12.0")], "http://devpi.example.com", set(),),
+        ([("fake", "2.12.0")], "http://devpi.example.com", set()),
         # No packages
-        ([], utils.DEFAULT_REPOSITORY, set(),),
+        ([], utils.DEFAULT_REPOSITORY, set()),
     ],
 )
 def test_release_urls(package_meta, repository_url, release_urls):
     """Test that the correct release urls are read"""
     packages = [
-        pretend.stub(safe_name=name, metadata=pretend.stub(version=version),)
+        pretend.stub(safe_name=name, metadata=pretend.stub(version=version))
         for name, version in package_meta
     ]
 

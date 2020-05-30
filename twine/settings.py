@@ -297,7 +297,7 @@ class Settings:
         self, cacert: Optional[str], client_cert: Optional[str]
     ) -> None:
         self.cacert = utils.get_cacert(cacert, self.repository_config)
-        self.client_cert = utils.get_clientcert(client_cert, self.repository_config,)
+        self.client_cert = utils.get_clientcert(client_cert, self.repository_config)
 
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.
