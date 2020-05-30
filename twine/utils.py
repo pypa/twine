@@ -231,8 +231,8 @@ def get_userpass_value(
         return None
 
 
-get_cacert = functools.partial(get_userpass_value, key="ca_cert",)
-get_clientcert = functools.partial(get_userpass_value, key="client_cert",)
+get_cacert = functools.partial(get_userpass_value, key="ca_cert")
+get_clientcert = functools.partial(get_userpass_value, key="client_cert")
 
 
 class EnvironmentDefault(argparse.Action):
