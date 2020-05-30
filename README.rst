@@ -28,22 +28,22 @@ It provides build system independent uploads of source and binary
 Why Should I Use This?
 ----------------------
 
-The goal of ``twine`` is to improve PyPI interaction by improving
+The goal of Twine is to improve PyPI interaction by improving
 security and testability.
 
-The biggest reason to use ``twine`` is that it securely authenticates
+The biggest reason to use Twine is that it securely authenticates
 you to `PyPI`_ over HTTPS using a verified connection, regardless of
 the underlying Python version. Meanwhile, ``python setup.py upload``
 will only work correctly and securely if your build system, Python
 version, and underlying operating system are configured properly.
 
-Secondly, ``twine`` encourages you to build your distribution files. ``python
+Secondly, Twine encourages you to build your distribution files. ``python
 setup.py upload`` only allows you to upload a package as a final step after
 building with ``distutils`` or ``setuptools``, within the same command
 invocation. This means that you cannot test the exact file you're going to
 upload to PyPI to ensure that it works before uploading it.
 
-Finally, ``twine`` allows you to pre-sign your files and pass the
+Finally, Twine allows you to pre-sign your files and pass the
 ``.asc`` files into the command line invocation (``twine upload
 myproject-1.0.1.tar.gz myproject-1.0.1.tar.gz.asc``). This enables you
 to be assured that you're typing your ``gpg`` passphrase into ``gpg``
@@ -96,7 +96,7 @@ Using Twine
 
 4. Done!
 
-More documentation on using ``twine`` to upload packages to PyPI is in
+More documentation on using Twine to upload packages to PyPI is in
 the `Python Packaging User Guide`_.
 
 Keyring Support
@@ -139,11 +139,11 @@ securely. See `Using Keyring on headless systems`_.
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
 
-In most cases, simply not setting a password in keyring will allow twine
+In most cases, simply not setting a password with ``keyring`` will allow Twine
 to fall back to prompting for a password. In some cases, the presence of
-keyring will cause unexpected or undesirable prompts from the backing
-system. In these cases, it may be desirable to disable keyring altogether.
-To disable keyring, simply invoke:
+Keyring will cause unexpected or undesirable prompts from the backing
+system. In these cases, it may be desirable to disable Keyring altogether.
+To disable Keyring, simply invoke:
 
 .. code-block:: console
 
@@ -343,7 +343,7 @@ architectural overview, and our future development plans.
 Code of Conduct
 ---------------
 
-Everyone interacting in the ``twine`` project's codebases, issue
+Everyone interacting in the Twine project's codebases, issue
 trackers, chat rooms, and mailing lists is expected to follow the
 `PyPA Code of Conduct`_.
 
