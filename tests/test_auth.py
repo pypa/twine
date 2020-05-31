@@ -165,7 +165,7 @@ def test_get_password_runtime_error_suppressed(
 
 
 def test_get_username_return_none(entered_username, monkeypatch, config):
-    """Test when Keyring's get_credential returns None"""
+    """Verify username when keyring backend's get_credential returns None."""
 
     class FailKeyring:
         @staticmethod
