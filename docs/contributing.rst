@@ -199,10 +199,11 @@ Making a new release
 
 A checklist for creating, testing, and distributing a new version.
 
-#. Add missing changes to :file:`docs/changelog.rst`.
+#. Add user-facing changes to :file:`docs/changelog.rst`.
 #. Choose a version number, e.g. ``3.2.0``.
 #. Add a ``:release:`` line to :file:`docs/changelog.rst`.
-#. Commit, push, and ensure the `Travis`_ build passes.
+#. Commit and open a pull request for review.
+#. Merge the pull request, and ensure the `Travis`_ build passes.
 #. Create a new git tag with ``git tag -m tag {version}``.
 #. Push the new tag with ``git push upstream {version}``.
 #. Watch the release in `Travis`_.

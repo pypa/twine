@@ -6,6 +6,19 @@
 Changelog
 =========
 
+* :release:`3.2.0 <unreleased>`
+* :feature:`666` Improve display of HTTP errors during upload
+* :feature:`649` Use red text when printing errors on the command line
+* :feature:`652` Print packages and signatures to be uploaded when using
+  ``--verbose`` option
+* :bug:`655 major` Update URL to ``.pypirc`` specfication
+* :feature:`602` Require repository URL scheme to be ``http`` or ``https``
+* :bug:`612 major` Don't raise an exception when Python version can't be
+  parsed from filename
+* :bug:`611 major` Fix inaccurate retry message during ``upload``
+* :bug:`601 major` Clarify error messages for archive format
+* :feature:`231` Add type annotations, checked with mypy, with :pep:`561`
+  support for users of Twine's API
 * :release:`3.1.1 <2019-11-27>`
 * :bug:`548` Restore ``--non-interactive`` as a flag not expecting an
   argument.
