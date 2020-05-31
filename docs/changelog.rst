@@ -1,8 +1,11 @@
 :orphan:
 
+.. See https://releases.readthedocs.io/ for instructions
+
 =========
 Changelog
 =========
+
 * :release:`3.1.1 <2019-11-27>`
 * :bug:`548` Restore ``--non-interactive`` as a flag not expecting an
   argument.
