@@ -47,9 +47,16 @@ Building the documentation
 Additions and edits to twine's documentation are welcome and
 appreciated.
 
-After making docs changes, lint and build the docs locally, using
-``tox``, before making a pull request. Activate your virtual
-environment, then, in the root directory, run:
+To preview the docs while you're making changes, run:
+
+.. code-block:: console
+
+    tox -e watch-docs
+
+Then open a web browser to `<http://127.0.0.1:8000>`_.
+
+When you're done making changes, lint and build the docs locally before making
+a pull request. In your active virtual environment, run:
 
 .. code-block:: console
 
