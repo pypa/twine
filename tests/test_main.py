@@ -10,8 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pretend
 import colorama
+import pretend
 
 from twine import __main__ as dunder_main
 from twine import cli
@@ -21,4 +21,7 @@ from twine import exceptions
 def test_exception_handling(monkeypatch):
     replaced_dispatch = pretend.raiser(exceptions.InvalidConfiguration("foo"))
     monkeypatch.setattr(cli, "dispatch", replaced_dispatch)
-    assert dunder_main.main() == colorama.Fore.RED + "InvalidConfiguration: foo" + colorama.Style.RESET_ALL
+    assert (
+        dunder_main.main()
+        == colorama.Fore.RED + "InvalidConfiguration: foo" + colorama.Style.RESET_ALL
+    )
