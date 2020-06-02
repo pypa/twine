@@ -52,7 +52,7 @@ def test_get_config(tmpdir):
 
 
 def test_get_config_no_distutils(tmpdir):
-    """Verify default repo urls if index-servers are not set."""
+    """Upload by default to PyPI if an index server is not set in .pypirc."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
@@ -140,7 +140,7 @@ def test_get_config_missing(tmpdir):
 
 
 def test_empty_userpass(tmpdir):
-    """Suppress prompts if empty username and password are supplied."""
+    """Suppress prompts if empty username and password are provided in .pypirc."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
@@ -180,7 +180,7 @@ def test_get_repository_config_missing(tmpdir):
 
 
 def test_get_repository_config_invalid_scheme(tmpdir):
-    """Raise an exception when parsing a URL with an invalid scheme."""
+    """Parse a URL with an invalid scheme and raise an exception."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
@@ -192,7 +192,7 @@ def test_get_repository_config_invalid_scheme(tmpdir):
 
 
 def test_get_repository_config_missing_components(tmpdir):
-    """Raise an exception when parsing a URL with missing components."""
+    """Parse a URL with missing host and/or scheme and raise an exception."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
@@ -215,7 +215,7 @@ def test_get_repository_config_missing_components(tmpdir):
 
 
 def test_get_repository_config_missing_config(tmpdir):
-    """Raise an exception for an invalid section lookup in the config file."""
+    """Read an invalid section from .pypirc and raise an exception."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
     with pytest.raises(exceptions.InvalidConfiguration):
         utils.get_repository_from_config(pypirc, "foobar")
@@ -287,7 +287,7 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
 )
 def test_check_status_code_for_missing_status_code(capsys, repo_url):
-    """Verify messages for status codes which are not explicitly checked."""
+    """Check that exceptions with unspecified status codes are correctly captured."""
     response = pretend.stub(
         status_code=403,
         url=repo_url,
