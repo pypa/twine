@@ -15,7 +15,7 @@
 import sys
 from typing import Any
 
-import colorama # type: ignore
+import colorama
 import requests
 
 from twine import cli
