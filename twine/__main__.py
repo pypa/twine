@@ -15,26 +15,19 @@
 import sys
 from typing import Any
 
+import colorama
 import requests
 
 from twine import cli
 from twine import exceptions
 
-try:
-    import colorama
-except Exception:
-    colorama = None
-
 
 def main() -> Any:
     try:
-        if colorama:
-            colorama.init()
+        colorama.init()
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        pre_style, post_style = "", ""
-        if colorama:
-            pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
+        pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
 
         return "{}{}: {}{}".format(
             pre_style, exc.__class__.__name__, exc.args[0], post_style,
