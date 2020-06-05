@@ -27,10 +27,9 @@ def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        # somehow parse args here
         parser = argparse.ArgumentParser()
         parser.add_argument(
-            "--no_color", default=False, required=False, action="store_true",
+            "--no-color", default=False, required=False, action="store_true",
         )
 
         args, _ = parser.parse_known_args(sys.argv[1:])

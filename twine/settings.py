@@ -264,7 +264,7 @@ class Settings:
             help="Disable the progress bar.",
         )
         parser.add_argument(
-            "--no_color",
+            "--no-color",
             default=False,
             required=False,
             action="store_true",

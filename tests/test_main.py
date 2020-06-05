@@ -10,6 +10,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 import colorama
 import pretend
 
@@ -25,3 +27,10 @@ def test_exception_handling(monkeypatch):
         dunder_main.main()
         == colorama.Fore.RED + "InvalidConfiguration: foo" + colorama.Style.RESET_ALL
     )
+
+
+def test_no_color_exception(monkeypatch):
+    replaced_dispatch = pretend.raiser(exceptions.InvalidConfiguration("foo"))
+    monkeypatch.setattr(cli, "dispatch", replaced_dispatch)
+    monkeypatch.setattr(sys, "argv", ["upload", "--no-color"])
+    assert dunder_main.main() == "InvalidConfiguration: foo"
