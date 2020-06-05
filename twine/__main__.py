@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import argparse
 import sys
 from typing import Any
 
@@ -23,15 +24,24 @@ from twine import exceptions
 
 
 def main() -> Any:
-    colorama.init()
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
+        # somehow parse args here
+        parser = argparse.ArgumentParser()
+        parser.add_argument(
+            "--no_color", default=False, required=False, action="store_true",
+        )
+
+        args, _ = parser.parse_known_args(sys.argv[1:])
+
+        pre_style, post_style = "", ""
+        if not args.no_color:
+            colorama.init()
+            pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
+
         return "{}{}: {}{}".format(
-            colorama.Fore.RED,
-            exc.__class__.__name__,
-            exc.args[0],
-            colorama.Style.RESET_ALL,
+            pre_style, exc.__class__.__name__, exc.args[0], post_style,
         )
 
 

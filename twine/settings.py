@@ -263,6 +263,13 @@ class Settings:
             action="store_true",
             help="Disable the progress bar.",
         )
+        parser.add_argument(
+            "--no_color",
+            default=False,
+            required=False,
+            action="store_true",
+            help="Disable colored output.",
+        )
 
     @classmethod
     def from_argparse(cls, args: argparse.Namespace) -> "Settings":
