@@ -313,3 +313,16 @@ def test_check_status_code_for_missing_status_code(capsys, repo_url):
 
     captured = capsys.readouterr()
     assert captured.out == "NOTE: Try --verbose to see response content.\n"
+
+
+@pytest.mark.parametrize(
+    ("size_in_bytes, formatted_size"),
+    [(3704, "3.6 KB"), (1153433, "1.1 MB"), (21412841, "20.4 MB")],
+)
+def test_get_file_size(size_in_bytes, formatted_size, monkeypatch):
+    """Get the size of file as a string with units."""
+    monkeypatch.setattr(os.path, "getsize", lambda _: size_in_bytes)
+
+    file_size = utils.get_file_size(size_in_bytes)
+
+    assert file_size == formatted_size

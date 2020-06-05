@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import os
+
 import pretend
 import pytest
 import requests
@@ -52,6 +54,50 @@ def upload_settings(make_settings, stub_repository):
     return upload_settings
 
 
+def test_make_package_pre_signed_dist(upload_settings, capsys):
+    """Create a PackageFile and print path, size, and user-provided signature."""
+    filename = helpers.WHEEL_FIXTURE
+    expected_size = "15.4 KB"
+    signed_filename = helpers.WHEEL_FIXTURE + ".asc"
+    signatures = {os.path.basename(signed_filename): signed_filename}
+
+    upload_settings.sign = True
+    upload_settings.verbose = True
+
+    package = upload._make_package(filename, signatures, upload_settings)
+
+    assert package.filename == filename
+    assert package.gpg_signature is not None
+
+    captured = capsys.readouterr()
+    assert captured.out.count(f"{filename} ({expected_size})") == 1
+    assert captured.out.count(f"Signed with {signed_filename}") == 1
+
+
+def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
+    """Create a PackageFile and print path, size, and Twine-generated signature."""
+    filename = helpers.NEW_WHEEL_FIXTURE
+    expected_size = "21.9 KB"
+    signatures = {}
+
+    upload_settings.sign = True
+    upload_settings.verbose = True
+
+    def stub_sign(package, *_):
+        package.gpg_signature = (package.signed_basefilename, b"signature")
+
+    monkeypatch.setattr(package_file.PackageFile, "sign", stub_sign)
+
+    package = upload._make_package(filename, signatures, upload_settings)
+
+    assert package.filename == filename
+    assert package.gpg_signature is not None
+
+    captured = capsys.readouterr()
+    assert captured.out.count(f"{filename} ({expected_size})") == 1
+    assert captured.out.count(f"Signed with {package.signed_filename}") == 1
+
+
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
     """Prints PyPI release URLS for each uploaded package."""
     stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
@@ -70,6 +116,26 @@ def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
     captured = capsys.readouterr()
     assert captured.out.count(RELEASE_URL) == 1
     assert captured.out.count(NEW_RELEASE_URL) == 1
+
+
+def test_print_packages_if_verbose(upload_settings, capsys):
+    """Print the path and file size of each distribution attempting to be uploaded."""
+    dists_to_upload = {
+        helpers.WHEEL_FIXTURE: "15.4 KB",
+        helpers.SDIST_FIXTURE: "20.8 KB",
+        helpers.NEW_SDIST_FIXTURE: "26.1 KB",
+        helpers.NEW_WHEEL_FIXTURE: "21.9 KB",
+    }
+
+    upload_settings.verbose = True
+
+    result = upload.upload(upload_settings, dists_to_upload.keys())
+    assert result is None
+
+    captured = capsys.readouterr()
+
+    for filename, size in dists_to_upload.items():
+        assert captured.out.count(f"{filename} ({size})") == 1
 
 
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
