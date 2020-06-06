@@ -21,7 +21,7 @@ twine
 Twine is `a utility`_ for `publishing`_ Python packages on `PyPI`_.
 
 It provides build system independent uploads of source and binary
-`distribution artifacts <distributions>`_ for both new and existing
+`distribution artifact <distributions_>`_ for both new and existing
 `projects`_.
 
 
@@ -306,6 +306,14 @@ For completeness, its usage:
                             containing the private key and the certificate in PEM
                             format.
 
+Configuration File
+^^^^^^^^^^^^^^^^^^
+
+Twine can read repository configuration from a ``.pypirc`` file, either in your
+home directory, or provided with the ``--config-file`` option. For details on
+writing and using ``.pypirc``, see the `specification <pypirc_>`_ in the Python
+Packaging User Guide.
+
 Environment Variables
 ^^^^^^^^^^^^^^^^^^^^^
 
@@ -351,6 +359,7 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
+.. _`pypirc`: https://packaging.python.org/specifications/pypirc/
 .. _`Python Packaging User Guide`:
    https://packaging.python.org/tutorials/distributing-packages/
 .. _`keyring`: https://pypi.org/project/keyring/

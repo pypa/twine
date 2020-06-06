@@ -66,7 +66,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
         parser.read(path)
 
         # Get a list of index_servers from the config file
-        # format: https://docs.python.org/3/distutils/packageindex.html#pypirc
+        # format: https://packaging.python.org/specifications/pypirc/
         if parser.has_option("distutils", "index-servers"):
             index_servers = parser.get("distutils", "index-servers").split()
 
@@ -139,7 +139,7 @@ def get_repository_from_config(
             "or not a complete URL in --repository-url.\n"
             "Maybe you have an out-dated '{cfg}' format?\n"
             "more info: "
-            "https://docs.python.org/distutils/packageindex.html#pypirc\n"
+            "https://packaging.python.org/specifications/pypirc/\n"
         ).format(repo=repository, cfg=config_file)
         raise exceptions.InvalidConfiguration(msg)
 
