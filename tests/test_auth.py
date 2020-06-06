@@ -82,10 +82,7 @@ def test_get_username_and_password_keyring_overrides_prompt(monkeypatch, config)
 
 @pytest.fixture
 def keyring_missing_get_credentials(monkeypatch):
-    """
-    Simulate keyring prior to 15.2 that does not have the
-    'get_credential' API.
-    """
+    """Simulate keyring prior to 15.2 that does not have the 'get_credential' API."""
     monkeypatch.delattr(auth.keyring, "get_credential")
 
 
@@ -116,11 +113,7 @@ def test_get_password_keyring_missing_non_interactive_aborts(
 
 @pytest.fixture
 def keyring_no_backends(monkeypatch):
-    """
-    Simulate that keyring has no available backends. When keyring
-    has no backends for the system, the backend will be a
-    fail.Keyring, which raises RuntimeError on get_password.
-    """
+    """Simulate missing keyring backend raising RuntimeError on get_password."""
 
     class FailKeyring:
         @staticmethod
@@ -132,11 +125,7 @@ def keyring_no_backends(monkeypatch):
 
 @pytest.fixture
 def keyring_no_backends_get_credential(monkeypatch):
-    """
-    Simulate that keyring has no available backends. When keyring
-    has no backends for the system, the backend will be a
-    fail.Keyring, which raises RuntimeError on get_credential.
-    """
+    """Simulate missing keyring backend raising RuntimeError on get_credential."""
 
     class FailKeyring:
         @staticmethod
