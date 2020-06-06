@@ -229,7 +229,7 @@ def test_fips_hash_manager(monkeypatch):
 def test_pkginfo_returns_no_metadata(monkeypatch):
     """Raise an exception when pkginfo can't interpret the metadata.
 
-    This could be caused a version number it doesn't support yet.
+    This could be caused by a version number or format it doesn't support yet.
     """
 
     def EmptyDist(filename):
