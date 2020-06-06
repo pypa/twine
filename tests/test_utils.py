@@ -179,39 +179,26 @@ def test_get_repository_config_missing(tmpdir):
     assert utils.get_repository_from_config(pypirc, "pypi") == exp
 
 
-def test_get_repository_config_invalid_scheme(tmpdir):
-    """Raise an exception for a URL with an invalid scheme."""
+@pytest.mark.parametrize(
+    "repo_url, message",
+    [
+        (
+            "ftp://test.pypi.org",
+            r"scheme was required to be one of \['http', 'https'\]",
+        ),
+        ("https:/", "host was required but missing."),
+        ("//test.pypi.org", "scheme was required but missing."),
+        ("foo.bar", "host, scheme were required but missing."),
+    ],
+)
+def test_get_repository_config_missing_components(tmpdir, repo_url, message):
+    """Raise an exception for a URL with an invalid/missing scheme and/or host."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
-        exceptions.UnreachableRepositoryURLDetected,
-        match=r"Invalid repository URL: "
-        r"scheme was required to be one of \['http', 'https'\] but was 'ftp'.",
+        exceptions.UnreachableRepositoryURLDetected, match=message,
     ):
-        utils.get_repository_from_config(pypirc, "foo.bar", "ftp://test.pypi.org")
-
-
-def test_get_repository_config_missing_components(tmpdir):
-    """Raise an exception for a URL with a missing host and/or scheme."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with pytest.raises(
-        exceptions.UnreachableRepositoryURLDetected,
-        match="Invalid repository URL: host was required but missing.",
-    ):
-        utils.get_repository_from_config(pypirc, "foo.bar", "https:/")
-
-    with pytest.raises(
-        exceptions.UnreachableRepositoryURLDetected,
-        match="Invalid repository URL: scheme was required but missing.",
-    ):
-        utils.get_repository_from_config(pypirc, "foo.bar", "//test.pypi.org")
-
-    with pytest.raises(
-        exceptions.UnreachableRepositoryURLDetected,
-        match="Invalid repository URL: host, scheme were required but missing.",
-    ):
-        utils.get_repository_from_config(pypirc, "foo.bar", "foo.bar")
+        utils.get_repository_from_config(pypirc, "pypi", repo_url)
 
 
 def test_get_repository_config_missing_config(tmpdir):
