@@ -77,7 +77,7 @@ def test_password_is_required_if_no_client_cert(client_cert, entered_password):
 
 
 def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
-    """Verify that if both password and client_cert are given they are set"""
+    """Verify that if both password and client_cert are given they are set."""
     client_cert = "/random/path"
     settings_obj = settings.Settings(
         username="fakeuser", password="anything", client_cert=client_cert

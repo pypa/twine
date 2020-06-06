@@ -227,10 +227,9 @@ def test_fips_hash_manager(monkeypatch):
 
 
 def test_pkginfo_returns_no_metadata(monkeypatch):
-    """
-    Fail gracefully if pkginfo can't interpret the metadata (possibly due to
-    seeing a version number it doesn't support yet) and gives us back an
-    'empty' object with no metadata
+    """Raise an exception when pkginfo can't interpret the metadata.
+
+    This could be caused a version number it doesn't support yet.
     """
 
     def EmptyDist(filename):
