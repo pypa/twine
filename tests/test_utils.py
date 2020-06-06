@@ -191,7 +191,7 @@ def test_get_repository_config_missing(tmpdir):
         ("foo.bar", "host, scheme were required but missing."),
     ],
 )
-def test_get_repository_config_missing_components(tmpdir, repo_url, message):
+def test_get_repository_config_with_invalid_url(tmpdir, repo_url, message):
     """Raise an exception for a URL with an invalid/missing scheme and/or host."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
