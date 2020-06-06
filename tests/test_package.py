@@ -207,7 +207,7 @@ TWINE_1_5_0_WHEEL_HEXDIGEST = package_file.Hexdigest(
 
 
 def test_hash_manager():
-    """Verify our HashManager works."""
+    """Generate hexdigest via HashManager."""
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     hasher = package_file.HashManager(filename)
     hasher.hash()
@@ -215,7 +215,7 @@ def test_hash_manager():
 
 
 def test_fips_hash_manager(monkeypatch):
-    """Verify the behaviour if hashlib is using FIPS mode."""
+    """Generate hexdigest without MD5 when hashlib is using FIPS mode."""
     replaced_md5 = pretend.raiser(ValueError("fipsmode"))
     monkeypatch.setattr(package_file.hashlib, "md5", replaced_md5)
 
