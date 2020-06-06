@@ -31,7 +31,7 @@ def default_repo():
 
 
 def test_gpg_signature_structure_is_preserved():
-    """Test that gpg signature structure doesn't change"""
+    """Preserve 'gpg_signature' key when converting metadata."""
     data = {
         "gpg_signature": ("filename.asc", "filecontent"),
     }
@@ -41,7 +41,7 @@ def test_gpg_signature_structure_is_preserved():
 
 
 def test_content_structure_is_preserved():
-    """Test that content structure doesn't change"""
+    """Preserve 'content' key when converting metadata."""
     data = {
         "content": ("filename", "filecontent"),
     }
@@ -51,7 +51,7 @@ def test_content_structure_is_preserved():
 
 
 def test_iterables_are_flattened():
-    """Test that iterables structures are changed and flattened"""
+    """Flatten iterable metadata to list of tuples."""
     data = {
         "platform": ["UNKNOWN"],
     }
@@ -68,7 +68,7 @@ def test_iterables_are_flattened():
 
 
 def test_set_client_certificate(default_repo):
-    """Test that setting client certificate is successful"""
+    """Set client certificate for session."""
     assert default_repo.session.cert is None
 
     default_repo.set_client_certificate(("/path/to/cert", "/path/to/key"))
@@ -76,7 +76,7 @@ def test_set_client_certificate(default_repo):
 
 
 def test_set_certificate_authority(default_repo):
-    """Test that setting certificate authority is successful"""
+    """Set certificate authority for session."""
     assert default_repo.session.verify is True
 
     default_repo.set_certificate_authority("/path/to/cert")
@@ -84,7 +84,7 @@ def test_set_certificate_authority(default_repo):
 
 
 def test_make_user_agent_string(default_repo):
-    """Test that dependencies are present in user agent string"""
+    """Add twine and its dependencies to User-Agent session header."""
     assert "User-Agent" in default_repo.session.headers
 
     user_agent = default_repo.session.headers["User-Agent"]
@@ -102,7 +102,7 @@ def response_with(**kwattrs):
 
 
 def test_package_is_uploaded_404s(default_repo):
-    """Test that a package upload fails with 404"""
+    """Return False when the project API response status isn't 200."""
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(status_code=404)
     )
@@ -112,7 +112,7 @@ def test_package_is_uploaded_404s(default_repo):
 
 
 def test_package_is_uploaded_200s_with_no_releases(default_repo):
-    """Test that a package upload succeeds with 200 but has no releases"""
+    """Return False when the list of releases for a project is empty."""
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
@@ -124,7 +124,7 @@ def test_package_is_uploaded_200s_with_no_releases(default_repo):
 
 
 def test_package_is_uploaded_with_releases_using_cache(default_repo):
-    """Test that a package upload succeeds without bypassing cache"""
+    """Return True when the package is in the releases cache."""
     default_repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
     package = pretend.stub(
         safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
@@ -134,7 +134,7 @@ def test_package_is_uploaded_with_releases_using_cache(default_repo):
 
 
 def test_package_is_uploaded_with_releases_not_using_cache(default_repo):
-    """Test that a package upload succeeds bypassing cache"""
+    """Return True when the package is in the list of releases for a project."""
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
@@ -150,7 +150,7 @@ def test_package_is_uploaded_with_releases_not_using_cache(default_repo):
 
 
 def test_package_is_uploaded_different_filenames(default_repo):
-    """Test that a package upload fails as safe name and basefilename differ"""
+    """Return False when the package is not in the list of releases for a project."""
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(
             status_code=200,
@@ -166,7 +166,7 @@ def test_package_is_uploaded_different_filenames(default_repo):
 
 
 def test_package_is_registered(default_repo):
-    """Test that a package is registered successfully"""
+    """Return API response from registering a package."""
     package = pretend.stub(
         basefilename="fake.whl", metadata_dictionary=lambda: {"name": "fake"}
     )
@@ -185,7 +185,7 @@ def test_package_is_registered(default_repo):
 def test_disable_progress_bar_is_forwarded_to_tqdm(
     monkeypatch, tmpdir, disable_progress_bar, default_repo
 ):
-    """Test that the disable flag is passed to tqdm"""
+    """Toggle display of upload progress bar."""
 
     @contextmanager
     def progressbarstub(*args, **kwargs):
@@ -218,7 +218,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
 
 
 def test_upload_retry(tmpdir, default_repo, capsys):
-    """Test that retry works while uploading"""
+    """Print retry messages when the upload response indicates a server error."""
     default_repo.disable_progress_bar = True
 
     default_repo.session = pretend.stub(
@@ -306,7 +306,7 @@ def test_upload_retry(tmpdir, default_repo, capsys):
     ],
 )
 def test_release_urls(package_meta, repository_url, release_urls):
-    """Test that the correct release urls are read"""
+    """Generate a set of PyPI release URLs for a list of packages."""
     packages = [
         pretend.stub(safe_name=name, metadata=pretend.stub(version=version))
         for name, version in package_meta
@@ -320,7 +320,7 @@ def test_release_urls(package_meta, repository_url, release_urls):
 
 
 def test_package_is_uploaded_incorrect_repo_url():
-    """Test that a package upload fails on providing wrong repo url"""
+    """Return False when using an incorrect repository URL."""
     repo = repository.Repository(
         repository_url="https://bad.repo.com/legacy",
         username="username",
