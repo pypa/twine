@@ -80,7 +80,7 @@ def test_check_passing_distribution(monkeypatch):
 
 @pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
 def test_check_passing_distribution_with_none_renderer(content_type, monkeypatch):
-    """Render readme for distribution with content-type without renderers."""
+    """Pass when rendering a content type can't fail."""
     package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": "blah",

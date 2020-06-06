@@ -180,7 +180,7 @@ def test_get_repository_config_missing(tmpdir):
 
 
 def test_get_repository_config_invalid_scheme(tmpdir):
-    """Parse a URL with an invalid scheme and raise an exception."""
+    """Raise an exception for a URL with an invalid scheme."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
@@ -192,7 +192,7 @@ def test_get_repository_config_invalid_scheme(tmpdir):
 
 
 def test_get_repository_config_missing_components(tmpdir):
-    """Parse a URL with missing host and/or scheme and raise an exception."""
+    """Raise an exception for a URL with a missing host and/or scheme."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
@@ -215,7 +215,7 @@ def test_get_repository_config_missing_components(tmpdir):
 
 
 def test_get_repository_config_missing_config(tmpdir):
-    """Read an invalid section from .pypirc and raise an exception."""
+    """Raise an exception when a repository isn't defined in .pypirc."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
     with pytest.raises(exceptions.InvalidConfiguration):
         utils.get_repository_from_config(pypirc, "foobar")
@@ -287,7 +287,7 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
 )
 def test_check_status_code_for_missing_status_code(capsys, repo_url):
-    """Check that exceptions with unspecified status codes are correctly captured."""
+    """Print HTTP errors based on verbosity level."""
     response = pretend.stub(
         status_code=403,
         url=repo_url,
