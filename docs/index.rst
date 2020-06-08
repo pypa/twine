@@ -46,7 +46,7 @@ Features
 - Verified HTTPS connections
 - Uploading doesn't require executing ``setup.py``
 - Uploading files that have already been created, allowing testing of
-    distributions before release
+  distributions before release
 - Supports uploading any packaging format (including `wheels`_)
 
 Installation
@@ -66,7 +66,7 @@ Using Twine
        $ python setup.py sdist bdist_wheel
 
 2. Upload with ``twine`` to `Test PyPI`_ and verify things look right.
-    Twine will automatically prompt for your username and password:
+   Twine will automatically prompt for your username and password:
 
     .. code-block:: console
 
@@ -148,8 +148,8 @@ for passwords.
 See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
 
-Options
--------
+Commands
+--------
 
 ``twine upload``
 ^^^^^^^^^^^^^^^^
@@ -310,22 +310,22 @@ it is not convenient to create a ``.pypirc`` file (for example,
 on a CI/build server).
 
 * ``TWINE_USERNAME`` - the username to use for authentication to the
-    repository.
+  repository.
 * ``TWINE_PASSWORD`` - the password to use for authentication to the
-    repository.
+  repository.
 * ``TWINE_REPOSITORY`` - the repository configuration, either defined as a
-    section in ``.pypirc`` or provided as a full URL.
+  section in ``.pypirc`` or provided as a full URL.
 * ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
-    self-signed or untrusted certificates.
+  self-signed or untrusted certificates.
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
-    if the required credentials are missing.
+  if the required credentials are missing.
 
 Resources
 ---------
 
-* `IRC <https://webchat.freenode.net/?channels=%23pypa>`_
-    (``#pypa`` - irc.freenode.net)
+* `IRC <https://webchat.freenode.net/?channels=%23pypa>`_:
+  ``#pypa`` on irc.freenode.net
 * `GitHub repository <https://github.com/pypa/twine>`_
 * User and developer `documentation`_
 * `Python Packaging User Guide`_
