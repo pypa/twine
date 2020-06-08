@@ -23,13 +23,13 @@ from twine import settings
 
 
 def test_settings_takes_no_positional_arguments():
-    """Verify that the Settings initialization is kw-only."""
+    """Raise an exception when Settings is initialized without keyword arguments."""
     with pytest.raises(TypeError):
         settings.Settings("a", "b", "c")
 
 
-def test_settings_transforms_config(tmpdir):
-    """Verify that the settings object transforms the passed in options."""
+def test_settings_transforms_repository_config(tmpdir):
+    """Set repository config and defaults when .pypirc is provided."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with open(pypirc, "w") as fp:
@@ -56,13 +56,13 @@ def test_settings_transforms_config(tmpdir):
 
 
 def test_identity_requires_sign():
-    """Verify that if a user passes identity, we require sign=True."""
+    """Raise an exception when user provides identity but doesn't require sigining."""
     with pytest.raises(exceptions.InvalidSigningConfiguration):
         settings.Settings(sign=False, identity="fakeid")
 
 
 def test_password_not_required_if_client_cert(entered_password):
-    """Verify that if client_cert is provided then a password is not."""
+    """Don't set password when only client_cert is provided."""
     test_client_cert = "/random/path"
     settings_obj = settings.Settings(username="fakeuser", client_cert=test_client_cert)
     assert not settings_obj.password
@@ -71,13 +71,13 @@ def test_password_not_required_if_client_cert(entered_password):
 
 @pytest.mark.parametrize("client_cert", [None, ""])
 def test_password_is_required_if_no_client_cert(client_cert, entered_password):
-    """Verify that if client_cert is not provided then a password must be."""
+    """Set password when client_cert is not provided."""
     settings_obj = settings.Settings(username="fakeuser", client_cert=client_cert)
     assert settings_obj.password == "entered pw"
 
 
 def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
-    """Verify that if both password and client_cert are given they are set"""
+    """Set password and client_cert when both are provided."""
     client_cert = "/random/path"
     settings_obj = settings.Settings(
         username="fakeuser", password="anything", client_cert=client_cert
