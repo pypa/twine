@@ -21,7 +21,7 @@ twine
 Twine is `a utility`_ for `publishing`_ Python packages on `PyPI`_.
 
 It provides build system independent uploads of source and binary
-`distribution artifact <distributions_>`_ for both new and existing
+`distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
 
