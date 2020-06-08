@@ -72,7 +72,7 @@ def test_read_valid(example_wheel):
 
 def test_read_non_existent_wheel_file_name():
     """Test reading a wheel file which doesn't exist"""
-    file_name = str(os.path.abspath(pathlib.Path("/foo/bar/baz.whl")))
+    file_name = str(pathlib.Path("/foo/bar/baz.whl").resolve())
     with pytest.raises(
         exceptions.InvalidDistribution, match=re.escape(f"No such file: {file_name}")
     ):
@@ -81,9 +81,7 @@ def test_read_non_existent_wheel_file_name():
 
 def test_read_invalid_wheel_extension():
     """Test reading a wheel file without a .whl extension"""
-    file_name = str(
-        pathlib.Path(os.path.dirname(__file__)) / "fixtures" / "twine-1.5.0.tar.gz"
-    )
+    file_name = str(pathlib.Path(__file__).parent / "fixtures" / "twine-1.5.0.tar.gz")
     with pytest.raises(
         exceptions.InvalidDistribution,
         match=re.escape(f"Not a known archive format for file: {file_name}"),
