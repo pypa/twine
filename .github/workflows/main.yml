@@ -30,7 +30,6 @@ jobs:
           python-version: ${{ matrix.python }}
       - name: "Install dependencies"
         run: |
-          python -m pip install --upgrade pip setuptools wheel
-          python -m pip install --upgrade coverage[toml] virtualenv tox
+          python -m pip install --upgrade pip setuptools wheel tox
       - name: Run tests
         run: python -m tox -e py  # Run tox using the version of Python in `PATH`
