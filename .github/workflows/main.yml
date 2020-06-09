@@ -34,5 +34,3 @@ jobs:
           python -m pip install --upgrade coverage[toml] virtualenv tox
       - name: Run tests
         run: python -m tox -e py  # Run tox using the version of Python in `PATH`
-      - name: "Convert coverage"
-        run: "python -m coverage report"
