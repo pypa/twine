@@ -12,6 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import os
+import pathlib
+import re
 import zipfile
 
 import pretend
@@ -62,38 +64,39 @@ def test_find_metadata_files():
 
 
 def test_read_valid(example_wheel):
-    """Test reading a valid wheel file"""
+    """Parse metadata from a valid wheel file."""
     metadata = example_wheel.read().decode().splitlines()
     assert "Name: twine" in metadata
     assert "Version: 1.5.0" in metadata
 
 
 def test_read_non_existent_wheel_file_name():
-    """Test reading a wheel file which doesn't exist"""
-    file_name = "/foo/bar/baz.whl"
+    """Raise an exception when wheel file doesn't exist."""
+    file_name = str(pathlib.Path("/foo/bar/baz.whl").resolve())
     with pytest.raises(
-        exceptions.InvalidDistribution, match=f"No such file: {file_name}"
+        exceptions.InvalidDistribution, match=re.escape(f"No such file: {file_name}")
     ):
         wheel.Wheel(file_name)
 
 
 def test_read_invalid_wheel_extension():
-    """Test reading a wheel file without a .whl extension"""
-    file_name = os.path.join(os.path.dirname(__file__), "fixtures/twine-1.5.0.tar.gz")
+    """Raise an exception when file is missing .whl extension."""
+    file_name = str(pathlib.Path(__file__).parent / "fixtures" / "twine-1.5.0.tar.gz")
     with pytest.raises(
         exceptions.InvalidDistribution,
-        match=f"Not a known archive format for file: {file_name}",
+        match=re.escape(f"Not a known archive format for file: {file_name}"),
     ):
         wheel.Wheel(file_name)
 
 
 def test_read_wheel_empty_metadata(tmpdir):
-    """Test reading a wheel file with an empty METADATA file"""
+    """Raise an exception when a wheel file is missing METADATA."""
     whl_file = tmpdir.mkdir("wheel").join("not-a-wheel.whl")
     with zipfile.ZipFile(whl_file, "w") as zip_file:
         zip_file.writestr("METADATA", "")
 
     with pytest.raises(
-        exceptions.InvalidDistribution, match=f"No METADATA in archive: {whl_file}"
+        exceptions.InvalidDistribution,
+        match=re.escape(f"No METADATA in archive: {whl_file}"),
     ):
         wheel.Wheel(whl_file)
