@@ -27,21 +27,23 @@ def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        parser = argparse.ArgumentParser()
-        parser.add_argument(
-            "--no-color", default=False, required=False, action="store_true",
-        )
+        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
 
-        args, _ = parser.parse_known_args(sys.argv[1:])
 
-        pre_style, post_style = "", ""
-        if not args.no_color:
-            colorama.init()
-            pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
+def _format_error(err: str) -> str:
+    parser = argparse.ArgumentParser()
+    parser.add_argument(
+        "--no-color", default=False, required=False, action="store_true",
+    )
 
-        return "{}{}: {}{}".format(
-            pre_style, exc.__class__.__name__, exc.args[0], post_style,
-        )
+    args, _ = parser.parse_known_args(sys.argv[1:])
+
+    pre_style, post_style = "", ""
+    if not args.no_color:
+        colorama.init()
+        pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
+
+    return f"{pre_style}{err}{post_style}"
 
 
 if __name__ == "__main__":
