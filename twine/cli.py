@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import sys
 from typing import Any
 from typing import Dict
 from typing import List
@@ -37,6 +38,7 @@ def _registered_commands(
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     return [
+        ("python", ".".join(map(str, sys.version_info))),
         ("pkginfo", _installed.Installed(pkginfo).version),
         ("requests", requests.__version__),
         ("setuptools", setuptools.__version__),
