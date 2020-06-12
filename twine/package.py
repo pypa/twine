@@ -182,22 +182,22 @@ class PackageFile:
         try:
             subprocess.check_call(gpg_args)
             return
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
                     "{} executable not available.".format(gpg_args[0])
-                )
+                ) from e
 
         print("gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
-        except FileNotFoundError:
+        except FileNotFoundError as e:
             print("gpg2 executable not available.")
             raise exceptions.InvalidSigningExecutable(
                 "'gpg' or 'gpg2' executables not available. "
                 "Try installing one of these or specifying an executable "
                 "with the --sign-with flag."
-            )
+            ) from e
 
 
 class Hexdigest(NamedTuple):
