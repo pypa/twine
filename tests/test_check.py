@@ -18,6 +18,7 @@ import pytest
 
 from twine import commands
 from twine import package as package_file
+from twine import settings
 from twine.commands import check
 
 
@@ -158,8 +159,8 @@ def test_check_failing_distribution(monkeypatch):
 
 def test_main(monkeypatch):
     check_result = pretend.stub()
-    check_stub = pretend.call_recorder(lambda a: check_result)
+    check_stub = pretend.call_recorder(lambda a, check_settings: check_result)
     monkeypatch.setattr(check, "check", check_stub)
 
     assert check.main(["dist/*"]) == check_result
-    assert check_stub.calls == [pretend.call(["dist/*"])]
+    assert check_stub.calls[0].args[0] == ["dist/*"]

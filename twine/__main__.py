@@ -21,29 +21,28 @@ import requests
 
 from twine import cli
 from twine import exceptions
+from twine import settings
 
 
 def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
+        parser = argparse.ArgumentParser()
+        settings.Settings.register_argparse_arguments(parser)
+        args, _ = parser.parse_known_args(sys.argv[1:])
+        color = not settings.Settings.from_argparse(args).no_color
+
+        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}", color=color)
 
 
-def _format_error(err: str) -> str:
-    parser = argparse.ArgumentParser()
-    parser.add_argument(
-        "--no-color", default=False, required=False, action="store_true",
-    )
-
-    args, _ = parser.parse_known_args(sys.argv[1:])
-
+def _format_error(message: str, color: bool = True) -> str:
     pre_style, post_style = "", ""
-    if not args.no_color:
+    if color:
         colorama.init()
         pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
 
-    return f"{pre_style}{err}{post_style}"
+    return f"{pre_style}{message}{post_style}"
 
 
 if __name__ == "__main__":
