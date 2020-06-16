@@ -159,6 +159,18 @@ def normalize_repository_url(url: str) -> str:
     return urlunparse(parsed)
 
 
+def get_file_size(filename: str) -> str:
+    """Return the size of a file in KB, or MB if >= 1024 KB."""
+    file_size = os.path.getsize(filename) / 1024
+    size_unit = "KB"
+
+    if file_size > 1024:
+        file_size = file_size / 1024
+        size_unit = "MB"
+
+    return f"{file_size:.1f} {size_unit}"
+
+
 def check_status_code(response: requests.Response, verbose: bool) -> None:
     """Generate a helpful message based on the response from the repository.
 
