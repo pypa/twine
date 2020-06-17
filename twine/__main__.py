@@ -12,7 +12,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import argparse
 import sys
 from typing import Any
 
@@ -21,24 +20,18 @@ import requests
 
 from twine import cli
 from twine import exceptions
-from twine import settings
 
 
 def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        parser = argparse.ArgumentParser()
-        settings.Settings.register_argparse_arguments(parser)
-        args, _ = parser.parse_known_args(sys.argv[1:])
-        color = not settings.Settings.from_argparse(args).no_color
-
-        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}", color=color)
+        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
 
 
-def _format_error(message: str, color: bool = True) -> str:
+def _format_error(message: str) -> str:
     pre_style, post_style = "", ""
-    if color:
+    if not cli.args.no_color:
         colorama.init()
         pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
 

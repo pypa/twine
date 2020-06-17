@@ -27,7 +27,6 @@ import readme_renderer.rst
 
 from twine import commands
 from twine import package as package_file
-from twine import settings
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
@@ -106,11 +105,7 @@ def _check_file(
     return warnings, is_ok
 
 
-def check(
-    dists: List[str],
-    output_stream: IO[str] = sys.stdout,
-    check_settings: Optional[settings.Settings] = None,
-) -> bool:
+def check(dists: List[str], output_stream: IO[str] = sys.stdout) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -148,7 +143,6 @@ def check(
 
 def main(args: List[str]) -> bool:
     parser = argparse.ArgumentParser(prog="twine check")
-    settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
         "dists",
         nargs="+",
@@ -157,7 +151,6 @@ def main(args: List[str]) -> bool:
     )
 
     parsed_args = parser.parse_args(args)
-    check_settings = settings.Settings.from_argparse(parsed_args)
 
     # Call the check function with the arguments from the command line
-    return check(parsed_args.dists, check_settings=check_settings)
+    return check(parsed_args.dists)
