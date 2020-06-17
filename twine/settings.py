@@ -59,7 +59,6 @@ class Settings:
         repository_url: Optional[str] = None,
         verbose: bool = False,
         disable_progress_bar: bool = False,
-        no_color: bool = False,
         **ignored_kwargs: Any,
     ) -> None:
         """Initialize our settings instance.
@@ -123,7 +122,6 @@ class Settings:
         self.comment = comment
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
-        self.no_color = no_color
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name, repository_url=repository_url,
@@ -264,13 +262,6 @@ class Settings:
             required=False,
             action="store_true",
             help="Disable the progress bar.",
-        )
-        parser.add_argument(
-            "--no-color",
-            default=False,
-            required=False,
-            action="store_true",
-            help="Disable colored output.",
         )
 
     @classmethod
