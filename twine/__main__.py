@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import re
 import sys
 from typing import Any
 
@@ -26,12 +27,25 @@ def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
-        return _format_error(_format_http_error(exc))
+        return _format_error(_format_http_exception(exc))
     except exceptions.TwineException as exc:
-        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
+        return _format_error(_format_exception(exc))
 
 
-def _format_http_error(exc: requests.HTTPError) -> str:
+def _format_http_exception(exc: requests.HTTPError) -> str:
+    # '%s Client Error: %s for url: %s'
+    # '%s Server Error: %s for url: %s'
+    pattern = r"(?P<status>.*Error): (?P<reason>.*) for url: (?P<url>.*)"
+    match = re.match(pattern, exc.args[0])
+    if match:
+        return (
+            f"{exc.__class__.__name__} from {match['url']}: {match['status']}\n"
+            f"{match['reason']}"
+        )
+    return _format_exception(exc)
+
+
+def _format_exception(exc: Exception) -> str:
     return f"{exc.__class__.__name__}: {exc.args[0]}"
 
 
