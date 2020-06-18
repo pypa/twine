@@ -25,8 +25,14 @@ from twine import exceptions
 def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
-    except (exceptions.TwineException, requests.HTTPError) as exc:
+    except requests.HTTPError as exc:
+        return _format_error(_format_http_error(exc))
+    except exceptions.TwineException as exc:
         return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
+
+
+def _format_http_error(exc: requests.HTTPError) -> str:
+    return f"{exc.__class__.__name__}: {exc.args[0]}"
 
 
 def _format_error(message: str) -> str:
