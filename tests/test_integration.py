@@ -1,7 +1,9 @@
 import sys
 
+import colorama
 import pytest
 
+from twine import __main__ as dunder_main
 from twine import cli
 
 
@@ -44,6 +46,29 @@ def test_pypi_upload(sampleproject_dist):
         str(sampleproject_dist),
     ]
     cli.dispatch(command)
+
+
+def test_pypi_error(sampleproject_dist, monkeypatch):
+    command = [
+        "twine",
+        "upload",
+        "--repository-url",
+        "https://test.pypi.org/legacy/",
+        "--username",
+        "foo",
+        "--password",
+        "bar",
+        str(sampleproject_dist),
+    ]
+    monkeypatch.setattr(sys, "argv", command)
+
+    message = (
+        "HTTPError from https://test.pypi.org/legacy/: 403 Client Error\n"
+        "Invalid or non-existent authentication information. "
+        "See https://test.pypi.org/help/#invalid-auth for details"
+    )
+
+    assert dunder_main.main() == colorama.Fore.RED + message + colorama.Style.RESET_ALL
 
 
 @pytest.mark.xfail(
