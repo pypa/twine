@@ -10,14 +10,20 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import pretend
+import sys
+
+import colorama
 
 from twine import __main__ as dunder_main
-from twine import cli
-from twine import exceptions
 
 
 def test_exception_handling(monkeypatch):
-    replaced_dispatch = pretend.raiser(exceptions.InvalidConfiguration("foo"))
-    monkeypatch.setattr(cli, "dispatch", replaced_dispatch)
-    assert dunder_main.main() == "InvalidConfiguration: foo"
+    monkeypatch.setattr(sys, "argv", ["twine", "upload", "missing.whl"])
+    message = "InvalidDistribution: Cannot find file (or expand pattern): 'missing.whl'"
+    assert dunder_main.main() == colorama.Fore.RED + message + colorama.Style.RESET_ALL
+
+
+def test_no_color_exception(monkeypatch):
+    monkeypatch.setattr(sys, "argv", ["twine", "--no-color", "upload", "missing.whl"])
+    message = "InvalidDistribution: Cannot find file (or expand pattern): 'missing.whl'"
+    assert dunder_main.main() == message

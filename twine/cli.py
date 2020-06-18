@@ -27,6 +27,8 @@ import tqdm
 import twine
 from twine import _installed
 
+args = argparse.Namespace()
+
 
 def _registered_commands(
     group: str = "twine.registered_commands",
@@ -60,13 +62,20 @@ def dispatch(argv: List[str]) -> Any:
         version="%(prog)s version {} ({})".format(twine.__version__, dep_versions()),
     )
     parser.add_argument(
+        "--no-color",
+        default=False,
+        required=False,
+        action="store_true",
+        help="disable colored output",
+    )
+    parser.add_argument(
         "command", choices=registered_commands.keys(),
     )
     parser.add_argument(
         "args", help=argparse.SUPPRESS, nargs=argparse.REMAINDER,
     )
 
-    args = parser.parse_args(argv)
+    parser.parse_args(argv, namespace=args)
 
     main = registered_commands[args.command].load()
 

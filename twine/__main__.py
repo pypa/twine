@@ -15,6 +15,7 @@
 import sys
 from typing import Any
 
+import colorama
 import requests
 
 from twine import cli
@@ -25,7 +26,16 @@ def main() -> Any:
     try:
         return cli.dispatch(sys.argv[1:])
     except (exceptions.TwineException, requests.HTTPError) as exc:
-        return "{}: {}".format(exc.__class__.__name__, exc.args[0])
+        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
+
+
+def _format_error(message: str) -> str:
+    pre_style, post_style = "", ""
+    if not cli.args.no_color:
+        colorama.init()
+        pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
+
+    return f"{pre_style}{message}{post_style}"
 
 
 if __name__ == "__main__":
