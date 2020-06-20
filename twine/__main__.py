@@ -25,25 +25,19 @@ from twine import exceptions
 
 def main() -> Any:
     try:
-        return cli.dispatch(sys.argv[1:])
+        result = cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
-        return _format_error(_format_http_exception(exc))
+        status_code = exc.response.status_code
+        status_phrase = http.HTTPStatus(status_code).phrase
+        result = (
+            f"{exc.__class__.__name__} from {exc.response.url}: "
+            f"{status_code} {status_phrase}\n"
+            f"{exc.response.reason}"
+        )
     except exceptions.TwineException as exc:
-        return _format_error(_format_exception(exc))
+        result = f"{exc.__class__.__name__}: {exc.args[0]}"
 
-
-def _format_http_exception(exc: requests.HTTPError) -> str:
-    status_code = exc.response.status_code
-    status_phrase = http.HTTPStatus(status_code).phrase
-    return (
-        f"{exc.__class__.__name__} from {exc.response.url}: "
-        f"{status_code} {status_phrase}\n"
-        f"{exc.response.reason}"
-    )
-
-
-def _format_exception(exc: Exception) -> str:
-    return f"{exc.__class__.__name__}: {exc.args[0]}"
+    return _format_error(result) if isinstance(result, str) else result
 
 
 def _format_error(message: str) -> str:
