@@ -12,7 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import re
+import http
 import sys
 from typing import Any
 
@@ -33,16 +33,13 @@ def main() -> Any:
 
 
 def _format_http_exception(exc: requests.HTTPError) -> str:
-    # '%s Client Error: %s for url: %s'
-    # '%s Server Error: %s for url: %s'
-    pattern = r"(?P<status>.*Error): (?P<reason>.*) for url: (?P<url>.*)"
-    match = re.match(pattern, exc.args[0])
-    if match:
-        return (
-            f"{exc.__class__.__name__} from {match['url']}: {match['status']}\n"
-            f"{match['reason']}"
-        )
-    return _format_exception(exc)
+    status_code = exc.response.status_code
+    status_phrase = http.HTTPStatus(status_code).phrase
+    return (
+        f"{exc.__class__.__name__} from {exc.response.url}: "
+        f"{status_code} {status_phrase}\n"
+        f"{exc.response.reason}"
+    )
 
 
 def _format_exception(exc: Exception) -> str:

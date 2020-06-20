@@ -1,9 +1,7 @@
 import sys
 
 import colorama
-import pretend
 import pytest
-import requests
 
 from twine import __main__ as dunder_main
 from twine import cli
@@ -65,31 +63,11 @@ def test_pypi_error(sampleproject_dist, monkeypatch):
     monkeypatch.setattr(sys, "argv", command)
 
     message = (
-        "HTTPError from https://test.pypi.org/legacy/: 403 Client Error\n"
+        "HTTPError from https://test.pypi.org/legacy/: 403 Forbidden\n"
         "Invalid or non-existent authentication information. "
         "See https://test.pypi.org/help/#invalid-auth for details"
     )
 
-    assert dunder_main.main() == colorama.Fore.RED + message + colorama.Style.RESET_ALL
-
-
-def test_pypi_error_fallback(sampleproject_dist, monkeypatch):
-    command = [
-        "twine",
-        "upload",
-        "--repository-url",
-        "https://test.pypi.org/legacy/",
-        "--username",
-        "foo",
-        "--password",
-        "bar",
-        str(sampleproject_dist),
-    ]
-    monkeypatch.setattr(sys, "argv", command)
-
-    monkeypatch.setattr(cli, "dispatch", pretend.raiser(requests.HTTPError("403")))
-
-    message = "HTTPError: 403"
     assert dunder_main.main() == colorama.Fore.RED + message + colorama.Style.RESET_ALL
 
 
