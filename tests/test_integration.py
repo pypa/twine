@@ -1,3 +1,4 @@
+import re
 import sys
 
 import colorama
@@ -63,12 +64,14 @@ def test_pypi_error(sampleproject_dist, monkeypatch):
     monkeypatch.setattr(sys, "argv", command)
 
     message = (
-        "HTTPError from https://test.pypi.org/legacy/: 403 Forbidden\n"
-        "Invalid or non-existent authentication information. "
-        "See https://test.pypi.org/help/#invalid-auth for details"
+        re.escape(colorama.Fore.RED)
+        + r"HTTPError from https://test.pypi.org/legacy/: 403 Forbidden\n"
+        + r".*authentication"
     )
 
-    assert dunder_main.main() == colorama.Fore.RED + message + colorama.Style.RESET_ALL
+    result = dunder_main.main()
+
+    assert re.match(message, result)
 
 
 @pytest.mark.xfail(
