@@ -65,8 +65,8 @@ def test_pypi_error(sampleproject_dist, monkeypatch):
 
     message = (
         re.escape(colorama.Fore.RED)
-        + r"HTTPError: 403 Forbidden from https://test.pypi.org/legacy/\n"
-        + r".*authentication"
+        + r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/\n"
+        + r".+?authentication"
     )
 
     result = dunder_main.main()
