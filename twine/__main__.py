@@ -30,8 +30,8 @@ def main() -> Any:
         status_code = exc.response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
         result = (
-            f"{exc.__class__.__name__} from {exc.response.url}: "
-            f"{status_code} {status_phrase}\n"
+            f"{exc.__class__.__name__}: {status_code} {status_phrase} "
+            f"from {exc.response.url}\n"
             f"{exc.response.reason}"
         )
     except exceptions.TwineException as exc:
