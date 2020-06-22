@@ -12,6 +12,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import http
 import sys
 from typing import Any
 
@@ -24,9 +25,19 @@ from twine import exceptions
 
 def main() -> Any:
     try:
-        return cli.dispatch(sys.argv[1:])
-    except (exceptions.TwineException, requests.HTTPError) as exc:
-        return _format_error(f"{exc.__class__.__name__}: {exc.args[0]}")
+        result = cli.dispatch(sys.argv[1:])
+    except requests.HTTPError as exc:
+        status_code = exc.response.status_code
+        status_phrase = http.HTTPStatus(status_code).phrase
+        result = (
+            f"{exc.__class__.__name__}: {status_code} {status_phrase} "
+            f"from {exc.response.url}\n"
+            f"{exc.response.reason}"
+        )
+    except exceptions.TwineException as exc:
+        result = f"{exc.__class__.__name__}: {exc.args[0]}"
+
+    return _format_error(result) if isinstance(result, str) else result
 
 
 def _format_error(message: str) -> str:

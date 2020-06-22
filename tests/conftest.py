@@ -128,7 +128,7 @@ def entered_password(monkeypatch):
     monkeypatch.setattr(getpass, "getpass", lambda prompt: "entered pw")
 
 
-@pytest.fixture
+@pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
     subprocess.run(

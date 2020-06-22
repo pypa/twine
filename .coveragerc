@@ -10,13 +10,5 @@ exclude_lines =
     # Don't complain if non-runnable code isn't run
     if __name__ == .__main__.:
 
-
-# Paths to omit from consideration
-omit =
-    # __main__.py exists only as a very basic wrapper around warehouse.cli
-    #   and exists only to provide setuptools and python -m a place to point
-    #   at.
-    */twine/__main__.py
-
 [html]
 show_contexts = True

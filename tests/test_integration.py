@@ -1,7 +1,10 @@
+import re
 import sys
 
+import colorama
 import pytest
 
+from twine import __main__ as dunder_main
 from twine import cli
 
 
@@ -44,6 +47,31 @@ def test_pypi_upload(sampleproject_dist):
         str(sampleproject_dist),
     ]
     cli.dispatch(command)
+
+
+def test_pypi_error(sampleproject_dist, monkeypatch):
+    command = [
+        "twine",
+        "upload",
+        "--repository-url",
+        "https://test.pypi.org/legacy/",
+        "--username",
+        "foo",
+        "--password",
+        "bar",
+        str(sampleproject_dist),
+    ]
+    monkeypatch.setattr(sys, "argv", command)
+
+    message = (
+        re.escape(colorama.Fore.RED)
+        + r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/\n"
+        + r".+?authentication"
+    )
+
+    result = dunder_main.main()
+
+    assert re.match(message, result)
 
 
 @pytest.mark.xfail(
