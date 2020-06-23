@@ -6,7 +6,7 @@
 Changelog
 =========
 
-* :release:`3.2.0 <unreleased>`
+* :release:`3.2.0 <2020-06-24>`
 * :feature:`666` Improve display of HTTP errors during upload
 * :feature:`649` Use red text when printing errors on the command line
 * :feature:`652` Print packages and signatures to be uploaded when using
