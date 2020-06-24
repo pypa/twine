@@ -204,7 +204,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Add a ``:release:`` line to :file:`docs/changelog.rst`.
 #. Commit and open a pull request for review.
 #. Merge the pull request, and ensure the `Travis`_ build passes.
-#. Create a new git tag with ``git tag -m tag {version}``.
+#. Create a new git tag with ``git tag -m "Release v{version}" {version}``.
 #. Push the new tag with ``git push upstream {version}``.
 #. Watch the release in `Travis`_.
 #. Send announcement email to `distutils-sig mailing list`_ and celebrate.
