@@ -11,7 +11,7 @@ Changelog
 * :feature:`649` Use red text when printing errors on the command line
 * :feature:`652` Print packages and signatures to be uploaded when using
   ``--verbose`` option
-* :bug:`655 major` Update URL to ``.pypirc`` specfication
+* :bug:`655 major` Update URL to ``.pypirc`` specification
 * :feature:`602` Require repository URL scheme to be ``http`` or ``https``
 * :bug:`612 major` Don't raise an exception when Python version can't be
   parsed from filename
