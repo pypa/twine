@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import logging
 import os.path
 import textwrap
 
@@ -267,13 +268,13 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
 
     # value of Verbose doesn't matter for this check
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected):
-        utils.check_status_code(response, False)
+        utils.check_status_code(response, 1)
 
 
 @pytest.mark.parametrize(
     "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
 )
-def test_check_status_code_for_missing_status_code(capsys, repo_url):
+def test_check_status_code_for_missing_status_code(caplog, repo_url):
     """Print HTTP errors based on verbosity level."""
     response = pretend.stub(
         status_code=403,
@@ -282,18 +283,23 @@ def test_check_status_code_for_missing_status_code(capsys, repo_url):
         text="Forbidden",
     )
 
+    verbose = 3
+
+    caplog.set_level(utils._VERBOSITY_TO_LOG_LEVEL[verbose], logger="LOGGER")
+
     with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, True)
+        utils.check_status_code(response, verbose)
 
     # Different messages are printed based on the verbose level
-    captured = capsys.readouterr()
-    assert captured.out == "Content received from server:\nForbidden\n"
+    captured = caplog.text
+    assert "Content received from server:\nForbidden\n" in captured
 
+    verbose = 0
     with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, False)
+        utils.check_status_code(response, verbose)
 
-    captured = capsys.readouterr()
-    assert captured.out == "NOTE: Try --verbose to see response content.\n"
+    captured = caplog.text
+    assert "NOTE: Try --verbose to see response content.\n" in captured
 
 
 @pytest.mark.parametrize(
@@ -307,3 +313,14 @@ def test_get_file_size(size_in_bytes, formatted_size, monkeypatch):
     file_size = utils.get_file_size(size_in_bytes)
 
     assert file_size == formatted_size
+
+
+def test_enforce_max_verbosity():
+    """Set the verbosity to 3 and the appropriate log level when verbosity > 3."""
+    max_verbosity = 3
+    args_verbosity = 10
+
+    utils.setup_logging(args_verbosity)
+    logger = logging.getLogger("LOGGER")
+
+    assert logger.getEffectiveLevel() == utils._VERBOSITY_TO_LOG_LEVEL[max_verbosity]

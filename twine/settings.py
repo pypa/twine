@@ -57,7 +57,7 @@ class Settings:
         client_cert: Optional[str] = None,
         repository_name: str = "pypi",
         repository_url: Optional[str] = None,
-        verbose: bool = False,
+        verbose: int = 0,
         disable_progress_bar: bool = False,
         **ignored_kwargs: Any,
     ) -> None:
@@ -111,7 +111,7 @@ class Settings:
         :param str repository_url:
             The URL of the repository (package index) to interact with. This
             will override the settings inferred from ``repository_name``.
-        :param bool verbose:
+        :param int verbosity:
             Show verbose output.
         :param bool disable_progress_bar:
             Disable the progress bar.
@@ -121,6 +121,8 @@ class Settings:
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
+        # Setting up logging before the config is loaded
+        utils.setup_logging(verbose)
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
         self._handle_repository_options(
@@ -250,11 +252,12 @@ class Settings:
             " private key and the certificate in PEM format.",
         )
         parser.add_argument(
+            "-v",
             "--verbose",
-            default=False,
+            default=0,
             required=False,
-            action="store_true",
-            help="Show verbose output.",
+            action="count",
+            help="Show verbose output. -v to -vvv in increasing verbosity.",
         )
         parser.add_argument(
             "--disable-progress-bar",

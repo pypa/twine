@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
 import os.path
 from typing import Dict
 from typing import List
@@ -56,6 +57,7 @@ def _make_package(
 ) -> package_file.PackageFile:
     """Create and sign a package, based off of filename, signatures and settings."""
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
+    logger = logging.getLogger("LOGGER")
 
     signed_name = package.signed_basefilename
     if signed_name in signatures:
@@ -65,9 +67,9 @@ def _make_package(
 
     if upload_settings.verbose:
         file_size = utils.get_file_size(package.filename)
-        print(f"  {package.filename} ({file_size})")
+        logger.info(f"  {package.filename} ({file_size})")
         if package.gpg_signature:
-            print(f"  Signed with {package.signed_filename}")
+            logger.info(f"  Signed with {package.signed_filename}")
 
     return package
 

@@ -15,8 +15,10 @@ import argparse
 import collections
 import configparser
 import functools
+import logging
 import os
 import os.path
+import sys
 from typing import Any
 from typing import Callable
 from typing import DefaultDict
@@ -171,13 +173,14 @@ def get_file_size(filename: str) -> str:
     return f"{file_size:.1f} {size_unit}"
 
 
-def check_status_code(response: requests.Response, verbose: bool) -> None:
+def check_status_code(response: requests.Response, verbose: int) -> None:
     """Generate a helpful message based on the response from the repository.
 
     Raise a custom exception for recognized errors. Otherwise, print the
     response content (based on the verbose option) before re-raising the
     HTTPError.
     """
+    logger = logging.getLogger("LOGGER")
     if response.status_code == 410 and "pypi.python.org" in response.url:
         raise exceptions.UploadToDeprecatedPyPIDetected(
             f"It appears you're uploading to pypi.python.org (or "
@@ -201,9 +204,9 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
     except requests.HTTPError as err:
         if response.text:
             if verbose:
-                print("Content received from server:\n{}".format(response.text))
+                logger.info("Content received from server:\n{}".format(response.text))
             else:
-                print("NOTE: Try --verbose to see response content.")
+                logger.warning("NOTE: Try --verbose to see response content.")
         raise err
 
 
@@ -295,3 +298,28 @@ class EnvironmentFlag(argparse.Action):
         """Allow '0' and 'false' and 'no' to be False."""
         falsey = {"0", "false", "no"}
         return bool(val and val.lower() not in falsey)
+
+
+_MAX_VERBOSITY = 5
+
+_VERBOSITY_TO_LOG_LEVEL = {
+    0: logging.WARNING,
+    1: logging.INFO,
+    2: logging.DEBUG,
+    3: _MAX_VERBOSITY,
+}
+
+
+def setup_logging(args_verbosity: int) -> None:
+    """Set up the logger and logging based on the verbosity inputted by the user."""
+    # 3 Vs are the maximum verbosity
+    if args_verbosity > 3:
+        args_verbosity = 3
+
+    log_level = _VERBOSITY_TO_LOG_LEVEL[args_verbosity]
+    logger = logging.getLogger("LOGGER")
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(log_level)
+    logger.addHandler(handler)
+    # Setting a level of verbosity for the logger
+    logger.setLevel(log_level)
