@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
+import sys
 from typing import Any
 from typing import Optional
 from typing import cast
@@ -21,6 +23,16 @@ from twine import auth
 from twine import exceptions
 from twine import repository
 from twine import utils
+
+
+def _setup_logging(verbose: bool) -> None:
+    """Initialize a logger based on verbosity available throughout twine."""
+    logger = logging.getLogger("twine")
+    log_level = logging.INFO if verbose else logging.WARNING
+    handler = logging.StreamHandler(sys.stdout)
+    handler.setLevel(log_level)
+    logger.addHandler(handler)
+    logger.setLevel(log_level)
 
 
 class Settings:
@@ -121,6 +133,7 @@ class Settings:
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
+        _setup_logging(verbose)
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
         self._handle_repository_options(

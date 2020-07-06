@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
 import os.path
 import textwrap
 
@@ -53,6 +54,18 @@ def test_settings_transforms_repository_config(tmpdir):
     assert s.cacert is None
     assert s.client_cert is None
     assert s.disable_progress_bar is False
+
+
+@pytest.mark.parametrize("verbose", [True, False])
+def test_setup_logging(verbose: bool):
+    """Set log level based on verbose field."""
+    settings._setup_logging(verbose)
+    logger = logging.getLogger("twine")
+
+    if verbose:
+        assert logger.level == logging.INFO
+    else:
+        assert logger.level == logging.WARNING
 
 
 def test_identity_requires_sign():

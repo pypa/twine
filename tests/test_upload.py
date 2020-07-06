@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import os
 
 import pretend
@@ -54,7 +55,7 @@ def upload_settings(make_settings, stub_repository):
     return upload_settings
 
 
-def test_make_package_pre_signed_dist(upload_settings, capsys):
+def test_make_package_pre_signed_dist(upload_settings, caplog):
     """Create a PackageFile and print path, size, and user-provided signature."""
     filename = helpers.WHEEL_FIXTURE
     expected_size = "15.4 KB"
@@ -63,18 +64,19 @@ def test_make_package_pre_signed_dist(upload_settings, capsys):
 
     upload_settings.sign = True
     upload_settings.verbose = True
+    caplog.set_level(logging.INFO, logger="twine")
 
     package = upload._make_package(filename, signatures, upload_settings)
 
     assert package.filename == filename
     assert package.gpg_signature is not None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(f"{filename} ({expected_size})") == 1
-    assert captured.out.count(f"Signed with {signed_filename}") == 1
+    captured = caplog.text
+    assert captured.count(f"{filename} ({expected_size})") == 1
+    assert captured.count(f"Signed with {signed_filename}") == 1
 
 
-def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
+def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
     """Create a PackageFile and print path, size, and Twine-generated signature."""
     filename = helpers.NEW_WHEEL_FIXTURE
     expected_size = "21.9 KB"
@@ -82,6 +84,7 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
 
     upload_settings.sign = True
     upload_settings.verbose = True
+    caplog.set_level(logging.INFO, logger="twine")
 
     def stub_sign(package, *_):
         package.gpg_signature = (package.signed_basefilename, b"signature")
@@ -93,9 +96,9 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
     assert package.filename == filename
     assert package.gpg_signature is not None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(f"{filename} ({expected_size})") == 1
-    assert captured.out.count(f"Signed with {package.signed_filename}") == 1
+    captured = caplog.text
+    assert captured.count(f"{filename} ({expected_size})") == 1
+    assert captured.count(f"Signed with {package.signed_filename}") == 1
 
 
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
@@ -118,7 +121,7 @@ def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
     assert captured.out.count(NEW_RELEASE_URL) == 1
 
 
-def test_print_packages_if_verbose(upload_settings, capsys):
+def test_print_packages_if_verbose(upload_settings, caplog):
     """Print the path and file size of each distribution attempting to be uploaded."""
     dists_to_upload = {
         helpers.WHEEL_FIXTURE: "15.4 KB",
@@ -128,14 +131,16 @@ def test_print_packages_if_verbose(upload_settings, capsys):
     }
 
     upload_settings.verbose = True
+    caplog.set_level(logging.INFO, logger="twine")
 
-    result = upload.upload(upload_settings, dists_to_upload.keys())
+    result = upload.upload(upload_settings, dists_to_upload)
+
     assert result is None
 
-    captured = capsys.readouterr()
+    captured = caplog.text
 
     for filename, size in dists_to_upload.items():
-        assert captured.out.count(f"{filename} ({size})") == 1
+        assert captured.count(f"{filename} ({size})") == 1
 
 
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
@@ -181,8 +186,12 @@ def test_success_when_gpg_is_run(upload_settings, stub_repository, monkeypatch):
 
 
 @pytest.mark.parametrize("verbose", [False, True])
-def test_exception_for_http_status(verbose, upload_settings, stub_response, capsys):
+def test_exception_for_http_status(verbose, upload_settings, stub_response, caplog):
     upload_settings.verbose = verbose
+    if verbose:
+        caplog.set_level(logging.INFO, logger="twine")
+    else:
+        caplog.set_level(logging.WARNING, logger="twine")
 
     stub_response.is_redirect = False
     stub_response.status_code = 403
@@ -192,15 +201,15 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
     with pytest.raises(requests.HTTPError):
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
-    captured = capsys.readouterr()
-    assert RELEASE_URL not in captured.out
+    captured = caplog.text
+    assert RELEASE_URL not in captured
 
     if verbose:
-        assert stub_response.text in captured.out
-        assert "--verbose" not in captured.out
+        assert stub_response.text in captured
+        assert "--verbose" not in captured
     else:
-        assert stub_response.text not in captured.out
-        assert "--verbose" in captured.out
+        assert stub_response.text not in captured
+        assert "--verbose" in captured
 
 
 def test_get_config_old_format(make_settings, pypirc):
