@@ -55,6 +55,12 @@ def upload_settings(make_settings, stub_repository):
     return upload_settings
 
 
+@pytest.fixture
+def caplog(caplog):
+    caplog.set_level(logging.INFO, logger="twine")
+    return caplog
+
+
 def test_make_package_pre_signed_dist(upload_settings, caplog):
     """Create a PackageFile and print path, size, and user-provided signature."""
     filename = helpers.WHEEL_FIXTURE
@@ -64,7 +70,6 @@ def test_make_package_pre_signed_dist(upload_settings, caplog):
 
     upload_settings.sign = True
     upload_settings.verbose = True
-    caplog.set_level(logging.INFO, logger="twine")
 
     package = upload._make_package(filename, signatures, upload_settings)
 
@@ -84,7 +89,6 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
 
     upload_settings.sign = True
     upload_settings.verbose = True
-    caplog.set_level(logging.INFO, logger="twine")
 
     def stub_sign(package, *_):
         package.gpg_signature = (package.signed_basefilename, b"signature")
@@ -131,7 +135,6 @@ def test_print_packages_if_verbose(upload_settings, caplog):
     }
 
     upload_settings.verbose = True
-    caplog.set_level(logging.INFO, logger="twine")
 
     result = upload.upload(upload_settings, dists_to_upload)
 
@@ -188,10 +191,8 @@ def test_success_when_gpg_is_run(upload_settings, stub_repository, monkeypatch):
 @pytest.mark.parametrize("verbose", [False, True])
 def test_exception_for_http_status(verbose, upload_settings, stub_response, caplog):
     upload_settings.verbose = verbose
-    if verbose:
-        caplog.set_level(logging.INFO, logger="twine")
-    else:
-        caplog.set_level(logging.WARNING, logger="twine")
+    log_level = logging.INFO if verbose else logging.WARNING
+    caplog.set_level(log_level, logger="twine")
 
     stub_response.is_redirect = False
     stub_response.status_code = 403

@@ -46,7 +46,7 @@ TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 # get_userpass_value.
 RepositoryConfig = Dict[str, Optional[str]]
 
-logger = logging.getLogger("twine")
+logger = logging.getLogger(__name__)
 
 
 def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
@@ -203,9 +203,8 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
         response.raise_for_status()
     except requests.HTTPError as err:
         if response.text:
-            if verbose:
-                logger.info("Content received from server:\n{}".format(response.text))
-            else:
+            logger.info("Content received from server:\n{}".format(response.text))
+            if not verbose:
                 logger.warning("NOTE: Try --verbose to see response content.")
         raise err
 

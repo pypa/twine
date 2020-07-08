@@ -26,7 +26,7 @@ from twine import package as package_file
 from twine import settings
 from twine import utils
 
-logger = logging.getLogger("twine")
+logger = logging.getLogger(__name__)
 
 
 def skip_upload(

@@ -56,16 +56,16 @@ def test_settings_transforms_repository_config(tmpdir):
     assert s.disable_progress_bar is False
 
 
-@pytest.mark.parametrize("verbose", [True, False])
-def test_setup_logging(verbose: bool):
+@pytest.mark.parametrize(
+    "verbose, log_level", [(True, logging.INFO), (False, logging.WARNING)]
+)
+def test_setup_logging(verbose, log_level):
     """Set log level based on verbose field."""
-    settings._setup_logging(verbose)
+    settings.Settings(verbose=verbose)
+
     logger = logging.getLogger("twine")
 
-    if verbose:
-        assert logger.level == logging.INFO
-    else:
-        assert logger.level == logging.WARNING
+    assert logger.level == log_level
 
 
 def test_identity_requires_sign():
