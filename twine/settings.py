@@ -25,13 +25,6 @@ from twine import repository
 from twine import utils
 
 
-def _setup_logging(verbose: bool) -> None:
-    """Initialize a logger based on the --verbose option."""
-    root_logger = logging.getLogger("twine")
-    root_logger.addHandler(logging.StreamHandler(sys.stdout))
-    root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
-
-
 class Settings:
     """Object that manages the configuration for Twine.
 
@@ -130,7 +123,6 @@ class Settings:
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
-        _setup_logging(verbose)
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
         self._handle_repository_options(
@@ -157,6 +149,18 @@ class Settings:
 
         # Workaround for https://github.com/python/mypy/issues/5858
         return cast(Optional[str], self.auth.password)
+
+    @property
+    def verbose(self) -> bool:
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, verbose: bool) -> None:
+        """Initialize a logger based on the --verbose option."""
+        self._verbose = verbose
+        root_logger = logging.getLogger("twine")
+        root_logger.addHandler(logging.StreamHandler(sys.stdout))
+        root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:

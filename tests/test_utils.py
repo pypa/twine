@@ -11,7 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import logging
+
 import os.path
 import textwrap
 
@@ -273,7 +273,12 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
 @pytest.mark.parametrize(
     "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
 )
-def test_check_status_code_for_missing_status_code(caplog, repo_url):
+@pytest.mark.parametrize(
+    "verbose", [True, False],
+)
+def test_check_status_code_for_missing_status_code(
+    capsys, repo_url, verbose, make_settings
+):
     """Print HTTP errors based on verbosity level."""
     response = pretend.stub(
         status_code=403,
@@ -282,22 +287,17 @@ def test_check_status_code_for_missing_status_code(caplog, repo_url):
         text="Forbidden",
     )
 
-    caplog.set_level(logging.INFO, logger="twine")
+    make_settings(verbose=verbose)
 
     with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, True)
+        utils.check_status_code(response, verbose)
 
-    # Different messages are printed based on the verbose level
-    captured = caplog.text
-    assert "Content received from server:\nForbidden\n" in captured
+    captured = capsys.readouterr()
 
-    caplog.set_level(logging.WARNING, logger="twine")
-
-    with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, False)
-
-    captured = caplog.text
-    assert "NOTE: Try --verbose to see response content.\n" in captured
+    if verbose:
+        assert captured.out == "Content received from server:\nForbidden\n"
+    else:
+        assert captured.out == "NOTE: Try --verbose to see response content.\n"
 
 
 @pytest.mark.parametrize(
