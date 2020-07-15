@@ -15,6 +15,7 @@ import argparse
 import collections
 import configparser
 import functools
+import logging
 import os
 import os.path
 from typing import Any
@@ -44,6 +45,8 @@ TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 # requires reworking the username/password handling, probably starting with
 # get_userpass_value.
 RepositoryConfig = Dict[str, Optional[str]]
+
+logger = logging.getLogger(__name__)
 
 
 def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
@@ -204,10 +207,9 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
         response.raise_for_status()
     except requests.HTTPError as err:
         if response.text:
-            if verbose:
-                print("Content received from server:\n{}".format(response.text))
-            else:
-                print("NOTE: Try --verbose to see response content.")
+            logger.info("Content received from server:\n{}".format(response.text))
+            if not verbose:
+                logger.warning("NOTE: Try --verbose to see response content.")
         raise err
 
 

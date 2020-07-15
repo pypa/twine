@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
 import os.path
 from typing import Dict
 from typing import List
@@ -24,6 +25,8 @@ from twine import exceptions
 from twine import package as package_file
 from twine import settings
 from twine import utils
+
+logger = logging.getLogger(__name__)
 
 
 def skip_upload(
@@ -63,11 +66,10 @@ def _make_package(
     elif upload_settings.sign:
         package.sign(upload_settings.sign_with, upload_settings.identity)
 
-    if upload_settings.verbose:
-        file_size = utils.get_file_size(package.filename)
-        print(f"  {package.filename} ({file_size})")
-        if package.gpg_signature:
-            print(f"  Signed with {package.signed_filename}")
+    file_size = utils.get_file_size(package.filename)
+    logger.info(f"  {package.filename} ({file_size})")
+    if package.gpg_signature:
+        logger.info(f"  Signed with {package.signed_filename}")
 
     return package
 

@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
+import sys
 from typing import Any
 from typing import Optional
 from typing import cast
@@ -147,6 +149,18 @@ class Settings:
 
         # Workaround for https://github.com/python/mypy/issues/5858
         return cast(Optional[str], self.auth.password)
+
+    @property
+    def verbose(self) -> bool:
+        return self._verbose
+
+    @verbose.setter
+    def verbose(self, verbose: bool) -> None:
+        """Initialize a logger based on the --verbose option."""
+        self._verbose = verbose
+        root_logger = logging.getLogger("twine")
+        root_logger.addHandler(logging.StreamHandler(sys.stdout))
+        root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:

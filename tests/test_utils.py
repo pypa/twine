@@ -338,7 +338,12 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
 @pytest.mark.parametrize(
     "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
 )
-def test_check_status_code_for_missing_status_code(capsys, repo_url):
+@pytest.mark.parametrize(
+    "verbose", [True, False],
+)
+def test_check_status_code_for_missing_status_code(
+    capsys, repo_url, verbose, make_settings
+):
     """Print HTTP errors based on verbosity level."""
     response = pretend.stub(
         status_code=403,
@@ -347,18 +352,17 @@ def test_check_status_code_for_missing_status_code(capsys, repo_url):
         text="Forbidden",
     )
 
-    with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, True)
-
-    # Different messages are printed based on the verbose level
-    captured = capsys.readouterr()
-    assert captured.out == "Content received from server:\nForbidden\n"
+    make_settings(verbose=verbose)
 
     with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, False)
+        utils.check_status_code(response, verbose)
 
     captured = capsys.readouterr()
-    assert captured.out == "NOTE: Try --verbose to see response content.\n"
+
+    if verbose:
+        assert captured.out == "Content received from server:\nForbidden\n"
+    else:
+        assert captured.out == "NOTE: Try --verbose to see response content.\n"
 
 
 @pytest.mark.parametrize(
