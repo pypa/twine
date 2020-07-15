@@ -103,6 +103,7 @@ def test_get_config_index_server_with_space(tmpdir):
         )
 
     assert utils.get_config(pypirc) == {
+        "foo bar": {"password": "testpassword", "username": "testuser"},
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
@@ -134,6 +135,7 @@ def test_get_config_multiple_index_servers(tmpdir):
         )
 
     assert utils.get_config(pypirc) == {
+        "foo": {"password": "testpassword", "username": "testuser"},
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
