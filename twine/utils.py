@@ -68,7 +68,11 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
         # Get a list of index_servers from the config file
         # format: https://packaging.python.org/specifications/pypirc/
         if parser.has_option("distutils", "index-servers"):
-            index_servers = parser.get("distutils", "index-servers").split()
+            index_servers = [
+                server.strip()
+                for server in parser.get("distutils", "index-servers").split("\n")
+                if server.strip() != ""
+            ]
 
         for key in ["username", "password"]:
             if parser.has_option("server-login", key):

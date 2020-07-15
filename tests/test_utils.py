@@ -80,6 +80,68 @@ def test_get_config_no_distutils(tmpdir):
     }
 
 
+def test_get_config_index_server_with_space(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(
+            textwrap.dedent(
+                """
+            [distutils]
+            index-servers = pypi
+                foo bar
+
+            [foo bar]
+            username = testuser
+            password = testpassword
+
+            [pypi]
+            username = testuser
+            password = testpassword
+        """
+            )
+        )
+
+    assert utils.get_config(pypirc) == {
+        "pypi": {
+            "repository": utils.DEFAULT_REPOSITORY,
+            "username": "testuser",
+            "password": "testpassword",
+        },
+    }
+
+
+def test_get_config_multiple_index_servers(tmpdir):
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with open(pypirc, "w") as fp:
+        fp.write(
+            textwrap.dedent(
+                """
+            [distutils]
+            index-servers = pypi
+                foo
+
+            [foo]
+            username = testuser
+            password = testpassword
+
+            [pypi]
+            username = testuser
+            password = testpassword
+        """
+            )
+        )
+
+    assert utils.get_config(pypirc) == {
+        "pypi": {
+            "repository": utils.DEFAULT_REPOSITORY,
+            "username": "testuser",
+            "password": "testpassword",
+        },
+    }
+
+
 def test_get_config_no_section(tmpdir):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
@@ -88,7 +150,8 @@ def test_get_config_no_section(tmpdir):
             textwrap.dedent(
                 """
             [distutils]
-            index-servers = pypi foo
+            index-servers = pypi
+                foo
 
             [pypi]
             username = testuser
