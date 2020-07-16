@@ -64,6 +64,8 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
     # Expand user strings in the path
     path = os.path.expanduser(path)
 
+    logger.info(f"Config Location: {path}")
+
     # Parse the rc file
     if os.path.isfile(path):
         parser.read(path)

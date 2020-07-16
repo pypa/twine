@@ -295,7 +295,7 @@ def test_check_status_code_for_missing_status_code(
     captured = capsys.readouterr()
 
     if verbose:
-        assert captured.out == "Content received from server:\nForbidden\n"
+        assert "Content received from server:\nForbidden\n" in captured.out
     else:
         assert captured.out == "NOTE: Try --verbose to see response content.\n"
 
