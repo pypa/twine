@@ -289,11 +289,10 @@ def test_check_status_code_for_missing_status_code(capsys, repo_url):
     captured = capsys.readouterr()
     assert captured.out == "Content received from server:\nForbidden\n"
 
-    with pytest.raises(requests.HTTPError):
-        utils.check_status_code(response, False)
-
-    captured = capsys.readouterr()
-    assert captured.out == "NOTE: Try --verbose to see response content.\n"
+    if verbose:
+        assert "Content received from server:\nForbidden\n" in captured.out
+    else:
+        assert captured.out == "NOTE: Try --verbose to see response content.\n"
 
 
 @pytest.mark.parametrize(
