@@ -50,6 +50,23 @@ def test_get_config(tmpdir):
         },
     }
 
+@pytest.mark.parametrize(
+    "verbose", [True, False],
+)
+def test_get_config_log_location(tmpdir, capsys, make_settings, verbose):
+    """Log the location of the .pypirc config used by the user."""
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    with capsys.disabled():
+        make_settings(verbose=verbose)
+
+    utils.get_config(pypirc)
+
+    captured = capsys.readouterr()
+    if verbose:
+        assert captured.out == f"Using configuration from {pypirc}\n"
+    else:
+        assert captured.out == ""
 
 def test_get_config_no_distutils(tmpdir):
     """Upload by default to PyPI if an index server is not set in .pypirc."""
@@ -287,7 +304,8 @@ def test_check_status_code_for_missing_status_code(
         text="Forbidden",
     )
 
-    make_settings(verbose=verbose)
+    with capsys.disabled():
+        make_settings(verbose=verbose)
 
     with pytest.raises(requests.HTTPError):
         utils.check_status_code(response, verbose)
@@ -295,7 +313,7 @@ def test_check_status_code_for_missing_status_code(
     captured = capsys.readouterr()
 
     if verbose:
-        assert "Content received from server:\nForbidden\n" in captured.out
+        assert captured.out == "Content received from server:\nForbidden\n"
     else:
         assert captured.out == "NOTE: Try --verbose to see response content.\n"
 
