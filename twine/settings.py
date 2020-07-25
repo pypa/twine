@@ -145,7 +145,10 @@ class Settings:
     @property
     def password(self) -> Optional[str]:
         if self.client_cert:
-            return None
+            try:
+                return cast(Optional[str], self.auth.password)
+            except exceptions.NonInteractive:
+                return None
 
         # Workaround for https://github.com/python/mypy/issues/5858
         return cast(Optional[str], self.auth.password)
