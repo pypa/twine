@@ -74,14 +74,6 @@ def test_identity_requires_sign():
         settings.Settings(sign=False, identity="fakeid")
 
 
-def test_password_not_required_if_client_cert(entered_password):
-    """Don't set password when only client_cert is provided."""
-    test_client_cert = "/random/path"
-    settings_obj = settings.Settings(username="fakeuser", client_cert=test_client_cert)
-    assert not settings_obj.password
-    assert settings_obj.client_cert == test_client_cert
-
-
 @pytest.mark.parametrize("client_cert", [None, ""])
 def test_password_is_required_if_no_client_cert(client_cert, entered_password):
     """Set password when client_cert is not provided."""
@@ -89,14 +81,30 @@ def test_password_is_required_if_no_client_cert(client_cert, entered_password):
     assert settings_obj.password == "entered pw"
 
 
-def test_client_cert_is_set_and_password_not_if_both_given(entered_password):
+def test_client_cert_and_password_both_set_if_given():
     """Set password and client_cert when both are provided."""
     client_cert = "/random/path"
     settings_obj = settings.Settings(
         username="fakeuser", password="anything", client_cert=client_cert
     )
-    assert not settings_obj.password
+    assert settings_obj.password == "anything"
     assert settings_obj.client_cert == client_cert
+
+
+def test_password_required_if_no_client_cert_and_non_interactive():
+    """Raise exception if no password or client_cert when non interactive."""
+    settings_obj = settings.Settings(username="fakeuser", non_interactive=True)
+    with pytest.raises(exceptions.NonInteractive):
+        settings_obj.password
+
+
+def test_no_password_prompt_if_client_cert_and_non_interactive(entered_password):
+    """Don't prompt for password when client_cert is provided and non interactive."""
+    client_cert = "/random/path"
+    settings_obj = settings.Settings(
+        username="fakeuser", client_cert=client_cert, non_interactive=True
+    )
+    assert not settings_obj.password
 
 
 class TestArgumentParsing:
