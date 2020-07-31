@@ -36,7 +36,7 @@ Code of Conduct
 
 Everyone interacting in the Twine project's codebases, issue
 trackers, chat rooms, and mailing lists is expected to follow the
-`PyPA Code of Conduct`_.
+`PSF Code of Conduct`_.
 
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
@@ -46,4 +46,4 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
-.. _`PyPA Code of Conduct`: https://www.pypa.io/en/latest/code-of-conduct/
+.. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
