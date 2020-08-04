@@ -71,8 +71,8 @@ def test_setup_logging(verbose, log_level):
 @pytest.mark.parametrize(
     "verbose", [True, False],
 )
-def test_get_config_log_location(tmpdir, capsys, make_settings, verbose):
-    """Log the location of the .pypirc config used by the user."""
+def test_print_config_path_if_verbose(tmpdir, capsys, make_settings, verbose):
+    """Print the location of the .pypirc config used by the user."""
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     make_settings(verbose=verbose)
