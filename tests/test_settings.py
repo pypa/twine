@@ -68,6 +68,23 @@ def test_setup_logging(verbose, log_level):
     assert logger.level == log_level
 
 
+@pytest.mark.parametrize(
+    "verbose", [True, False],
+)
+def test_print_config_path_if_verbose(tmpdir, capsys, make_settings, verbose):
+    """Print the location of the .pypirc config used by the user."""
+    pypirc = os.path.join(str(tmpdir), ".pypirc")
+
+    make_settings(verbose=verbose)
+
+    captured = capsys.readouterr()
+
+    if verbose:
+        assert captured.out == f"Using configuration from {pypirc}\n"
+    else:
+        assert captured.out == ""
+
+
 def test_identity_requires_sign():
     """Raise an exception when user provides identity but doesn't require sigining."""
     with pytest.raises(exceptions.InvalidSigningConfiguration):
