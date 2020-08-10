@@ -13,9 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import contextlib
 import logging
 import sys
 from typing import Any
+from typing import ContextManager
 from typing import Optional
 from typing import cast
 
@@ -144,14 +146,14 @@ class Settings:
 
     @property
     def password(self) -> Optional[str]:
-        if self.client_cert:
-            try:
-                return cast(Optional[str], self.auth.password)
-            except exceptions.NonInteractive:
-                return None
+        with self._allow_noninteractive():
+            # Workaround for https://github.com/python/mypy/issues/5858
+            return cast(Optional[str], self.auth.password)
 
-        # Workaround for https://github.com/python/mypy/issues/5858
-        return cast(Optional[str], self.auth.password)
+    def _allow_noninteractive(self) -> ContextManager[None]:
+        """Bypass NonInteractive error when client cert is present."""
+        suppressed = (exceptions.NonInteractive,) if self.client_cert else ()
+        return contextlib.suppress(*suppressed)
 
     @property
     def verbose(self) -> bool:
