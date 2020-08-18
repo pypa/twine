@@ -238,8 +238,10 @@ def get_userpass_value(
     :rtype: unicode
     """
     if cli_value is not None:
+        logger.info(f"{key} set via CLI")
         return cli_value
     elif config.get(key) is not None:
+        logger.info(f"{key} set via .pypirc config file")
         return config[key]
     elif prompt_strategy:
         return prompt_strategy()

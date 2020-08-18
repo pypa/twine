@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 import sys
 from typing import Any
 from typing import Dict
@@ -38,6 +39,8 @@ WAREHOUSE = "https://upload.pypi.org/"
 OLD_WAREHOUSE = "https://upload.pypi.io/"
 TEST_WAREHOUSE = "https://test.pypi.org/"
 WAREHOUSE_WEB = "https://pypi.org/"
+
+logger = logging.getLogger(__name__)
 
 
 class ProgressBar(tqdm.tqdm):
@@ -67,6 +70,9 @@ class Repository:
         self.session.auth = (
             (username or "", password or "") if username or password else None
         )
+        logger.info("Password is : placeholder")
+        logger.info(f"Username is : {username}")
+
         self.session.headers["User-Agent"] = self._make_user_agent_string()
         for scheme in ("http://", "https://"):
             self.session.mount(scheme, self._make_adapter_with_retries())
