@@ -358,12 +358,12 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
-.. _`projects`: https://packaging.python.org/glossary/#term-project
+.. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`distributions`:
-    https://packaging.python.org/glossary/#term-distribution-package
+    https://packaging.python.org/glossary/#term-Distribution-Package
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
-.. _`wheels`: https://packaging.python.org/glossary/#term-wheel
+.. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
 .. _`no longer necessary if you are uploading to pypi.org`:
     https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
