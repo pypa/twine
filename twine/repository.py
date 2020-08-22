@@ -70,8 +70,8 @@ class Repository:
         self.session.auth = (
             (username or "", password or "") if username or password else None
         )
-        logger.info("Password is : placeholder")
-        logger.info(f"Username is : {username}")
+        logger.info(f"username: {username}")
+        logger.info(f"password: <{'hidden' if password else 'empty'}>")
 
         self.session.headers["User-Agent"] = self._make_user_agent_string()
         for scheme in ("http://", "https://"):
