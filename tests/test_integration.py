@@ -17,7 +17,7 @@ import requests
 from twine import __main__ as dunder_main
 from twine import cli
 
-pytestmark = pytest.mark.enable_socket
+pytestmark = [pytest.mark.enable_socket, pytest.mark.flaky(reruns=3, reruns_delay=1)]
 
 
 @pytest.fixture(scope="session")
