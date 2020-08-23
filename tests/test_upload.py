@@ -425,11 +425,11 @@ def test_values_from_env(monkeypatch):
     "repo_url",
     ["https://upload.pypi.org/", "https://test.pypi.org/", "https://pypi.org/"],
 )
-def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
-    upload_settings = make_settings()
-
-    # override defaults to use incorrect URL
+def test_check_status_code_for_wrong_repo_url(repo_url, upload_settings, stub_response):
     upload_settings.repository_config["repository"] = repo_url
+
+    stub_response.url = repo_url
+    stub_response.status_code = 405
 
     with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(
