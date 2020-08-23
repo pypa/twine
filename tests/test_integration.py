@@ -7,6 +7,8 @@ import pytest
 from twine import __main__ as dunder_main
 from twine import cli
 
+pytestmark = pytest.mark.enable_socket
+
 
 @pytest.mark.xfail(
     sys.platform == "win32",
