@@ -20,15 +20,83 @@ from twine import cli
 pytestmark = pytest.mark.enable_socket
 
 
-dist_names = [
-    "twine-1.5.0.tar.gz",
-    "twine-1.5.0-py2.py3-none-any.whl",
-    "twine-1.6.5.tar.gz",
-    "twine-1.6.5-py2.py3-none-any.whl",
-]
+@pytest.fixture(scope="session")
+def sampleproject_dist(tmp_path_factory):
+    checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
+    subprocess.run(
+        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)]
+    )
+    with (checkout / "setup.py").open("r+") as setup:
+        orig = setup.read()
+        sub = orig.replace("name='sampleproject'", "name='twine-sampleproject'")
+        assert orig != sub
+        setup.seek(0)
+        setup.write(sub)
+    tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+    subprocess.run(
+        [sys.executable, "setup.py", "egg_info", "--tag-build", f"post{tag}", "sdist"],
+        cwd=str(checkout),
+    )
+    (dist,) = checkout.joinpath("dist").glob("*")
+    return dist
 
 
-@pytest.fixture(params=dist_names)
+sampleproject_token = (
+    "pypi-AgENdGVzdC5weXBpLm9yZwIkNDgzYTFhMjEtMzEwYi00NT"
+    "kzLTkwMzYtYzc1Zjg4NmFiMjllAAJEeyJwZXJtaXNzaW9ucyI6IH"
+    "sicHJvamVjdHMiOiBbInR3aW5lLXNhbXBsZXByb2plY3QiXX0sIC"
+    "J2ZXJzaW9uIjogMX0AAAYg2kBZ1tN8lj8dlmL3ScoVvr_pvQE0t"
+    "6PKqigoYJKvw3M"
+)
+
+
+def test_pypi_upload(sampleproject_dist):
+    command = [
+        "upload",
+        "--repository-url",
+        "https://test.pypi.org/legacy/",
+        "--username",
+        "__token__",
+        "--password",
+        sampleproject_token,
+        str(sampleproject_dist),
+    ]
+    cli.dispatch(command)
+
+
+def test_pypi_error(sampleproject_dist, monkeypatch):
+    command = [
+        "twine",
+        "upload",
+        "--repository-url",
+        "https://test.pypi.org/legacy/",
+        "--username",
+        "foo",
+        "--password",
+        "bar",
+        str(sampleproject_dist),
+    ]
+    monkeypatch.setattr(sys, "argv", command)
+
+    message = (
+        re.escape(colorama.Fore.RED)
+        + r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/\n"
+        + r".+?authentication"
+    )
+
+    result = dunder_main.main()
+
+    assert re.match(message, result)
+
+
+@pytest.fixture(
+    params=[
+        "twine-1.5.0.tar.gz",
+        "twine-1.5.0-py2.py3-none-any.whl",
+        "twine-1.6.5.tar.gz",
+        "twine-1.6.5-py2.py3-none-any.whl",
+    ]
+)
 def uploadable_dist(request):
     return pathlib.Path(__file__).parent / "fixtures" / request.param
 
@@ -178,72 +246,3 @@ def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
         str(uploadable_dist),
     ]
     cli.dispatch(command)
-
-
-@pytest.fixture(scope="session")
-def sampleproject_dist(tmp_path_factory):
-    checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
-    subprocess.run(
-        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)]
-    )
-    with (checkout / "setup.py").open("r+") as setup:
-        orig = setup.read()
-        sub = orig.replace("name='sampleproject'", "name='twine-sampleproject'")
-        assert orig != sub
-        setup.seek(0)
-        setup.write(sub)
-    tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
-    subprocess.run(
-        [sys.executable, "setup.py", "egg_info", "--tag-build", f"post{tag}", "sdist"],
-        cwd=str(checkout),
-    )
-    (dist,) = checkout.joinpath("dist").glob("*")
-    return dist
-
-
-sampleproject_token = (
-    "pypi-AgENdGVzdC5weXBpLm9yZwIkNDgzYTFhMjEtMzEwYi00NT"
-    "kzLTkwMzYtYzc1Zjg4NmFiMjllAAJEeyJwZXJtaXNzaW9ucyI6IH"
-    "sicHJvamVjdHMiOiBbInR3aW5lLXNhbXBsZXByb2plY3QiXX0sIC"
-    "J2ZXJzaW9uIjogMX0AAAYg2kBZ1tN8lj8dlmL3ScoVvr_pvQE0t"
-    "6PKqigoYJKvw3M"
-)
-
-
-def test_pypi_upload(sampleproject_dist):
-    command = [
-        "upload",
-        "--repository-url",
-        "https://test.pypi.org/legacy/",
-        "--username",
-        "__token__",
-        "--password",
-        sampleproject_token,
-        str(sampleproject_dist),
-    ]
-    cli.dispatch(command)
-
-
-def test_pypi_error(sampleproject_dist, monkeypatch):
-    command = [
-        "twine",
-        "upload",
-        "--repository-url",
-        "https://test.pypi.org/legacy/",
-        "--username",
-        "foo",
-        "--password",
-        "bar",
-        str(sampleproject_dist),
-    ]
-    monkeypatch.setattr(sys, "argv", command)
-
-    message = (
-        re.escape(colorama.Fore.RED)
-        + r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/\n"
-        + r".+?authentication"
-    )
-
-    result = dunder_main.main()
-
-    assert re.match(message, result)
