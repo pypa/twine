@@ -15,12 +15,7 @@ import hashlib
 import io
 import os
 import subprocess
-from typing import Dict
-from typing import NamedTuple
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
+from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import pkg_resources
 import pkginfo

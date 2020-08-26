@@ -13,8 +13,7 @@
 # limitations under the License.
 import argparse
 import os.path
-from typing import List
-from typing import cast
+from typing import List, cast
 
 from twine import exceptions
 from twine import package as package_file

@@ -14,9 +14,7 @@
 import argparse
 import logging
 import os.path
-from typing import Dict
-from typing import List
-from typing import cast
+from typing import Dict, List, cast
 
 import requests
 

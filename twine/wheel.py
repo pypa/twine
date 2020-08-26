@@ -15,8 +15,7 @@ import io
 import os
 import re
 import zipfile
-from typing import List
-from typing import Optional
+from typing import List, Optional
 
 from pkginfo import distribution
 

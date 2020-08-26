@@ -16,10 +16,7 @@ import argparse
 import contextlib
 import logging
 import sys
-from typing import Any
-from typing import ContextManager
-from typing import Optional
-from typing import cast
+from typing import Any, ContextManager, Optional, cast
 
 from twine import auth
 from twine import exceptions

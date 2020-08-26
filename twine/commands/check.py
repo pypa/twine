@@ -17,11 +17,7 @@ import io
 import re
 import sys
 import textwrap
-from typing import IO
-from typing import List
-from typing import Optional
-from typing import Tuple
-from typing import cast
+from typing import IO, List, Optional, Tuple, cast
 
 import readme_renderer.rst
 
