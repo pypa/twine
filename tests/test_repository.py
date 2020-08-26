@@ -127,7 +127,9 @@ def test_package_is_uploaded_with_releases_using_cache(default_repo):
     """Return True when the package is in the releases cache."""
     default_repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
     package = pretend.stub(
-        safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
+        safe_name="fake",
+        basefilename="fake.whl",
+        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package) is True
@@ -143,7 +145,9 @@ def test_package_is_uploaded_with_releases_not_using_cache(default_repo):
         ),
     )
     package = pretend.stub(
-        safe_name="fake", basefilename="fake.whl", metadata=pretend.stub(version="0.1"),
+        safe_name="fake",
+        basefilename="fake.whl",
+        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package, bypass_cache=True) is True
@@ -159,7 +163,9 @@ def test_package_is_uploaded_different_filenames(default_repo):
         ),
     )
     package = pretend.stub(
-        safe_name="fake", basefilename="foo.whl", metadata=pretend.stub(version="0.1"),
+        safe_name="fake",
+        basefilename="foo.whl",
+        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package) is False
@@ -313,7 +319,9 @@ def test_release_urls(package_meta, repository_url, release_urls):
     ]
 
     repo = repository.Repository(
-        repository_url=repository_url, username="username", password="password",
+        repository_url=repository_url,
+        username="username",
+        password="password",
     )
 
     assert repo.release_urls(packages) == release_urls

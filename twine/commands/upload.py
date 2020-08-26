@@ -111,7 +111,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         # redirects as well.
         if resp.is_redirect:
             raise exceptions.RedirectDetected.from_args(
-                repository_url, resp.headers["location"],
+                repository_url,
+                resp.headers["location"],
             )
 
         if skip_upload(resp, upload_settings.skip_existing, package):

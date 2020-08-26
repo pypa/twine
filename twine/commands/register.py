@@ -38,7 +38,8 @@ def register(register_settings: settings.Settings, package: str) -> None:
 
     if resp.is_redirect:
         raise exceptions.RedirectDetected.from_args(
-            repository_url, resp.headers["location"],
+            repository_url,
+            resp.headers["location"],
         )
 
     resp.raise_for_status()

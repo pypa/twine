@@ -265,5 +265,7 @@ class HashManager:
     def hexdigest(self) -> Hexdigest:
         """Return the hexdigest for the file."""
         return Hexdigest(
-            self._md5_hexdigest(), self._sha2_hexdigest(), self._blake_hexdigest(),
+            self._md5_hexdigest(),
+            self._sha2_hexdigest(),
+            self._blake_hexdigest(),
         )

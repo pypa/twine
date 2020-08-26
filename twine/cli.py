@@ -69,10 +69,13 @@ def dispatch(argv: List[str]) -> Any:
         help="disable colored output",
     )
     parser.add_argument(
-        "command", choices=registered_commands.keys(),
+        "command",
+        choices=registered_commands.keys(),
     )
     parser.add_argument(
-        "args", help=argparse.SUPPRESS, nargs=argparse.REMAINDER,
+        "args",
+        help=argparse.SUPPRESS,
+        nargs=argparse.REMAINDER,
     )
 
     parser.parse_args(argv, namespace=args)
