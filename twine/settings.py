@@ -16,10 +16,7 @@ import argparse
 import contextlib
 import logging
 import sys
-from typing import Any
-from typing import ContextManager
-from typing import Optional
-from typing import cast
+from typing import Any, ContextManager, Optional, cast
 
 from twine import auth
 from twine import exceptions
@@ -128,15 +125,19 @@ class Settings:
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
         self._handle_repository_options(
-            repository_name=repository_name, repository_url=repository_url,
+            repository_name=repository_name,
+            repository_url=repository_url,
         )
         self._handle_package_signing(
-            sign=sign, sign_with=sign_with, identity=identity,
+            sign=sign,
+            sign_with=sign_with,
+            identity=identity,
         )
         # _handle_certificates relies on the parsed repository config
         self._handle_certificates(cacert, client_cert)
         self.auth = auth.Resolver.choose(not non_interactive)(
-            self.repository_config, auth.CredentialInput(username, password),
+            self.repository_config,
+            auth.CredentialInput(username, password),
         )
 
     @property
@@ -204,7 +205,9 @@ class Settings:
             help="GPG program used to sign uploads (default: %(default)s).",
         )
         parser.add_argument(
-            "-i", "--identity", help="GPG identity used to sign files.",
+            "-i",
+            "--identity",
+            help="GPG identity used to sign files.",
         )
         parser.add_argument(
             "-u",
@@ -306,7 +309,9 @@ class Settings:
         self, repository_name: str, repository_url: Optional[str]
     ) -> None:
         self.repository_config = utils.get_repository_from_config(
-            self.config_file, repository_name, repository_url,
+            self.config_file,
+            repository_name,
+            repository_url,
         )
         self.repository_config["repository"] = utils.normalize_repository_url(
             cast(str, self.repository_config["repository"]),

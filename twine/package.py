@@ -15,12 +15,7 @@ import hashlib
 import io
 import os
 import subprocess
-from typing import Dict
-from typing import NamedTuple
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
+from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import pkg_resources
 import pkginfo
@@ -265,5 +260,7 @@ class HashManager:
     def hexdigest(self) -> Hexdigest:
         """Return the hexdigest for the file."""
         return Hexdigest(
-            self._md5_hexdigest(), self._sha2_hexdigest(), self._blake_hexdigest(),
+            self._md5_hexdigest(),
+            self._sha2_hexdigest(),
+            self._blake_hexdigest(),
         )

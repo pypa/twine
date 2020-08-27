@@ -49,7 +49,9 @@ def test_exception_for_redirect(register_settings):
     redirect_url = "https://malicious.website.org/danger"
 
     stub_response = pretend.stub(
-        is_redirect=True, status_code=301, headers={"location": redirect_url},
+        is_redirect=True,
+        status_code=301,
+        headers={"location": redirect_url},
     )
 
     stub_repository = pretend.stub(

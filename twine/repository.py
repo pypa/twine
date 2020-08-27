@@ -12,13 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import sys
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Optional
-from typing import Set
-from typing import Tuple
-from typing import cast
+from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import requests
 import requests_toolbelt

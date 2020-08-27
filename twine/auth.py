@@ -1,10 +1,7 @@
 import functools
 import getpass
 import warnings
-from typing import Callable
-from typing import Optional
-from typing import Type
-from typing import cast
+from typing import Callable, Optional, Type, cast
 
 import keyring
 

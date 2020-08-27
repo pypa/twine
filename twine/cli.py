@@ -12,10 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-from typing import Any
-from typing import Dict
-from typing import List
-from typing import Tuple
+from typing import Any, Dict, List, Tuple
 
 import pkg_resources
 import pkginfo
@@ -69,10 +66,13 @@ def dispatch(argv: List[str]) -> Any:
         help="disable colored output",
     )
     parser.add_argument(
-        "command", choices=registered_commands.keys(),
+        "command",
+        choices=registered_commands.keys(),
     )
     parser.add_argument(
-        "args", help=argparse.SUPPRESS, nargs=argparse.REMAINDER,
+        "args",
+        help=argparse.SUPPRESS,
+        nargs=argparse.REMAINDER,
     )
 
     parser.parse_args(argv, namespace=args)
