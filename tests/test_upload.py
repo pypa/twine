@@ -339,43 +339,9 @@ def test_prints_skip_message_for_response(
             dict(
                 status_code=400,
                 text=(
-                    '<!DOCTYPE html>\n<html lang="en">\n<head>\n'
-                    "  <title>400 - Nexus Repository Manager</title>\n"
-                    '  <meta http-equiv="Content-Type" '
-                    'content="text/html; charset=UTF-8"/>\n\n\n'
-                    "  <!--[if lt IE 9]>\n  <script>(new Image).src="
-                    '"https://nexus.server.io/favicon.ico?3.25.1-04"</script>\n'
-                    '  <![endif]-->\n  <link rel="icon" type="image/png" href='
-                    '"https://nexus.server.io/favicon-32x32.png?3.25.1-04" '
-                    'sizes="32x32">\n  <link rel="mask-icon" href='
-                    '"https://nexus.server.io/safari-pinned-tab.svg?3.25.1-04"'
-                    ' color="#5bbad5">\n  <link rel="icon" type="image/png"'
-                    ' href="https://nexus.server.io/favicon-16x16.png?3.25.1-04"'
-                    ' sizes="16x16">\n  <link rel="shortcut icon" href'
-                    '="https://nexus.server.io/favicon.ico?3.25.1-04">\n'
-                    '  <meta name="msapplication-TileImage" '
-                    'content="https://nexus.server.io/mstile-144x144.png?3.25.1-04">\n'
-                    '  <meta name="msapplication-TileColor" content="#00a300">\n\n'
-                    '  <link rel="stylesheet" type="text/css" href='
-                    '"https://nexus.server.io/static/css/nexus-content.css?3.25.1-04"/>'
-                    "\n</head>\n<body>\n"
-                    '<div class="nexus-header">\n  <a href="https://nexus.server.io">\n'
-                    '    <div class="product-logo">\n      <img src='
-                    '"https://nexus.server.io/static/images/nexus.png?3.25.1-04"'
-                    ' alt="Product logo"/>\n    </div>\n    <div class='
-                    '"product-id">\n      <div class="product-id__line-1">\n'
-                    '        <span class="product-name">Nexus Repository Manager</span>'
-                    '\n      </div>\n      <div class="product-id__line-2">\n'
-                    '        <span class="product-spec">OSS 3.25.1-04</span>\n'
-                    "      </div>\n    </div>\n  </a>\n</div>\n\n<div class="
-                    '"nexus-body">\n  <div class="content-header">\n    <img src='
-                    '"https://nexus.server.io/static/rapture/resources/icons/x32/'
-                    'exclamation.png?3.25.1-04" alt="Exclamation point" aria-role='
-                    '"presentation"/>\n    <span class="title">Error 400</span>\n'
-                    '    <span class="description">Bad Request</span>\n  </div>\n'
-                    '  <div class="content-body">\n    <div class="content-section">\n'
-                    "      Repository does not allow updating assets: pypi-local\n"
-                    "    </div>\n      </div>\n</div>\n</body>\n</html>"
+                    '<div class="content-section">\n'
+                    "    Repository does not allow updating assets: pypi-local\n"
+                    "</div>\n"
                 ),
             ),
             id="nexus_new",
