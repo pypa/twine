@@ -46,7 +46,7 @@ def skip_upload(
         # PyPI / TestPyPI
         or (status == 400 and "already exist" in reason)
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        or (status == 400 and ("updating asset" in reason or "updating asset" in text))
+        or (status == 400 and any("updating asset" in x for x in [reason, text])):
         # Artifactory (https://jfrog.com/artifactory/)
         or (status == 403 and "overwrite artifact" in text)
     )
