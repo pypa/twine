@@ -337,6 +337,17 @@ def test_prints_skip_message_for_response(
         ),
         pytest.param(
             dict(
+                status_code=400,
+                text=(
+                    '<div class="content-section">\n'
+                    "    Repository does not allow updating assets: pypi-local\n"
+                    "</div>\n"
+                ),
+            ),
+            id="nexus_new",
+        ),
+        pytest.param(
+            dict(
                 status_code=409,
                 reason=(
                     'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
