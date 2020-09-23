@@ -8,7 +8,7 @@
     :target: https://twine.readthedocs.io
 
 .. image:: https://img.shields.io/travis/com/pypa/twine
-    :target: https://travis-ci.org/pypa/twine
+    :target: https://travis-ci.com/github/pypa/twine
 
 .. image:: https://img.shields.io/codecov/c/github/pypa/twine
     :target: https://codecov.io/gh/pypa/twine
