@@ -61,14 +61,7 @@ def test_pypi_upload(sampleproject_dist):
         sampleproject_token,
         str(sampleproject_dist),
     ]
-
-    try:
-        cli.dispatch(command)
-    except requests.HTTPError as exc:
-        # Workaround intermittent failure from testpypi
-        if exc.response.status_code >= 500:
-            pytest.xfail(f"{exc.response.status_code} from {exc.response.url}")
-        raise
+    cli.dispatch(command)
 
 
 def test_pypi_error(sampleproject_dist, monkeypatch):
@@ -92,10 +85,6 @@ def test_pypi_error(sampleproject_dist, monkeypatch):
     )
 
     result = dunder_main.main()
-
-    # Workaround intermittent failure from testpypi
-    if "HTTPError: 50" in result:
-        pytest.xfail(result)
 
     assert re.match(message, result)
 
