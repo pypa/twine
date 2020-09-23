@@ -49,6 +49,8 @@ def skip_upload(
         or (status == 400 and any("updating asset" in x for x in [reason, text]))
         # Artifactory (https://jfrog.com/artifactory/)
         or (status == 403 and "overwrite artifact" in text)
+        # Gitlab Enterprise Edition (https://about.gitlab.com)
+        or (status == 400 and "already been taken" in text)
     )
 
 

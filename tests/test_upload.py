@@ -378,6 +378,15 @@ def test_prints_skip_message_for_response(
             ),
             id="artifactory_new",
         ),
+        pytest.param(
+            dict(
+                status_code=400,
+                text=(
+                    '{"message":"validation failed: file name has already been taken"}'
+                ),
+            ),
+            id="gitlab_enterprise",
+        ),
     ],
 )
 def test_skip_existing_skips_files_on_repository(response_kwargs):
