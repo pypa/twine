@@ -186,7 +186,7 @@ A checklist for adding a new maintainer to the project.
 
 #. Add them as a Member in the GitHub repo settings. (This will also
    give them privileges on the `Travis CI project
-   <https://travis-ci.org/pypa/twine>`_.)
+   <https://travis-ci.com/github/pypa/twine>`_.)
 #. Get them Test PyPI and canon PyPI usernames and add them as a
    Maintainer on `our Test PyPI project
    <https://test.pypi.org/manage/project/twine/collaboration/>`_ and
@@ -226,7 +226,7 @@ merge into a single tool; see `ongoing discussion
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/
 .. _`pytest`: https://docs.pytest.org/
-.. _`Travis`: https://travis-ci.org/github/pypa/twine
+.. _`Travis`: https://travis-ci.com/github/pypa/twine
 .. _`isort`: https://timothycrosley.github.io/isort/
 .. _`black`: https://black.readthedocs.io/
 .. _`flake8`: https://flake8.pycqa.org/
