@@ -17,8 +17,6 @@ import requests
 from twine import __main__ as dunder_main
 from twine import cli
 
-pytestmark = pytest.mark.enable_socket
-
 
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory):
@@ -176,6 +174,7 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     sys.platform == "win32",
     reason="pytest-services watcher_getter fixture does not support Windows",
 )
+@pytest.mark.block_network(allowed_hosts=[".*"])
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
         "upload",
@@ -238,6 +237,7 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
     sys.platform == "win32",
     reason="pytest-services watcher_getter fixture does not support Windows",
 )
+@pytest.mark.block_network(allowed_hosts=[".*"])
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
         "upload",
