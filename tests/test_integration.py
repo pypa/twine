@@ -17,7 +17,7 @@ import requests
 from twine import __main__ as dunder_main
 from twine import cli
 
-pytestmark = [pytest.mark.enable_socket, pytest.mark.flaky(reruns=3, reruns_delay=1)]
+pytestmark = pytest.mark.enable_socket
 
 
 @pytest.fixture(scope="session")
@@ -50,6 +50,7 @@ sampleproject_token = (
 )
 
 
+@pytest.mark.vcr
 def test_pypi_upload(sampleproject_dist):
     command = [
         "upload",
@@ -64,6 +65,7 @@ def test_pypi_upload(sampleproject_dist):
     cli.dispatch(command)
 
 
+@pytest.mark.vcr
 def test_pypi_error(sampleproject_dist, monkeypatch):
     command = [
         "twine",
@@ -169,6 +171,7 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     return munch.Munch.fromDict(locals())
 
 
+@pytest.mark.flaky(reruns=3, reruns_delay=1)
 @pytest.mark.xfail(
     sys.platform == "win32",
     reason="pytest-services watcher_getter fixture does not support Windows",
@@ -230,6 +233,7 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
     return munch.Munch.fromDict(locals())
 
 
+@pytest.mark.flaky(reruns=3, reruns_delay=1)
 @pytest.mark.xfail(
     sys.platform == "win32",
     reason="pytest-services watcher_getter fixture does not support Windows",
