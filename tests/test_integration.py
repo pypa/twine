@@ -18,9 +18,17 @@ from twine import __main__ as dunder_main
 from twine import cli
 
 
+def replace_post_body(request):
+    request.body = None
+    return request
+
+
 @pytest.fixture(scope="module")
 def vcr_config():
-    return {"filter_headers": ["authorization"]}
+    return {
+        "filter_headers": ["authorization"],
+        "before_record_request": replace_post_body,
+    }
 
 
 @pytest.fixture(scope="session")
