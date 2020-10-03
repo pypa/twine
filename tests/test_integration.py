@@ -18,6 +18,11 @@ from twine import __main__ as dunder_main
 from twine import cli
 
 
+@pytest.fixture(scope="module")
+def vcr_config():
+    return {"filter_headers": ["authorization"]}
+
+
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
