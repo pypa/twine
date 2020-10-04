@@ -1,10 +1,6 @@
 name: Integration
 
 on:
-  # TODO: Remove this after it runs successfully
-  pull_request:
-    branches:
-      - master
   push:
     branches:
       - master
