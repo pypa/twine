@@ -214,7 +214,7 @@ def test_hash_manager():
     assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
 
 
-def test_fips_hash_manager(monkeypatch):
+def test_fips_hash_manager_md5(monkeypatch):
     """Generate hexdigest without MD5 when hashlib is using FIPS mode."""
     replaced_md5 = pretend.raiser(ValueError("fipsmode"))
     monkeypatch.setattr(package_file.hashlib, "md5", replaced_md5)
@@ -223,6 +223,18 @@ def test_fips_hash_manager(monkeypatch):
     hasher = package_file.HashManager(filename)
     hasher.hash()
     hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(md5=None)
+    assert hasher.hexdigest() == hashes
+
+
+def test_fips_hash_manager_blake2(monkeypatch):
+    """Generate hexdigest without BLAKE2 when hashlib is using FIPS mode."""
+    replaced_blake2b = pretend.raiser(ValueError("fipsmode"))
+    monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
+
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    hasher = package_file.HashManager(filename)
+    hasher.hash()
+    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
     assert hasher.hexdigest() == hashes
 
 
