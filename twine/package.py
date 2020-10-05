@@ -220,7 +220,12 @@ class HashManager:
 
         self._sha2_hasher = hashlib.sha256()
 
-        self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
+        self._blake_hasher = None
+        try:
+            self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
+        except ValueError:
+            # FIPS mode disables blake2
+            pass
 
     def _md5_update(self, content: bytes) -> None:
         if self._md5_hasher is not None:
