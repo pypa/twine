@@ -22,7 +22,7 @@ Python. For example:
 .. code-block:: console
 
     cd /path/to/your/local/twine
-    python3.8 -m venv venv
+    python3.6 -m venv venv
     source venv/bin/activate
 
 Then, run the following command:
@@ -107,13 +107,6 @@ To pass options to ``pytest``, e.g. the name of a test, run:
 
     tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
-You can also set the ``PYTEST_ADDOPTS`` environment variable to use the same
-options on every test run. For example, to always skip integration tests:
-
-.. code-block:: console
-
-    export PYTEST_ADDOPTS='-k "not integration"'
-
 Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `Travis`_.
 To run the tests against a specific version, e.g. Python 3.6, you will need it
 installed on your machine. Then, run:
@@ -121,6 +114,12 @@ installed on your machine. Then, run:
 .. code-block:: console
 
     tox -e py36
+
+To run the "integration" tests of uploading to real package indexes, run:
+
+.. code-block:: console
+
+    tox -e integration
 
 To run the tests against all supported Python versions, check code style,
 and build the documentation, run:
