@@ -12,11 +12,6 @@ matrix:
   include:
     - python: &latest_py3 3.8
 
-    - python: 3.7
-      name: Making sure that docs build is healthy
-      env:
-        TOXENV: docs
-
     - stage: deploy
       if: tag IS present
       python: *latest_py3
