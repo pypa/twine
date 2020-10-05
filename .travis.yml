@@ -11,16 +11,6 @@ matrix:
 
   include:
     - python: &latest_py3 3.8
-    - python: &oldest_py3 3.6
-
-    - python: *latest_py3
-      name: Checking type annotations (latest Python)
-      env:
-        TOXENV: types
-    - python: *oldest_py3
-      name: Checking type annotations (oldest Python)
-      env:
-        TOXENV: types
 
     - python: 3.7
       name: Making sure that docs build is healthy
