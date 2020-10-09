@@ -20,10 +20,7 @@ matrix:
       after_script: skip
 
 install:
-  - pip install tox codecov
+  - pip install tox
 
 script:
   - tox
-
-after_script:
-  - codecov --env TRAVIS_OS_NAME,TOXENV
