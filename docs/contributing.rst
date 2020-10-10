@@ -107,9 +107,9 @@ To pass options to ``pytest``, e.g. the name of a test, run:
 
     tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
-Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `Travis`_.
-To run the tests against a specific version, e.g. Python 3.6, you will need it
-installed on your machine. Then, run:
+Twine is continuously tested against Python 3.6, 3.7, and 3.8 using `GitHub
+Actions`_. To run the tests against a specific version, e.g. Python 3.6, you
+will need it installed on your machine. Then, run:
 
 .. code-block:: console
 
@@ -183,9 +183,7 @@ Adding a maintainer
 
 A checklist for adding a new maintainer to the project.
 
-#. Add them as a Member in the GitHub repo settings. (This will also
-   give them privileges on the `Travis CI project
-   <https://travis-ci.com/github/pypa/twine>`_.)
+#. Add them as a Member in the GitHub repo settings.
 #. Get them Test PyPI and canon PyPI usernames and add them as a
    Maintainer on `our Test PyPI project
    <https://test.pypi.org/manage/project/twine/collaboration/>`_ and
@@ -202,7 +200,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Choose a version number, e.g. ``3.2.0``.
 #. Add a ``:release:`` line to :file:`docs/changelog.rst`.
 #. Commit and open a pull request for review.
-#. Merge the pull request, and ensure the `Travis`_ build passes.
+#. Merge the pull request, and ensure the `GitHub Actions`_ build passes.
 #. Create a new git tag with ``git tag -m "Release v{version}" {version}``.
 #. Push the new tag with ``git push upstream {version}``.
 #. Watch the release in `Travis`_.
@@ -225,6 +223,7 @@ merge into a single tool; see `ongoing discussion
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/
 .. _`pytest`: https://docs.pytest.org/
+.. _`GitHub Actions`: https://github.com/pypa/twine/actions
 .. _`Travis`: https://travis-ci.com/github/pypa/twine
 .. _`isort`: https://timothycrosley.github.io/isort/
 .. _`black`: https://black.readthedocs.io/
