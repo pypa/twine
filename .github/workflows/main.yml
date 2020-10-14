@@ -20,6 +20,8 @@ jobs:
       - name: Run linting
         run: python -m tox -e lint
 
+  # TODO: Add 3.9 when lxml wheels are available:
+  # https://bugs.launchpad.net/lxml/+bug/1899830
   types:
     strategy:
       matrix:
