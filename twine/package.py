@@ -15,12 +15,7 @@ import hashlib
 import io
 import os
 import subprocess
-from typing import Dict
-from typing import NamedTuple
-from typing import Optional
-from typing import Sequence
-from typing import Tuple
-from typing import Union
+from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import pkg_resources
 import pkginfo
@@ -225,7 +220,12 @@ class HashManager:
 
         self._sha2_hasher = hashlib.sha256()
 
-        self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
+        self._blake_hasher = None
+        try:
+            self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
+        except ValueError:
+            # FIPS mode disables blake2
+            pass
 
     def _md5_update(self, content: bytes) -> None:
         if self._md5_hasher is not None:
@@ -265,5 +265,7 @@ class HashManager:
     def hexdigest(self) -> Hexdigest:
         """Return the hexdigest for the file."""
         return Hexdigest(
-            self._md5_hexdigest(), self._sha2_hexdigest(), self._blake_hexdigest(),
+            self._md5_hexdigest(),
+            self._sha2_hexdigest(),
+            self._blake_hexdigest(),
         )

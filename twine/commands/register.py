@@ -13,8 +13,7 @@
 # limitations under the License.
 import argparse
 import os.path
-from typing import List
-from typing import cast
+from typing import List, cast
 
 from twine import exceptions
 from twine import package as package_file
@@ -38,7 +37,8 @@ def register(register_settings: settings.Settings, package: str) -> None:
 
     if resp.is_redirect:
         raise exceptions.RedirectDetected.from_args(
-            repository_url, resp.headers["location"],
+            repository_url,
+            resp.headers["location"],
         )
 
     resp.raise_for_status()

@@ -18,13 +18,7 @@ import functools
 import logging
 import os
 import os.path
-from typing import Any
-from typing import Callable
-from typing import DefaultDict
-from typing import Dict
-from typing import Optional
-from typing import Sequence
-from typing import Union
+from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 

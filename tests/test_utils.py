@@ -196,7 +196,8 @@ def test_get_repository_config_with_invalid_url(tmpdir, repo_url, message):
     pypirc = os.path.join(str(tmpdir), ".pypirc")
 
     with pytest.raises(
-        exceptions.UnreachableRepositoryURLDetected, match=message,
+        exceptions.UnreachableRepositoryURLDetected,
+        match=message,
     ):
         utils.get_repository_from_config(pypirc, "pypi", repo_url)
 
@@ -253,7 +254,10 @@ def test_default_to_environment_action(env_name, default, environ, expected):
     dest = "example"
     with helpers.set_env(**environ):
         action = utils.EnvironmentDefault(
-            env=env_name, default=default, option_strings=option_strings, dest=dest,
+            env=env_name,
+            default=default,
+            option_strings=option_strings,
+            dest=dest,
         )
     assert action.env == env_name
     assert action.default == expected
@@ -271,10 +275,12 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
 
 
 @pytest.mark.parametrize(
-    "repo_url", ["https://pypi.python.org", "https://testpypi.python.org"],
+    "repo_url",
+    ["https://pypi.python.org", "https://testpypi.python.org"],
 )
 @pytest.mark.parametrize(
-    "verbose", [True, False],
+    "verbose",
+    [True, False],
 )
 def test_check_status_code_for_missing_status_code(
     capsys, repo_url, verbose, make_settings

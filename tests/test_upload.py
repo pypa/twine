@@ -337,6 +337,17 @@ def test_prints_skip_message_for_response(
         ),
         pytest.param(
             dict(
+                status_code=400,
+                text=(
+                    '<div class="content-section">\n'
+                    "    Repository does not allow updating assets: pypi-local\n"
+                    "</div>\n"
+                ),
+            ),
+            id="nexus_new",
+        ),
+        pytest.param(
+            dict(
                 status_code=409,
                 reason=(
                     'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
@@ -366,6 +377,15 @@ def test_prints_skip_message_for_response(
                 ),
             ),
             id="artifactory_new",
+        ),
+        pytest.param(
+            dict(
+                status_code=400,
+                text=(
+                    '{"message":"validation failed: file name has already been taken"}'
+                ),
+            ),
+            id="gitlab_enterprise",
         ),
     ],
 )
@@ -425,11 +445,11 @@ def test_values_from_env(monkeypatch):
     "repo_url",
     ["https://upload.pypi.org/", "https://test.pypi.org/", "https://pypi.org/"],
 )
-def test_check_status_code_for_wrong_repo_url(repo_url, make_settings):
-    upload_settings = make_settings()
-
-    # override defaults to use incorrect URL
+def test_check_status_code_for_wrong_repo_url(repo_url, upload_settings, stub_response):
     upload_settings.repository_config["repository"] = repo_url
+
+    stub_response.url = repo_url
+    stub_response.status_code = 405
 
     with pytest.raises(exceptions.InvalidPyPIUploadURL):
         upload.upload(

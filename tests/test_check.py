@@ -25,7 +25,8 @@ class TestWarningStream:
     def setup(self):
         self.stream = check._WarningStream()
         self.stream.output = pretend.stub(
-            write=pretend.call_recorder(lambda a: None), getvalue=lambda: "result",
+            write=pretend.call_recorder(lambda a: None),
+            getvalue=lambda: "result",
         )
 
     def test_write_match(self):
