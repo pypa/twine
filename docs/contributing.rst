@@ -203,7 +203,7 @@ A checklist for creating, testing, and distributing a new version.
 #. Merge the pull request, and ensure the `GitHub Actions`_ build passes.
 #. Create a new git tag with ``git tag -m "Release v{version}" {version}``.
 #. Push the new tag with ``git push upstream {version}``.
-#. Watch the release in `Travis`_.
+#. Watch the release in `GitHub Actions`_.
 #. Send announcement email to `distutils-sig mailing list`_ and celebrate.
 
 
@@ -224,7 +224,6 @@ merge into a single tool; see `ongoing discussion
 .. _`tox`: https://tox.readthedocs.io/
 .. _`pytest`: https://docs.pytest.org/
 .. _`GitHub Actions`: https://github.com/pypa/twine/actions
-.. _`Travis`: https://travis-ci.com/github/pypa/twine
 .. _`isort`: https://timothycrosley.github.io/isort/
 .. _`black`: https://black.readthedocs.io/
 .. _`flake8`: https://flake8.pycqa.org/
