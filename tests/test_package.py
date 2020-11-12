@@ -258,7 +258,6 @@ def test_pkginfo_returns_no_metadata(monkeypatch):
 
 def test_malformed_from_file(monkeypatch):
     """Raise an exception when malformed package file triggers EOFError."""
-
     filename = "tests/fixtures/malformed.tar.gz"
 
     with pytest.raises(exceptions.InvalidDistribution) as err:
