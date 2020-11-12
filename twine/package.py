@@ -76,8 +76,14 @@ class PackageFile:
         # Extract the metadata from the package
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
-                meta = DIST_TYPES[dtype](filename)
-                break
+                try:
+                    meta = DIST_TYPES[dtype](filename)
+                except EOFError:
+                    raise exceptions.InvalidDistribution(
+                        "Invalid distribution file: '%s'" % os.path.basename(filename)
+                    )
+                else:
+                    break
         else:
             raise exceptions.InvalidDistribution(
                 "Unknown distribution format: '%s'" % os.path.basename(filename)
