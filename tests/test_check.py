@@ -159,8 +159,34 @@ def test_check_failing_distribution(monkeypatch):
 
 def test_main(monkeypatch):
     check_result = pretend.stub()
-    check_stub = pretend.call_recorder(lambda a: check_result)
+    check_stub = pretend.call_recorder(lambda a, strict=False: check_result)
     monkeypatch.setattr(check, "check", check_stub)
 
     assert check.main(["dist/*"]) == check_result
-    assert check_stub.calls == [pretend.call(["dist/*"])]
+    assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]
+
+
+def test_strict_fails_on_warnings(monkeypatch, capsys):
+    package = pretend.stub(
+        metadata_dictionary=lambda: {
+            "description": None,
+            "description_content_type": None,
+        }
+    )
+
+    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+    monkeypatch.setattr(
+        package_file,
+        "PackageFile",
+        pretend.stub(from_filename=lambda *a, **kw: package),
+    )
+
+    # used to crash with `AttributeError`
+    output_stream = io.StringIO()
+    check.check(["dist/*"], output_stream=output_stream, strict=True)
+    assert output_stream.getvalue() == (
+        "Checking dist/dist.tar.gz: FAILED, due to warnings\n"
+        "  warning: `long_description_content_type` missing. "
+        "defaulting to `text/x-rst`.\n"
+        "  warning: `long_description` missing.\n"
+    )
