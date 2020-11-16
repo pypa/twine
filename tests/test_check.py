@@ -118,7 +118,7 @@ def test_check_no_description(monkeypatch, capsys):
 
     # used to crash with `AttributeError`
     output_stream = io.StringIO()
-    check.check(["dist/*"], output_stream=output_stream)
+    assert not check.check(["dist/*"], output_stream=output_stream)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: PASSED, with warnings\n"
         "  warning: `long_description_content_type` missing. "
@@ -183,7 +183,7 @@ def test_strict_fails_on_warnings(monkeypatch, capsys):
 
     # used to crash with `AttributeError`
     output_stream = io.StringIO()
-    check.check(["dist/*"], output_stream=output_stream, strict=True)
+    assert check.check(["dist/*"], output_stream=output_stream, strict=True)
     assert output_stream.getvalue() == (
         "Checking dist/dist.tar.gz: FAILED, due to warnings\n"
         "  warning: `long_description_content_type` missing. "
