@@ -102,9 +102,9 @@ def _check_file(
 
 
 def check(
-        dists: List[str],
-        output_stream: IO[str] = sys.stdout,
-        strict: bool = False,
+    dists: List[str],
+    output_stream: IO[str] = sys.stdout,
+    strict: bool = False,
 ) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
