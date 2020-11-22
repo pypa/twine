@@ -163,13 +163,14 @@ PyPI.
 .. code-block:: console
 
     $ twine check -h
-    usage: twine check [-h] dist [dist ...]
+    usage: twine check [-h] [--strict] dist [dist ...]
 
     positional arguments:
       dist        The distribution files to check, usually dist/*
 
     optional arguments:
       -h, --help  show this help message and exit
+      --strict    Fail on warnings
 
 ``twine register``
 ^^^^^^^^^^^^^^^^^^

@@ -101,7 +101,11 @@ def _check_file(
     return warnings, is_ok
 
 
-def check(dists: List[str], output_stream: IO[str] = sys.stdout) -> bool:
+def check(
+    dists: List[str],
+    output_stream: IO[str] = sys.stdout,
+    strict: bool = False,
+) -> bool:
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -126,7 +130,11 @@ def check(dists: List[str], output_stream: IO[str] = sys.stdout) -> bool:
             output_stream.write(textwrap.indent(error_text, "  "))
             output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
         elif warnings:
-            output_stream.write("PASSED, with warnings\n")
+            if strict:
+                failure = True
+                output_stream.write("FAILED, due to warnings\n")
+            else:
+                output_stream.write("PASSED, with warnings\n")
         else:
             output_stream.write("PASSED\n")
 
@@ -145,8 +153,15 @@ def main(args: List[str]) -> bool:
         metavar="dist",
         help="The distribution files to check, usually dist/*",
     )
+    parser.add_argument(
+        "--strict",
+        action="store_true",
+        default=False,
+        required=False,
+        help="Fail on warnings",
+    )
 
     parsed_args = parser.parse_args(args)
 
     # Call the check function with the arguments from the command line
-    return check(parsed_args.dists)
+    return check(parsed_args.dists, strict=parsed_args.strict)
