@@ -232,8 +232,10 @@ def get_userpass_value(
     :rtype: unicode
     """
     if cli_value is not None:
+        logger.info(f"{key} set by command options")
         return cli_value
     elif config.get(key) is not None:
+        logger.info(f"{key} set from config file")
         return config[key]
     elif prompt_strategy:
         return prompt_strategy()

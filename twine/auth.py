@@ -1,5 +1,6 @@
 import functools
 import getpass
+import logging
 import warnings
 from typing import Callable, Optional, Type, cast
 
@@ -7,6 +8,8 @@ import keyring
 
 from twine import exceptions
 from twine import utils
+
+logger = logging.getLogger(__name__)
 
 
 class CredentialInput:
@@ -70,12 +73,20 @@ class Resolver:
         return None
 
     def username_from_keyring_or_prompt(self) -> str:
-        return self.get_username_from_keyring() or self.prompt("username", input)
+        username = self.get_username_from_keyring()
+        if username:
+            logger.info("username set from keyring")
+            return username
+
+        return self.prompt("username", input)
 
     def password_from_keyring_or_prompt(self) -> str:
-        return self.get_password_from_keyring() or self.prompt(
-            "password", getpass.getpass
-        )
+        password = self.get_password_from_keyring()
+        if password:
+            logger.info("password set from keyring")
+            return password
+
+        return self.prompt("password", getpass.getpass)
 
     def prompt(self, what: str, how: Callable[..., str]) -> str:
         return how(f"Enter your {what}: ")

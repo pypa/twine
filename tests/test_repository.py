@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
 from contextlib import contextmanager
 
 import pretend
@@ -338,3 +339,23 @@ def test_package_is_uploaded_incorrect_repo_url():
     repo.url = "https://bad.repo.com/legacy"
 
     assert repo.package_is_uploaded(None) is False
+
+
+@pytest.mark.parametrize(
+    "username, password, messages",
+    [
+        (None, None, ["username: <empty>", "password: <empty>"]),
+        ("", "", ["username: <empty>", "password: <empty>"]),
+        ("username", "password", ["username: username", "password: <hidden>"]),
+    ],
+)
+def test_logs_username_and_password(username, password, messages, caplog):
+    caplog.set_level(logging.INFO, "twine")
+
+    repository.Repository(
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username=username,
+        password=password,
+    )
+
+    assert caplog.messages == messages
