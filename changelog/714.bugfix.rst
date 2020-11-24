@@ -1,0 +1,1 @@
+Show a better error message for malformed files
