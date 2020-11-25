@@ -19,10 +19,12 @@ import requests
 import requests_toolbelt
 import tqdm
 import urllib3
+from packaging import version
 from requests import adapters
 from requests_toolbelt.utils import user_agent
 
 import twine
+from twine import importlib_metadata
 from twine import package as package_file
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
@@ -77,13 +79,20 @@ class Repository:
 
     @staticmethod
     def _make_adapter_with_retries() -> adapters.HTTPAdapter:
-        retry = urllib3.Retry(
+        retry_kwargs = dict(
             connect=5,
             total=10,
-            method_whitelist=["GET"],
             status_forcelist=[500, 501, 502, 503],
         )
-        return adapters.HTTPAdapter(max_retries=retry)
+
+        # method_whitelist will be removed in 2.0; avoid DeprecationWarning until then
+        urllib3_version = importlib_metadata.version("urllib3")
+        if version.parse(urllib3_version) >= version.parse("1.26"):
+            retry_kwargs.update(allowed_methods=["GET"])
+        else:
+            retry_kwargs.update(method_whitelist=["GET"])
+
+        return adapters.HTTPAdapter(max_retries=urllib3.Retry(**retry_kwargs))
 
     @staticmethod
     def _make_user_agent_string() -> str:
