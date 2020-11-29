@@ -2,6 +2,10 @@
 Changelog
 =========
 
+This project follows the `semantic versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#semantic-versioning-preferred>`_
+and `pre-release versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#pre-release-versioning>`_
+schemes recommended by the Python Packaging Authority.
+
 .. towncrier release notes start
 
 3.2.1.dev28+g0c6ff22.d20201129 (2020-11-29)
