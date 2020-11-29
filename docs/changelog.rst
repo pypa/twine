@@ -129,7 +129,7 @@ Changelog
 - *Bugfix* Fix ``--skip-existing`` when used to upload a package for the first time. (`#220 <https://github.com/pypa/twine/issues/220>`_)
 - *Bugfix* Fix precedence of ``--repository-url`` over ``--repository``. (`#206 <https://github.com/pypa/twine/issues/206>`_)
 - *Misc* Twine will now resolve passwords using the `keyring <https://pypi.org/project/keyring/>`_ if available. Module can be required with the ``keyring`` extra.
-- *Misc* Twine will use ``hashlib.blake2b`` on Python 3.6+ instead of using pyblake2 for Blake2 hashes 256 bit hashes.
+- *Misc* Twine will use ``hashlib.blake2b`` on Python 3.6+ instead of pyblake2
 
 1.8.1 (2016-08-09)
 ------------------
@@ -157,8 +157,8 @@ Changelog
 - *Feature* Allow the Repository URL to be provided on the command-line (``--repository-url``) or via an environment variable (``TWINE_REPOSITORY_URL``). (`#166 <https://github.com/pypa/twine/issues/166>`_)
 - *Feature* Generate Blake2b 256 digests for packages *if* ``pyblake2`` is installed. Users can use ``python -m pip install twine[with-blake2]`` to have ``pyblake2`` installed with Twine. (`#171 <https://github.com/pypa/twine/issues/171>`_)
 - *Misc* Generate SHA256 digest for all packages by default.
-- *Misc* Stop testing on Python 2.6. 2.6 support will be "best effort" until 2.0.0
-- *Misc* Warn users if they receive a 500 error when uploading to ``*pypi.python.org``
+- *Misc* Stop testing on Python 2.6.
+- *Misc* Warn users if they receive a 500 error when uploading to ``*pypi.python.org`` (`#199 <https://github.com/pypa/twine/issues/199>`_)
 
 1.7.4 (2016-07-09)
 ------------------
@@ -169,7 +169,7 @@ Changelog
 ------------------
 
 - *Bugfix* Fix uploads to instances of pypiserver using ``--skip-existing``. We were not properly checking the return status code on the response after attempting an upload. (`#195 <https://github.com/pypa/twine/issues/195>`_)
-- *Misc* Do not generate traffic to Legacy PyPI unless we're uploading to it or uploading to Warehouse (e.g., pypi.io). This avoids the attempt to upload a package to the index if we can find it on Legacy PyPI already.
+- *Misc* Avoid attempts to upload a package if we can find it on Legacy PyPI.
 
 1.7.2 (2016-07-05)
 ------------------
@@ -205,7 +205,7 @@ Changelog
 1.6.3 (2015-10-05)
 ------------------
 
-- *Bugfix* Uploading signatures was broken due to the pull request that added large file support via ``requests-toolbelt``. This caused a 500 error on PyPI and prevented package and signature upload in twine 1.6.0 (`137`, `140`)
+- *Bugfix* Fix uploading signatures causing a 500 error after large file support was added. (`#137 <https://github.com/pypa/twine/issues/137>`_, `#140 <https://github.com/pypa/twine/issues/140>`_)
 
 1.6.2 (2015-09-28)
 ------------------
