@@ -228,6 +228,5 @@ merge into a single tool; see `ongoing discussion
 .. _`black`: https://black.readthedocs.io/
 .. _`flake8`: https://flake8.pycqa.org/
 .. _`mypy`: https://mypy.readthedocs.io/
-.. _`plugin`: https://github.com/bitprophet/releases
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`open issues`: https://github.com/pypa/twine/issues

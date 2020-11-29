@@ -1,7 +1,5 @@
 :orphan:
 
-.. See https://releases.readthedocs.io/ for instructions
-
 =========
 Changelog
 =========
