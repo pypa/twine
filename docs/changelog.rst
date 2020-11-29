@@ -8,7 +8,7 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
-3.2.1.dev28+g0c6ff22.d20201129 (2020-11-29)
+3.2.1.dev32+gedd44f9.d20201129 (2020-11-29)
 -------------------------------------------
 
 Features
@@ -34,6 +34,7 @@ Improved Documentation
 ^^^^^^^^^^^^^^^^^^^^^^
 
 - Adopt PSF code of conduct (`#680 <https://github.com/pypa/twine/issues/680>`_)
+- Adopt towncrier for the changleog (`#718 <https://github.com/pypa/twine/issues/718>`_)
 
 
 3.2.0 (2020-06-24)
