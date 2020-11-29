@@ -85,7 +85,7 @@ class Repository:
 
         try:
             retry = urllib3.Retry(allowed_methods=["GET"], **retry_kwargs)
-        except TypeError:
+        except TypeError:  # pragma: no cover
             # Avoiding DeprecationWarning starting in urllib3 1.26
             # Remove when that's the mininum version
             retry = urllib3.Retry(method_whitelist=["GET"], **retry_kwargs)
