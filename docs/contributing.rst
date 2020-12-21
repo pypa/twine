@@ -232,9 +232,9 @@ Making a new release
 
 A checklist for creating, testing, and distributing a new version.
 
-#. Add user-facing changes to :file:`docs/changelog.rst`.
-#. Choose a version number, e.g. ``3.2.0``.
-#. Add a ``:release:`` line to :file:`docs/changelog.rst`.
+#. Choose a version number, e.g. ``3.3.0``.
+#. Run ``tox -e changelog -- --version {version}`` to build
+   :file:`docs/changelog.rst`.
 #. Commit and open a pull request for review.
 #. Merge the pull request, and ensure the `GitHub Actions`_ build passes.
 #. Create a new git tag with ``git tag -m "Release v{version}" {version}``.
