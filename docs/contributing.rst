@@ -130,15 +130,51 @@ and build the documentation, run:
 
 
 Submitting changes
-^^^^^^^^^^^^^^^^^^
+------------------
 
 1. Fork `the GitHub repository`_.
 2. Make a branch off of ``master`` and commit your changes to it.
 3. Run the tests, check code style, and build the docs as described above.
-4. Ensure that your name is added to the end of the :file:`AUTHORS`
+4. Optionally, add your name to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
-5. Submit a pull request to the ``master`` branch on GitHub.
+5. Submit a pull request to the ``master`` branch on GitHub, referencing an
+   open issue.
+6. Add a changelog entry.
+
+Changelog entries
+^^^^^^^^^^^^^^^^^
+
+The ``docs/changelog.rst`` file is built by `towncrier`_ from files in the
+``changelog/`` directory. To add an entry, create a file in that directory
+named ``{number}.{type}.rst``, where ``{number}`` is the pull request number,
+and ``{type}`` is ``feature``, ``bugfix``, ``doc``, ``removal``, or ``misc``.
+
+For example, if your PR number is 1234 and it's fixing a bug, then you
+would create ``changelog/1234.bugfix.rst``. PRs can span multiple categories by
+creating multiple files: if you added a feature and deprecated/removed an old
+feature in PR #5678, you would create ``changelog/5678.feature.rst`` and
+``changelog/5678.removal.rst``.
+
+A changelog entry is meant for end users and should only contain details
+relevant to them. In order to maintain a consistent style, please keep the
+entry to the point, in sentence case, shorter than 80 characters, and in an
+imperative tone. An entry should complete the sentence "This change will ...".
+If one line is not enough, use a summary line in an imperative tone, followed
+by a description of the change in one or more paragraphs, each wrapped at 80
+characters and separated by blank lines.
+
+You don't need to reference the pull request or issue number in a changelog
+entry, since towncrier will add a link using the number in the file name,
+and the pull request should reference an issue number. Similarly, you don't
+need to add your name to the entry, since that will be associated with the pull
+request.
+
+Changelog entries are rendered using `reStructuredText`_, but they should only
+have minimal formatting (such as ````monospaced text````).
+
+.. _`towncrier`: https://pypi.org/project/towncrier/
+.. _`reStructuredText`: https://www.writethedocs.org/guide/writing/reStructuredText/
 
 
 Architectural overview

@@ -6,6 +6,10 @@ This project follows the `semantic versioning <https://packaging.python.org/guid
 and `pre-release versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#pre-release-versioning>`_
 schemes recommended by the Python Packaging Authority.
 
+.. Do *NOT* add changelog entries here!
+   This changelog is managed by towncrier and is built at release time.
+   See https://twine.readthedocs.io/en/latest/contributing.html#changelog-entries for details.
+
 .. towncrier release notes start
 
 3.2.0 (2020-06-24)
