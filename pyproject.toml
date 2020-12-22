@@ -1,3 +1,11 @@
 [build-system]
 requires = ["setuptools>=40.8", "wheel", "setuptools_scm>=1.15"]
 build-backend = "setuptools.build_meta:__legacy__"
+
+[tool.towncrier]
+package = "twine"
+filename = "docs/changelog.rst"
+directory = "changelog"
+title_format = "{version} ({project_date})"
+issue_format = "`#{issue} <https://github.com/pypa/twine/issues/{issue}>`_"
+underlines = ["-", "^"]

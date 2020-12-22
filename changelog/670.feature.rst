@@ -1,0 +1,1 @@
+Print files to be uploaded using ``upload --verbose``
