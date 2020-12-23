@@ -1,1 +1,0 @@
-Print source and values of credentials when using ``upload --verbose``
