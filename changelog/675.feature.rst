@@ -1,1 +1,0 @@
-Print configuration file location when using ``upload --verbose``
