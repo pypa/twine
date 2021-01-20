@@ -14,7 +14,6 @@
 import argparse
 from typing import Any, Dict, List, Tuple
 
-import pkg_resources
 import pkginfo
 import requests
 import requests_toolbelt
@@ -23,15 +22,15 @@ import tqdm
 
 import twine
 from twine import _installed
+from twine import importlib_metadata
 
 args = argparse.Namespace()
 
 
 def _registered_commands(
     group: str = "twine.registered_commands",
-) -> Dict[str, pkg_resources.EntryPoint]:
-    registered_commands = pkg_resources.iter_entry_points(group=group)
-    return {c.name: c for c in registered_commands}
+) -> Dict[str, importlib_metadata.EntryPoint]:
+    return dict(importlib_metadata.entry_points()[group])
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
