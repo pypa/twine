@@ -29,7 +29,9 @@ import sys
 if sys.version_info[:2] >= (3, 8):
     from importlib import metadata as importlib_metadata
 else:
-    import importlib_metadata
+    # Using `as` to workaround "implicit reexport disabled"
+    # https://mypy.readthedocs.io/en/stable/config_file.html#confval-implicit_reexport
+    import importlib_metadata as importlib_metadata
 
 
 metadata = importlib_metadata.metadata("twine")

@@ -1,0 +1,1 @@
+Prefer importlib.metadata for entry point handling.
