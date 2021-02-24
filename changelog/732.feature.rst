@@ -1,0 +1,1 @@
+Rely on importlib_metadata 3.6 for nicer entry point processing.
