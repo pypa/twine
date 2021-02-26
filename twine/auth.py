@@ -55,7 +55,7 @@ class Resolver:
 
     def get_username_from_keyring(self) -> Optional[str]:
         try:
-            creds = keyring.get_credential(self.system, None)
+            creds = keyring.get_credential(self.system, None)  # type: ignore
             if creds:
                 return cast(str, creds.username)
         except AttributeError:
@@ -67,7 +67,8 @@ class Resolver:
 
     def get_password_from_keyring(self) -> Optional[str]:
         try:
-            return cast(str, keyring.get_password(self.system, self.username))
+            password = keyring.get_password(self.system, self.username)  # type: ignore
+            return cast(str, password)
         except Exception as exc:
             warnings.warn(str(exc))
         return None
