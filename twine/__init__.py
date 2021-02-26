@@ -24,15 +24,7 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-import sys
-
-if sys.version_info[:2] >= (3, 8):
-    from importlib import metadata as importlib_metadata
-else:
-    # Using `as` to workaround "implicit reexport disabled"
-    # https://mypy.readthedocs.io/en/stable/config_file.html#confval-implicit_reexport
-    import importlib_metadata as importlib_metadata
-
+import importlib_metadata
 
 metadata = importlib_metadata.metadata("twine")
 
