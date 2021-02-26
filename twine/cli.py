@@ -78,6 +78,6 @@ def dispatch(argv: List[str]) -> Any:
 
     parser.parse_args(argv, namespace=args)
 
-    main = registered_commands[args.command].load()
+    main = registered_commands[args.command].load()  # type: ignore
 
     return main(args.args)
