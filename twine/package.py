@@ -17,6 +17,7 @@ import os
 import subprocess
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
+import importlib_metadata
 import pkg_resources
 import pkginfo
 
@@ -99,8 +100,8 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
+            dist, = importlib_metadata.Distribution.discover(path=[filename])
+            py_version = dist.metadata['Version']
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
         elif dtype == "bdist_wininst":
