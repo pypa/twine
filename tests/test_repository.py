@@ -89,7 +89,7 @@ def test_make_user_agent_string(default_repo):
     assert "User-Agent" in default_repo.session.headers
 
     user_agent = default_repo.session.headers["User-Agent"]
-    packages = ("twine/", "requests/", "requests-toolbelt/", "pkginfo/", "setuptools/")
+    packages = ("twine/", "requests/", "requests-toolbelt/", "pkginfo/")
     assert all(p in user_agent for p in packages)
 
 
