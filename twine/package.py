@@ -18,7 +18,7 @@ import subprocess
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import importlib_metadata
-import pkg_resources
+import packaging.utils
 import pkginfo
 
 from twine import exceptions
@@ -59,7 +59,7 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = pkg_resources.safe_name(metadata.name)
+        self.safe_name = packaging.utils.canonicalize_name(metadata.name)
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
