@@ -17,7 +17,6 @@ from typing import Any, List, Tuple
 import pkginfo
 import requests
 import requests_toolbelt
-import setuptools
 import tqdm
 from importlib_metadata import entry_points
 
@@ -31,7 +30,6 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     return [
         ("pkginfo", _installed.Installed(pkginfo).version),
         ("requests", requests.__version__),
-        ("setuptools", setuptools.__version__),
         ("requests-toolbelt", requests_toolbelt.__version__),
         ("tqdm", tqdm.__version__),
     ]
