@@ -12,27 +12,19 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-from typing import Any, Dict, List, Tuple
+from typing import Any, List, Tuple
 
 import pkginfo
 import requests
 import requests_toolbelt
 import setuptools
 import tqdm
+from importlib_metadata import entry_points
 
 import twine
 from twine import _installed
-from twine import importlib_metadata
 
 args = argparse.Namespace()
-
-
-def _registered_commands(
-    group: str = "twine.registered_commands",
-) -> Dict[str, importlib_metadata.EntryPoint]:
-    # todo: with python/importlib_metadata#278:
-    # return importlib_metadata.entry_points()[group]
-    return {ep.name: ep for ep in importlib_metadata.entry_points()[group]}
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
@@ -52,7 +44,7 @@ def dep_versions() -> str:
 
 
 def dispatch(argv: List[str]) -> Any:
-    registered_commands = _registered_commands()
+    registered_commands = entry_points(group="twine.registered_commands")
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
@@ -68,7 +60,7 @@ def dispatch(argv: List[str]) -> Any:
     )
     parser.add_argument(
         "command",
-        choices=registered_commands.keys(),
+        choices=registered_commands.names,
     )
     parser.add_argument(
         "args",
