@@ -18,7 +18,7 @@ import pkginfo
 import requests
 import requests_toolbelt
 import tqdm
-from importlib_metadata import entry_points
+from importlib_metadata import entry_points, version
 
 import twine
 from twine import _installed
@@ -28,6 +28,8 @@ args = argparse.Namespace()
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     return [
+        ("importlib_metadata", version("importlib_metadata")),
+        ("packaging", version("packaging")),
         ("pkginfo", _installed.Installed(pkginfo).version),
         ("requests", requests.__version__),
         ("requests-toolbelt", requests_toolbelt.__version__),
