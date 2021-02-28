@@ -31,7 +31,7 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
         "requests-toolbelt",
         "tqdm",
     )
-    return [(dep, version(dep)) for dep in deps]
+    return [(dep, version(dep)) for dep in deps]  # type: ignore
 
 
 def dep_versions() -> str:

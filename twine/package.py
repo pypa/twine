@@ -100,7 +100,9 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(path=[filename])
+            (dist,) = importlib_metadata.Distribution.discover(
+                path=[filename]
+            )  # type: ignore
             py_version = dist.metadata["Version"]
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
