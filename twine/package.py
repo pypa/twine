@@ -18,7 +18,7 @@ import subprocess
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import importlib_metadata
-import packaging.utils  # type: ignore
+import packaging.utils
 import pkginfo
 
 from twine import exceptions
