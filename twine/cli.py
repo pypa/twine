@@ -14,7 +14,8 @@
 import argparse
 from typing import Any, List, Tuple
 
-from importlib_metadata import entry_points, version
+from importlib_metadata import entry_points
+from importlib_metadata import version
 
 import twine
 
