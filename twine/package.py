@@ -17,7 +17,8 @@ import os
 import subprocess
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
-import pkg_resources
+import importlib_metadata
+import packaging.utils
 import pkginfo
 
 from twine import exceptions
@@ -58,7 +59,7 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = pkg_resources.safe_name(metadata.name)
+        self.safe_name = packaging.utils.canonicalize_name(metadata.name)
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
@@ -99,8 +100,10 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            pkgd = pkg_resources.Distribution.from_filename(filename)
-            py_version = pkgd.py_version
+            (dist,) = importlib_metadata.Distribution.discover(  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+                path=[filename]
+            )
+            py_version = dist.metadata["Version"]
         elif dtype == "bdist_wheel":
             py_version = meta.py_version
         elif dtype == "bdist_wininst":

@@ -1,0 +1,1 @@
+Eliminated dependency on Setuptools/pkg_resources and replaced with packaging and importlib_metadata.
