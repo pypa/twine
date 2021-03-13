@@ -12,6 +12,17 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+3.4.0 (2021-03-13)
+------------------
+
+Features
+^^^^^^^^
+
+- Prefer importlib.metadata for entry point handling. (`#728 <https://github.com/pypa/twine/issues/728>`_)
+- Rely on importlib_metadata 3.6 for nicer entry point processing. (`#732 <https://github.com/pypa/twine/issues/732>`_)
+- Eliminated dependency on Setuptools/pkg_resources and replaced with packaging and importlib_metadata. (`#736 <https://github.com/pypa/twine/issues/736>`_)
+
+
 3.3.0 (2020-12-23)
 ------------------
 
