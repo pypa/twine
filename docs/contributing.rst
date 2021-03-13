@@ -232,13 +232,14 @@ Making a new release
 
 A checklist for creating, testing, and distributing a new version.
 
-#. Choose a version number, e.g. ``3.3.0``.
-#. Run ``tox -e changelog -- --version {version}`` to build
+#. Choose a version number, e.g. ``VERSION=3.3.0``.
+#. Create a new branch, e.g. ``git switch -c release-$VERSION``.
+#. Run ``tox -e changelog -- --version $VERSION`` to build
    :file:`docs/changelog.rst`.
 #. Commit and open a pull request for review.
 #. Merge the pull request, and ensure the `GitHub Actions`_ build passes.
-#. Create a new git tag with ``git tag -m "Release v{version}" {version}``.
-#. Push the new tag with ``git push upstream {version}``.
+#. Create a new git tag with ``git tag -m "Release v$VERSION" $VERSION``.
+#. Push the new tag with ``git push upstream $VERSION``.
 #. Watch the release in `GitHub Actions`_.
 #. Send announcement email to `distutils-sig mailing list`_ and celebrate.
 
