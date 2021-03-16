@@ -12,7 +12,7 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
-3.4.0 (2021-03-13)
+3.4.0 (2021-03-15)
 ------------------
 
 Features
