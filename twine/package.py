@@ -14,11 +14,11 @@
 import hashlib
 import io
 import os
+import re
 import subprocess
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import importlib_metadata
-import packaging.utils
 import pkginfo
 
 from twine import exceptions
@@ -44,6 +44,14 @@ DIST_EXTENSIONS = {
 MetadataValue = Union[str, Sequence[str]]
 
 
+def _safe_name(name: str) -> str:
+    """Convert an arbitrary string to a standard distribution name.
+
+    Any runs of non-alphanumeric/. characters are replaced with a single '-'.
+    """
+    return re.sub("[^A-Za-z0-9.]+", "-", name)
+
+
 class PackageFile:
     def __init__(
         self,
@@ -59,7 +67,7 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = packaging.utils.canonicalize_name(metadata.name)
+        self.safe_name = _safe_name(metadata.name)
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None

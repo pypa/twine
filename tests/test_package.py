@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import string
+
 import pretend
 import pytest
 
@@ -108,6 +110,28 @@ def test_package_signed_name_is_correct():
 
     assert package.signed_basefilename == "deprecated-pypirc.asc"
     assert package.signed_filename == (filename + ".asc")
+
+
+@pytest.mark.parametrize(
+    "pkg_name,expected_name",
+    [
+        (string.ascii_letters, string.ascii_letters),
+        (string.digits, string.digits),
+        (string.punctuation, "-.-"),
+        ("mosaik.SimConfig", "mosaik.SimConfig"),
+        ("mosaik$$$$.SimConfig", "mosaik-.SimConfig"),
+    ],
+)
+def test_package_safe_name_is_correct(pkg_name, expected_name):
+    package = package_file.PackageFile(
+        filename="tests/fixtures/deprecated-pypirc",
+        comment=None,
+        metadata=pretend.stub(name=pkg_name),
+        python_version=None,
+        filetype=None,
+    )
+
+    assert package.safe_name == expected_name
 
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
