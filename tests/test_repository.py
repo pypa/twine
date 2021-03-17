@@ -95,7 +95,6 @@ def test_make_user_agent_string(default_repo):
         "requests-toolbelt/",
         "pkginfo/",
         "importlib_metadata/",
-        "packaging/",
     )
     assert all(p in user_agent for p in packages)
 

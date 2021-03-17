@@ -25,7 +25,6 @@ args = argparse.Namespace()
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = (
         "importlib_metadata",
-        "packaging",
         "pkginfo",
         "requests",
         "requests-toolbelt",
