@@ -1,1 +1,0 @@
-Fixed a regression that was causing some namespace packages with dots in them fail to upload to PyPI.
