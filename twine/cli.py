@@ -12,10 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import sys
 from typing import Any, List, Tuple
 
-from importlib_metadata import entry_points
-from importlib_metadata import version
+if sys.version_info < (3, 8):
+    from importlib_metadata import entry_points
+    from importlib_metadata import version
+else:
+    from importlib.metadata import entry_points, version
 
 import twine
 
@@ -24,12 +28,15 @@ args = argparse.Namespace()
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = (
-        "importlib_metadata",
         "pkginfo",
         "requests",
         "requests-toolbelt",
         "tqdm",
     )
+
+    if sys.version_info < (3, 8):
+        deps += ("importlib_metadata",)
+
     return [(dep, version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
 

@@ -24,9 +24,16 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-import importlib_metadata
+import sys
 
-metadata = importlib_metadata.metadata("twine")
+if sys.version_info < (3, 8):
+    import importlib_metadata
+
+    metadata = importlib_metadata.metadata("twine")
+else:
+    from importlib.metadata import metadata
+
+    metadata = metadata("twine")
 
 
 __title__ = metadata["name"]

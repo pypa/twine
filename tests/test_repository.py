@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import sys
 from contextlib import contextmanager
 
 import pretend
@@ -94,8 +95,10 @@ def test_make_user_agent_string(default_repo):
         "requests/",
         "requests-toolbelt/",
         "pkginfo/",
-        "importlib_metadata/",
     )
+    if sys.version_info < (3, 8):
+        packages += ("importlib_metadata/",)
+
     assert all(p in user_agent for p in packages)
 
 

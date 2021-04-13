@@ -16,9 +16,14 @@ import io
 import os
 import re
 import subprocess
+import sys
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
-import importlib_metadata
+if sys.version_info < (3, 8):
+    from importlib_metadata import Distribution
+else:
+    from importlib.metadata import Distribution
+
 import pkginfo
 
 from twine import exceptions
@@ -111,7 +116,7 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+            (dist,) = Distribution.discover(  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
                 path=[filename]
             )
             py_version = dist.metadata["Version"]
