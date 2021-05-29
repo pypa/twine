@@ -105,8 +105,11 @@ class PackageFile:
         # give us back empty metadata. At the very least, we should have a name
         # and version
         if not (meta.name and meta.version):
+            supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
             raise exceptions.InvalidDistribution(
-                "Invalid distribution metadata. Try upgrading twine if possible."
+                "Invalid distribution metadata. "
+                "This version of twine supports Metadata-Version "
+                f"{', '.join(supported_metadata[:-1])}, and {supported_metadata[-1]}"
             )
 
         py_version: Optional[str]

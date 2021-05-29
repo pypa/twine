@@ -278,6 +278,7 @@ def test_pkginfo_returns_no_metadata(monkeypatch):
         package_file.PackageFile.from_filename(filename, comment=None)
 
     assert "Invalid distribution metadata" in err.value.args[0]
+    assert "1.0, 1.1, 1.2, 2.0, and 2.1" in err.value.args[0]
 
 
 def test_malformed_from_file(monkeypatch):
