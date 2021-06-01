@@ -29,7 +29,7 @@ Then, run the following commands:
 
 .. code-block:: console
 
-    pip install -U pip 
+    pip install -U pip
     pip install -e .
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
