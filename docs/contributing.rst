@@ -25,10 +25,11 @@ Python. For example:
     python3.6 -m venv venv
     source venv/bin/activate
 
-Then, run the following command:
+Then, run the following commands:
 
 .. code-block:: console
 
+    pip install -U pip
     pip install -e .
 
 Now, in your virtual environment, ``twine`` is pointing at your local copy, so
