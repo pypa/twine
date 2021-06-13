@@ -11,36 +11,35 @@ mailing list`_, to ask questions or get involved.
 Getting started
 ---------------
 
-We recommend you use a `virtual environment`_, so that twine and its
-dependencies do not interfere with other packages installed on your
-machine.
+We use `tox`_ to run tests, check code style, and build the documentation.
+To install ``tox``, run:
 
-Clone the twine repository from GitHub, then make and activate a
-virtual environment that uses Python 3.6 or newer as the default
-Python. For example:
+.. code-block:: console
+
+    python3 -m pip install tox
+
+Clone the twine repository from GitHub, then run:
 
 .. code-block:: console
 
     cd /path/to/your/local/twine
-    python3.6 -m venv venv
+    tox -e dev
+
+This creates a `virtual environment`_, so that twine and its
+dependencies do not interfere with other packages installed on your
+machine. In the virtual environment, ``twine`` is pointing at your
+local copy, so when you make changes, you can easily see their effect.
+
+The virtual environment also contains the tools for running tests
+and checking code style, so you can run them on single files directly or
+in your code editor. However, we still encourage using the ``tox`` commands
+below on the whole codebase.
+
+To use the virtual environment, run:
+
+.. code-block:: console
+
     source venv/bin/activate
-
-Then, run the following commands:
-
-.. code-block:: console
-
-    pip install -U pip
-    pip install -e .
-
-Now, in your virtual environment, ``twine`` is pointing at your local copy, so
-when you make changes, you can easily see their effect.
-
-We use `tox`_ to run tests, check code style, and build the documentation.
-To install ``tox`` in your active virtual environment, run:
-
-.. code-block:: console
-
-    pip install tox
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
