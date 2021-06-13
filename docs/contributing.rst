@@ -134,12 +134,12 @@ Submitting changes
 ------------------
 
 1. Fork `the GitHub repository`_.
-2. Make a branch off of ``master`` and commit your changes to it.
+2. Make a branch off of ``main`` and commit your changes to it.
 3. Run the tests, check code style, and build the docs as described above.
 4. Optionally, add your name to the end of the :file:`AUTHORS`
    file using the format ``Name <email@domain.com> (url)``, where the
    ``(url)`` portion is optional.
-5. Submit a pull request to the ``master`` branch on GitHub, referencing an
+5. Submit a pull request to the ``main`` branch on GitHub, referencing an
    open issue.
 6. Add a changelog entry.
 
