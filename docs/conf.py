@@ -269,6 +269,8 @@ linkcheck_ignore = [
     # Avoid errors due to GitHub rate limit
     # https://github.com/sphinx-doc/sphinx/issues/7388
     "https://github.com/pypa/twine/issues/*",
+    # Avoid errors from channels interpreted as anchors
+    "https://web.libera.chat/#",
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.

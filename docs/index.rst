@@ -325,8 +325,9 @@ discussion and background.
 Resources
 ---------
 
-* `IRC <https://webchat.freenode.net/?channels=%23pypa>`_:
-  ``#pypa`` on irc.freenode.net
+* `Discourse forum <https://discuss.python.org/c/packaging/>`_
+* `IRC <https://web.libera.chat/#pypa>`_:
+  ``#pypa`` on irc.libera.chat
 * `GitHub repository <https://github.com/pypa/twine>`_
 * User and developer `documentation`_
 * `Python Packaging User Guide`_
