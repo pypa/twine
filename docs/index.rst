@@ -325,6 +325,7 @@ discussion and background.
 Resources
 ---------
 
+* `Discourse forum <https://discuss.python.org/c/packaging/>`_
 * `IRC <https://web.libera.chat/#pypa>`_:
   ``#pypa`` on irc.libera.chat
 * `GitHub repository <https://github.com/pypa/twine>`_
