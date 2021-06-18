@@ -5,7 +5,7 @@ We are happy you have decided to contribute to twine.
 
 Please see `the GitHub repository`_ for code and more documentation,
 and the `official Python Packaging User Guide`_ for user documentation. You can
-also join ``#pypa`` or ``#pypa-dev`` `on Freenode`_, or the `distutils-sig
+also join ``#pypa`` or ``#pypa-dev`` on `IRC`_, or the `distutils-sig
 mailing list`_, to ask questions or get involved.
 
 Getting started
@@ -256,7 +256,7 @@ merge into a single tool; see `ongoing discussion
 
 .. _`official Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`the GitHub repository`: https://github.com/pypa/twine
-.. _`on Freenode`: https://webchat.freenode.net/?channels=%23pypa-dev,pypa
+.. _`IRC`: https://web.libera.chat/#pypa-dev,#pypa
 .. _`distutils-sig mailing list`: https://mail.python.org/mailman3/lists/distutils-sig.python.org/
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/
