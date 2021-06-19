@@ -32,13 +32,13 @@ def test_get_config(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [distutils]
-            index-servers = pypi
+                [distutils]
+                index-servers = pypi
 
-            [pypi]
-            username = testuser
-            password = testpassword
-        """
+                [pypi]
+                username = testuser
+                password = testpassword
+                """
             )
         )
 
@@ -59,10 +59,10 @@ def test_get_config_no_distutils(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [pypi]
-            username = testuser
-            password = testpassword
-        """
+                [pypi]
+                username = testuser
+                password = testpassword
+                """
             )
         )
 
@@ -87,13 +87,13 @@ def test_get_config_no_section(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [distutils]
-            index-servers = pypi foo
+                [distutils]
+                index-servers = pypi foo
 
-            [pypi]
-            username = testuser
-            password = testpassword
-        """
+                [pypi]
+                username = testuser
+                password = testpassword
+                """
             )
         )
 
@@ -113,9 +113,9 @@ def test_get_config_override_pypi_url(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [pypi]
-            repository = http://pypiproxy
-        """
+                [pypi]
+                repository = http://pypiproxy
+                """
             )
         )
 
@@ -147,10 +147,10 @@ def test_empty_userpass(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [pypi]
-            username=
-            password=
-        """
+                [pypi]
+                username=
+                password=
+                """
             )
         )
 

@@ -37,11 +37,11 @@ def test_settings_transforms_repository_config(tmpdir):
         fp.write(
             textwrap.dedent(
                 """
-            [pypi]
-            repository: https://upload.pypi.org/legacy/
-            username:username
-            password:password
-        """
+                [pypi]
+                repository: https://upload.pypi.org/legacy/
+                username:username
+                password:password
+                """
             )
         )
     s = settings.Settings(config_file=pypirc)
