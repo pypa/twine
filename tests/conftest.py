@@ -4,11 +4,15 @@ import textwrap
 import pytest
 
 from twine import settings
+from twine import utils
 
 
 @pytest.fixture()
-def config_file(tmpdir):
-    return tmpdir / ".pypirc"
+def config_file(tmpdir, monkeypatch):
+    path = tmpdir / ".pypirc"
+    # Mimic common case of .pypirc in home directory
+    monkeypatch.setattr(utils, "DEFAULT_CONFIG_FILE", path)
+    return path
 
 
 @pytest.fixture

@@ -171,10 +171,24 @@ def test_get_repository_config_with_invalid_url(config_file, repo_url, message):
         utils.get_repository_from_config(config_file, "pypi", repo_url)
 
 
-def test_get_repository_config_missing_config(config_file):
-    """Raise an exception when a repository isn't defined in .pypirc."""
-    with pytest.raises(exceptions.InvalidConfiguration):
-        utils.get_repository_from_config(config_file, "foobar")
+def test_get_repository_config_missing_repository(write_config_file):
+    """Raise an exception when a custom repository isn't defined in .pypirc."""
+    config_file = write_config_file("")
+    with pytest.raises(
+        exceptions.InvalidConfiguration,
+        match="Missing 'missing-repository'",
+    ):
+        utils.get_repository_from_config(config_file, "missing-repository")
+
+
+@pytest.mark.parametrize("repository", ["pypi", "missing-repository"])
+def test_get_repository_config_missing_file(repository):
+    """Raise an exception when a custom config file doesn't exist."""
+    with pytest.raises(
+        exceptions.InvalidConfiguration,
+        match=r"No such file.*missing-file",
+    ):
+        utils.get_repository_from_config("missing-file", repository)
 
 
 def test_get_config_deprecated_pypirc():

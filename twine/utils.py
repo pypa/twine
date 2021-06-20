@@ -33,6 +33,8 @@ input_func = input
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
+DEFAULT_CONFIG_FILE = "~/.pypirc"
+
 # TODO: In general, it seems to be assumed that the values retrieved from
 # instances of this type aren't None, except for username and password.
 # Type annotations would be cleaner if this were Dict[str, str], but that
@@ -48,13 +50,20 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
 
     Format: https://packaging.python.org/specifications/pypirc/
 
-    If the file doesn't exist, return a default configuration for pypyi and testpypi.
+    If the default config file doesn't exist, return a default configuration for
+    pypyi and testpypi.
     """
+    realpath = os.path.realpath(os.path.expanduser(path))
     parser = configparser.RawConfigParser()
 
-    path = os.path.expanduser(path)
-    if parser.read(path):
-        logger.info(f"Using configuration from {path}")
+    try:
+        with open(realpath) as f:
+            parser.read_file(f)
+            logger.info(f"Using configuration from {realpath}")
+    except FileNotFoundError:
+        # User probably set --config-file, but the file can't be read
+        if path != DEFAULT_CONFIG_FILE:
+            raise
 
     # server-login is obsolete, but retained for backwards compatibility
     defaults: RepositoryConfig = {
@@ -121,8 +130,11 @@ def get_repository_from_config(
             "username": None,
             "password": None,
         }
+
     try:
         return get_config(config_file)[repository]
+    except OSError as exc:
+        raise exceptions.InvalidConfiguration(str(exc))
     except KeyError:
         raise exceptions.InvalidConfiguration(
             f"Missing '{repository}' section from {config_file}.\n"

@@ -52,7 +52,7 @@ class Settings:
         password: Optional[str] = None,
         non_interactive: bool = False,
         comment: Optional[str] = None,
-        config_file: str = "~/.pypirc",
+        config_file: str = utils.DEFAULT_CONFIG_FILE,
         skip_existing: bool = False,
         cacert: Optional[str] = None,
         client_cert: Optional[str] = None,
@@ -244,7 +244,7 @@ class Settings:
         )
         parser.add_argument(
             "--config-file",
-            default="~/.pypirc",
+            default=utils.DEFAULT_CONFIG_FILE,
             help="The .pypirc config file to use.",
         )
         parser.add_argument(
