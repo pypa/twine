@@ -203,7 +203,7 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
         assert "--verbose" in captured.out
 
 
-def test_get_config_old_format(make_settings, pypirc):
+def test_get_config_old_format(make_settings, config_file):
     try:
         make_settings(
             """
@@ -218,7 +218,7 @@ def test_get_config_old_format(make_settings, pypirc):
             for text in [
                 "'pypi'",
                 "--repository-url",
-                pypirc,
+                config_file,
                 "https://docs.python.org/",
             ]
         )

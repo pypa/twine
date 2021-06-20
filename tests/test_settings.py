@@ -14,8 +14,6 @@
 # limitations under the License.
 import argparse
 import logging
-import os.path
-import textwrap
 
 import pytest
 
@@ -29,22 +27,18 @@ def test_settings_takes_no_positional_arguments():
         settings.Settings("a", "b", "c")
 
 
-def test_settings_transforms_repository_config(tmpdir):
+def test_settings_transforms_repository_config(write_config_file):
     """Set repository config and defaults when .pypirc is provided."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
+    config_file = write_config_file(
+        """
+        [pypi]
+        repository: https://upload.pypi.org/legacy/
+        username:username
+        password:password
+        """
+    )
 
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-                [pypi]
-                repository: https://upload.pypi.org/legacy/
-                username:username
-                password:password
-                """
-            )
-        )
-    s = settings.Settings(config_file=pypirc)
+    s = settings.Settings(config_file=config_file)
     assert s.repository_config["repository"] == "https://upload.pypi.org/legacy/"
     assert s.sign is False
     assert s.sign_with == "gpg"
@@ -72,16 +66,14 @@ def test_setup_logging(verbose, log_level):
     "verbose",
     [True, False],
 )
-def test_print_config_path_if_verbose(tmpdir, capsys, make_settings, verbose):
+def test_print_config_path_if_verbose(config_file, capsys, make_settings, verbose):
     """Print the location of the .pypirc config used by the user."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
     make_settings(verbose=verbose)
 
     captured = capsys.readouterr()
 
     if verbose:
-        assert captured.out == f"Using configuration from {pypirc}\n"
+        assert captured.out == f"Using configuration from {config_file}\n"
     else:
         assert captured.out == ""
 
