@@ -12,10 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import sys
 from typing import Any, List, Tuple
 
-from importlib_metadata import entry_points
-from importlib_metadata import version
+if sys.version_info[:2] >= (3, 10):
+    from importlib.metadata import entry_points
+    from importlib.metadata import version
+else:
+    from importlib_metadata import entry_points
+    from importlib_metadata import version
 
 import twine
 
