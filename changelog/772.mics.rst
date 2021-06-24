@@ -1,0 +1,1 @@
+Remove dependency on external importlib_metadata on Python 3.10.
