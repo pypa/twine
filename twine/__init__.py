@@ -27,11 +27,11 @@ __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 import sys
 
 if sys.version_info[:2] >= (3, 10):
-    from importlib import metadata as importlib_metadata
+    from importlib.metadata import metadata as _metadata
 else:
-    import importlib_metadata
+    from importlib_metadata import metadata as _metadata
 
-metadata = importlib_metadata.metadata("twine")
+metadata = _metadata("twine")
 
 
 __title__ = metadata["name"]
