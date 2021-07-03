@@ -33,6 +33,8 @@ input_func = input
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
+DEFAULT_CONFIG_FILE = "~/.pypirc"
+
 # TODO: In general, it seems to be assumed that the values retrieved from
 # instances of this type aren't None, except for username and password.
 # Type annotations would be cleaner if this were Dict[str, str], but that
@@ -43,46 +45,45 @@ RepositoryConfig = Dict[str, Optional[str]]
 logger = logging.getLogger(__name__)
 
 
-def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
-    # even if the config file does not exist, set up the parser
-    # variable to reduce the number of if/else statements
+def get_config(path: str) -> Dict[str, RepositoryConfig]:
+    """Read repository configuration from a file (i.e. ~/.pypirc).
+
+    Format: https://packaging.python.org/specifications/pypirc/
+
+    If the default config file doesn't exist, return a default configuration for
+    pypyi and testpypi.
+    """
+    realpath = os.path.realpath(os.path.expanduser(path))
     parser = configparser.RawConfigParser()
 
-    # this list will only be used if index-servers
-    # is not defined in the config file
-    index_servers = ["pypi", "testpypi"]
+    try:
+        with open(realpath) as f:
+            parser.read_file(f)
+            logger.info(f"Using configuration from {realpath}")
+    except FileNotFoundError:
+        # User probably set --config-file, but the file can't be read
+        if path != DEFAULT_CONFIG_FILE:
+            raise
 
-    # default configuration for each repository
-    defaults: RepositoryConfig = {"username": None, "password": None}
+    # server-login is obsolete, but retained for backwards compatibility
+    defaults: RepositoryConfig = {
+        "username": parser.get("server-login", "username", fallback=None),
+        "password": parser.get("server-login", "password", fallback=None),
+    }
 
-    # Expand user strings in the path
-    path = os.path.expanduser(path)
+    config: DefaultDict[str, RepositoryConfig]
+    config = collections.defaultdict(lambda: defaults.copy())
 
-    logger.info(f"Using configuration from {path}")
+    index_servers = parser.get(
+        "distutils", "index-servers", fallback="pypi testpypi"
+    ).split()
 
-    # Parse the rc file
-    if os.path.isfile(path):
-        parser.read(path)
-
-        # Get a list of index_servers from the config file
-        # format: https://packaging.python.org/specifications/pypirc/
-        if parser.has_option("distutils", "index-servers"):
-            index_servers = parser.get("distutils", "index-servers").split()
-
-        for key in ["username", "password"]:
-            if parser.has_option("server-login", key):
-                defaults[key] = parser.get("server-login", key)
-
-    config: DefaultDict[str, RepositoryConfig] = collections.defaultdict(
-        lambda: defaults.copy()
-    )
-
-    # don't require users to manually configure URLs for these repositories
+    # Don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
     if "testpypi" in index_servers:
         config["testpypi"]["repository"] = TEST_REPOSITORY
 
-    # optional configuration values for individual repositories
+    # Optional configuration values for individual repositories
     for repository in index_servers:
         for key in [
             "username",
@@ -94,8 +95,7 @@ def get_config(path: str = "~/.pypirc") -> Dict[str, RepositoryConfig]:
             if parser.has_option(repository, key):
                 config[repository][key] = parser.get(repository, key)
 
-    # convert the defaultdict to a regular dict at this point
-    # to prevent surprising behavior later on
+    # Convert the defaultdict to a regular dict to prevent surprising behavior later on
     return dict(config)
 
 
@@ -117,30 +117,29 @@ def _validate_repository_url(repository_url: str) -> None:
 
 
 def get_repository_from_config(
-    config_file: str, repository: str, repository_url: Optional[str] = None
+    config_file: str,
+    repository: str,
+    repository_url: Optional[str] = None,
 ) -> RepositoryConfig:
-    # Get our config from, if provided, command-line values for the
-    # repository name and URL, or the .pypirc file
-
+    """Get repository config command-line values or the .pypirc file."""
+    # Prefer CLI `repository_url` over `repository` or .pypirc
     if repository_url:
         _validate_repository_url(repository_url)
-        # prefer CLI `repository_url` over `repository` or .pypirc
         return {
             "repository": repository_url,
             "username": None,
             "password": None,
         }
+
     try:
         return get_config(config_file)[repository]
+    except OSError as exc:
+        raise exceptions.InvalidConfiguration(str(exc))
     except KeyError:
-        msg = (
-            "Missing '{repo}' section from the configuration file\n"
-            "or not a complete URL in --repository-url.\n"
-            "Maybe you have an out-dated '{cfg}' format?\n"
-            "more info: "
-            "https://packaging.python.org/specifications/pypirc/\n"
-        ).format(repo=repository, cfg=config_file)
-        raise exceptions.InvalidConfiguration(msg)
+        raise exceptions.InvalidConfiguration(
+            f"Missing '{repository}' section from {config_file}.\n"
+            f"More info: https://packaging.python.org/specifications/pypirc/ "
+        )
 
 
 _HOSTNAMES = {

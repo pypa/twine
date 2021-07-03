@@ -203,14 +203,14 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
         assert "--verbose" in captured.out
 
 
-def test_get_config_old_format(make_settings, pypirc):
+def test_get_config_old_format(make_settings, config_file):
     try:
         make_settings(
             """
             [server-login]
             username:foo
             password:bar
-        """
+            """
         )
     except KeyError as err:
         assert all(
@@ -218,7 +218,7 @@ def test_get_config_old_format(make_settings, pypirc):
             for text in [
                 "'pypi'",
                 "--repository-url",
-                pypirc,
+                config_file,
                 "https://docs.python.org/",
             ]
         )
@@ -232,7 +232,7 @@ def test_deprecated_repo(make_settings):
             repository: https://pypi.python.org/pypi/
             username:foo
             password:bar
-        """
+            """
         )
 
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
@@ -257,7 +257,7 @@ def test_exception_for_redirect(make_settings):
         repository: https://test.pypi.org/legacy
         username:foo
         password:bar
-    """
+        """
     )
 
     stub_response = pretend.stub(

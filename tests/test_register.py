@@ -19,7 +19,7 @@ def register_settings(make_settings):
         repository: https://test.pypi.org/legacy
         username:foo
         password:bar
-    """
+        """
     )
 
 

@@ -13,7 +13,6 @@
 # limitations under the License.
 
 import os.path
-import textwrap
 
 import pretend
 import pytest
@@ -25,24 +24,19 @@ from twine import utils
 from . import helpers
 
 
-def test_get_config(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-            [distutils]
-            index-servers = pypi
-
-            [pypi]
-            username = testuser
-            password = testpassword
+def test_get_config(write_config_file):
+    config_file = write_config_file(
         """
-            )
-        )
+        [distutils]
+        index-servers = pypi
 
-    assert utils.get_config(pypirc) == {
+        [pypi]
+        username = testuser
+        password = testpassword
+        """
+    )
+
+    assert utils.get_config(config_file) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
@@ -51,22 +45,17 @@ def test_get_config(tmpdir):
     }
 
 
-def test_get_config_no_distutils(tmpdir):
+def test_get_config_no_distutils(write_config_file):
     """Upload by default to PyPI if an index server is not set in .pypirc."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-            [pypi]
-            username = testuser
-            password = testpassword
+    config_file = write_config_file(
         """
-            )
-        )
+        [pypi]
+        username = testuser
+        password = testpassword
+        """
+    )
 
-    assert utils.get_config(pypirc) == {
+    assert utils.get_config(config_file) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
@@ -80,24 +69,19 @@ def test_get_config_no_distutils(tmpdir):
     }
 
 
-def test_get_config_no_section(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-            [distutils]
-            index-servers = pypi foo
-
-            [pypi]
-            username = testuser
-            password = testpassword
+def test_get_config_no_section(write_config_file):
+    config_file = write_config_file(
         """
-            )
-        )
+        [distutils]
+        index-servers = pypi foo
 
-    assert utils.get_config(pypirc) == {
+        [pypi]
+        username = testuser
+        password = testpassword
+        """
+    )
+
+    assert utils.get_config(config_file) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": "testuser",
@@ -106,26 +90,19 @@ def test_get_config_no_section(tmpdir):
     }
 
 
-def test_get_config_override_pypi_url(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-            [pypi]
-            repository = http://pypiproxy
+def test_get_config_override_pypi_url(write_config_file):
+    config_file = write_config_file(
         """
-            )
-        )
+        [pypi]
+        repository = http://pypiproxy
+        """
+    )
 
-    assert utils.get_config(pypirc)["pypi"]["repository"] == "http://pypiproxy"
+    assert utils.get_config(config_file)["pypi"]["repository"] == "http://pypiproxy"
 
 
-def test_get_config_missing(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    assert utils.get_config(pypirc) == {
+def test_get_config_missing(config_file):
+    assert utils.get_config(config_file) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
             "username": None,
@@ -139,44 +116,38 @@ def test_get_config_missing(tmpdir):
     }
 
 
-def test_empty_userpass(tmpdir):
+def test_empty_userpass(write_config_file):
     """Suppress prompts if empty username and password are provided in .pypirc."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
-    with open(pypirc, "w") as fp:
-        fp.write(
-            textwrap.dedent(
-                """
-            [pypi]
-            username=
-            password=
+    config_file = write_config_file(
         """
-            )
-        )
+        [pypi]
+        username=
+        password=
+        """
+    )
 
-    config = utils.get_config(pypirc)
+    config = utils.get_config(config_file)
     pypi = config["pypi"]
 
     assert pypi["username"] == pypi["password"] == ""
 
 
-def test_get_repository_config_missing(tmpdir):
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
+def test_get_repository_config_missing(config_file):
     repository_url = "https://notexisting.python.org/pypi"
     exp = {
         "repository": repository_url,
         "username": None,
         "password": None,
     }
-    assert utils.get_repository_from_config(pypirc, "foo", repository_url) == exp
-    assert utils.get_repository_from_config(pypirc, "pypi", repository_url) == exp
+    assert utils.get_repository_from_config(config_file, "foo", repository_url) == exp
+    assert utils.get_repository_from_config(config_file, "pypi", repository_url) == exp
+
     exp = {
         "repository": utils.DEFAULT_REPOSITORY,
         "username": None,
         "password": None,
     }
-    assert utils.get_repository_from_config(pypirc, "pypi") == exp
+    assert utils.get_repository_from_config(config_file, "pypi") == exp
 
 
 @pytest.mark.parametrize(
@@ -191,22 +162,33 @@ def test_get_repository_config_missing(tmpdir):
         ("foo.bar", "host, scheme were required but missing."),
     ],
 )
-def test_get_repository_config_with_invalid_url(tmpdir, repo_url, message):
+def test_get_repository_config_with_invalid_url(config_file, repo_url, message):
     """Raise an exception for a URL with an invalid/missing scheme and/or host."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-
     with pytest.raises(
         exceptions.UnreachableRepositoryURLDetected,
         match=message,
     ):
-        utils.get_repository_from_config(pypirc, "pypi", repo_url)
+        utils.get_repository_from_config(config_file, "pypi", repo_url)
 
 
-def test_get_repository_config_missing_config(tmpdir):
-    """Raise an exception when a repository isn't defined in .pypirc."""
-    pypirc = os.path.join(str(tmpdir), ".pypirc")
-    with pytest.raises(exceptions.InvalidConfiguration):
-        utils.get_repository_from_config(pypirc, "foobar")
+def test_get_repository_config_missing_repository(write_config_file):
+    """Raise an exception when a custom repository isn't defined in .pypirc."""
+    config_file = write_config_file("")
+    with pytest.raises(
+        exceptions.InvalidConfiguration,
+        match="Missing 'missing-repository'",
+    ):
+        utils.get_repository_from_config(config_file, "missing-repository")
+
+
+@pytest.mark.parametrize("repository", ["pypi", "missing-repository"])
+def test_get_repository_config_missing_file(repository):
+    """Raise an exception when a custom config file doesn't exist."""
+    with pytest.raises(
+        exceptions.InvalidConfiguration,
+        match=r"No such file.*missing-file",
+    ):
+        utils.get_repository_from_config("missing-file", repository)
 
 
 def test_get_config_deprecated_pypirc():
