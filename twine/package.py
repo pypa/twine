@@ -152,9 +152,7 @@ class PackageFile:
             "download_url": meta.download_url,
             "supported_platform": meta.supported_platforms,
             "comment": self.comment,
-            "md5_digest": self.md5_digest,
             "sha256_digest": self.sha2_digest,
-            "blake2_256_digest": self.blake2_256_digest,
             # PEP 314
             "provides": meta.provides,
             "requires": meta.requires,
@@ -173,6 +171,14 @@ class PackageFile:
 
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature
+
+        # FIPS will make us send None/null to a package repository and some of
+        # them don't appreciate that. FIPS disables both MD5 and Blake2
+        if self.md5_digest:
+            data["md5_digest"] = self.md5_digest
+
+        if self.blake2_256_digest:
+            data["blake2_256_digest"] = self.blake2_256_digest
 
         return data
 
