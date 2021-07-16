@@ -262,8 +262,8 @@ def test_fips_hash_manager_blake2(monkeypatch):
     assert hasher.hexdigest() == hashes
 
 
-def test_fips_packagefile(monkeypatch):
-    """Generate a metadata dictionary when FIPS is enabled.
+def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
+    """Generate a valid metadata dictionary for Nexus when FIPS is enabled.
 
     See also: https://github.com/pypa/twine/issues/775
     """

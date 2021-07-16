@@ -172,8 +172,9 @@ class PackageFile:
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature
 
-        # FIPS will make us send None/null to a package repository and some of
-        # them don't appreciate that. FIPS disables both MD5 and Blake2
+        # FIPS disables MD5 and Blake2, making the digest values None. Some package
+        # repositories don't allow null values, so this only sends non-null values.
+        # See also: https://github.com/pypa/twine/issues/775
         if self.md5_digest:
             data["md5_digest"] = self.md5_digest
 
