@@ -1,0 +1,3 @@
+Do not include md5_digest or blake2_256_digest if FIPS mode is enabled on the
+host. This removes those fields from the metadata before sending the metadata
+to the repository.

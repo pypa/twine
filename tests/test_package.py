@@ -262,6 +262,24 @@ def test_fips_hash_manager_blake2(monkeypatch):
     assert hasher.hexdigest() == hashes
 
 
+def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
+    """Generate a valid metadata dictionary for Nexus when FIPS is enabled.
+
+    See also: https://github.com/pypa/twine/issues/775
+    """
+    replaced_blake2b = pretend.raiser(ValueError("fipsmode"))
+    replaced_md5 = pretend.raiser(ValueError("fipsmode"))
+    monkeypatch.setattr(package_file.hashlib, "md5", replaced_md5)
+    monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
+
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    pf = package_file.PackageFile.from_filename(filename, None)
+
+    mddict = pf.metadata_dictionary()
+    assert "md5_digest" not in mddict
+    assert "blake2_256_digest" not in mddict
+
+
 def test_pkginfo_returns_no_metadata(monkeypatch):
     """Raise an exception when pkginfo can't interpret the metadata.
 
