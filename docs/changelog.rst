@@ -12,8 +12,8 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
-3.4.1 (2021-03-16)
-------------------
+Twine 3.4.1 (2021-03-16)
+------------------------
 
 Bugfixes
 ^^^^^^^^
@@ -21,8 +21,8 @@ Bugfixes
 - Fix a regression that was causing some namespace packages with dots in them fail to upload to PyPI. (`#745 <https://github.com/pypa/twine/issues/745>`_)
 
 
-3.4.0 (2021-03-15)
-------------------
+Twine 3.4.0 (2021-03-15)
+------------------------
 
 Features
 ^^^^^^^^
@@ -32,8 +32,8 @@ Features
 - Eliminate dependency on setuptools/pkg_resources and replace with packaging and importlib_metadata. (`#736 <https://github.com/pypa/twine/issues/736>`_)
 
 
-3.3.0 (2020-12-23)
-------------------
+Twine 3.3.0 (2020-12-23)
+------------------------
 
 Features
 ^^^^^^^^
@@ -61,8 +61,8 @@ Improved Documentation
 - Adopt towncrier for the changleog (`#718 <https://github.com/pypa/twine/issues/718>`_)
 
 
-3.2.0 (2020-06-24)
-------------------
+Twine 3.2.0 (2020-06-24)
+------------------------
 
 Features
 ^^^^^^^^
@@ -81,24 +81,24 @@ Bugfixes
 - Fix inaccurate retry message during ``upload`` (`#611 <https://github.com/pypa/twine/issues/611>`_)
 - Clarify error messages for archive format (`#601 <https://github.com/pypa/twine/issues/601>`_)
 
-3.1.1 (2019-11-27)
-------------------
+Twine 3.1.1 (2019-11-27)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Restore ``--non-interactive`` as a flag not expecting an argument. (`#548 <https://github.com/pypa/twine/issues/548>`_)
 
-3.1.0 (2019-11-23)
-------------------
+Twine 3.1.0 (2019-11-23)
+------------------------
 
 Features
 ^^^^^^^^
 
 - Add support for specifying ``--non-interactive`` as an environment variable. (`#547 <https://github.com/pypa/twine/issues/547>`_)
 
-3.0.0 (2019-11-18)
-------------------
+Twine 3.0.0 (2019-11-18)
+------------------------
 
 Features
 ^^^^^^^^
@@ -113,8 +113,8 @@ Bugfixes
 
 - More robust handling of server response in ``--skip-existing`` (`#332 <https://github.com/pypa/twine/issues/332>`_)
 
-2.0.0 (2019-09-24)
-------------------
+Twine 2.0.0 (2019-09-24)
+------------------------
 
 Features
 ^^^^^^^^
@@ -126,16 +126,16 @@ Bugfixes
 
 - Require requests 2.20 or later to avoid reported security vulnerabilities in earlier releases. (`#491 <https://github.com/pypa/twine/issues/491>`_)
 
-1.15.0 (2019-09-17)
--------------------
+Twine 1.15.0 (2019-09-17)
+-------------------------
 
 Features
 ^^^^^^^^
 
 - Improved output on ``check`` command: Prints a message when there are no distributions given to check. Improved handling of errors in a distribution's markup, avoiding messages flowing through to the next distribution's errors. (`#488 <https://github.com/pypa/twine/issues/488>`_)
 
-1.14.0 (2019-09-06)
--------------------
+Twine 1.14.0 (2019-09-06)
+-------------------------
 
 Features
 ^^^^^^^^
@@ -149,8 +149,8 @@ Bugfixes
 
 - Fail more gracefully when encountering bad metadata (`#341 <https://github.com/pypa/twine/issues/341>`_)
 
-1.13.0 (2019-02-13)
--------------------
+Twine 1.13.0 (2019-02-13)
+-------------------------
 
 Features
 ^^^^^^^^
@@ -181,16 +181,16 @@ Misc
 
 - Refactor tox env and travis config. (`#439 <https://github.com/pypa/twine/issues/439>`_)
 
-1.12.1 (2018-09-24)
--------------------
+Twine 1.12.1 (2018-09-24)
+-------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Fix regression with upload exit code (`#404 <https://github.com/pypa/twine/issues/404>`_)
 
-1.12.0 (2018-09-24)
--------------------
+Twine 1.12.0 (2018-09-24)
+-------------------------
 
 Features
 ^^^^^^^^
@@ -204,8 +204,8 @@ Bugfixes
 
 - Avoid MD5 when Python is compiled in FIPS mode (`#367 <https://github.com/pypa/twine/issues/367>`_)
 
-1.11.0 (2018-03-19)
--------------------
+Twine 1.11.0 (2018-03-19)
+-------------------------
 
 Features
 ^^^^^^^^
@@ -226,8 +226,8 @@ Misc
 - Add new maintainer, release checklists. (`#314 <https://github.com/pypa/twine/issues/314>`_)
 - Add instructions on how to use keyring. (`#277 <https://github.com/pypa/twine/issues/277>`_)
 
-1.10.0 (2018-03-07)
--------------------
+Twine 1.10.0 (2018-03-07)
+-------------------------
 
 Features
 ^^^^^^^^
@@ -252,16 +252,16 @@ Bugfixes
 - Fix ``--repository[-url]`` help text (`#265 <https://github.com/pypa/twine/issues/265>`_)
 - Remove obsolete registration guidance (`#200 <https://github.com/pypa/twine/issues/200>`_)
 
-1.9.1 (2017-05-27)
-------------------
+Twine 1.9.1 (2017-05-27)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Blacklist known bad versions of Requests. (`#253 <https://github.com/pypa/twine/issues/253>`_)
 
-1.9.0 (2017-05-22)
-------------------
+Twine 1.9.0 (2017-05-22)
+------------------------
 
 Bugfixes
 ^^^^^^^^
@@ -276,8 +276,8 @@ Misc
 - Twine will now resolve passwords using the `keyring <https://pypi.org/project/keyring/>`_ if available. Module can be required with the ``keyring`` extra.
 - Twine will use ``hashlib.blake2b`` on Python 3.6+ instead of pyblake2
 
-1.8.1 (2016-08-09)
-------------------
+Twine 1.8.1 (2016-08-09)
+------------------------
 
 Misc
 ^^^^
@@ -292,8 +292,8 @@ Misc
     :file:`.pypirc` file.
 
 
-1.8.0 (2016-08-08)
-------------------
+Twine 1.8.0 (2016-08-08)
+------------------------
 
 Features
 ^^^^^^^^
@@ -315,16 +315,16 @@ Misc
 - Stop testing on Python 2.6.
 - Warn users if they receive a 500 error when uploading to ``*pypi.python.org`` (`#199 <https://github.com/pypa/twine/issues/199>`_)
 
-1.7.4 (2016-07-09)
-------------------
+Twine 1.7.4 (2016-07-09)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Correct a packaging error.
 
-1.7.3 (2016-07-08)
-------------------
+Twine 1.7.3 (2016-07-08)
+------------------------
 
 Bugfixes
 ^^^^^^^^
@@ -336,24 +336,24 @@ Misc
 
 - Avoid attempts to upload a package if we can find it on Legacy PyPI.
 
-1.7.2 (2016-07-05)
-------------------
+Twine 1.7.2 (2016-07-05)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Fix issue where we were checking the existence of packages even if the user didn't specify ``--skip-existing``. (`#189 <https://github.com/pypa/twine/issues/189>`_) (`#191 <https://github.com/pypa/twine/issues/191>`_)
 
-1.7.1 (2016-07-05)
-------------------
+Twine 1.7.1 (2016-07-05)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Clint was not specified in the wheel metadata as a dependency. (`#187 <https://github.com/pypa/twine/issues/187>`_)
 
-1.7.0 (2016-07-04)
-------------------
+Twine 1.7.0 (2016-07-04)
+------------------------
 
 Features
 ^^^^^^^^
@@ -369,16 +369,16 @@ Bugfixes
 
 - Allow passwords to have ``%``\ s in them. (`#186 <https://github.com/pypa/twine/issues/186>`_)
 
-1.6.5 (2015-12-16)
-------------------
+Twine 1.6.5 (2015-12-16)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Bump requests-toolbelt version to ensure we avoid ConnectionErrors (`#155 <https://github.com/pypa/twine/issues/155>`_)
 
-1.6.4 (2015-10-27)
-------------------
+Twine 1.6.4 (2015-10-27)
+------------------------
 
 Bugfixes
 ^^^^^^^^
@@ -386,16 +386,16 @@ Bugfixes
 - Paths with hyphens in them break the Wheel regular expression. (`#145 <https://github.com/pypa/twine/issues/145>`_)
 - Exception while accessing the ``repository`` key (sic) when raising a redirect exception. (`#146 <https://github.com/pypa/twine/issues/146>`_)
 
-1.6.3 (2015-10-05)
-------------------
+Twine 1.6.3 (2015-10-05)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Fix uploading signatures causing a 500 error after large file support was added. (`#137 <https://github.com/pypa/twine/issues/137>`_, `#140 <https://github.com/pypa/twine/issues/140>`_)
 
-1.6.2 (2015-09-28)
-------------------
+Twine 1.6.2 (2015-09-28)
+------------------------
 
 Bugfixes
 ^^^^^^^^
@@ -410,16 +410,16 @@ Bugfixes
     signatures to PyPI. Both were fixed as part of this.
 
 
-1.6.1 (2015-09-18)
-------------------
+Twine 1.6.1 (2015-09-18)
+------------------------
 
 Bugfixes
 ^^^^^^^^
 
 - Fix signing support for uploads (`#130 <https://github.com/pypa/twine/issues/130>`_)
 
-1.6.0 (2015-09-14)
-------------------
+Twine 1.6.0 (2015-09-14)
+------------------------
 
 Features
 ^^^^^^^^
@@ -438,8 +438,8 @@ Bugfixes
 - Warnings triggered by pkginfo searching for ``PKG-INFO`` files should no longer be user visible. (`#114 <https://github.com/pypa/twine/issues/114>`_)
 - Provide more helpful messages if :file:`.pypirc` is out of date. (`#111 <https://github.com/pypa/twine/issues/111>`_)
 
-1.5.0 (2015-03-10)
-------------------
+Twine 1.5.0 (2015-03-10)
+------------------------
 
 Features
 ^^^^^^^^
@@ -457,8 +457,8 @@ Misc
 
 - Add lower-limit to requests dependency
 
-1.4.0 (2014-12-12)
-------------------
+Twine 1.4.0 (2014-12-12)
+------------------------
 
 Features
 ^^^^^^^^
@@ -476,16 +476,16 @@ Bugfixes
 - Prevent ResourceWarning from being shown (`#28 <https://github.com/pypa/twine/issues/28>`_)
 - Add support for uploading Windows installers (`#26 <https://github.com/pypa/twine/issues/26>`_)
 
-1.3.0 (2014-03-31)
-------------------
+Twine 1.3.0 (2014-03-31)
+------------------------
 
 Features
 ^^^^^^^^
 
 - Additional functionality.
 
-1.2.2 (2013-10-03)
-------------------
+Twine 1.2.2 (2013-10-03)
+------------------------
 
 Features
 ^^^^^^^^
