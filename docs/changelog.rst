@@ -12,6 +12,19 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.4.2 (2021-07-20)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Improve error message for unsupported metadata. (`#755 <https://github.com/pypa/twine/issues/755>`_)
+- Improve error message for a missing config file. (`#770 <https://github.com/pypa/twine/issues/770>`_)
+- Do not include md5_digest or blake2_256_digest if FIPS mode is enabled on the
+  host. This removes those fields from the metadata before sending the metadata
+  to the repository. (`#776 <https://github.com/pypa/twine/issues/776>`_)
+
+
 Twine 3.4.1 (2021-03-16)
 ------------------------
 
