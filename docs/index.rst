@@ -12,9 +12,6 @@ It provides build system independent uploads of source and binary
 `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
-.. contents:: Table of Contents
-    :local:
-
 Why Should I Use This?
 ----------------------
 
