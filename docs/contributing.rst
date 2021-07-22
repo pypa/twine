@@ -233,17 +233,43 @@ Making a new release
 
 A checklist for creating, testing, and distributing a new version.
 
-#. Choose a version number, e.g. ``VERSION=3.3.0``.
-#. Create a new branch, e.g. ``git switch -c release-$VERSION``.
-#. Run ``tox -e changelog -- --version $VERSION`` to build
-   :file:`docs/changelog.rst`.
-#. Commit and open a pull request for review.
-#. Merge the pull request, and ensure the `GitHub Actions`_ build passes.
-#. Create a new git tag with ``git tag -m "Release v$VERSION" $VERSION``.
-#. Push the new tag with ``git push upstream $VERSION``.
-#. Watch the release in `GitHub Actions`_.
-#. Send announcement email to `distutils-sig mailing list`_ and celebrate.
+#. Choose a version number, and create a new branch
 
+   .. code-block:: console
+
+      VERSION=3.4.2
+
+      git switch -c release-$VERSION
+
+#. Update :file:`docs/changelog.rst`
+
+   .. code-block:: console
+
+      tox -e changelog -- --version $VERSION
+
+      git commit -am "Update changelog for $VERSION"
+
+#. Open a pull request for review
+
+#. Merge the pull request, and ensure the `GitHub Actions`_ build passes
+
+#. Create a new git tag for the version
+
+   .. code-block:: console
+
+      git switch main
+
+      git pull --ff-only upstream main
+
+      git tag -m "Release v$VERSION" $VERSION
+
+#. Push to start the release, and watch it in `GitHub Actions`_
+
+   .. code-block:: console
+
+      git push upstream $VERSION
+
+#. View the new release on `PyPI`_
 
 Future development
 ------------------
@@ -269,3 +295,4 @@ merge into a single tool; see `ongoing discussion
 .. _`mypy`: https://mypy.readthedocs.io/
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`open issues`: https://github.com/pypa/twine/issues
+.. _`PyPI`: https://pypi.org/project/twine/
