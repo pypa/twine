@@ -15,11 +15,12 @@
 Welcome to twine's documentation!
 =================================
 
-Twine is `a utility`_ for `publishing`_ Python packages on `PyPI`_.
+.. include:: ../README.rst
+   :end-before: DO-NOT-REMOVE-docs-badges-END
 
-It provides build system independent uploads of source and binary
-`distribution artifacts <distributions_>`_ for both new and existing
-`projects`_.
+.. include:: ../README.rst
+   :start-after: DO-NOT-REMOVE-docs-intro-START
+   :end-before: DO-NOT-REMOVE-docs-intro-END
 
 Why Should I Use This?
 ----------------------
@@ -351,9 +352,6 @@ Everyone interacting in the Twine project's codebases, issue
 trackers, chat rooms, and mailing lists is expected to follow the
 `PSF Code of Conduct`_.
 
-.. _`a utility`: https://pypi.org/project/twine/
-.. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
-.. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`pypirc`: https://packaging.python.org/specifications/pypirc/
 .. _`Python Packaging User Guide`:
