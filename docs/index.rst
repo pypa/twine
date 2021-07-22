@@ -3,6 +3,15 @@
     You can adapt this file completely to your liking, but it should at least
     contain the root `toctree` directive.
 
+.. toctree::
+    :caption: Further documentation
+    :hidden:
+    :maxdepth: 3
+
+    contributing
+    changelog
+    Python Packaging User Guide <https://packaging.python.org/tutorials/distributing-packages/>
+
 Welcome to twine's documentation!
 =================================
 
@@ -369,13 +378,3 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`no longer necessary if you are uploading to pypi.org`:
     https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
-
-.. toctree::
-    :caption: Further documentation
-    :maxdepth: 3
-
-    contributing
-    changelog
-    Python Packaging User Guide <https://packaging.python.org/tutorials/distributing-packages/>
-
-* :ref:`search`
