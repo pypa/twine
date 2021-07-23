@@ -58,9 +58,9 @@ Features
 Installation
 ------------
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ pip install twine
+    pip install twine
 
 Using Twine
 -----------
@@ -276,15 +276,15 @@ which you may upload.
 
 For example, to set a username and password for PyPI:
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ keyring set https://upload.pypi.org/legacy/ your-username
+    keyring set https://upload.pypi.org/legacy/ your-username
 
 or
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
+    python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
 and enter the password when prompted.
 
@@ -307,15 +307,15 @@ Keyring will cause unexpected or undesirable prompts from the backing system.
 In these cases, it may be desirable to disable Keyring altogether. To disable
 Keyring, simply invoke:
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ keyring --disable
+    keyring --disable
 
 or
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ python -m keyring --disable
+    python -m keyring --disable
 
 That command will configure for the current user the "null" keyring,
 effectively disabling the functionality, and allowing Twine to prompt

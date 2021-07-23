@@ -15,13 +15,13 @@ Getting started
 We use `tox`_ to run tests, check code style, and build the documentation.
 To install ``tox``, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     python3 -m pip install tox
 
 Clone the twine repository from GitHub, then run:
 
-.. code-block:: console
+.. code-block:: bash
 
     cd /path/to/your/local/twine
     tox -e dev
@@ -38,7 +38,7 @@ below on the whole codebase.
 
 To use the virtual environment, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     source venv/bin/activate
 
@@ -50,7 +50,7 @@ appreciated.
 
 To preview the docs while you're making changes, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e watch-docs
 
@@ -59,7 +59,7 @@ Then open a web browser to `<http://127.0.0.1:8000>`_.
 When you're done making changes, lint and build the docs locally before making
 a pull request. In your active virtual environment, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e docs
 
@@ -70,19 +70,19 @@ Code style
 
 To automatically reformat your changes with `isort`_ and `black`_, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e format
 
 To detect any remaining code smells with `flake8`_, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e lint
 
 To perform strict type-checking using `mypy`_, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e types
 
@@ -98,13 +98,13 @@ We use `pytest`_ for writing and running tests.
 
 To run the tests in your virtual environment, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e py
 
 To pass options to ``pytest``, e.g. the name of a test, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
@@ -112,20 +112,20 @@ Twine is continuously tested against Python 3.6, 3.7, 3.8, and 3.9 using
 `GitHub Actions`_. To run the tests against a specific version, e.g. Python
 3.6, you will need it installed on your machine. Then, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e py36
 
 To run the "integration" tests of uploading to real package indexes, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox -e integration
 
 To run the tests against all supported Python versions, check code style,
 and build the documentation, run:
 
-.. code-block:: console
+.. code-block:: bash
 
     tox
 
@@ -235,7 +235,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Choose a version number, and create a new branch
 
-   .. code-block:: console
+   .. code-block:: bash
 
       VERSION=3.4.2
 
@@ -243,7 +243,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Update :file:`docs/changelog.rst`
 
-   .. code-block:: console
+   .. code-block:: bash
 
       tox -e changelog -- --version $VERSION
 
@@ -255,7 +255,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Create a new git tag for the version
 
-   .. code-block:: console
+   .. code-block:: bash
 
       git switch main
 
@@ -265,7 +265,7 @@ A checklist for creating, testing, and distributing a new version.
 
 #. Push to start the release, and watch it in `GitHub Actions`_
 
-   .. code-block:: console
+   .. code-block:: bash
 
       git push upstream $VERSION
 
