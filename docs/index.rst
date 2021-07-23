@@ -16,11 +16,11 @@ Welcome to twine's documentation!
 =================================
 
 .. include:: ../README.rst
-   :end-before: DO-NOT-REMOVE-docs-badges-END
+   :end-before: docs-badges-end
 
 .. include:: ../README.rst
-   :start-after: DO-NOT-REMOVE-docs-intro-START
-   :end-before: DO-NOT-REMOVE-docs-intro-END
+   :start-after: docs-intro-start
+   :end-before: docs-intro-end
 
 Why Should I Use This?
 ----------------------
@@ -364,9 +364,6 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
-.. _`projects`: https://packaging.python.org/glossary/#term-Project
-.. _`distributions`:
-    https://packaging.python.org/glossary/#term-Distribution-Package
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
