@@ -67,25 +67,23 @@ Using Twine
 
 1. Create some distributions in the normal way:
 
-   .. code-block:: console
+   .. code-block:: bash
 
-       $ python setup.py sdist bdist_wheel
+       python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right.
-   Twine will automatically prompt for your username and password:
+2. Upload to `Test PyPI`_ and verify things look right:
 
-   .. code-block:: console
+   .. code-block:: bash
 
-       $ twine upload -r testpypi dist/*
-       username: ...
-       password:
-       ...
+       twine upload -r testpypi dist/*
+
+   Twine will prompt for your username and password.
 
 3. Upload to `PyPI`_:
 
-   .. code-block:: console
+   .. code-block:: bash
 
-       $ twine upload dist/*
+       twine upload dist/*
 
 4. Done!
 
