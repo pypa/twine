@@ -9,6 +9,7 @@
     :maxdepth: 3
 
     contributing
+    Code Of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
     changelog
     Python Packaging User Guide <https://packaging.python.org/tutorials/distributing-packages/>
 
