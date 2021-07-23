@@ -100,9 +100,8 @@ Commands
 
 Uploads one or more distributions to a repository.
 
-.. code-block:: console
+.. code-block:: text
 
-    $ twine upload -h
     usage: twine upload [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
                         [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
                         [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
@@ -166,9 +165,8 @@ Uploads one or more distributions to a repository.
 Checks whether your distribution's long description will render correctly on
 PyPI.
 
-.. code-block:: console
+.. code-block:: text
 
-    $ twine check -h
     usage: twine check [-h] [--strict] dist [dist ...]
 
     positional arguments:
@@ -188,9 +186,7 @@ are using a different package index.
 
 For completeness, its usage:
 
-.. code-block:: console
-
-    $ twine register -h
+.. code-block:: text
 
     usage: twine register [-h] -r REPOSITORY [--repository-url REPOSITORY_URL]
                           [-u USERNAME] [-p PASSWORD] [-c COMMENT]
