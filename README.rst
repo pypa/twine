@@ -41,8 +41,8 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`distributions`:
-    https://packaging.python.org/glossary/#term-distribution-package
-.. _`projects`: https://packaging.python.org/glossary/#term-project
+    https://packaging.python.org/glossary/#term-Distribution-Package
+.. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
