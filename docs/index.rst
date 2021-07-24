@@ -22,6 +22,12 @@ It provides build system independent uploads of source and binary
 `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
+Everyone interacting in the Twine project's codebases, issue
+trackers, chat rooms, and mailing lists is expected to follow the
+`PSF Code of Conduct`_.
+
+If you'd like to contribute, see the `developer documentation`_.
+
 Why Should I Use This?
 ----------------------
 
@@ -333,24 +339,10 @@ Resources
 ---------
 
 * `GitHub repository <https://github.com/pypa/twine>`_
-* User and developer `documentation`_
 * `Python Packaging User Guide`_
 * `Python packaging issue tracker <https://github.com/pypa/packaging-problems>`_
 * `IRC <https://web.libera.chat/#pypa>`_:
   ``#pypa`` on irc.libera.chat
-
-Contributing
-------------
-
-See our `developer documentation`_ for how to get started, an
-architectural overview, and our future development plans.
-
-Code of Conduct
----------------
-
-Everyone interacting in the Twine project's codebases, issue
-trackers, chat rooms, and mailing lists is expected to follow the
-`PSF Code of Conduct`_.
 
 .. _`a utility`: https://pypi.org/project/twine/
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
@@ -364,7 +356,6 @@ trackers, chat rooms, and mailing lists is expected to follow the
     https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
 .. _`additional installation steps`:
     https://pypi.org/project/keyring/#installation-linux
-.. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
