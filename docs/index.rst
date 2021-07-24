@@ -10,14 +10,14 @@
     changelog
     contributing
     Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
+    PyPI Project <https://pypi.org/project/twine/>
     GitHub Repository <https://github.com/pypa/twine>
     Python Packaging Tutorial <https://packaging.python.org/tutorials/distributing-packages/>
 
-Welcome to twine's documentation!
-=================================
+Twine
+=====
 
-Twine is `a utility`_ for `publishing`_ Python packages on `PyPI`_.
-
+Twine is a utility for `publishing`_ Python packages on `PyPI`_.
 It provides build system independent uploads of source and binary
 `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
@@ -335,7 +335,6 @@ for passwords.
 See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
 
-.. _`a utility`: https://pypi.org/project/twine/
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
