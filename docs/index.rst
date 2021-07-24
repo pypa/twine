@@ -4,14 +4,14 @@
     contain the root `toctree` directive.
 
 .. toctree::
-    :caption: Further documentation
     :hidden:
     :maxdepth: 3
 
-    contributing
-    Code Of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
     changelog
-    Python Packaging User Guide <https://packaging.python.org/tutorials/distributing-packages/>
+    contributing
+    Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
+    GitHub Repository <https://github.com/pypa/twine>
+    Python Packaging Tutorial <https://packaging.python.org/tutorials/distributing-packages/>
 
 Welcome to twine's documentation!
 =================================
@@ -334,15 +334,6 @@ for passwords.
 
 See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
-
-Resources
----------
-
-* `GitHub repository <https://github.com/pypa/twine>`_
-* `Python Packaging User Guide`_
-* `Python packaging issue tracker <https://github.com/pypa/packaging-problems>`_
-* `IRC <https://web.libera.chat/#pypa>`_:
-  ``#pypa`` on irc.libera.chat
 
 .. _`a utility`: https://pypi.org/project/twine/
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
