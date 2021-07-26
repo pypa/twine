@@ -22,12 +22,6 @@ It provides build system independent uploads of source and binary
 `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
-Everyone interacting in the Twine project's codebases, issue
-trackers, chat rooms, and mailing lists is expected to follow the
-`PSF Code of Conduct`_.
-
-If you'd like to contribute, see the `developer documentation`_.
-
 Why Should I Use This?
 ----------------------
 
