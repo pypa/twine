@@ -59,34 +59,32 @@ Features
 Installation
 ------------
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ pip install twine
+    pip install twine
 
 Using Twine
 -----------
 
 1. Create some distributions in the normal way:
 
-    .. code-block:: console
+   .. code-block:: bash
 
-       $ python setup.py sdist bdist_wheel
+       python setup.py sdist bdist_wheel
 
-2. Upload with ``twine`` to `Test PyPI`_ and verify things look right.
-   Twine will automatically prompt for your username and password:
+2. Upload to `Test PyPI`_ and verify things look right:
 
-    .. code-block:: console
+   .. code-block:: bash
 
-       $ twine upload -r testpypi dist/*
-       username: ...
-       password:
-       ...
+       twine upload -r testpypi dist/*
+
+   Twine will prompt for your username and password.
 
 3. Upload to `PyPI`_:
 
-    .. code-block:: console
+   .. code-block:: bash
 
-       $ twine upload dist/*
+       twine upload dist/*
 
 4. Done!
 
@@ -101,9 +99,8 @@ Commands
 
 Uploads one or more distributions to a repository.
 
-.. code-block:: console
+.. code-block:: text
 
-    $ twine upload -h
     usage: twine upload [-h] [-r REPOSITORY] [--repository-url REPOSITORY_URL]
                         [-s] [--sign-with SIGN_WITH] [-i IDENTITY] [-u USERNAME]
                         [-p PASSWORD] [-c COMMENT] [--config-file CONFIG_FILE]
@@ -167,9 +164,8 @@ Uploads one or more distributions to a repository.
 Checks whether your distribution's long description will render correctly on
 PyPI.
 
-.. code-block:: console
+.. code-block:: text
 
-    $ twine check -h
     usage: twine check [-h] [--strict] dist [dist ...]
 
     positional arguments:
@@ -189,9 +185,7 @@ are using a different package index.
 
 For completeness, its usage:
 
-.. code-block:: console
-
-    $ twine register -h
+.. code-block:: text
 
     usage: twine register [-h] -r REPOSITORY [--repository-url REPOSITORY_URL]
                           [-u USERNAME] [-p PASSWORD] [-c COMMENT]
@@ -281,15 +275,15 @@ which you may upload.
 
 For example, to set a username and password for PyPI:
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ keyring set https://upload.pypi.org/legacy/ your-username
+    keyring set https://upload.pypi.org/legacy/ your-username
 
 or
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ python3 -m keyring set https://upload.pypi.org/legacy/ your-username
+    python3 -m keyring set https://upload.pypi.org/legacy/ your-username
 
 and enter the password when prompted.
 
@@ -312,15 +306,15 @@ Keyring will cause unexpected or undesirable prompts from the backing system.
 In these cases, it may be desirable to disable Keyring altogether. To disable
 Keyring, simply invoke:
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ keyring --disable
+    keyring --disable
 
 or
 
-.. code-block:: console
+.. code-block:: bash
 
-    $ python -m keyring --disable
+    python -m keyring --disable
 
 That command will configure for the current user the "null" keyring,
 effectively disabling the functionality, and allowing Twine to prompt
