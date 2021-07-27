@@ -1,13 +1,17 @@
 Contributing
 ============
 
-We are happy you have decided to contribute to twine.
+We are happy you have decided to contribute to Twine.
 
 Please see `the GitHub repository`_ for code and more documentation,
 and the `official Python Packaging User Guide`_ for user documentation.
 To ask questions or get involved, you can join the `Python Packaging
 Discourse forum`_, ``#pypa`` or ``#pypa-dev`` on `IRC`_, or the
 `distutils-sig mailing list`_.
+
+Everyone interacting in the Twine project's codebases, issue
+trackers, chat rooms, and mailing lists is expected to follow the
+`PSF Code of Conduct`_.
 
 Getting started
 ---------------
@@ -285,6 +289,7 @@ merge into a single tool; see `ongoing discussion
 .. _`Python Packaging Discourse forum`: https://discuss.python.org/c/packaging/
 .. _`IRC`: https://web.libera.chat/#pypa-dev,#pypa
 .. _`distutils-sig mailing list`: https://mail.python.org/mailman3/lists/distutils-sig.python.org/
+.. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`virtual environment`: https://packaging.python.org/guides/installing-using-pip-and-virtual-environments/
 .. _`tox`: https://tox.readthedocs.io/
 .. _`pytest`: https://docs.pytest.org/
