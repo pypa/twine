@@ -101,7 +101,6 @@ Uploads one or more distributions to a repository.
 
 .. program-output:: twine upload -h
 
-    
 ``twine check``
 ^^^^^^^^^^^^^^^
 
