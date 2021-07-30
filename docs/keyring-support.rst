@@ -43,7 +43,7 @@ In most cases, simply not setting a password with ``keyring`` will allow Twine
 to fall back to prompting for a password. In some cases, the presence of
 Keyring will cause unexpected or undesirable prompts from the backing system.
 In these cases, it may be desirable to disable Keyring altogether. To disable
-Keyring, simply invoke:
+Keyring, run:
 
 .. code-block:: bash
 
