@@ -115,10 +115,10 @@ PyPI.
 
 .. warning::
 
-  The ``register`` command is `no longer necessary if you are
-  uploading to pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_
-  (the new PyPI software running on pypi.org). However, you may need this if you
-  are using a different package index.
+   The ``register`` command is `no longer necessary if you are
+   uploading to pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_
+   (the new PyPI software running on pypi.org). However, you may need this if you
+   are using a different package index.
 
 For completeness, its usage:
 
