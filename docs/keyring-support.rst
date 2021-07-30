@@ -25,7 +25,7 @@ or
 and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
-URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
+URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
 
 The next time you run ``twine``, it will prompt you for a username, and then
 get the appropriate password from the keyring.
