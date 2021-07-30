@@ -55,11 +55,7 @@ or
 
     python -m keyring --disable
 
-That command will configure for the current user the "null" keyring,
-effectively disabling the functionality, and allowing Twine to prompt
-for passwords.
-
-See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
+See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
 
 .. _`keyring`: https://pypi.org/project/keyring/
