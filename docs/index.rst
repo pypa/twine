@@ -7,7 +7,6 @@
     :hidden:
     :maxdepth: 3
 
-    keyring-support
     changelog
     contributing
     Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
@@ -117,7 +116,7 @@ PyPI.
 
    The ``register`` command is `no longer necessary if you are
    uploading to pypi.org`_.  As such, it is `not supported by Warehouse`_
-   (the software running on pypi.org). However, you may need it if you
+   (the software running on `pypi.org`_). However, you may need it if you
    are using a different package index.
 
 For completeness, its usage:
@@ -153,12 +152,78 @@ on a CI/build server).
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
 
+Keyring Support
+---------------
+
+Instead of typing in your password every time you upload a distribution, Twine
+allows storing a username and password securely using `keyring`_.
+Keyring is installed with Twine but for some systems (Linux mainly) may
+require `additional installation steps`_.
+
+Once Twine is installed, use the ``keyring`` program to set a
+username and password to use for each package index (repository) to
+which you may upload.
+
+For example, to set a username and password for PyPI:
+
+.. code-block:: bash
+
+    keyring set https://upload.pypi.org/legacy/ your-username
+
+or
+
+.. code-block:: bash
+
+    python3 -m keyring set https://upload.pypi.org/legacy/ your-username
+
+and enter the password when prompted.
+
+For a different repository, replace the URL with the relevant repository
+URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
+
+The next time you run ``twine``, it will prompt you for a username, and then
+get the appropriate password from the keyring.
+
+.. note::
+
+   If you are using Linux in a headless environment (such as on a
+   server) you'll need to do some additional steps to ensure that Keyring can
+   store secrets securely. See `Using Keyring on headless systems`_.
+
+Disabling Keyring
+^^^^^^^^^^^^^^^^^
+
+In most cases, simply not setting a password with ``keyring`` will allow Twine
+to fall back to prompting for a password. In some cases, the presence of
+Keyring will cause unexpected or undesirable prompts from the backing system.
+In these cases, it may be desirable to disable Keyring altogether. To disable
+Keyring, run:
+
+.. code-block:: bash
+
+    keyring --disable
+
+or
+
+.. code-block:: bash
+
+    python -m keyring --disable
+
+See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
+discussion and background.
+
+
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`pypirc`: https://packaging.python.org/specifications/pypirc/
 .. _`Python Packaging User Guide`:
     https://packaging.python.org/tutorials/distributing-packages/
+.. _`keyring`: https://pypi.org/project/keyring/
+.. _`Using Keyring on headless systems`:
+    https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
+.. _`additional installation steps`:
+    https://pypi.org/project/keyring/#installation-linux
 .. _`developer documentation`:
     https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
@@ -169,4 +234,5 @@ on a CI/build server).
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
 .. _`no longer necessary if you are uploading to pypi.org`:
     https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
-.. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
+.. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`pypi.org`: https://pypi.org
