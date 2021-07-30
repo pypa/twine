@@ -32,9 +32,9 @@ grab the appropriate password from the keyring.
 
 .. note::
 
-    If you are using Linux in a headless environment (such as on a
-    server) you'll need to do some additional steps to ensure that Keyring can
-    store secrets securely. See `Using Keyring on headless systems`_.
+   If you are using Linux in a headless environment (such as on a
+   server) you'll need to do some additional steps to ensure that Keyring can
+   store secrets securely. See `Using Keyring on headless systems`_.
 
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
