@@ -21,14 +21,14 @@ To install ``tox``, run:
 
 .. code-block:: bash
 
-    python3 -m pip install tox
+   python3 -m pip install tox
 
 Clone the twine repository from GitHub, then run:
 
 .. code-block:: bash
 
-    cd /path/to/your/local/twine
-    tox -e dev
+   cd /path/to/your/local/twine
+   tox -e dev
 
 This creates a `virtual environment`_, so that twine and its
 dependencies do not interfere with other packages installed on your
@@ -44,7 +44,7 @@ To use the virtual environment, run:
 
 .. code-block:: bash
 
-    source venv/bin/activate
+   source venv/bin/activate
 
 Building the documentation
 ^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -56,7 +56,7 @@ To preview the docs while you're making changes, run:
 
 .. code-block:: bash
 
-    tox -e watch-docs
+   tox -e watch-docs
 
 Then open a web browser to `<http://127.0.0.1:8000>`_.
 
@@ -65,7 +65,7 @@ a pull request. In your active virtual environment, run:
 
 .. code-block:: bash
 
-    tox -e docs
+   tox -e docs
 
 The HTML of the docs will be written to :file:`docs/_build/html`.
 
@@ -76,19 +76,19 @@ To automatically reformat your changes with `isort`_ and `black`_, run:
 
 .. code-block:: bash
 
-    tox -e format
+   tox -e format
 
 To detect any remaining code smells with `flake8`_, run:
 
 .. code-block:: bash
 
-    tox -e lint
+   tox -e lint
 
 To perform strict type-checking using `mypy`_, run:
 
 .. code-block:: bash
 
-    tox -e types
+   tox -e types
 
 Any errors from ``lint`` or ``types`` need to be fixed manually.
 
@@ -104,13 +104,13 @@ To run the tests in your virtual environment, run:
 
 .. code-block:: bash
 
-    tox -e py
+   tox -e py
 
 To pass options to ``pytest``, e.g. the name of a test, run:
 
 .. code-block:: bash
 
-    tox -e py -- tests/test_upload.py::test_exception_for_http_status
+   tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
 Twine is continuously tested against Python 3.6, 3.7, 3.8, and 3.9 using
 `GitHub Actions`_. To run the tests against a specific version, e.g. Python
@@ -118,20 +118,20 @@ Twine is continuously tested against Python 3.6, 3.7, 3.8, and 3.9 using
 
 .. code-block:: bash
 
-    tox -e py36
+   tox -e py36
 
 To run the "integration" tests of uploading to real package indexes, run:
 
 .. code-block:: bash
 
-    tox -e integration
+   tox -e integration
 
 To run the tests against all supported Python versions, check code style,
 and build the documentation, run:
 
 .. code-block:: bash
 
-    tox
+   tox
 
 
 Submitting changes
