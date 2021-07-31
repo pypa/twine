@@ -196,8 +196,7 @@ Keyring, run:
 
    keyring --disable
 
-See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
-discussion and background.
+See `Twine issue #338`_ for discussion and background.
 
 
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
@@ -222,3 +221,4 @@ discussion and background.
 .. _`not supported on PyPI`:
    https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`issue #1627 on Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`Twine issue #338`: https://github.com/pypa/twine/issues/338
