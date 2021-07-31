@@ -29,7 +29,7 @@ The goal of Twine is to improve PyPI interaction by improving
 security and testability.
 
 The biggest reason to use Twine is that it securely authenticates
-you to `PyPI`_ over HTTPS using a verified connection, regardless of
+you to PyPI over HTTPS using a verified connection, regardless of
 the underlying Python version. Meanwhile, ``python setup.py upload``
 will only work correctly and securely if your build system, Python
 version, and underlying operating system are configured properly.
@@ -172,7 +172,7 @@ For example, to set a username and password for PyPI:
 and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
-URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
+URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
 
 The next time you run ``twine``, it will prompt you for a username, and then
 get the appropriate password from Keyring.
