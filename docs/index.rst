@@ -17,9 +17,9 @@
 Twine
 =====
 
-Twine is a utility for `publishing`_ Python packages on `PyPI`_.
-It provides build system independent uploads of source and binary
-`distribution artifacts <distributions_>`_ for both new and existing
+Twine is a utility for `publishing`_ Python packages to `PyPI`_ and other
+`repositories`_. It provides build system independent uploads of source and
+binary `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
 Why Should I Use This?
@@ -159,9 +159,8 @@ allows storing a username and password securely using `keyring`_.
 Keyring is installed with Twine but for some systems (Linux mainly) may
 require `additional installation steps`_.
 
-Once Twine is installed, use the ``keyring`` program to set a
-username and password to use for each package index (repository) to
-which you may upload.
+Once Twine is installed, use the ``keyring`` program to set a username and
+password to use for each repository to which you may upload.
 
 For example, to set a username and password for PyPI:
 
@@ -215,6 +214,8 @@ See `Twine issue #338`_ for discussion and background.
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`distributions`:
    https://packaging.python.org/glossary/#term-Distribution-Package
+.. _`repositories`:
+   https://packaging.python.org/glossary/#term-Package-Index
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
