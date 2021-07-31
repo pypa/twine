@@ -170,19 +170,13 @@ For example, to set a username and password for PyPI:
 
     keyring set https://upload.pypi.org/legacy/ your-username
 
-or
-
-.. code-block:: bash
-
-    python3 -m keyring set https://upload.pypi.org/legacy/ your-username
-
 and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
 URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
 
 The next time you run ``twine``, it will prompt you for a username, and then
-get the appropriate password from the keyring.
+get the appropriate password from Keyring.
 
 .. note::
 
@@ -202,12 +196,6 @@ Keyring, run:
 .. code-block:: bash
 
     keyring --disable
-
-or
-
-.. code-block:: bash
-
-    python -m keyring --disable
 
 See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
