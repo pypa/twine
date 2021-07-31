@@ -1,18 +1,18 @@
 .. twine documentation master file, originally created by
-    sphinx-quickstart on Tue Aug 13 11:51:54 2013.
-    You can adapt this file completely to your liking, but it should at least
-    contain the root `toctree` directive.
+   sphinx-quickstart on Tue Aug 13 11:51:54 2013.
+   You can adapt this file completely to your liking, but it should at least
+   contain the root `toctree` directive.
 
 .. toctree::
-    :hidden:
-    :maxdepth: 3
+   :hidden:
+   :maxdepth: 3
 
-    changelog
-    contributing
-    Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
-    PyPI Project <https://pypi.org/project/twine/>
-    GitHub Repository <https://github.com/pypa/twine>
-    Python Packaging Tutorial <https://packaging.python.org/tutorials/distributing-packages/>
+   changelog
+   contributing
+   Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
+   PyPI Project <https://pypi.org/project/twine/>
+   GitHub Repository <https://github.com/pypa/twine>
+   Python Packaging Tutorial <https://packaging.python.org/tutorials/distributing-packages/>
 
 Twine
 =====
@@ -61,7 +61,7 @@ Installation
 
 .. code-block:: bash
 
-    pip install twine
+   pip install twine
 
 Using Twine
 -----------
@@ -70,13 +70,13 @@ Using Twine
 
    .. code-block:: bash
 
-       python setup.py sdist bdist_wheel
+      python setup.py sdist bdist_wheel
 
 2. Upload to `Test PyPI`_ and verify things look right:
 
    .. code-block:: bash
 
-       twine upload -r testpypi dist/*
+      twine upload -r testpypi dist/*
 
    Twine will prompt for your username and password.
 
@@ -84,7 +84,7 @@ Using Twine
 
    .. code-block:: bash
 
-       twine upload dist/*
+      twine upload dist/*
 
 4. Done!
 
@@ -168,7 +168,7 @@ For example, to set a username and password for PyPI:
 
 .. code-block:: bash
 
-    keyring set https://upload.pypi.org/legacy/ your-username
+   keyring set https://upload.pypi.org/legacy/ your-username
 
 and enter the password when prompted.
 
@@ -195,7 +195,7 @@ Keyring, run:
 
 .. code-block:: bash
 
-    keyring --disable
+   keyring --disable
 
 See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
@@ -206,20 +206,20 @@ discussion and background.
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`pypirc`: https://packaging.python.org/specifications/pypirc/
 .. _`Python Packaging User Guide`:
-    https://packaging.python.org/tutorials/distributing-packages/
+   https://packaging.python.org/tutorials/distributing-packages/
 .. _`keyring`: https://pypi.org/project/keyring/
 .. _`Using Keyring on headless systems`:
-    https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
+   https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems
 .. _`additional installation steps`:
-    https://pypi.org/project/keyring/#installation-linux
+   https://pypi.org/project/keyring/#installation-linux
 .. _`developer documentation`:
-    https://twine.readthedocs.io/en/latest/contributing.html
+   https://twine.readthedocs.io/en/latest/contributing.html
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`distributions`:
-    https://packaging.python.org/glossary/#term-Distribution-Package
+   https://packaging.python.org/glossary/#term-Distribution-Package
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
 .. _`no longer necessary`:
-    https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
+   https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627

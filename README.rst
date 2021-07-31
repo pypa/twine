@@ -1,17 +1,17 @@
 .. image:: https://img.shields.io/pypi/v/twine.svg
-    :target: https://pypi.org/project/twine
+   :target: https://pypi.org/project/twine
 
 .. image:: https://img.shields.io/pypi/pyversions/twine.svg
-    :target: https://pypi.org/project/twine
+   :target: https://pypi.org/project/twine
 
 .. image:: https://img.shields.io/readthedocs/twine
-    :target: https://twine.readthedocs.io
+   :target: https://twine.readthedocs.io
 
 .. image:: https://img.shields.io/github/workflow/status/pypa/twine/Main
-    :target: https://github.com/pypa/twine/actions
+   :target: https://github.com/pypa/twine/actions
 
 .. image:: https://img.shields.io/codecov/c/github/pypa/twine
-    :target: https://codecov.io/gh/pypa/twine
+   :target: https://codecov.io/gh/pypa/twine
 
 twine
 =====
@@ -41,9 +41,9 @@ trackers, chat rooms, and mailing lists is expected to follow the
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
 .. _`distributions`:
-    https://packaging.python.org/glossary/#term-Distribution-Package
+   https://packaging.python.org/glossary/#term-Distribution-Package
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`documentation`: https://twine.readthedocs.io/
 .. _`developer documentation`:
-    https://twine.readthedocs.io/en/latest/contributing.html
+   https://twine.readthedocs.io/en/latest/contributing.html
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
