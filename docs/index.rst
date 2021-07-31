@@ -112,10 +112,12 @@ PyPI.
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
 
-**WARNING**: The ``register`` command is `no longer necessary if you are
-uploading to pypi.org`_.  As such, it is `no longer supported`_ in `Warehouse`_
-(the new PyPI software running on pypi.org). However, you may need this if you
-are using a different package index.
+.. warning::
+
+   The ``register`` command is `no longer necessary`_ if you are
+   uploading to `PyPI`_.  As such, it is `not supported by Warehouse`_
+   (the software running on PyPI). However, you may need it if you
+   are using a different package index.
 
 For completeness, its usage:
 
@@ -168,23 +170,19 @@ For example, to set a username and password for PyPI:
 
     keyring set https://upload.pypi.org/legacy/ your-username
 
-or
-
-.. code-block:: bash
-
-    python3 -m keyring set https://upload.pypi.org/legacy/ your-username
-
 and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
-URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
+URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
 
-The next time you run ``twine``, it will prompt you for a username and will
-grab the appropriate password from the keyring.
+The next time you run ``twine``, it will prompt you for a username, and then
+get the appropriate password from Keyring.
 
-**Note:** If you are using Linux in a headless environment (such as on a
-server) you'll need to do some additional steps to ensure that Keyring can
-store secrets securely. See `Using Keyring on headless systems`_.
+.. note::
+
+   If you are using Linux in a headless environment (such as on a
+   server) you'll need to do some additional steps to ensure that Keyring can
+   store secrets securely. See `Using Keyring on headless systems`_.
 
 Disabling Keyring
 ^^^^^^^^^^^^^^^^^
@@ -193,24 +191,15 @@ In most cases, simply not setting a password with ``keyring`` will allow Twine
 to fall back to prompting for a password. In some cases, the presence of
 Keyring will cause unexpected or undesirable prompts from the backing system.
 In these cases, it may be desirable to disable Keyring altogether. To disable
-Keyring, simply invoke:
+Keyring, run:
 
 .. code-block:: bash
 
     keyring --disable
 
-or
-
-.. code-block:: bash
-
-    python -m keyring --disable
-
-That command will configure for the current user the "null" keyring,
-effectively disabling the functionality, and allowing Twine to prompt
-for passwords.
-
-See `twine 338 <https://github.com/pypa/twine/issues/338>`_ for
+See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
 discussion and background.
+
 
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
 .. _`PyPI`: https://pypi.org
@@ -231,6 +220,6 @@ discussion and background.
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
-.. _`no longer necessary if you are uploading to pypi.org`:
+.. _`no longer necessary`:
     https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
-.. _`no longer supported`: https://github.com/pypa/warehouse/issues/1627
+.. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627
