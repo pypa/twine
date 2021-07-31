@@ -114,9 +114,9 @@ PyPI.
 
 .. warning::
 
-   The ``register`` command is `no longer necessary if you are
-   uploading to pypi.org`_.  As such, it is `not supported by Warehouse`_
-   (the software running on `pypi.org`_). However, you may need it if you
+   The ``register`` command is `no longer necessary`_ if you are
+   uploading to `PyPI`_.  As such, it is `not supported by Warehouse`_
+   (the software running on PyPI). However, you may need it if you
    are using a different package index.
 
 For completeness, its usage:
@@ -232,7 +232,6 @@ discussion and background.
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
-.. _`no longer necessary if you are uploading to pypi.org`:
+.. _`no longer necessary`:
     https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
 .. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627
-.. _`pypi.org`: https://pypi.org
