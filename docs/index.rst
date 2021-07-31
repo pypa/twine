@@ -112,14 +112,13 @@ PyPI.
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
 
+Pre-register a name with a repository before uploading a distribution.
+
 .. warning::
 
-   The ``register`` command is `no longer necessary`_ if you are
-   uploading to `PyPI`_.  As such, it is `not supported by Warehouse`_
-   (the software running on PyPI). However, you may need it if you
-   are using a different package index.
-
-For completeness, its usage:
+   Pre-registration is `not supported on PyPI`_, so the ``register`` command is
+   only necessary if you are using a different repository that requires it. See
+   `issue #1627 on Warehouse`_ (the software running on PyPI) for more details.
 
 .. program-output:: twine register -h
 
@@ -220,6 +219,6 @@ discussion and background.
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
-.. _`no longer necessary`:
+.. _`not supported on PyPI`:
    https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
-.. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`issue #1627 on Warehouse`: https://github.com/pypa/warehouse/issues/1627
