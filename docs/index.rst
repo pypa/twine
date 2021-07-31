@@ -70,7 +70,7 @@ Using Twine
 
    .. code-block:: bash
 
-      python setup.py sdist bdist_wheel
+      python -m build
 
 2. Upload to `Test PyPI`_ and verify things look right:
 
