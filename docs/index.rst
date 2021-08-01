@@ -17,9 +17,9 @@
 Twine
 =====
 
-Twine is a utility for `publishing`_ Python packages on `PyPI`_.
-It provides build system independent uploads of source and binary
-`distribution artifacts <distributions_>`_ for both new and existing
+Twine is a utility for `publishing`_ Python packages to `PyPI`_ and other
+`repositories`_. It provides build system independent uploads of source and
+binary `distribution artifacts <distributions_>`_ for both new and existing
 `projects`_.
 
 Why Should I Use This?
@@ -29,7 +29,7 @@ The goal of Twine is to improve PyPI interaction by improving
 security and testability.
 
 The biggest reason to use Twine is that it securely authenticates
-you to `PyPI`_ over HTTPS using a verified connection, regardless of
+you to PyPI over HTTPS using a verified connection, regardless of
 the underlying Python version. Meanwhile, ``python setup.py upload``
 will only work correctly and securely if your build system, Python
 version, and underlying operating system are configured properly.
@@ -70,7 +70,7 @@ Using Twine
 
    .. code-block:: bash
 
-      python setup.py sdist bdist_wheel
+      python -m build
 
 2. Upload to `Test PyPI`_ and verify things look right:
 
@@ -112,14 +112,13 @@ PyPI.
 ``twine register``
 ^^^^^^^^^^^^^^^^^^
 
+Pre-register a name with a repository before uploading a distribution.
+
 .. warning::
 
-   The ``register`` command is `no longer necessary`_ if you are
-   uploading to `PyPI`_.  As such, it is `not supported by Warehouse`_
-   (the software running on PyPI). However, you may need it if you
-   are using a different package index.
-
-For completeness, its usage:
+   Pre-registration is `not supported on PyPI`_, so the ``register`` command is
+   only necessary if you are using a different repository that requires it. See
+   `issue #1627 on Warehouse`_ (the software running on PyPI) for more details.
 
 .. program-output:: twine register -h
 
@@ -160,9 +159,8 @@ allows storing a username and password securely using `keyring`_.
 Keyring is installed with Twine but for some systems (Linux mainly) may
 require `additional installation steps`_.
 
-Once Twine is installed, use the ``keyring`` program to set a
-username and password to use for each package index (repository) to
-which you may upload.
+Once Twine is installed, use the ``keyring`` program to set a username and
+password to use for each repository to which you may upload.
 
 For example, to set a username and password for PyPI:
 
@@ -173,7 +171,7 @@ For example, to set a username and password for PyPI:
 and enter the password when prompted.
 
 For a different repository, replace the URL with the relevant repository
-URL. For example, for `Test PyPI`_, use ``https://test.pypi.org/legacy/``.
+URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
 
 The next time you run ``twine``, it will prompt you for a username, and then
 get the appropriate password from Keyring.
@@ -197,8 +195,7 @@ Keyring, run:
 
    keyring --disable
 
-See `Twine issue #338 <https://github.com/pypa/twine/issues/338>`_ for
-discussion and background.
+See `Twine issue #338`_ for discussion and background.
 
 
 .. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
@@ -217,9 +214,12 @@ discussion and background.
 .. _`projects`: https://packaging.python.org/glossary/#term-Project
 .. _`distributions`:
    https://packaging.python.org/glossary/#term-Distribution-Package
+.. _`repositories`:
+   https://packaging.python.org/glossary/#term-Package-Index
 .. _`PSF Code of Conduct`: https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md
 .. _`Warehouse`: https://github.com/pypa/warehouse
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
-.. _`no longer necessary`:
+.. _`not supported on PyPI`:
    https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
-.. _`not supported by Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`issue #1627 on Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`Twine issue #338`: https://github.com/pypa/twine/issues/338
