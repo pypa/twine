@@ -30,6 +30,7 @@ logger = logging.getLogger(__name__)
 def skip_upload(
     response: requests.Response, skip_existing: bool, package: package_file.PackageFile
 ) -> bool:
+    """Skip uploading distributions when getting errors."""
     if not skip_existing:
         return False
 
@@ -75,6 +76,7 @@ def _make_package(
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
+    """Upload distributions to repository."""
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
@@ -135,6 +137,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
 
 def main(args: List[str]) -> None:
+    """Set command line arguments."""
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(

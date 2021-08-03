@@ -106,6 +106,7 @@ def check(
     output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
+    """Print output of checking."""
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -146,6 +147,7 @@ def check(
 
 
 def main(args: List[str]) -> bool:
+    """Set command line arguments."""
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
         "dists",

@@ -21,6 +21,7 @@ from twine import settings
 
 
 def register(register_settings: settings.Settings, package: str) -> None:
+    """Register package to repository."""
     repository_url = cast(str, register_settings.repository_config["repository"])
     print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
@@ -45,6 +46,7 @@ def register(register_settings: settings.Settings, package: str) -> None:
 
 
 def main(args: List[str]) -> None:
+    """Set command line arguments."""
     parser = argparse.ArgumentParser(
         prog="twine register",
         description="register operation is not required with PyPI.org",
