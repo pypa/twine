@@ -134,8 +134,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     repository.close()
 
 
-def main(args: List[str]) -> None:
-    parser = argparse.ArgumentParser(prog="twine upload")
+def main(root_parser: argparse._SubParsersAction) -> None:
+    parser = root_parser.add_parser(name="upload", description="upload a file to PyPI")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
         "dists",
@@ -147,7 +147,7 @@ def main(args: List[str]) -> None:
         "file upload.",
     )
 
-    parsed_args = parser.parse_args(args)
+    parsed_args = yield
     upload_settings = settings.Settings.from_argparse(parsed_args)
 
     # Call the upload function with the arguments from the command line

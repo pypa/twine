@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-from typing import Any, List, Tuple
+from typing import Any, List, Tuple, Dict
 
 from importlib_metadata import entry_points
 from importlib_metadata import version
@@ -40,6 +40,15 @@ def dep_versions() -> str:
 
 
 def dispatch(argv: List[str]) -> Any:
+    command_map: Dict[str, Any] = {}
+    parser = build_parser(command_map)
+    options = parser.parse_args(argv)
+    return command_map[options.command].send(options)
+
+
+def build_parser(command_map: Dict[str, Any] = None):
+    if command_map is None:
+        command_map = {}
     registered_commands = entry_points(group="twine.registered_commands")
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
@@ -54,18 +63,10 @@ def dispatch(argv: List[str]) -> Any:
         action="store_true",
         help="disable colored output",
     )
-    parser.add_argument(
-        "command",
-        choices=registered_commands.names,
-    )
-    parser.add_argument(
-        "args",
-        help=argparse.SUPPRESS,
-        nargs=argparse.REMAINDER,
-    )
-
-    parser.parse_args(argv, namespace=args)
-
-    main = registered_commands[args.command].load()
-
-    return main(args.args)
+    sub_parser = parser.add_subparsers(title='sub command to run', dest='command')
+    sub_parser.required = True
+    for command in registered_commands:
+        main_func = command.load()
+        generator = main_func(sub_parser)
+        command_map[command.name] = next(generator)
+    return parser

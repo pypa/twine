@@ -94,33 +94,10 @@ the `Python Packaging User Guide`_.
 Commands
 --------
 
-``twine upload``
-^^^^^^^^^^^^^^^^
-
-Uploads one or more distributions to a repository.
-
-.. program-output:: twine upload -h
-
-``twine check``
-^^^^^^^^^^^^^^^
-
-Checks whether your distribution's long description will render correctly on
-PyPI.
-
-.. program-output:: twine check -h
-
-``twine register``
-^^^^^^^^^^^^^^^^^^
-
-Pre-register a name with a repository before uploading a distribution.
-
-.. warning::
-
-   Pre-registration is `not supported on PyPI`_, so the ``register`` command is
-   only necessary if you are using a different repository that requires it. See
-   `issue #1627 on Warehouse`_ (the software running on PyPI) for more details.
-
-.. program-output:: twine register -h
+.. sphinx_argparse_cli::
+   :module: twine.cli
+   :func: build_parser
+   :title:
 
 Configuration
 -------------

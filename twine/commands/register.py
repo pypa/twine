@@ -44,10 +44,9 @@ def register(register_settings: settings.Settings, package: str) -> None:
     resp.raise_for_status()
 
 
-def main(args: List[str]) -> None:
-    parser = argparse.ArgumentParser(
-        prog="twine register",
-        description="register operation is not required with PyPI.org",
+def main(root_parser: argparse._SubParsersAction) -> None:
+    parser = root_parser.add_parser(
+        name="register", description="register operation is not required with PyPI.org"
     )
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
@@ -56,7 +55,7 @@ def main(args: List[str]) -> None:
         help="File from which we read the package metadata.",
     )
 
-    parsed_args = parser.parse_args(args)
+    parsed_args = yield
     register_settings = settings.Settings.from_argparse(parsed_args)
 
     # Call the register function with the args from the command line

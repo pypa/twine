@@ -145,8 +145,8 @@ def check(
     return failure
 
 
-def main(args: List[str]) -> bool:
-    parser = argparse.ArgumentParser(prog="twine check")
+def main(root_parser: argparse._SubParsersAction) -> bool:
+    parser = root_parser.add_parser(name="check", description="check packages")
     parser.add_argument(
         "dists",
         nargs="+",
@@ -161,7 +161,7 @@ def main(args: List[str]) -> bool:
         help="Fail on warnings",
     )
 
-    parsed_args = parser.parse_args(args)
+    parsed_args = yield
 
     # Call the check function with the arguments from the command line
     return check(parsed_args.dists, strict=parsed_args.strict)
