@@ -122,15 +122,15 @@ def check(
     If the check is passed, message for passing the check is given
     and ``failure = False`` is returned.
 
-    :param List[str] dists: 
+    :param List[str] dists:
         The distribution files we are going to check.
     :param IO[str] output_stream:
         Output stream of the check.
-        
+
         This defaults to ``sys.stdout``.
     :param: bool strict:
-        Strict mode for the check. 
-        
+        Strict mode for the check.
+
         This defaults to ``False``.
 
     :return bool:

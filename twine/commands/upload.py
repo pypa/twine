@@ -110,8 +110,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
     If we get a redirect, exception :class:`RedirectDetected` is raised.
 
-    If ``skip_upload`` is ``True``, it prints the skipping message to the user and continues
-    uploading distributions.
+    If ``skip_upload`` is ``True``, it prints the skipping message to the user
+    and continues uploading distributions.
 
     Then, it will check status code responded by the repository, and generate
     a helpful message. After that, it will add the distribution files uploaded to
