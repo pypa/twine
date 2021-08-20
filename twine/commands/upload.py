@@ -1,3 +1,6 @@
+"""Module containing the upload function in twine.
+This module uploads the package to the repository.
+"""
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,7 +33,20 @@ logger = logging.getLogger(__name__)
 def skip_upload(
     response: requests.Response, skip_existing: bool, package: package_file.PackageFile
 ) -> bool:
-    """Skip uploading distributions when getting errors."""
+    """Return Boolean type(True or False) according to the status code that returned by
+    the repository when uploading the package to determine whether they should be uploaded.
+    
+    If skip_existing is set to True, then return False.
+    If status code 400, 403, 409 is responded by the repository, return True.
+
+    Args:
+        response (requests.Response): Get the response from the repository.
+        skip_existing (bool): If this is set to True, then return False.
+        package (package_file.PackageFile): Get the package files.
+
+    Returns:
+        bool: Determine whether we should skip uploading the package.
+    """ 
     if not skip_existing:
         return False
 
@@ -58,7 +74,6 @@ def skip_upload(
 def _make_package(
     filename: str, signatures: Dict[str, str], upload_settings: settings.Settings
 ) -> package_file.PackageFile:
-    """Create and sign a package, based off of filename, signatures and settings."""
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
 
     signed_name = package.signed_basefilename
@@ -76,7 +91,31 @@ def _make_package(
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
-    """Upload distributions to repository."""
+    """Upload distributions to repository.
+    
+    This function will check if the user has passed in pre-signed distributions.
+    Then, it will check the repository url to verify that we are not using legacy
+    PyPI. If no error is occurred, it will make package, create repository and
+    upload distributions.
+    
+    If skip_existing is set to True and the package is uploaded already,
+    it prints the skipping message to the user and continues uploading distributions.
+    
+    If we get a redirect, exception :class:`RedirectDetected` is raised.
+    
+    If skip_upload is True, it prints the skipping message to the user and continues
+    uploading distributions.
+    
+    Then, it will check status code responded by the repository, and generate 
+    a helpful message. After that, it will add the distribution files uploaded to
+    the uploaded_packages.
+    
+    Finally, it will show release urls to the user and close the session.
+    
+    Args:
+        upload_settings(settings.Settings): The settings for the upload function.
+        dists(List[str]):  Get dists that are going to be uploaded.
+    """
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
@@ -137,7 +176,11 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
 
 def main(args: List[str]) -> None:
-    """Set command line arguments."""
+    """Entry-point of upload command.
+
+    Args:
+        args (List[str]): Arguments for the upload command.
+    """
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(
