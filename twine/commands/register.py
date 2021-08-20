@@ -60,8 +60,8 @@ def register(register_settings: settings.Settings, package: str) -> None:
 def main(args: List[str]) -> None:
     """Entry-point of register command.
 
-    Args:
-        args (List[str]): Arguments for the register command.
+    :param List[str] args:
+        Arguments for the register command.
     """
     parser = argparse.ArgumentParser(
         prog="twine register",

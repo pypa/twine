@@ -39,16 +39,20 @@ def skip_upload(
     Return Boolean type according to the status code that responded by the repository or
     the argument passed by the user when trying to upload the package(s).
 
-    If skip_existing is set to True, then return False.
-    If status code 400, 403, 409 is responded by the repository, return True.
+    If ``skip_existing`` is set to ``True``, then return ``False``.
+    If status code 400, 403, 409 is responded by the repository, return ``True``.
 
-    Args:
-        response (requests.Response): Get the response from the repository.
-        skip_existing (bool): If this is set to True, then return False.
-        package (package_file.PackageFile): Get the package files.
+    :param requests.Response response:
+        Get the response from the repository.
+    :param bool skip_existing:
+        Specify whether twine should continue uploading files if one
+        of them already exists. This primarily supports PyPI. Other
+        package indexes may not be supported.
+    :param package_file.PackageFile package:
+        Get the package files.
 
-    Returns:
-        bool: Determine whether we should skip uploading the package.
+    :return bool:
+        Determine whether we should skip uploading the package.
     """
     if not skip_existing:
         return False
@@ -101,23 +105,24 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     PyPI. If no error is occurred, it will make package, create repository and
     upload distributions.
 
-    If skip_existing is set to True and the package is uploaded already,
+    If ``skip_existing`` is set to ``True`` and the package is uploaded already,
     it prints the skipping message to the user and continues uploading distributions.
 
     If we get a redirect, exception :class:`RedirectDetected` is raised.
 
-    If skip_upload is True, it prints the skipping message to the user and continues
+    If ``skip_upload`` is ``True``, it prints the skipping message to the user and continues
     uploading distributions.
 
     Then, it will check status code responded by the repository, and generate
     a helpful message. After that, it will add the distribution files uploaded to
-    the uploaded_packages.
+    the ``uploaded_packages``.
 
     Finally, it will show release urls to the user and close the session.
 
-    Args:
-        upload_settings(settings.Settings): The settings for the upload function.
-        dists(List[str]):  Get dists that are going to be uploaded.
+    :param settings.Settings upload_settings:
+        The settings for the upload function.
+    :param List[str] dists:
+        Get dists that are going to be uploaded.
     """
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions
@@ -181,8 +186,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 def main(args: List[str]) -> None:
     """Entry-point of upload command.
 
-    Args:
-        args (List[str]): Arguments for the upload command.
+    :param List[str] args:
+        Arguments for the upload command.
     """
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)

@@ -112,24 +112,29 @@ def check(
 ) -> bool:
     """Check the file(s) given by user.
 
-    If there are no files to check, False is returned with a output.
+    If there are no files to check, ``False`` is returned with a output.
 
-    If the check is failed, error text is given and failure = True is returned.
+    If the check is failed, error text is given and ``failure = True`` is returned.
 
-    If strict is set to True by user, the check will fail when there are warnings.
+    If strict is set to ``True`` by user, the check will fail when there are warnings.
     Otherwise, the check will pass with warnings.
 
     If the check is passed, message for passing the check is given
-    and failure = False is returned.
+    and ``failure = False`` is returned.
 
-    Args:
-        dists (List[str]): the distribution files we are going to check
-        output_stream (IO[str], optional): Output stream of the check.
-                                           Defaults to sys.stdout.
-        strict (bool, optional): Strict mode for the check. Defaults to False.
+    :param List[str] dists: 
+        The distribution files we are going to check.
+    :param IO[str] output_stream:
+        Output stream of the check.
+        
+        This defaults to ``sys.stdout``.
+    :param: bool strict:
+        Strict mode for the check. 
+        
+        This defaults to ``False``.
 
-    Returns:
-        bool: Determine whether the check has passed.
+    :return bool:
+        Determine whether the check has passed.
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
@@ -173,11 +178,11 @@ def check(
 def main(args: List[str]) -> bool:
     """Entry-point of check command.
 
-    Args:
-        args (List[str]): Arguments for the check command.
+    :param List[str] args:
+        Arguments for the check command.
 
-    Returns:
-        bool: The result of the check function.
+    :return bool:
+        The result of the check function.
     """
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
