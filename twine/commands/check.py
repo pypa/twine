@@ -1,4 +1,5 @@
 """Module containing the check function in twine.
+
 This module checks file(s) that users are going to
 upload, and raises warnings when errors occurred.
 """
@@ -110,25 +111,26 @@ def check(
     strict: bool = False,
 ) -> bool:
     """Check the file(s) given by user.
-    
+
     If there are no files to check, False is returned with a output.
-    
+
     If the check is failed, error text is given and failure = True is returned.
-    
+
     If strict is set to True by user, the check will fail when there are warnings.
     Otherwise, the check will pass with warnings.
-    
+
     If the check is passed, message for passing the check is given
     and failure = False is returned.
 
     Args:
         dists (List[str]): the distribution files we are going to check
-        output_stream (IO[str], optional): Output stream of the check. Defaults to sys.stdout.
+        output_stream (IO[str], optional): Output stream of the check.
+                                           Defaults to sys.stdout.
         strict (bool, optional): Strict mode for the check. Defaults to False.
 
     Returns:
         bool: Determine whether the check has passed.
-    """    
+    """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -170,7 +172,7 @@ def check(
 
 def main(args: List[str]) -> bool:
     """Entry-point of check command.
-    
+
     Args:
         args (List[str]): Arguments for the check command.
 
