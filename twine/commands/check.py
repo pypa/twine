@@ -128,7 +128,7 @@ def check(
         Output stream of the check.
 
         This defaults to ``sys.stdout``.
-    :param: bool strict:
+    :param bool strict:
         Strict mode for the check.
 
         This defaults to ``False``.
