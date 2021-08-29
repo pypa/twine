@@ -27,9 +27,8 @@ from twine import settings
 def register(register_settings: settings.Settings, package: str) -> None:
     """Register package to repository.
 
-    Raises:
-        :class:`exceptions.PackageNotFound`: If the package is not existing.
-        :class:`exceptions.RedirectDetected.from_args`: If we get a redirect.
+    :raises PackageNotFound: if the package is not existing
+    :raises RedirectDetected: if we get a redirect
 
     Finally, it raises for status. If error is occurred, it will print
     a error message in verbose output.
