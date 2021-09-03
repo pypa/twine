@@ -211,6 +211,13 @@ specify either as a default, in the :file:`.pypirc` file, or pass on
 the command line), and the methods that upload the package securely to
 a URL.
 
+API reference
+^^^^^^^^^^^^^
+
+.. toctree::
+
+   api/twine
+
 Where Twine gets configuration and credentials
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
