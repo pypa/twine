@@ -285,7 +285,7 @@ def test_check_status_code_for_missing_status_code(
     if verbose:
         assert captured.out.count("Content received from server:\nForbidden\n") == 1
     else:
-        assert captured.out.count("NOTE: Try --verbose to see response content.\n") == 1
+        assert captured.out.count("For more details, retry the upload with the --verbose option.\n") == 1
 
 
 @pytest.mark.parametrize(
