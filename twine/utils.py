@@ -200,7 +200,9 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
         if response.text:
             logger.info("Content received from server:\n{}".format(response.text))
             if not verbose:
-                logger.warning("For more details, retry the upload with the --verbose option.")
+                logger.warning(
+                    "For more details, retry the upload with the --verbose option."
+                )
         raise err
 
 
