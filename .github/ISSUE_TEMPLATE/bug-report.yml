@@ -1,0 +1,103 @@
+name: Bug report
+description: File a bug report
+
+body:
+- type: markdown
+  attributes:
+    value: |
+      Thank you for taking the time to report an issue.
+
+      To more efficiently resolve this issue, we'd like to know some basic information about your system and setup.
+
+
+- type: input
+  id: os_version
+  attributes:
+    label: OS version
+    description: |
+      What is your operating system and version?
+
+      For example, this could be Windows 10, macOS 11.4 or Ubuntu 18.04.
+  validations:
+    required: true
+
+
+- type: input 
+  id: python_version
+  attributes:
+    label: Python version
+    description: |
+      What is the version of Python you are running?
+
+      You can usually get this by running `python --version`.
+    placeholder: Python x.x.x
+  validations:
+    required: true
+
+
+- type: input
+  id: install_method
+  attributes:
+    label: How did you install twine?
+    description: Did you use your operating system's package manager or pip or something else?
+  validations:
+    required: true
+
+
+- type: input
+  id: twine_version
+  attributes:
+    label: Twine version
+    description: |
+      What is the Version of twine you have installed?
+
+      Please paste the complete output of `twine --version` here:
+  validations:
+    required: true
+
+
+- type: textarea
+  id: package_repository
+  attributes:
+    label: Package repository
+    description: |
+      Which package repository are you targeting?
+
+      If you're having issues uploading a specific package, you *must* include a copy of the following:
+
+        - The package's `PKG-INFO` file
+        - A redacted version of your `.pypirc` file (**REMOVE ALL USERNAMES & PASSWORDS BEFORE UPLOADING**)
+
+      You may upload them to Github Gist and/or provide links of them here.
+
+
+- type: textarea
+  id: the_issue
+  attributes:
+    label: The Issue
+    description: Please describe the issue that you are experiencing.
+  validations:
+    required: true
+
+
+- type: textarea
+  id: reproduce
+  attributes:
+    label: Steps to Reproduce
+    description: If the issue is predictable and consistently reproducible, please list the steps here.
+    placeholder: |
+      1. Upload the package '...' by running the command 'twine ...'
+      2. Enter token or my username and password.
+      3. An error occurs.
+  validations:
+    required: true
+
+
+- type: textarea
+  id: output
+  attributes:
+    label: Output of the command
+    description: Please paste the output of the command here.
+    render: shell
+  validations:
+    required: true
