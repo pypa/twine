@@ -42,16 +42,16 @@ def skip_upload(
     If ``skip_existing`` is set to ``True``, then return ``False``.
     If status code 400, 403, 409 is responded by the repository, return ``True``.
 
-    :param requests.Response response:
+    :param response:
         Get the response from the repository.
-    :param bool skip_existing:
+    :param skip_existing:
         Specify whether twine should continue uploading files if one
         of them already exists. This primarily supports PyPI. Other
         package indexes may not be supported.
-    :param package_file.PackageFile package:
+    :param package:
         Get the package files.
 
-    :return bool:
+    :return:
         Determine whether we should skip uploading the package.
     """
     if not skip_existing:
@@ -119,9 +119,9 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
     Finally, it will show release urls to the user and close the session.
 
-    :param settings.Settings upload_settings:
+    :param upload_settings:
         The settings for the upload function.
-    :param List[str] dists:
+    :param dists:
         Get dists that are going to be uploaded.
     """
     dists = commands._find_dists(dists)
@@ -186,7 +186,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 def main(args: List[str]) -> None:
     """Entry-point of upload command.
 
-    :param List[str] args:
+    :param args:
         Arguments for the upload command.
     """
     parser = argparse.ArgumentParser(prog="twine upload")

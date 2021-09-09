@@ -59,7 +59,7 @@ def register(register_settings: settings.Settings, package: str) -> None:
 def main(args: List[str]) -> None:
     """Entry-point of register command.
 
-    :param List[str] args:
+    :param args:
         Arguments for the register command.
     """
     parser = argparse.ArgumentParser(

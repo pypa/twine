@@ -122,18 +122,14 @@ def check(
     If the check is passed, message for passing the check is given
     and ``failure = False`` is returned.
 
-    :param List[str] dists:
+    :param dists:
         The distribution files we are going to check.
-    :param IO[str] output_stream:
+    :param output_stream:
         Output stream of the check.
-
-        This defaults to ``sys.stdout``.
-    :param bool strict:
+    :param strict:
         Strict mode for the check.
 
-        This defaults to ``False``.
-
-    :return bool:
+    :return:
         Determine whether the check has passed.
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
@@ -178,10 +174,10 @@ def check(
 def main(args: List[str]) -> bool:
     """Entry-point of check command.
 
-    :param List[str] args:
+    :param args:
         Arguments for the check command.
 
-    :return bool:
+    :return:
         The result of the check function.
     """
     parser = argparse.ArgumentParser(prog="twine check")
