@@ -1,8 +1,4 @@
-"""Module containing the check function in twine.
-
-This module checks file(s) that users are going to
-upload, and raises warnings when errors occurred.
-"""
+"""Module containing the logic for ``twine check``."""
 # Copyright 2018 Dustin Ingram
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -110,7 +106,7 @@ def check(
     output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
-    """Check the file(s) given by user.
+    """Check that a distribution will render correctly on PyPI.
 
     If there are no files to check, ``False`` is returned with a output.
 
@@ -172,13 +168,13 @@ def check(
 
 
 def main(args: List[str]) -> bool:
-    """Entry-point of check command.
+    """Execute the ``check`` command.
 
     :param args:
-        Arguments for the check command.
+        The command-line arguments.
 
     :return:
-        The result of the check function.
+        The exit status of the ``check`` command.
     """
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(

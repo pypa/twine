@@ -1,7 +1,4 @@
-"""Module containing the upload function in twine.
-
-This module uploads the package to the repository.
-"""
+"""Module containing the logic for ``twine upload``."""
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -98,7 +95,7 @@ def _make_package(
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
-    """Upload distributions to repository.
+    """Upload one or more distributions to a repository.
 
     This function will check if the user has passed in pre-signed distributions.
     Then, it will check the repository url to verify that we are not using legacy
@@ -184,10 +181,10 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
 
 def main(args: List[str]) -> None:
-    """Entry-point of upload command.
+    """Execute the ``upload`` command.
 
     :param args:
-        Arguments for the upload command.
+        The command-line arguments.
     """
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)

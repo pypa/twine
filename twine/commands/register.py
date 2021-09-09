@@ -1,7 +1,4 @@
-"""Module containing the register function in twine.
-
-This module registers the package to the repository.
-"""
+"""Module containing the logic for ``twine register``."""
 # Copyright 2015 Ian Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -25,7 +22,10 @@ from twine import settings
 
 
 def register(register_settings: settings.Settings, package: str) -> None:
-    """Register package to repository.
+    """Pre-register a name with a repository before uploading a distribution.
+
+    Pre-registration is not supported on PyPI, so the ``register`` command is only
+    necessary if you are using a different repository that requires it.
 
     :raises PackageNotFound: if the package is not existing
     :raises RedirectDetected: if we get a redirect
@@ -57,10 +57,10 @@ def register(register_settings: settings.Settings, package: str) -> None:
 
 
 def main(args: List[str]) -> None:
-    """Entry-point of register command.
+    """Execute the ``register`` command.
 
     :param args:
-        Arguments for the register command.
+        The command-line arguments.
     """
     parser = argparse.ArgumentParser(
         prog="twine register",
