@@ -22,16 +22,22 @@ from twine import settings
 
 
 def register(register_settings: settings.Settings, package: str) -> None:
-    """Pre-register a name with a repository before uploading a distribution.
+    """Pre-register a package name with a repository before uploading a distribution.
 
     Pre-registration is not supported on PyPI, so the ``register`` command is only
     necessary if you are using a different repository that requires it.
 
-    :raises PackageNotFound: if the package is not existing
-    :raises RedirectDetected: if we get a redirect
+    :param register_settings:
+        The configured options relating to repository registration.
+    :param package:
+        The path of the distribution to use for package metadata.
 
-    Finally, it raises for status. If error is occurred, it will print
-    a error message in verbose output.
+    :raises twine.exceptions.PackageNotFound:
+        The distribution does not exist.
+    :raises twine.exceptions.RedirectDetected:
+        The repository tried to redirect to another URL.
+    :raises requests.HTTPError:
+        The repository responded with an error.
     """
     repository_url = cast(str, register_settings.repository_config["repository"])
     print(f"Registering package to {repository_url}")
