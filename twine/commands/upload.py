@@ -104,8 +104,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         The distribution files to upload to the repository. This can also include
         ``.asc`` files; the GPG signatures will be added to the corresponding uploads.
 
-    :raises twine.exceptions.RedirectDetected:
-        The repository tried to redirect to another URL.
+    :raises twine.exceptions.TwineException:
+        The upload failed due to a configuration error.
     :raises requests.HTTPError:
         The repository responded with an error.
     """

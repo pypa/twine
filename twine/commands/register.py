@@ -32,10 +32,8 @@ def register(register_settings: settings.Settings, package: str) -> None:
     :param package:
         The path of the distribution to use for package metadata.
 
-    :raises twine.exceptions.PackageNotFound:
-        The distribution does not exist.
-    :raises twine.exceptions.RedirectDetected:
-        The repository tried to redirect to another URL.
+    :raises twine.exceptions.TwineException:
+        The registration failed due to a configuration error.
     :raises requests.HTTPError:
         The repository responded with an error.
     """
