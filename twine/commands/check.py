@@ -106,27 +106,20 @@ def check(
     output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
-    """Check that a distribution will render correctly on PyPI.
+    """Check that a distribution will render correctly on PyPI and display the results.
 
-    If there are no files to check, ``False`` is returned with a output.
-
-    If the check is failed, error text is given and ``failure = True`` is returned.
-
-    If strict is set to ``True`` by user, the check will fail when there are warnings.
-    Otherwise, the check will pass with warnings.
-
-    If the check is passed, message for passing the check is given
-    and ``failure = False`` is returned.
+    This is currently only validates ``long_description``, but more checks could be
+    added; see https://github.com/pypa/twine/projects/2.
 
     :param dists:
-        The distribution files we are going to check.
+        The distribution files to check.
     :param output_stream:
-        Output stream of the check.
+        The destination of the resulting output.
     :param strict:
-        Strict mode for the check.
+        If ``True``, treat warnings as errors.
 
     :return:
-        Determine whether the check has passed.
+        ``True`` if there are rendering errors, otherwise ``False``.
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
