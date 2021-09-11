@@ -89,27 +89,25 @@ def _make_package(
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
-    """Upload one or more distributions to a repository.
-
-    This function will check if the user has passed in pre-signed distributions.
-    Then, it will check the repository url to verify that we are not using legacy
-    PyPI. If no error is occurred, it will make package, create repository and
-    upload distributions.
+    """Upload one or more distributions to a repository, and display the progress.
 
     If a package already exists on the repository, most repositories will return an
     error response. However, if ``upload_settings.skip_existing`` is ``True``, a message
     will be displayed and any remaining distributions will be uploaded.
 
-    Then, it will check status code responded by the repository, and generate
-    a helpful message. After that, it will add the distribution files uploaded to
-    the ``uploaded_packages``.
-
-    Finally, it will show release urls to the user and close the session.
+    For known repositories (like PyPI), the web URLs of successfully uploaded packages
+    will be displayed.
 
     :param upload_settings:
-        The settings for the upload function.
+        The configured options related to uploading to a repository.
     :param dists:
-        Get dists that are going to be uploaded.
+        The distribution files to upload to the repository. This can also include
+        ``.asc`` files; the GPG signatures will be added to the corresponding uploads.
+
+    :raises twine.exceptions.RedirectDetected:
+        The repository tried to redirect to another URL.
+    :raises requests.HTTPError:
+        The repository responded with an error.
     """
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions
