@@ -31,25 +31,19 @@ logger = logging.getLogger(__name__)
 def skip_upload(
     response: requests.Response, skip_existing: bool, package: package_file.PackageFile
 ) -> bool:
-    """Skip uploading a package.
-
-    Return Boolean type according to the status code that responded by the repository or
-    the argument passed by the user when trying to upload the package(s).
-
-    If ``skip_existing`` is set to ``True``, then return ``False``.
-    If status code 400, 403, 409 is responded by the repository, return ``True``.
+    """Determine if a failed upload is an error or can be safely ignored.
 
     :param response:
-        Get the response from the repository.
+        The response from attempting to upload ``package`` to a repository.
     :param skip_existing:
-        Specify whether twine should continue uploading files if one
-        of them already exists. This primarily supports PyPI. Other
-        package indexes may not be supported.
+        If ``True``, use the status and content of ``response`` to determine if the
+        package already exists on the repository. If so, then a failed upload is safe
+        to ignore.
     :param package:
-        Get the package files.
+        The package that was being uploaded.
 
     :return:
-        Determine whether we should skip uploading the package.
+        ``True`` if a failed upload can be safely ignored, otherwise ``False``.
     """
     if not skip_existing:
         return False
@@ -102,13 +96,9 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     PyPI. If no error is occurred, it will make package, create repository and
     upload distributions.
 
-    If ``skip_existing`` is set to ``True`` and the package is uploaded already,
-    it prints the skipping message to the user and continues uploading distributions.
-
-    If we get a redirect, exception :class:`RedirectDetected` is raised.
-
-    If ``skip_upload`` is ``True``, it prints the skipping message to the user
-    and continues uploading distributions.
+    If a package already exists on the repository, most repositories will return an
+    error response. However, if ``upload_settings.skip_existing`` is ``True``, a message
+    will be displayed and any remaining distributions will be uploaded.
 
     Then, it will check status code responded by the repository, and generate
     a helpful message. After that, it will add the distribution files uploaded to
