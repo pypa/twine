@@ -324,10 +324,12 @@ class Settings:
         self.client_cert = utils.get_clientcert(client_cert, self.repository_config)
 
     def check_repository_url(self) -> None:
-        """Verify we are not using legacy PyPI.
+        """Verify we are not using legacy PyPI and using the correct url for PyPI.
 
         :raises:
             :class:`~twine.exceptions.UploadToDeprecatedPyPIDetected`
+        :raises:
+            :class:`~twine.exceptions.InvalidPyPIUploadURL`
         """
         repository_url = cast(str, self.repository_config["repository"])
 
@@ -336,6 +338,20 @@ class Settings:
         ):
             raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
                 repository_url, utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY
+            )
+        
+        if repository_url.startswith(
+            ("https://pypi.org/", "https://test.pypi.org/", "https://upload.pypi.org/")
+        ) and repository_url not in [utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY]:
+            raise exceptions.InvalidPyPIUploadURL(
+                f"The configured repository {repository_url} is not a known "
+                f"PyPI repository.\n"
+                f"Did you mean {utils.DEFAULT_REPOSITORY} "
+                f"or {utils.TEST_REPOSITORY} ?\n"
+                f"Check your --repository-url value or "
+                f"modify the url in {self.config_file} (if you are using -r or --repository)"
+                f"so twine can upload your distributions properly.\n"
+                f"See {utils.PYPIRC_DOCS} for more details."
             )
 
     def create_repository(self) -> repository.Repository:
