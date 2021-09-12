@@ -347,8 +347,8 @@ class Settings:
             raise exceptions.InvalidPyPIUploadURL(
                 f"The configured repository {repository_url} is not a known "
                 f"PyPI repository.\n"
-                f"Did you mean {utils.DEFAULT_REPOSITORY} "
-                f"or {utils.TEST_REPOSITORY}?\n"
+                f"You probably want {utils.DEFAULT_REPOSITORY} "
+                f"or {utils.TEST_REPOSITORY}.\n"
                 f"Check your --repository-url value "
                 f"or the repository configuration in {self.config_file}.\n"
                 f"See https://packaging.python.org/specifications/pypirc/ "
