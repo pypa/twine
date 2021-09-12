@@ -71,6 +71,7 @@ class _WarningStream:
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
 ) -> Tuple[List[str], bool]:
+    """Check given distribution."""
     warnings = []
     is_ok = True
 

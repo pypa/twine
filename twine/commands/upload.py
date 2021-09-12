@@ -72,6 +72,7 @@ def skip_upload(
 def _make_package(
     filename: str, signatures: Dict[str, str], upload_settings: settings.Settings
 ) -> package_file.PackageFile:
+    """Create and sign a package, based off of filename, signatures and settings."""
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
 
     signed_name = package.signed_basefilename
