@@ -64,60 +64,46 @@ class Settings:
     ) -> None:
         """Initialize our settings instance.
 
-        :param bool sign:
+        :param sign:
             Configure whether the package file should be signed.
-
-            This defaults to ``False``.
-        :param str sign_with:
+        :param sign_with:
             The name of the executable used to sign the package with.
-
-            This defaults to ``gpg``.
-        :param str identity:
+        :param identity:
             The GPG identity that should be used to sign the package file.
-        :param str username:
+        :param username:
             The username used to authenticate to the repository (package
             index).
-        :param str password:
+        :param password:
             The password used to authenticate to the repository (package
             index).
-        :param bool non_interactive:
+        :param non_interactive:
             Do not interactively prompt for username/password if the required
             credentials are missing.
-
-            This defaults to ``False``.
-        :param str comment:
+        :param comment:
             The comment to include with each distribution file.
-        :param str config_file:
+        :param config_file:
             The path to the configuration file to use.
-
-            This defaults to ``~/.pypirc``.
-        :param bool skip_existing:
+        :param skip_existing:
             Specify whether twine should continue uploading files if one
             of them already exists. This primarily supports PyPI. Other
             package indexes may not be supported.
-
-            This defaults to ``False``.
-        :param str cacert:
+        :param cacert:
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
-        :param str client_cert:
-            The path to the client certificate used to perform authentication
-            to the index.
-
-            This must be a single file that contains both the private key and
+        :param client_cert:
+            The path to the client certificate used to perform authentication to the
+            index. This must be a single file that contains both the private key and
             the PEM-encoded certificate.
-        :param str repository_name:
+        :param repository_name:
             The name of the repository (package index) to interact with. This
             should correspond to a section in the config file.
-        :param str repository_url:
+        :param repository_url:
             The URL of the repository (package index) to interact with. This
             will override the settings inferred from ``repository_name``.
-        :param bool verbose:
+        :param verbose:
             Show verbose output.
-        :param bool disable_progress_bar:
+        :param disable_progress_bar:
             Disable the progress bar.
-
-            This defaults to ``False``
         """
         self.config_file = config_file
         self.comment = comment
@@ -326,8 +312,8 @@ class Settings:
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.
 
-        :raises:
-            :class:`~twine.exceptions.UploadToDeprecatedPyPIDetected`
+        :raises twine.exceptions.UploadToDeprecatedPyPIDetected:
+            The configured repository URL is for legacy PyPI.
         """
         repository_url = cast(str, self.repository_config["repository"])
 

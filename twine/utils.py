@@ -214,21 +214,22 @@ def get_userpass_value(
 
     Uses the following rules:
 
-    1. If it is specified on the cli (`cli_value`), use that.
-    2. If `config[key]` is specified, use that.
-    3. If `prompt_strategy`, prompt using `prompt_strategy`.
-    4. Otherwise return None
+    1. If it is specified on the CLI (``cli_value``), use that.
+    2. If ``config[key]`` is specified, use that.
+    3. If ``prompt_strategy``, prompt using ``prompt_strategy``.
+    4. Otherwise return ``None``
 
-    :param cli_value: The value supplied from the command line or `None`.
-    :type cli_value: unicode or `None`
-    :param config: Config dictionary
-    :type config: dict
-    :param key: Key to find the config value.
-    :type key: unicode
-    :prompt_strategy: Argumentless function to return fallback value.
-    :type prompt_strategy: function
-    :returns: The value for the username / password
-    :rtype: unicode
+    :param cli_value:
+        The value supplied from the command line or `None`.
+    :param config:
+        Config dictionary.
+    :param key:
+        Key to find the config value.
+    :param prompt_strategy:
+        Argumentless function to return fallback value.
+
+    :return:
+        The value for the username / password.
     """
     if cli_value is not None:
         logger.info(f"{key} set by command options")
