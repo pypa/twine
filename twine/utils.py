@@ -32,7 +32,6 @@ input_func = input
 
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
-PYPIRC_DOCS = "https://packaging.python.org/specifications/pypirc/"
 
 DEFAULT_CONFIG_FILE = "~/.pypirc"
 
