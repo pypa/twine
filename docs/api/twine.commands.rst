@@ -2,9 +2,6 @@ twine.commands package
 ======================
 
 .. automodule:: twine.commands
-   :members:
-   :undoc-members:
-   :show-inheritance:
 
 Submodules
 ----------

@@ -36,7 +36,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinxcontrib.programoutput",
 ]
-# autodoc_typehints = "description"
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -280,3 +279,22 @@ intersphinx_mapping = {"https://docs.python.org/": None}
 
 # Be strict about the invalid references:
 nitpicky = True
+
+# TODO: Try to add these to intersphinx_mapping
+nitpick_ignore_regex = [
+    (r"py:.*", r"(pkginfo|requests)\..*"),
+]
+
+# -- Options for apidoc output ------------------------------------------------
+
+autodoc_default_options = {
+    "members": True,
+    "private-members": True,
+    "undoc-members": True,
+    "member-order": "bysource",
+}
+
+autodoc_class_signature = "separated"
+autodoc_preserve_defaults = True
+# autodoc_typehints = "both"
+# autodoc_typehints_description_target = "documented"
