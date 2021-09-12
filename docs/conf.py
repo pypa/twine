@@ -272,6 +272,8 @@ linkcheck_ignore = [
     "https://github.com/pypa/twine/issues/*",
     # Avoid errors from channels interpreted as anchors
     "https://web.libera.chat/#",
+    # Avoid error from InvalidPyPIUploadURL docstring
+    "https://upload.pypi.org/legacy",
 ]
 
 # Example configuration for intersphinx: refer to the Python standard library.
@@ -282,7 +284,7 @@ nitpicky = True
 
 # TODO: Try to add these to intersphinx_mapping
 nitpick_ignore_regex = [
-    (r"py:.*", r"(pkginfo|requests)\..*"),
+    (r"py:.*", r"(pkginfo|requests|IO).*"),
 ]
 
 # -- Options for apidoc output ------------------------------------------------
