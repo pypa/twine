@@ -339,7 +339,7 @@ class Settings:
             raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
                 repository_url, utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY
             )
-        
+
         if repository_url.startswith(
             ("https://pypi.org/", "https://test.pypi.org/", "https://upload.pypi.org/")
         ) and repository_url not in [utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY]:
@@ -349,7 +349,8 @@ class Settings:
                 f"Did you mean {utils.DEFAULT_REPOSITORY} "
                 f"or {utils.TEST_REPOSITORY} ?\n"
                 f"Check your --repository-url value or "
-                f"modify the url in {self.config_file} (if you are using -r or --repository)"
+                f"modify the url in {self.config_file} "
+                f"(if you are using -r or --repository),\n"
                 f"so twine can upload your distributions properly.\n"
                 f"See {utils.PYPIRC_DOCS} for more details."
             )
