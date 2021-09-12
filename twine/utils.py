@@ -210,26 +210,27 @@ def get_userpass_value(
     key: str,
     prompt_strategy: Optional[Callable[[], str]] = None,
 ) -> Optional[str]:
-    """Get the username / password from config.
+    """Get a credential (e.g. a username or password) from the configuration.
 
     Uses the following rules:
 
-    1. If it is specified on the CLI (``cli_value``), use that.
+    1. If ``cli_value`` is specified, use that.
     2. If ``config[key]`` is specified, use that.
-    3. If ``prompt_strategy``, prompt using ``prompt_strategy``.
+    3. If ``prompt_strategy`` is specified, use its return value.
     4. Otherwise return ``None``
 
     :param cli_value:
-        The value supplied from the command line or `None`.
+        The value supplied from the command line.
     :param config:
-        Config dictionary.
+        A dictionary of repository configuration values.
     :param key:
-        Key to find the config value.
+        The credential to look up in ``config``, e.g. ``"username"`` or ``"password"``.
     :param prompt_strategy:
-        Argumentless function to return fallback value.
+        An argumentless function to get the value, e.g. from keyring or by prompting
+        the user.
 
     :return:
-        The value for the username / password.
+        The credential value, i.e. the username or password.
     """
     if cli_value is not None:
         logger.info(f"{key} set by command options")
@@ -244,7 +245,10 @@ def get_userpass_value(
 
 
 get_cacert = functools.partial(get_userpass_value, key="ca_cert")
+get_cacert.__doc__ = "Get the CA certificate via ``get_userpass_value``."
+
 get_clientcert = functools.partial(get_userpass_value, key="client_cert")
+get_clientcert.__doc__ = "Get the client certificate via ``get_userpass_value``."
 
 
 class EnvironmentDefault(argparse.Action):
