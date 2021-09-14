@@ -31,6 +31,13 @@ class RedirectDetected(TwineException):
 
     @classmethod
     def from_args(cls, repository_url: str, redirect_url: str) -> "RedirectDetected":
+        if redirect_url == f"{repository_url}/":
+            return cls(
+                f"{repository_url} attempted to redirect to {redirect_url}.\n"
+                f"Your repository URL is missing a trailing slash. "
+                "Please add it and try again.",
+            )
+
         return cls(
             f"{repository_url} attempted to redirect to {redirect_url}.\n"
             f"If you trust these URLs, set {redirect_url} as your repository URL.\n"
