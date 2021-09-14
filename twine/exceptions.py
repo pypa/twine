@@ -31,17 +31,11 @@ class RedirectDetected(TwineException):
 
     @classmethod
     def from_args(cls, repository_url: str, redirect_url: str) -> "RedirectDetected":
-        msg = "\n".join(
-            [
-                "{} attempted to redirect to {}.".format(repository_url, redirect_url),
-                "If you trust these URLs, set {} as your repository URL.".format(
-                    redirect_url
-                ),
-                "Aborting.",
-            ]
+        return cls(
+            f"{repository_url} attempted to redirect to {redirect_url}.\n"
+            f"If you trust these URLs, set {redirect_url} as your repository URL.\n"
+            "Aborting.",
         )
-
-        return cls(msg)
 
 
 class PackageNotFound(TwineException):
