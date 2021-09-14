@@ -254,7 +254,7 @@ def test_exception_for_redirect(make_settings):
     upload_settings = make_settings(
         """
         [pypi]
-        repository: https://test.pypi.org/legacy
+        repository: https://test.pypi.org/legacy/
         username:foo
         password:bar
         """
@@ -263,7 +263,7 @@ def test_exception_for_redirect(make_settings):
     stub_response = pretend.stub(
         is_redirect=True,
         status_code=301,
-        headers={"location": "https://test.pypi.org/legacy/"},
+        headers={"location": "https://malicious.pypi.org/legacy/"},
     )
 
     stub_repository = pretend.stub(
@@ -273,6 +273,22 @@ def test_exception_for_redirect(make_settings):
     upload_settings.create_repository = lambda: stub_repository
 
     with pytest.raises(exceptions.RedirectDetected) as err:
+        upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
+
+    assert "https://test.pypi.org/legacy/" in err.value.args[0]
+
+
+def test_exception_for_missing_slash(make_settings):
+    upload_settings = make_settings(
+        """
+        [pypi]
+        repository: https://test.pypi.org/legacy
+        username:foo
+        password:bar
+        """
+    )
+
+    with pytest.raises(exceptions.InvalidPyPIUploadURL) as err:
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
     assert "https://test.pypi.org/legacy/" in err.value.args[0]
