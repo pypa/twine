@@ -17,6 +17,7 @@ import contextlib
 import logging
 import sys
 from typing import Any, ContextManager, Optional, cast
+from urllib.parse import urlparse
 
 from twine import auth
 from twine import exceptions
@@ -340,10 +341,12 @@ class Settings:
                 repository_url, utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY
             )
 
-        if "pypi.org" in repository_url and repository_url not in [
-            utils.DEFAULT_REPOSITORY,
-            utils.TEST_REPOSITORY,
-        ]:
+        repository_host = urlparse(repository_url).hostname
+        if (
+            repository_host
+            and repository_host.endswith("pypi.org")
+            and repository_url not in [utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY]
+        ):
             raise exceptions.InvalidPyPIUploadURL(
                 f"The configured repository {repository_url} is not a known "
                 f"PyPI repository.\n"
