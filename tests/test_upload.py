@@ -248,13 +248,39 @@ def test_deprecated_repo(make_settings):
     )
 
 
-def test_exception_for_redirect(make_settings):
+@pytest.mark.parametrize(
+    "repository_url, redirect_url, message_match",
+    [
+        (
+            "https://test.pypi.org/legacy",
+            "https://test.pypi.org/legacy/",
+            (
+                r"https://test.pypi.org/legacy.+https://test.pypi.org/legacy/"
+                r".+\nYour repository URL is missing a trailing slash"
+            ),
+        ),
+        (
+            "https://test.pypi.org/legacy/",
+            "https://malicious.pypi.org/legacy/",
+            (
+                r"https://test.pypi.org/legacy/.+https://malicious.pypi.org/legacy/"
+                r".+\nIf you trust these URLs"
+            ),
+        ),
+    ],
+)
+def test_exception_for_redirect(
+    repository_url,
+    redirect_url,
+    message_match,
+    make_settings,
+):
     # Not using fixtures because this setup is significantly different
 
     upload_settings = make_settings(
-        """
+        f"""
         [pypi]
-        repository: https://test.pypi.org/legacy
+        repository: {repository_url}
         username:foo
         password:bar
         """
@@ -263,7 +289,7 @@ def test_exception_for_redirect(make_settings):
     stub_response = pretend.stub(
         is_redirect=True,
         status_code=301,
-        headers={"location": "https://test.pypi.org/legacy/"},
+        headers={"location": redirect_url},
     )
 
     stub_repository = pretend.stub(
@@ -272,13 +298,7 @@ def test_exception_for_redirect(make_settings):
 
     upload_settings.create_repository = lambda: stub_repository
 
-    with pytest.raises(
-        exceptions.RedirectDetected,
-        match=(
-            r"https://test.pypi.org/legacy.+https://test.pypi.org/legacy/"
-            r".+\nIf you trust these URLs"
-        ),
-    ):
+    with pytest.raises(exceptions.RedirectDetected, match=message_match):
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
 
