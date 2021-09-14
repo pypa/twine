@@ -40,8 +40,8 @@ class RedirectDetected(TwineException):
 
         return cls(
             f"{repository_url} attempted to redirect to {redirect_url}.\n"
-            f"If you trust these URLs, set {redirect_url} as your repository URL.\n"
-            "Aborting.",
+            f"If you trust these URLs, set {redirect_url} as your repository URL "
+            "and try again.",
         )
 
 

@@ -261,9 +261,9 @@ def test_deprecated_repo(make_settings):
         ),
         (
             "https://test.pypi.org/legacy/",
-            "https://malicious.pypi.org/legacy/",
+            "https://malicious.website.org/danger/",
             (
-                r"https://test.pypi.org/legacy/.+https://malicious.pypi.org/legacy/"
+                r"https://test.pypi.org/legacy/.+https://malicious.website.org/danger/"
                 r".+\nIf you trust these URLs"
             ),
         ),
