@@ -272,10 +272,14 @@ def test_exception_for_redirect(make_settings):
 
     upload_settings.create_repository = lambda: stub_repository
 
-    with pytest.raises(exceptions.RedirectDetected) as err:
+    with pytest.raises(
+        exceptions.RedirectDetected,
+        match=(
+            r"https://test.pypi.org/legacy.+https://test.pypi.org/legacy/"
+            r".+\nIf you trust these URLs"
+        ),
+    ):
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
-
-    assert "https://test.pypi.org/legacy/" in err.value.args[0]
 
 
 def test_prints_skip_message_for_uploaded_package(
