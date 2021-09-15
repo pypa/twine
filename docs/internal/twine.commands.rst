@@ -3,9 +3,6 @@ twine.commands package
 
 .. automodule:: twine.commands
 
-Submodules
-----------
-
 .. toctree::
    :maxdepth: 4
 
