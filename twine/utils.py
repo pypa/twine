@@ -244,11 +244,11 @@ def get_userpass_value(
         return None
 
 
+#: Get the CA bundle via :func:`get_userpass_value`.
 get_cacert = functools.partial(get_userpass_value, key="ca_cert")
-get_cacert.__doc__ = "Get the CA certificate via ``get_userpass_value``."
 
+#: Get the client certificate via :func:`get_userpass_value`.
 get_clientcert = functools.partial(get_userpass_value, key="client_cert")
-get_clientcert.__doc__ = "Get the client certificate via ``get_userpass_value``."
 
 
 class EnvironmentDefault(argparse.Action):
