@@ -1,3 +1,8 @@
+"""Top-level module for Twine.
+
+The contents of this package are not a public API. For more details, see
+https://github.com/pypa/twine/issues/194 and https://github.com/pypa/twine/issues/665.
+"""
 # Copyright 2018 Donald Stufft and individual contributors
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
