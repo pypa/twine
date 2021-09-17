@@ -16,7 +16,7 @@ def register_settings(make_settings):
     return make_settings(
         """
         [pypi]
-        repository: https://test.pypi.org/legacy
+        repository: https://test.pypi.org/legacy/
         username:foo
         password:bar
         """
@@ -46,7 +46,7 @@ def test_successful_register(register_settings):
 def test_exception_for_redirect(register_settings):
     """Raise an exception when repository URL results in a redirect."""
     repository_url = register_settings.repository_config["repository"]
-    redirect_url = "https://malicious.website.org/danger"
+    redirect_url = "https://malicious.website.org/danger/"
 
     stub_response = pretend.stub(
         is_redirect=True,
@@ -60,13 +60,10 @@ def test_exception_for_redirect(register_settings):
 
     register_settings.create_repository = lambda: stub_repository
 
-    err_msg = (
-        f"{repository_url} attempted to redirect to {redirect_url}.\n"
-        f"If you trust these URLs, set {redirect_url} as your repository URL.\n"
-        f"Aborting."
-    )
-
-    with pytest.raises(exceptions.RedirectDetected, match=err_msg):
+    with pytest.raises(
+        exceptions.RedirectDetected,
+        match=rf"{repository_url}.+{redirect_url}.+\nIf you trust these URLs",
+    ):
         register.register(register_settings, helpers.WHEEL_FIXTURE)
 
 
