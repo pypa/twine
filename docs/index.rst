@@ -151,6 +151,19 @@ on a CI/build server).
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
 
+Proxy Support
+^^^^^^^^^^^^^
+
+Twine allows you to upload your distributions with/without proxy via these environment variables:
+
+* ``HTTP_PROXY`` - Upload your distributions with HTTP proxy.
+* ``HTTPS_PROXY`` - Upload your distributions with HTTPS proxy.
+* ``NO_PROXY`` - Upload your distributions without proxy.
+
+For more information, please visit
+`"Proxies" section in requests docs <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_
+or read `an article about proxy <https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/>`_.
+
 Keyring Support
 ---------------
 
