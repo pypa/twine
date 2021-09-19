@@ -151,6 +151,23 @@ on a CI/build server).
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
 
+Proxy Support
+^^^^^^^^^^^^^
+
+Twine can be configured to use a proxy by setting environment variables.
+For example, to use a proxy for just the ``twine`` command,
+without ``export``-ing it for other tools:
+
+.. code-block:: bash
+
+   HTTPS_PROXY=socks5://user:pass@host:port twine upload dist/*
+
+For more information, see the Requests documentation on
+`proxies <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_ and
+`SOCKS <https://docs.python-requests.org/en/master/user/advanced/#socks>`_ , and
+`an in-depth article about proxy environment variables
+<https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/>`_.
+
 Keyring Support
 ---------------
 
