@@ -154,7 +154,8 @@ on a CI/build server).
 Proxy Support
 ^^^^^^^^^^^^^
 
-Twine can be configured to use a proxy by setting environment variables. For example:
+Twine can be configured to use a proxy by setting environment variables.
+For example:
 
 .. code-block:: bash
 
