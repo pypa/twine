@@ -161,9 +161,20 @@ these environment variables:
 * ``HTTPS_PROXY`` - Upload your distributions with HTTPS proxy.
 * ``NO_PROXY`` - Upload your distributions without proxy.
 
-For more information, please visit
-`"Proxies" section in requests docs <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_
-or read `an article about proxy <https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/>`_.
+For example:
+
+.. code-block:: bash
+
+   export HTTPS_PROXY=socks5://user:pass@host:port
+
+   twine upload dist/*
+
+
+For more information, see the Requests documentation on
+`proxies <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_ and
+`SOCKS <https://docs.python-requests.org/en/master/user/advanced/#socks>`_ , and
+`an in-depth article about proxy environment variables
+<https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/>`_.
 
 Keyring Support
 ---------------
