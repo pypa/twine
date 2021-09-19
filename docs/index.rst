@@ -154,14 +154,7 @@ on a CI/build server).
 Proxy Support
 ^^^^^^^^^^^^^
 
-Twine allows you to upload your distributions with/without proxy via
-these environment variables:
-
-* ``HTTP_PROXY`` - Upload your distributions with HTTP proxy.
-* ``HTTPS_PROXY`` - Upload your distributions with HTTPS proxy.
-* ``NO_PROXY`` - Upload your distributions without proxy.
-
-For example:
+Twine can be configured to use a proxy by setting environment variables. For example:
 
 .. code-block:: bash
 
