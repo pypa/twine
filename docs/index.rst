@@ -155,16 +155,8 @@ Proxy Support
 ^^^^^^^^^^^^^
 
 Twine can be configured to use a proxy by setting environment variables.
-For example:
-
-.. code-block:: bash
-
-   export HTTPS_PROXY=socks5://user:pass@host:port
-
-   twine upload dist/*
-
-Alternatively, one can set the environment variable for the command
-itself without exporting it for other tools as well:
+For example, to use a proxy for just the ``twine`` command,
+without ``export``-ing it for other tools:
 
 .. code-block:: bash
 
