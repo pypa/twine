@@ -163,6 +163,13 @@ For example:
 
    twine upload dist/*
 
+Alternatively, one can set the environment variable for the command itself without exporting it for other tools as well
+
+.. code-block:: bash
+
+   HTTPS_PROXY=socks5://user:pass@host:port twine upload dist/*
+
+
 
 For more information, see the Requests documentation on
 `proxies <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_ and
