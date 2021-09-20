@@ -1,3 +1,8 @@
+"""Module containing the logic for the ``twine`` sub-commands.
+
+The contents of this package are not a public API. For more details, see
+https://github.com/pypa/twine/issues/194 and https://github.com/pypa/twine/issues/665.
+"""
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

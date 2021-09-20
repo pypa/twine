@@ -1,3 +1,4 @@
+"""Module containing the logic for ``twine check``."""
 # Copyright 2018 Dustin Ingram
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -106,6 +107,21 @@ def check(
     output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
+    """Check that a distribution will render correctly on PyPI and display the results.
+
+    This is currently only validates ``long_description``, but more checks could be
+    added; see https://github.com/pypa/twine/projects/2.
+
+    :param dists:
+        The distribution files to check.
+    :param output_stream:
+        The destination of the resulting output.
+    :param strict:
+        If ``True``, treat warnings as errors.
+
+    :return:
+        ``True`` if there are rendering errors, otherwise ``False``.
+    """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
         output_stream.write("No files to check.\n")
@@ -146,6 +162,14 @@ def check(
 
 
 def main(args: List[str]) -> bool:
+    """Execute the ``check`` command.
+
+    :param args:
+        The command-line arguments.
+
+    :return:
+        The exit status of the ``check`` command.
+    """
     parser = argparse.ArgumentParser(prog="twine check")
     parser.add_argument(
         "dists",

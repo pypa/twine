@@ -1,3 +1,4 @@
+"""Module containing the logic for ``twine upload``."""
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -30,6 +31,20 @@ logger = logging.getLogger(__name__)
 def skip_upload(
     response: requests.Response, skip_existing: bool, package: package_file.PackageFile
 ) -> bool:
+    """Determine if a failed upload is an error or can be safely ignored.
+
+    :param response:
+        The response from attempting to upload ``package`` to a repository.
+    :param skip_existing:
+        If ``True``, use the status and content of ``response`` to determine if the
+        package already exists on the repository. If so, then a failed upload is safe
+        to ignore.
+    :param package:
+        The package that was being uploaded.
+
+    :return:
+        ``True`` if a failed upload can be safely ignored, otherwise ``False``.
+    """
     if not skip_existing:
         return False
 
@@ -75,6 +90,26 @@ def _make_package(
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
+    """Upload one or more distributions to a repository, and display the progress.
+
+    If a package already exists on the repository, most repositories will return an
+    error response. However, if ``upload_settings.skip_existing`` is ``True``, a message
+    will be displayed and any remaining distributions will be uploaded.
+
+    For known repositories (like PyPI), the web URLs of successfully uploaded packages
+    will be displayed.
+
+    :param upload_settings:
+        The configured options related to uploading to a repository.
+    :param dists:
+        The distribution files to upload to the repository. This can also include
+        ``.asc`` files; the GPG signatures will be added to the corresponding uploads.
+
+    :raises twine.exceptions.TwineException:
+        The upload failed due to a configuration error.
+    :raises requests.HTTPError:
+        The repository responded with an error.
+    """
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions
     signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
@@ -135,6 +170,11 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
 
 def main(args: List[str]) -> None:
+    """Execute the ``upload`` command.
+
+    :param args:
+        The command-line arguments.
+    """
     parser = argparse.ArgumentParser(prog="twine upload")
     settings.Settings.register_argparse_arguments(parser)
     parser.add_argument(

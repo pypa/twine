@@ -13,5 +13,4 @@ per-file-ignores =
     # D103 Missing docstring in public function
     # D104 Missing docstring in public package
     twine/*: D100,D101,D102,D103,D104
-    twine/commands/*: D100,D101,D102,D103,D104
     tests/*: D100,D101,D102,D103,D104

@@ -1,3 +1,4 @@
+"""Module containing the logic for ``twine register``."""
 # Copyright 2015 Ian Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -21,6 +22,21 @@ from twine import settings
 
 
 def register(register_settings: settings.Settings, package: str) -> None:
+    """Pre-register a package name with a repository before uploading a distribution.
+
+    Pre-registration is not supported on PyPI, so the ``register`` command is only
+    necessary if you are using a different repository that requires it.
+
+    :param register_settings:
+        The configured options relating to repository registration.
+    :param package:
+        The path of the distribution to use for package metadata.
+
+    :raises twine.exceptions.TwineException:
+        The registration failed due to a configuration error.
+    :raises requests.HTTPError:
+        The repository responded with an error.
+    """
     repository_url = cast(str, register_settings.repository_config["repository"])
     print(f"Registering package to {repository_url}")
     repository = register_settings.create_repository()
@@ -45,6 +61,11 @@ def register(register_settings: settings.Settings, package: str) -> None:
 
 
 def main(args: List[str]) -> None:
+    """Execute the ``register`` command.
+
+    :param args:
+        The command-line arguments.
+    """
     parser = argparse.ArgumentParser(
         prog="twine register",
         description="register operation is not required with PyPI.org",
