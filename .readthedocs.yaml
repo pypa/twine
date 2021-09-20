@@ -14,7 +14,8 @@ formats:
   - epub
 
 python:
-  version: 3.8
+  # Mininum supported Python version
+  version: "3.6"
   install:
     - requirements: docs/requirements.txt
     - method: pip
