@@ -65,7 +65,7 @@ class Repository:
             (username or "", password or "") if username or password else None
         )
         logger.info(f"username: {username if username else '<empty>'}")
-        logger.info(f"password: <{'hidden' if password else 'empty'}>")
+        logger.info(f"password: {'*' * len(password) if password else '<empty>'}")
 
         self.session.headers["User-Agent"] = self._make_user_agent_string()
         for scheme in ("http://", "https://"):

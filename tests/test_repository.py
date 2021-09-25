@@ -352,7 +352,9 @@ def test_package_is_uploaded_incorrect_repo_url():
     [
         (None, None, ["username: <empty>", "password: <empty>"]),
         ("", "", ["username: <empty>", "password: <empty>"]),
-        ("username", "password", ["username: username", "password: <hidden>"]),
+        ("username", "password", ["username: username", "password: ********"]),
+        # Ctrl-V in Windows Command Prompt; see https://bugs.python.org/issue37426
+        ("username", "\x16", ["username: username", "password: *"]),
     ],
 )
 def test_logs_username_and_password(username, password, messages, caplog):
