@@ -1,3 +1,4 @@
+import getpass
 import logging
 
 import pytest
@@ -202,3 +203,26 @@ def test_logs_config_values(config, caplog):
         "username set from config file",
         "password set from config file",
     ]
+
+
+@pytest.mark.parametrize(
+    "password, warning",
+    [
+        ("", "Your password is empty"),
+        ("\x16", "Your password contains control characters"),
+        ("entered\x16pw", "Your password contains control characters"),
+    ],
+)
+def test_warns_for_empty_password(
+    password,
+    warning,
+    monkeypatch,
+    entered_username,
+    config,
+    caplog,
+):
+    monkeypatch.setattr(getpass, "getpass", lambda prompt: password)
+
+    assert auth.Resolver(config, auth.CredentialInput()).password == password
+
+    assert caplog.messages[0].startswith(f"  {warning}")
