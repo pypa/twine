@@ -1,0 +1,1 @@
+Generalize ``--verbose`` suggestion when an upload fails.
