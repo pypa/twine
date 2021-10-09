@@ -256,9 +256,9 @@ def get_userpass_value(
 
         if warning:
             logger.warning(f"  {warning}. Did you enter it correctly?")
-            # TODO: Link to new entry in Twine docs
             logger.warning(
-                "  See https://pypi.org/help/#invalid-auth for more information."
+                "  See https://twine.readthedocs.io/#entering-credentials "
+                "for more information."
             )
 
         return value

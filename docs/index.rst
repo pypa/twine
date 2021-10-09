@@ -88,6 +88,20 @@ Using Twine
 
 4. Done!
 
+.. _entering-credentials:
+
+.. note::
+
+   Like many other command line tools, Twine does not show any characters when
+   you enter your password.
+
+   If you're using Windows and trying to paste your username, password, or
+   token in the Command Prompt or PowerShell, ``Ctrl-V`` and ``Shift+Insert``
+   won't work. Instead, you can use "Edit > Paste" from the window menu, or
+   enable "Use Ctrl+Shift+C/V as Copy/Paste" in "Properties". This is a
+   `known issue <https://bugs.python.org/issue37426>`_ with Python's
+   ``getpass`` module.
+
 More documentation on using Twine to upload packages to PyPI is in
 the `Python Packaging User Guide`_.
 
