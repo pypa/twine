@@ -276,15 +276,17 @@ linkcheck_ignore = [
     "https://upload.pypi.org/legacy",
 ]
 
-# Example configuration for intersphinx: refer to the Python standard library.
-intersphinx_mapping = {"https://docs.python.org/": None}
+intersphinx_mapping = {
+    "python": ("https://docs.python.org/3", None),
+    "requests": ("https://docs.python-requests.org/en/latest/", None),
+}
 
 # Be strict about the invalid references:
 nitpicky = True
 
 # TODO: Try to add these to intersphinx_mapping
 nitpick_ignore_regex = [
-    (r"py:.*", r"(pkginfo|requests|IO).*"),
+    (r"py:.*", r"(pkginfo|IO).*"),
 ]
 
 # -- Options for apidoc output ------------------------------------------------
