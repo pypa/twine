@@ -18,6 +18,7 @@ import functools
 import logging
 import os
 import os.path
+import unicodedata
 from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
@@ -240,11 +241,31 @@ def get_userpass_value(
     if cli_value is not None:
         logger.info(f"{key} set by command options")
         return cli_value
+
     elif config.get(key) is not None:
         logger.info(f"{key} set from config file")
         return config[key]
+
     elif prompt_strategy:
-        return prompt_strategy()
+        warning = ""
+        value = prompt_strategy()
+
+        if not value:
+            warning = f"Your {key} is empty"
+        elif any(unicodedata.category(c).startswith("C") for c in value):
+            # See https://www.unicode.org/reports/tr44/#General_Category_Values
+            # Most common case is "\x16" when pasting in Windows Command Prompt
+            warning = f"Your {key} contains control characters"
+
+        if warning:
+            logger.warning(f"  {warning}. Did you enter it correctly?")
+            logger.warning(
+                "  See https://twine.readthedocs.io/#entering-credentials "
+                "for more information."
+            )
+
+        return value
+
     else:
         return None
 
