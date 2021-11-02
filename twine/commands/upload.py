@@ -58,8 +58,8 @@ def skip_upload(
     return (
         # pypiserver (https://pypi.org/project/pypiserver)
         status == 409
-        # PyPI / TestPyPI
-        or (status == 400 and "already exist" in reason)
+        # PyPI / TestPyPI / GCP Artifact Registry
+        or (status == 400 and any("already exist" in x for x in [reason, text]))
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
         or (status == 400 and any("updating asset" in x for x in [reason, text]))
         # Artifactory (https://jfrog.com/artifactory/)
