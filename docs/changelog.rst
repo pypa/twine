@@ -12,6 +12,24 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.5.0 (2021-11-02)
+------------------------
+
+Features
+^^^^^^^^
+
+- Show more helpful messages for invalid passwords. (`#815 <https://github.com/pypa/twine/issues/815>`_)
+- Allow the ``--skip-existing`` option to work with GCP Artifact Registry. (`#816 <https://github.com/pypa/twine/issues/816>`_)
+
+
+Bugfixes
+^^^^^^^^
+
+- Add a helpful error message when an upload fails due to missing a trailing
+  slash in the URL. (`#812 <https://github.com/pypa/twine/issues/812>`_)
+- Generalize ``--verbose`` suggestion when an upload fails. (`#817 <https://github.com/pypa/twine/issues/817>`_)
+
+
 Twine 3.4.2 (2021-07-20)
 ------------------------
 
