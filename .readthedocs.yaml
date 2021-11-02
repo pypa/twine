@@ -16,7 +16,8 @@ formats:
 python:
   # Mininum supported Python version
   version: "3.6"
+  # NB: install . first to avoid upgrading past docs/requirements.txt pins
   install:
-    - requirements: docs/requirements.txt
     - method: pip
       path: .
+    - requirements: docs/requirements.txt
