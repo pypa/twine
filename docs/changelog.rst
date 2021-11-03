@@ -19,7 +19,7 @@ Features
 ^^^^^^^^
 
 - Show more helpful messages for invalid passwords. (`#815 <https://github.com/pypa/twine/issues/815>`_)
-- Allow the ``--skip-existing`` option to work with GCP Artifact Registry. (`#816 <https://github.com/pypa/twine/issues/816>`_)
+- Allow the ``--skip-existing`` option to work with GCP Artifact Registry. (`#823 <https://github.com/pypa/twine/issues/823>`_)
 
 
 Bugfixes
