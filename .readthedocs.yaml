@@ -16,7 +16,9 @@ formats:
 python:
   # Mininum supported Python version
   version: "3.6"
-  # NB: install . first to avoid upgrading past docs/requirements.txt pins
+  # Install twine first, because RTD uses `--upgrade-strategy eager`,
+  # which installs the latest version of docutils via readme_renderer.
+  # However, Sphinx 4.2.0 requires docutils>=0.14,<0.18.
   install:
     - method: pip
       path: .
