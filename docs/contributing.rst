@@ -112,13 +112,13 @@ To pass options to ``pytest``, e.g. the name of a test, run:
 
    tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
-Twine is continuously tested against Python 3.6, 3.7, 3.8, and 3.9 using
+Twine is continuously tested against supported versions of Python using
 `GitHub Actions`_. To run the tests against a specific version, e.g. Python
-3.6, you will need it installed on your machine. Then, run:
+3.8, you will need it installed on your machine. Then, run:
 
 .. code-block:: bash
 
-   tox -e py36
+   tox -e py38
 
 To run the "integration" tests of uploading to real package indexes, run:
 
