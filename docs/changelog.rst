@@ -12,6 +12,15 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.6.0 (2021-11-10)
+------------------------
+
+Features
+^^^^^^^^
+
+- Add support for Python 3.10. (`#827 <https://github.com/pypa/twine/issues/827>`_)
+
+
 Twine 3.5.0 (2021-11-02)
 ------------------------
 
