@@ -34,7 +34,20 @@ input_func = input
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
-DEFAULT_CONFIG_FILE = "~/.pypirc"
+# Obtain config file location following XDG spec
+XDG_CONFIG_HOME = os.environ.get(
+    "XDG_CONFIG_HOME", os.path.join(os.path.expanduser("~"), ".config")
+)
+XDG_CONFIG_FILE = os.path.join(XDG_CONFIG_HOME, "pypi", "pypirc")
+
+# Obtain old config file location to add backward compatibility
+OLD_CONFIG_FILE = os.path.join(os.path.expanduser("~"), ".pypirc")
+
+# Obtain config file, ${HOME}/.pypirc if exists else
+# ${XDG_CONFIG_HOME}/pypi/pypirc
+DEFAULT_CONFIG_FILE = (
+    OLD_CONFIG_FILE if os.path.isfile(OLD_CONFIG_FILE) else XDG_CONFIG_FILE
+)
 
 # TODO: In general, it seems to be assumed that the values retrieved from
 # instances of this type aren't None, except for username and password.
