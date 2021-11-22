@@ -167,6 +167,8 @@ class PackageFile:
             # Metadata 2.1
             "provides_extras": meta.provides_extras,
             "description_content_type": meta.description_content_type,
+            # Metadata 2.2
+            "dynamic": meta.dynamic,
         }
 
         if self.gpg_signature is not None:

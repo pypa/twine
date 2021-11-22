@@ -164,6 +164,7 @@ def test_metadata_dictionary(gpg_signature):
         requires_python=pretend.stub(),
         provides_extras=pretend.stub(),
         description_content_type=pretend.stub(),
+        dynamic=pretend.stub(),
     )
 
     package = package_file.PackageFile(
@@ -218,6 +219,9 @@ def test_metadata_dictionary(gpg_signature):
     # Metadata 2.1
     assert result["provides_extras"] == meta.provides_extras
     assert result["description_content_type"] == meta.description_content_type
+
+    # Metadata 2.2
+    assert result["dynamic"] == meta.dynamic
 
     # GPG signature
     assert result.get("gpg_signature") == gpg_signature
