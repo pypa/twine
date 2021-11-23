@@ -43,7 +43,7 @@ jobs:
       - name: Run type-checking
         run: python -m tox -e types
       - name: Run tests
-        run: python -m tox -e py -- --cov-report xml
+        run: python -m tox -e py -- --cov-report xml --color yes
       - uses: codecov/codecov-action@v1
         if: github.event_name != 'schedule'
         with:
