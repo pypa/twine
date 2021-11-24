@@ -1,0 +1,1 @@
+Add support for core metadata version 2.2, defined in PEP 643.
