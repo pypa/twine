@@ -1,3 +1,5 @@
+# Run integration tests separately from main.yml because they can be flaky
+# See https://github.com/pypa/twine/issues/684#issuecomment-703150619
 name: Integration
 
 on:
