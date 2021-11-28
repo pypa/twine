@@ -1,3 +1,5 @@
+# Run integration tests separately from main.yml because they can be flaky
+# See https://github.com/pypa/twine/issues/684#issuecomment-703150619
 name: Integration
 
 on:
@@ -7,6 +9,11 @@ on:
   schedule:
     - cron: '0 0 * * *'  # daily
 
+env:
+  FORCE_COLOR: "1"
+  TOX_TESTENV_PASSENV: "FORCE_COLOR"
+  MIN_PYTHON_VERSION: "3.6"
+
 jobs:
   test:
     runs-on: ubuntu-latest
@@ -14,7 +21,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-python@v2
         with:
-          python-version: 3.8
+          python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
         run: python -m pip install tox
       - name: Run tests
