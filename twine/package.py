@@ -128,6 +128,10 @@ class PackageFile:
         return cls(filename, comment, meta, py_version, dtype)
 
     def metadata_dictionary(self) -> Dict[str, MetadataValue]:
+        """Merge multiple sources of metadata into a single dictionary.
+
+        Includes values from filename, PKG-INFO, hashers, and signature.
+        """
         meta = self.metadata
         data = {
             # identify release
@@ -167,6 +171,8 @@ class PackageFile:
             # Metadata 2.1
             "provides_extras": meta.provides_extras,
             "description_content_type": meta.description_content_type,
+            # Metadata 2.2
+            "dynamic": meta.dynamic,
         }
 
         if self.gpg_signature is not None:

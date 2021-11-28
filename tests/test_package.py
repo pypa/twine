@@ -19,6 +19,8 @@ import pytest
 from twine import exceptions
 from twine import package as package_file
 
+from . import helpers
+
 
 def test_sign_file(monkeypatch):
     replaced_check_call = pretend.call_recorder(lambda args: None)
@@ -134,8 +136,59 @@ def test_package_safe_name_is_correct(pkg_name, expected_name):
     assert package.safe_name == expected_name
 
 
+def test_metadata_dictionary_keys():
+    """Merge multiple sources of metadata into a single dictionary."""
+    package = package_file.PackageFile.from_filename(helpers.SDIST_FIXTURE, None)
+    assert set(package.metadata_dictionary()) == set(
+        [
+            # identify release
+            "name",
+            "version",
+            # file content
+            "filetype",
+            "pyversion",
+            # additional meta-data
+            "metadata_version",
+            "summary",
+            "home_page",
+            "author",
+            "author_email",
+            "maintainer",
+            "maintainer_email",
+            "license",
+            "description",
+            "keywords",
+            "platform",
+            "classifiers",
+            "download_url",
+            "supported_platform",
+            "comment",
+            "md5_digest",
+            "sha256_digest",
+            "blake2_256_digest",
+            # PEP 314
+            "provides",
+            "requires",
+            "obsoletes",
+            # Metadata 1.2
+            "project_urls",
+            "provides_dist",
+            "obsoletes_dist",
+            "requires_dist",
+            "requires_external",
+            "requires_python",
+            # Metadata 2.1
+            "provides_extras",
+            "description_content_type",
+            # Metadata 2.2
+            "dynamic",
+        ]
+    )
+
+
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
-def test_metadata_dictionary(gpg_signature):
+def test_metadata_dictionary_values(gpg_signature):
+    """Pass values from pkginfo.Distribution through to dictionary."""
     meta = pretend.stub(
         name="whatever",
         version=pretend.stub(),
@@ -164,6 +217,7 @@ def test_metadata_dictionary(gpg_signature):
         requires_python=pretend.stub(),
         provides_extras=pretend.stub(),
         description_content_type=pretend.stub(),
+        dynamic=pretend.stub(),
     )
 
     package = package_file.PackageFile(
@@ -218,6 +272,9 @@ def test_metadata_dictionary(gpg_signature):
     # Metadata 2.1
     assert result["provides_extras"] == meta.provides_extras
     assert result["description_content_type"] == meta.description_content_type
+
+    # Metadata 2.2
+    assert result["dynamic"] == meta.dynamic
 
     # GPG signature
     assert result.get("gpg_signature") == gpg_signature
