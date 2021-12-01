@@ -12,6 +12,15 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.7.0 (2021-12-01)
+------------------------
+
+Features
+^^^^^^^^
+
+- Add support for core metadata version 2.2, defined in PEP 643. (`#833 <https://github.com/pypa/twine/issues/833>`_)
+
+
 Twine 3.6.0 (2021-11-10)
 ------------------------
 
