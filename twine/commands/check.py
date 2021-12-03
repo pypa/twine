@@ -21,6 +21,7 @@ import textwrap
 from typing import IO, List, Optional, Tuple, cast
 
 import readme_renderer.rst
+from importlib_metadata import entry_points
 
 from twine import commands
 from twine import package as package_file
@@ -68,12 +69,10 @@ class _WarningStream:
         return self.output.getvalue()
 
 
-def _check_file(
-    filename: str, render_warning_stream: _WarningStream
-) -> Tuple[List[str], bool]:
-    """Check given distribution."""
+def check_long_description(filename: str) -> Tuple[List[str], List[str]]:
+    """Check whether the long description can be properly rendered."""
     warnings = []
-    is_ok = True
+    errors = []
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
 
@@ -93,13 +92,65 @@ def _check_file(
     if description in {None, "UNKNOWN\n\n\n"}:
         warnings.append("`long_description` missing.")
     elif renderer:
+        render_warning_stream = _WarningStream()
         rendering_result = renderer.render(
             description, stream=render_warning_stream, **params
         )
         if rendering_result is None:
-            is_ok = False
+            error_text = (
+                "`long_description` has syntax errors in markup and "
+                "would not be rendered on PyPI."
+            )
+            errors.append(textwrap.indent(error_text, "  "))
+            errors.append(textwrap.indent(str(render_warning_stream), "    "))
 
-    return warnings, is_ok
+    return warnings, errors
+
+
+def check_license(filename: str) -> Tuple[List[str], List[str]]:
+    """Check whether a license is properly specified."""
+    warnings = []
+    errors = []
+
+    package = package_file.PackageFile.from_filename(filename, comment=None)
+
+    metadata = package.metadata_dictionary()
+    license = cast(Optional[str], metadata.get("license", None))
+    license_classifiers = [
+        classifier
+        for classifier in metadata.get("classifiers", [])
+        if classifier.startswith("License ::")
+    ]
+
+    if license is None and not license_classifiers:
+        warning = (
+            "No license specified. Use one of the `LICENSE ::` classifiers "
+            "or the `license` field if no classifier is relevant."
+        )
+        warnings.append(warning)
+
+    return warnings, errors
+
+
+def _check_file(filename: str) -> Tuple[List[str], List[str]]:
+    """Run all available checkers on FILENAME.
+
+    :param filename:
+        Path to the distribution file to analyze
+    :return:
+        A list of warnings and a list of errors
+    """
+    warnings = []
+    errors = []
+
+    registered_checkers = entry_points(group="twine.registered_checkers")
+    for checker in registered_checkers:
+        func = checker.load()
+        checker_warnings, checker_errors = func(filename)
+        warnings.extend(checker_warnings)
+        errors.extend(checker_errors)
+
+    return warnings, errors
 
 
 def check(
@@ -107,10 +158,9 @@ def check(
     output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
-    """Check that a distribution will render correctly on PyPI and display the results.
+    """Run linters on the distribution files specified as arguments.
 
-    This is currently only validates ``long_description``, but more checks could be
-    added; see https://github.com/pypa/twine/projects/2.
+    More linters can be added as entry_points (twine.registered_checkers).
 
     :param dists:
         The distribution files to check.
@@ -120,7 +170,7 @@ def check(
         If ``True``, treat warnings as errors.
 
     :return:
-        ``True`` if there are rendering errors, otherwise ``False``.
+        ``True`` if there are errors, otherwise ``False``.
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
@@ -131,20 +181,12 @@ def check(
 
     for filename in uploads:
         output_stream.write("Checking %s: " % filename)
-        render_warning_stream = _WarningStream()
-        warnings, is_ok = _check_file(filename, render_warning_stream)
+        warnings, errors = _check_file(filename)
 
         # Print the status and/or error
-        if not is_ok:
+        if errors:
             failure = True
             output_stream.write("FAILED\n")
-
-            error_text = (
-                "`long_description` has syntax errors in markup and "
-                "would not be rendered on PyPI.\n"
-            )
-            output_stream.write(textwrap.indent(error_text, "  "))
-            output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
         elif warnings:
             if strict:
                 failure = True
@@ -154,7 +196,9 @@ def check(
         else:
             output_stream.write("PASSED\n")
 
-        # Print warnings after the status and/or error
+        # Print errors and warnings after the status
+        for message in errors:
+            output_stream.write("  error: " + message + "\n")
         for message in warnings:
             output_stream.write("  warning: " + message + "\n")
 

@@ -45,148 +45,180 @@ class TestWarningStream:
         assert str(self.stream) == "result"
 
 
-def test_check_no_distributions(monkeypatch):
-    stream = io.StringIO()
+class TestCheckLicense:
+    def test_license_field_specified(self, monkeypatch):
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "license": "Some License v42.0",
+            }
+        )
 
-    monkeypatch.setattr(commands, "_find_dists", lambda a: [])
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
 
-    assert not check.check(["dist/*"], output_stream=stream)
-    assert stream.getvalue() == "No files to check.\n"
+        warnings, errors = check.check_license("dist/dist.tar.gz")
+        assert not warnings
+        assert not errors
 
+    def test_license_classifier_specified(self, monkeypatch):
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "classifiers": [
+                    "License :: OSI Approved :: Apache Software License",
+                ],
+            }
+        )
 
-def test_check_passing_distribution(monkeypatch):
-    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: "valid"))
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": "text/markdown",
-        }
-    )
-    output_stream = io.StringIO()
-    warning_stream = ""
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-    monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+        warnings, errors = check.check_license("dist/dist.tar.gz")
+        assert not warnings
+        assert not errors
 
-    assert not check.check(["dist/*"], output_stream=output_stream)
-    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
-    assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+    def test_no_license_specified(self, monkeypatch):
+        package = pretend.stub(metadata_dictionary=lambda: {})
 
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
 
-@pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
-def test_check_passing_distribution_with_none_renderer(content_type, monkeypatch):
-    """Pass when rendering a content type can't fail."""
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": content_type,
-        }
-    )
-
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-
-    output_stream = io.StringIO()
-    assert not check.check(["dist/*"], output_stream=output_stream)
-    assert output_stream.getvalue() == "Checking dist/dist.tar.gz: PASSED\n"
+        warnings, errors = check.check_license("dist/dist.tar.gz")
+        assert not errors
+        assert warnings == [
+            "No license specified. Use one of the `LICENSE ::` classifiers "
+            "or the `license` field if no classifier is relevant."
+        ]
 
 
-def test_check_no_description(monkeypatch, capsys):
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": None,
-            "description_content_type": None,
-        }
-    )
+class TestCheckLongDescription:
+    def test_passing_distribution(self, monkeypatch):
+        renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: "valid"))
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "description": "blah",
+                "description_content_type": "text/markdown",
+            }
+        )
 
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
+        warning_stream = ""
 
-    # used to crash with `AttributeError`
-    output_stream = io.StringIO()
-    assert not check.check(["dist/*"], output_stream=output_stream)
-    assert output_stream.getvalue() == (
-        "Checking dist/dist.tar.gz: PASSED, with warnings\n"
-        "  warning: `long_description_content_type` missing. "
-        "defaulting to `text/x-rst`.\n"
-        "  warning: `long_description` missing.\n"
-    )
+        monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
+        monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
+        monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+
+        warnings, errors = check.check_long_description("dist/dist.tar.gz")
+        assert not warnings
+        assert not errors
+        assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+
+    @pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
+    def test_passing_distribution_with_none_renderer(
+        self, content_type, monkeypatch
+    ):
+        """Pass when rendering a content type can't fail."""
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "description": "blah",
+                "description_content_type": content_type,
+            }
+        )
+
+        monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
+
+        warnings, errors = check.check_long_description("dist/dist.tar.gz")
+        assert not warnings
+        assert not errors
+
+    def test_no_description(self, monkeypatch, capsys):
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "description": None,
+                "description_content_type": None,
+            }
+        )
+
+        monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
+
+        # used to crash with `AttributeError`
+        output_stream = io.StringIO()
+        assert not check.check(["dist/*"], output_stream=output_stream)
+        warnings, errors = check.check_long_description("dist/dist.tar.gz")
+        assert not errors
+        assert warnings == [
+            "`long_description_content_type` missing. defaulting to `text/x-rst`.",
+            "`long_description` missing.",
+        ]
+
+    def test_rendering_failure(self, monkeypatch):
+        renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
+        package = pretend.stub(
+            metadata_dictionary=lambda: {
+                "description": "blah",
+                "description_content_type": "text/markdown",
+            }
+        )
+        warning_stream = "WARNING"
+
+        monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
+        monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+        monkeypatch.setattr(
+            package_file,
+            "PackageFile",
+            pretend.stub(from_filename=lambda *a, **kw: package),
+        )
+        monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+        warnings, errors = check.check_long_description("dist/dist.tar.gz")
+        assert not warnings
+        assert errors == [
+            "  `long_description` has syntax errors in markup and "
+            "would not be rendered on PyPI.",
+            "    WARNING",
+        ]
 
 
-def test_strict_fails_on_warnings(monkeypatch, capsys):
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": None,
-            "description_content_type": None,
-        }
-    )
+class TestCheckCommand:
+    def test_strict_fails_on_warnings(self, monkeypatch):
+        monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
+        monkeypatch.setattr(check, "_check_file", lambda *args: (["warning"], []))
+        assert not check.check(["dist/dist.tar.gz"], strict=False)
+        assert check.check(["dist/dist.tar.gz"], strict=True)
 
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
+    def test_check_no_distributions(self, monkeypatch):
+        stream = io.StringIO()
 
-    # used to crash with `AttributeError`
-    output_stream = io.StringIO()
-    assert check.check(["dist/*"], output_stream=output_stream, strict=True)
-    assert output_stream.getvalue() == (
-        "Checking dist/dist.tar.gz: FAILED, due to warnings\n"
-        "  warning: `long_description_content_type` missing. "
-        "defaulting to `text/x-rst`.\n"
-        "  warning: `long_description` missing.\n"
-    )
+        monkeypatch.setattr(commands, "_find_dists", lambda a: [])
 
+        assert not check.check(["dist/*"], output_stream=stream)
+        assert stream.getvalue() == "No files to check.\n"
 
-def test_check_failing_distribution(monkeypatch):
-    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": "text/markdown",
-        }
-    )
-    output_stream = io.StringIO()
-    warning_stream = "WARNING"
+    def test_main(self, monkeypatch):
+        check_result = pretend.stub()
+        check_stub = pretend.call_recorder(lambda a, strict=False: check_result)
+        monkeypatch.setattr(check, "check", check_stub)
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-    monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
-
-    assert check.check(["dist/*"], output_stream=output_stream)
-    assert output_stream.getvalue() == (
-        "Checking dist/dist.tar.gz: FAILED\n"
-        "  `long_description` has syntax errors in markup and would not be "
-        "rendered on PyPI.\n"
-        "    WARNING"
-    )
-    assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
-
-
-def test_main(monkeypatch):
-    check_result = pretend.stub()
-    check_stub = pretend.call_recorder(lambda a, strict=False: check_result)
-    monkeypatch.setattr(check, "check", check_stub)
-
-    assert check.main(["dist/*"]) == check_result
-    assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]
+        assert check.main(["dist/*"]) == check_result
+        assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]

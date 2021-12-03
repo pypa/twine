@@ -118,8 +118,11 @@ Uploads one or more distributions to a repository.
 ``twine check``
 ^^^^^^^^^^^^^^^
 
-Checks whether your distribution's long description will render correctly on
-PyPI.
+Runs a series of checks on the given distribution files:
+
+* Checks whether your distribution's long description will render correctly on
+  PyPI.
+* Checks whether a license was specified.
 
 .. program-output:: twine check -h
 
