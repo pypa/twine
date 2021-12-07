@@ -12,6 +12,15 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.7.1 (2021-12-07)
+------------------------
+
+Improved Documentation
+^^^^^^^^^^^^^^^^^^^^^^
+
+- Fix broken link to packaging tutorial. (`#844 <https://github.com/pypa/twine/issues/844>`_)
+
+
 Twine 3.7.0 (2021-12-01)
 ------------------------
 
