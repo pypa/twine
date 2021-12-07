@@ -12,7 +12,7 @@
    Code of Conduct <https://github.com/pypa/.github/blob/main/CODE_OF_CONDUCT.md>
    PyPI Project <https://pypi.org/project/twine/>
    GitHub Repository <https://github.com/pypa/twine>
-   Python Packaging Tutorial <https://packaging.python.org/tutorials/distributing-packages/>
+   Python Packaging Tutorial <https://packaging.python.org/tutorials/packaging-projects/>
 
 Twine
 =====
@@ -229,12 +229,12 @@ Keyring, run:
 See `Twine issue #338`_ for discussion and background.
 
 
-.. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`publishing`: https://packaging.python.org/tutorials/packaging-projects/
 .. _`PyPI`: https://pypi.org
 .. _`Test PyPI`: https://packaging.python.org/guides/using-testpypi/
 .. _`pypirc`: https://packaging.python.org/specifications/pypirc/
 .. _`Python Packaging User Guide`:
-   https://packaging.python.org/tutorials/distributing-packages/
+   https://packaging.python.org/tutorials/packaging-projects/
 .. _`keyring`: https://pypi.org/project/keyring/
 .. _`Using Keyring on headless systems`:
    https://keyring.readthedocs.io/en/latest/#using-keyring-on-headless-linux-systems

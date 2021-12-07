@@ -291,7 +291,7 @@ In the future, ``pip`` and ``twine`` may
 merge into a single tool; see `ongoing discussion
 <https://github.com/pypa/packaging-problems/issues/60>`_.
 
-.. _`official Python Packaging User Guide`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`official Python Packaging User Guide`: https://packaging.python.org/tutorials/packaging-projects/
 .. _`the GitHub repository`: https://github.com/pypa/twine
 .. _`Python Packaging Discourse forum`: https://discuss.python.org/c/packaging/
 .. _`IRC`: https://web.libera.chat/#pypa-dev,#pypa

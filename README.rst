@@ -38,7 +38,7 @@ Everyone interacting in the Twine project's codebases, issue
 trackers, chat rooms, and mailing lists is expected to follow the
 `PSF Code of Conduct`_.
 
-.. _`publishing`: https://packaging.python.org/tutorials/distributing-packages/
+.. _`publishing`: https://packaging.python.org/tutorials/packaging-projects/
 .. _`PyPI`: https://pypi.org
 .. _`distributions`:
    https://packaging.python.org/glossary/#term-Distribution-Package
