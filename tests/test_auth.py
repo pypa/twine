@@ -86,7 +86,9 @@ def test_get_username_and_password_keyring_overrides_prompt(
     assert res.password == "real_user@system sekure pa55word"
 
     assert caplog.messages == [
+        "Querying keyring for username",
         "username set from keyring",
+        "Querying keyring for password",
         "password set from keyring",
     ]
 
