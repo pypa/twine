@@ -56,6 +56,7 @@ class Resolver:
     def get_username_from_keyring(self) -> Optional[str]:
         try:
             system = cast(str, self.system)
+            logger.info("Querying keyring for username")
             creds = keyring.get_credential(system, None)
             if creds:
                 return cast(str, creds.username)
@@ -70,6 +71,7 @@ class Resolver:
         try:
             system = cast(str, self.system)
             username = cast(str, self.username)
+            logger.info("Querying keyring for password")
             return cast(str, keyring.get_password(system, username))
         except Exception as exc:
             warnings.warn(str(exc))
