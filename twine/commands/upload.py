@@ -82,9 +82,9 @@ def _make_package(
         package.sign(upload_settings.sign_with, upload_settings.identity)
 
     file_size = utils.get_file_size(package.filename)
-    logger.info(f"  {package.filename} ({file_size})")
+    logger.info(f"{package.filename} ({file_size})")
     if package.gpg_signature:
-        logger.info(f"  Signed with {package.signed_filename}")
+        logger.info(f"Signed with {package.signed_filename}")
 
     return package
 
