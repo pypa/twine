@@ -149,21 +149,17 @@ def keyring_no_backends_get_credential(monkeypatch):
 
 
 def test_get_username_runtime_error_suppressed(
-    entered_username, keyring_no_backends_get_credential, recwarn, config
+    entered_username, keyring_no_backends_get_credential, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
-    assert len(recwarn) == 1
-    warning = recwarn.pop(UserWarning)
-    assert "fail!" in str(warning)
+    assert caplog.messages == ["fail!"]
 
 
 def test_get_password_runtime_error_suppressed(
-    entered_password, keyring_no_backends, recwarn, config
+    entered_password, keyring_no_backends, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput("user")).password == "entered pw"
-    assert len(recwarn) == 1
-    warning = recwarn.pop(UserWarning)
-    assert "fail!" in str(warning)
+    assert caplog.messages == ["fail!"]
 
 
 def test_get_username_return_none(entered_username, monkeypatch, config):
