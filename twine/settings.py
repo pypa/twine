@@ -17,9 +17,6 @@ import contextlib
 import logging
 from typing import Any, ContextManager, Optional, cast
 
-import rich.highlighter
-import rich.logging
-
 from twine import auth
 from twine import exceptions
 from twine import repository
@@ -153,13 +150,6 @@ class Settings:
         """Initialize a logger based on the --verbose option."""
         self._verbose = verbose
         root_logger = logging.getLogger("twine")
-        root_logger.addHandler(
-            rich.logging.RichHandler(
-                show_time=False,
-                show_path=False,
-                highlighter=rich.highlighter.NullHighlighter(),
-            )
-        )
         root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     @staticmethod

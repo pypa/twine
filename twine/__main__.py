@@ -13,40 +13,44 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import http
+import logging
 import sys
 from typing import Any
 
-import colorama
 import requests
+import rich.highlighter
+import rich.logging
 
 from twine import cli
 from twine import exceptions
 
 
 def main() -> Any:
+    root_logger = logging.getLogger("twine")
+    root_logger.addHandler(
+        rich.logging.RichHandler(
+            show_time=False,
+            show_path=False,
+            highlighter=rich.highlighter.NullHighlighter(),
+        )
+    )
+
     try:
-        result = cli.dispatch(sys.argv[1:])
+        error = cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
+        error = True
         status_code = exc.response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
-        result = (
+        root_logger.error(
             f"{exc.__class__.__name__}: {status_code} {status_phrase} "
             f"from {exc.response.url}\n"
             f"{exc.response.reason}"
         )
     except exceptions.TwineException as exc:
-        result = f"{exc.__class__.__name__}: {exc.args[0]}"
+        error = True
+        root_logger.error(f"{exc.__class__.__name__}: {exc.args[0]}")
 
-    return _format_error(result) if isinstance(result, str) else result
-
-
-def _format_error(message: str) -> str:
-    pre_style, post_style = "", ""
-    if not cli.args.no_color:
-        colorama.init()
-        pre_style, post_style = colorama.Fore.RED, colorama.Style.RESET_ALL
-
-    return f"{pre_style}{message}{post_style}"
+    return error
 
 
 if __name__ == "__main__":
