@@ -18,8 +18,10 @@ import sys
 from typing import Any
 
 import requests
+import rich.console
 import rich.highlighter
 import rich.logging
+import rich.theme
 
 from twine import cli
 from twine import exceptions
@@ -29,6 +31,17 @@ def main() -> Any:
     root_logger = logging.getLogger("twine")
     root_logger.addHandler(
         rich.logging.RichHandler(
+            console=rich.console.Console(
+                theme=rich.theme.Theme(
+                    {
+                        "logging.level.debug": "green",
+                        "logging.level.info": "blue",
+                        "logging.level.warning": "yellow",
+                        "logging.level.error": "red",
+                        "logging.level.critical": "reverse red",
+                    }
+                )
+            ),
             show_time=False,
             show_path=False,
             highlighter=rich.highlighter.NullHighlighter(),
