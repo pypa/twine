@@ -28,6 +28,8 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
         "pkginfo",
         "requests",
         "requests-toolbelt",
+        "urllib3",
+        "keyring",
         "tqdm",
     )
     return [(dep, version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
