@@ -140,6 +140,13 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
         resp = repository.upload(package)
 
+        if upload_settings.verbose:
+            logger.info(
+                f"Received {resp.status_code} response from {resp.url}: {resp.reason}"
+            )
+            if resp.text:
+                logger.info(f"Response text:\n{resp.text}")
+
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
         # by PyPI should never happen in reality. This should catch malicious
