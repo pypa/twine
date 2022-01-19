@@ -14,8 +14,8 @@
 import argparse
 from typing import Any, List, Tuple
 
-from importlib_metadata import entry_points
-from importlib_metadata import version
+import importlib_metadata
+from packaging import requirements
 
 import twine
 
@@ -23,14 +23,9 @@ args = argparse.Namespace()
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
-    deps = (
-        "importlib_metadata",
-        "pkginfo",
-        "requests",
-        "requests-toolbelt",
-        "tqdm",
-    )
-    return [(dep, version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+    requires = importlib_metadata.requires("twine")  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+    deps = [requirements.Requirement(r).name for r in requires]
+    return [(dep, importlib_metadata.version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
 
 def dep_versions() -> str:
@@ -40,7 +35,9 @@ def dep_versions() -> str:
 
 
 def dispatch(argv: List[str]) -> Any:
-    registered_commands = entry_points(group="twine.registered_commands")
+    registered_commands = importlib_metadata.entry_points(
+        group="twine.registered_commands"
+    )
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
