@@ -141,9 +141,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         resp = repository.upload(package)
 
         if upload_settings.verbose:
-            logger.info(
-                f"Received {resp.status_code} response from {resp.url}: {resp.reason}"
-            )
+            logger.info(f"Request: {resp.request.method} {resp.request.url}")
+            logger.info(f"Response from {resp.url}:\n{resp.status_code} {resp.reason}")
             if resp.text:
                 logger.info(f"Response text:\n{resp.text}")
 
