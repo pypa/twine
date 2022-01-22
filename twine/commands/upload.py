@@ -18,7 +18,6 @@ import os.path
 from typing import Dict, List, cast
 
 import requests
-from requests_toolbelt.utils import dump
 
 from twine import commands
 from twine import exceptions
@@ -142,7 +141,11 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         resp = repository.upload(package)
 
         if upload_settings.verbose:
-            logger.info(dump.dump_all(resp).decode("utf-8"))
+            logger.info(
+                f"Received {resp.status_code} response from {resp.url}: {resp.reason}"
+            )
+            if resp.text:
+                logger.info(f"Response text:\n{resp.text}")
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
