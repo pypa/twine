@@ -77,18 +77,12 @@ class Repository:
 
     @staticmethod
     def _make_adapter_with_retries() -> adapters.HTTPAdapter:
-        retry_kwargs = dict(
+        retry = urllib3.Retry(
+            allowed_methods=["GET"],
             connect=5,
             total=10,
             status_forcelist=[500, 501, 502, 503],
         )
-
-        try:
-            retry = urllib3.Retry(allowed_methods=["GET"], **retry_kwargs)
-        except TypeError:  # pragma: no cover
-            # Avoiding DeprecationWarning starting in urllib3 1.26
-            # Remove when that's the mininum version
-            retry = urllib3.Retry(method_whitelist=["GET"], **retry_kwargs)
 
         return adapters.HTTPAdapter(max_retries=retry)
 

@@ -337,23 +337,46 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
     assert "blake2_256_digest" not in mddict
 
 
-def test_pkginfo_returns_no_metadata(monkeypatch):
+@pytest.mark.parametrize(
+    "read_data, missing_fields",
+    [
+        pytest.param(
+            b"Metadata-Version: 2.3\nName: test-package\nVersion: 1.0.0\n",
+            "Name, Version",
+            id="unsupported Metadata-Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: UNKNOWN\n",
+            "Name, Version",
+            id="missing Name and Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n",
+            "Name",
+            id="missing Name",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nName: test-package\nVersion: UNKNOWN\n",
+            "Version",
+            id="missing Version",
+        ),
+    ],
+)
+def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
     """Raise an exception when pkginfo can't interpret the metadata.
 
     This could be caused by a version number or format it doesn't support yet.
     """
-
-    def EmptyDist(filename):
-        return pretend.stub(name=None, version=None)
-
-    monkeypatch.setattr(package_file, "DIST_TYPES", {"bdist_wheel": EmptyDist})
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
 
     with pytest.raises(exceptions.InvalidDistribution) as err:
         package_file.PackageFile.from_filename(filename, comment=None)
 
-    assert "Invalid distribution metadata" in err.value.args[0]
-    assert "1.0, 1.1, 1.2, 2.0, 2.1, and 2.2" in err.value.args[0]
+    assert (
+        f"Metadata is missing required fields: {missing_fields}." in err.value.args[0]
+    )
+    assert "1.0, 1.1, 1.2, 2.0, 2.1, 2.2" in err.value.args[0]
 
 
 def test_malformed_from_file(monkeypatch):

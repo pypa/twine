@@ -1,0 +1,1 @@
+Show more helpful error message for invalid metadata.
