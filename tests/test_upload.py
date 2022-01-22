@@ -32,7 +32,12 @@ NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 def stub_response():
     """Mock successful upload of a package."""
     return pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
+        is_redirect=False,
+        url="https://test.pypi.org/legacy/",
+        status_code=200,
+        reason="OK",
+        text=None,
+        raise_for_status=lambda: None,
     )
 
 
@@ -186,7 +191,8 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
 
     stub_response.is_redirect = False
     stub_response.status_code = 403
-    stub_response.text = "Invalid or non-existent authentication information"
+    stub_response.reason = "Invalid or non-existent authentication information"
+    stub_response.text = stub_response.reason
     stub_response.raise_for_status = pretend.raiser(requests.HTTPError)
 
     with pytest.raises(requests.HTTPError):
@@ -288,8 +294,11 @@ def test_exception_for_redirect(
 
     stub_response = pretend.stub(
         is_redirect=True,
+        url=redirect_url,
         status_code=301,
         headers={"location": redirect_url},
+        reason="Redirect",
+        text="",
     )
 
     stub_repository = pretend.stub(
@@ -323,7 +332,9 @@ def test_prints_skip_message_for_response(
 ):
     upload_settings.skip_existing = True
 
-    stub_response.status_code = 409
+    stub_response.status_code = 400
+    stub_response.reason = "File already exists"
+    stub_response.text = stub_response.reason
 
     # Do the upload, triggering the error response
     stub_repository.package_is_uploaded = lambda package: False

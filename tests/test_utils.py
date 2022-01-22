@@ -282,10 +282,7 @@ def test_check_status_code_for_missing_status_code(
 
     captured = capsys.readouterr()
 
-    if verbose:
-        assert captured.out.count("Content received from server:\nForbidden\n") == 1
-    else:
-        assert captured.out.count("--verbose option") == 1
+    assert captured.out.count("--verbose option") == 0 if verbose else 1
 
 
 @pytest.mark.parametrize(
