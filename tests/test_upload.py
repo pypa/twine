@@ -143,6 +143,25 @@ def test_print_packages_if_verbose(upload_settings, capsys):
         assert captured.out.count(f"{filename} ({size})") == 1
 
 
+def test_print_response_if_verbose(upload_settings, stub_response, capsys):
+    """Print details about the response from the repostiry."""
+    upload_settings.verbose = True
+
+    result = upload.upload(
+        upload_settings,
+        [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE],
+    )
+    assert result is None
+
+    captured = capsys.readouterr()
+    response_log = (
+        f"Response from {stub_response.url}:\n"
+        f"{stub_response.status_code} {stub_response.reason}"
+    )
+
+    assert captured.out.count(response_log) == 2
+
+
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
     """Add GPG signature provided by user to uploaded package."""
     # Upload a pre-signed distribution
