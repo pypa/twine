@@ -374,8 +374,7 @@ def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
         package_file.PackageFile.from_filename(filename, comment=None)
 
     assert (
-        f"Distribution metadata is missing required fields: {missing_fields}."
-        in err.value.args[0]
+        f"Metadata is missing required fields: {missing_fields}." in err.value.args[0]
     )
     assert "1.0, 1.1, 1.2, 2.0, 2.1, 2.2" in err.value.args[0]
 

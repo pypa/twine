@@ -111,10 +111,10 @@ class PackageFile:
         if missing_fields:
             supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
             raise exceptions.InvalidDistribution(
-                "Distribution metadata is missing required fields: "
-                f"{', '.join(missing_fields)}. "
-                "Make sure that the distribution includes the files where those fields "
-                "are specified, and that you're using a supported Metadata-Version: "
+                "Metadata is missing required fields: "
+                f"{', '.join(missing_fields)}.\n"
+                "Make sure the distribution includes the files where those fields "
+                "are specified, and is using a supported Metadata-Version: "
                 f"{', '.join(supported_metadata)}."
             )
 
