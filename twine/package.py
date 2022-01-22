@@ -101,15 +101,21 @@ class PackageFile:
                 "Unknown distribution format: '%s'" % os.path.basename(filename)
             )
 
-        # If pkginfo encounters a metadata version it doesn't support, it may
-        # give us back empty metadata. At the very least, we should have a name
-        # and version
-        if not (meta.name and meta.version):
+        # If pkginfo encounters a metadata version it doesn't support, it may give us
+        # back empty metadata. At the very least, we should have a name and version,
+        # which could also be empty if, for example, a MANIFEST.in doesn't include
+        # setup.cfg.
+        missing_fields = [
+            f.capitalize() for f in ["name", "version"] if not getattr(meta, f)
+        ]
+        if missing_fields:
             supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
             raise exceptions.InvalidDistribution(
-                "Invalid distribution metadata. "
-                "This version of twine supports Metadata-Version "
-                f"{', '.join(supported_metadata[:-1])}, and {supported_metadata[-1]}"
+                "Metadata is missing required fields: "
+                f"{', '.join(missing_fields)}.\n"
+                "Make sure the distribution includes the files where those fields "
+                "are specified, and is using a supported Metadata-Version: "
+                f"{', '.join(supported_metadata)}."
             )
 
         py_version: Optional[str]
