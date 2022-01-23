@@ -12,8 +12,6 @@
 
 import sys
 
-import pytest
-
 from twine import __main__ as dunder_main
 
 
@@ -34,7 +32,6 @@ def test_exception_handling(monkeypatch, capsys):
     ]
 
 
-@pytest.mark.xfail(reason="capsys isn't reset, resulting in duplicate lines")
 def test_no_color_exception(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["twine", "--no-color", "upload", "missing.whl"])
 

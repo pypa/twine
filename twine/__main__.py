@@ -22,12 +22,12 @@ import requests
 from twine import cli
 from twine import exceptions
 
+logger = logging.getLogger(__name__)
+
 
 def main() -> Any:
-    # Ensure that all log messages are displayed.
-    # Color will be configured during cli.dispatch() after argparse.
-    root_logger = logging.getLogger("twine")
-    root_logger.addHandler(logging.StreamHandler(sys.stdout))
+    # Ensure that all errors are logged, even before argparse
+    cli.configure_logging()
 
     try:
         error = cli.dispatch(sys.argv[1:])
@@ -35,14 +35,14 @@ def main() -> Any:
         error = True
         status_code = exc.response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
-        root_logger.error(
+        logger.error(
             f"{exc.__class__.__name__}: {status_code} {status_phrase} "
             f"from {exc.response.url}\n"
             f"{exc.response.reason}"
         )
     except exceptions.TwineException as exc:
         error = True
-        root_logger.error(f"{exc.__class__.__name__}: {exc.args[0]}")
+        logger.error(f"{exc.__class__.__name__}: {exc.args[0]}")
 
     return error
 

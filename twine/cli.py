@@ -26,6 +26,44 @@ import twine
 
 args = argparse.Namespace()
 
+# This module attribute facilitates project-wide configuration and usage of Rich.
+# https://rich.readthedocs.io/en/latest/console.html
+console = rich.console.Console(
+    # Setting force_terminal makes testing easier by ensuring color codes.
+    # This could be based on FORCE_COLORS or PY_COLORS in os.environ, but Rich doesn't
+    # support that (https://github.com/Textualize/rich/issues/343), and since this is
+    # a module attribute, os.environ would be read on import, which complicates testing.
+    # no_color is set in dispatch() after argparse.
+    force_terminal=True,
+    theme=rich.theme.Theme(
+        {
+            "logging.level.debug": "green",
+            "logging.level.info": "blue",
+            "logging.level.warning": "yellow",
+            "logging.level.error": "red",
+            "logging.level.critical": "reverse red",
+        }
+    ),
+)
+
+
+def configure_logging() -> None:
+    root_logger = logging.getLogger("twine")
+
+    # This prevents failures test_main.py due to capsys not being cleared.
+    # TODO: Use dictConfig() instead?
+    for handler in root_logger.handlers:
+        root_logger.removeHandler(handler)
+
+    root_logger.addHandler(
+        rich.logging.RichHandler(
+            console=console,
+            show_time=False,
+            show_path=False,
+            highlighter=rich.highlighter.NullHighlighter(),
+        )
+    )
+
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     requires = importlib_metadata.requires("twine")  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
@@ -36,39 +74,6 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
 def dep_versions() -> str:
     return ", ".join(
         "{}: {}".format(*dependency) for dependency in list_dependencies_and_versions()
-    )
-
-
-def configure_logging() -> None:
-    root_logger = logging.getLogger("twine")
-
-    # Overwrite basic configuration in main()
-    # TODO: Use dictConfig() instead?
-    for handler in root_logger.handlers:
-        root_logger.removeHandler(handler)
-
-    root_logger.addHandler(
-        rich.logging.RichHandler(
-            # TODO: Maybe make console a module attribute to facilitate testing and
-            # using Rich's other functionality.
-            console=rich.console.Console(
-                # TODO: Set this if FORCE_COLOR or PY_COLORS in os.environ
-                force_terminal=True,
-                no_color=getattr(args, "no_color", False),
-                theme=rich.theme.Theme(
-                    {
-                        "logging.level.debug": "green",
-                        "logging.level.info": "blue",
-                        "logging.level.warning": "yellow",
-                        "logging.level.error": "red",
-                        "logging.level.critical": "reverse red",
-                    }
-                ),
-            ),
-            show_time=False,
-            show_path=False,
-            highlighter=rich.highlighter.NullHighlighter(),
-        )
     )
 
 
@@ -101,7 +106,10 @@ def dispatch(argv: List[str]) -> Any:
     )
     parser.parse_args(argv, namespace=args)
 
-    configure_logging()
+    # HACK: This attribute isn't documented, but this is an expedient way to alter the
+    # Rich configuration after argparse, while allowing logging to be configured on
+    # startup, ensuring all errors are displayed.
+    console.no_color = args.no_color
 
     main = registered_commands[args.command].load()
 
