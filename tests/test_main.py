@@ -43,8 +43,7 @@ def test_no_color_exception(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Removing trailing whitespace on lines wrapped by Rich; trying to test it was ugly.
-    # TODO: Assert no color
+    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
     assert [line.rstrip() for line in captured.out.splitlines()] == [
         "ERROR    InvalidDistribution: Cannot find file (or expand pattern):",
         "         'missing.whl'",

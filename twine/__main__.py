@@ -18,36 +18,16 @@ import sys
 from typing import Any
 
 import requests
-import rich.console
-import rich.highlighter
-import rich.logging
-import rich.theme
 
 from twine import cli
 from twine import exceptions
 
 
 def main() -> Any:
+    # Ensure that all log messages are displayed.
+    # Color will be configured during cli.dispatch() after argparse.
     root_logger = logging.getLogger("twine")
-    root_logger.addHandler(
-        rich.logging.RichHandler(
-            console=rich.console.Console(
-                theme=rich.theme.Theme(
-                    {
-                        "logging.level.debug": "green",
-                        "logging.level.info": "blue",
-                        "logging.level.warning": "yellow",
-                        "logging.level.error": "red",
-                        "logging.level.critical": "reverse red",
-                    }
-                ),
-                force_terminal=True,
-            ),
-            show_time=False,
-            show_path=False,
-            highlighter=rich.highlighter.NullHighlighter(),
-        )
-    )
+    root_logger.addHandler(logging.StreamHandler(sys.stdout))
 
     try:
         error = cli.dispatch(sys.argv[1:])

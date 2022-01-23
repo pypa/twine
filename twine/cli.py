@@ -12,9 +12,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
 from typing import Any, List, Tuple
 
 import importlib_metadata
+import rich.console
+import rich.highlighter
+import rich.logging
+import rich.theme
 from packaging import requirements
 
 import twine
@@ -34,10 +39,44 @@ def dep_versions() -> str:
     )
 
 
+def configure_logging() -> None:
+    root_logger = logging.getLogger("twine")
+
+    # Overwrite basic configuration in main()
+    # TODO: Use dictConfig() instead?
+    for handler in root_logger.handlers:
+        root_logger.removeHandler(handler)
+
+    root_logger.addHandler(
+        rich.logging.RichHandler(
+            # TODO: Maybe make console a module attribute to facilitate testing and
+            # using Rich's other functionality.
+            console=rich.console.Console(
+                # TODO: Set this if FORCE_COLOR or PY_COLORS in os.environ
+                force_terminal=True,
+                no_color=getattr(args, "no_color", False),
+                theme=rich.theme.Theme(
+                    {
+                        "logging.level.debug": "green",
+                        "logging.level.info": "blue",
+                        "logging.level.warning": "yellow",
+                        "logging.level.error": "red",
+                        "logging.level.critical": "reverse red",
+                    }
+                ),
+            ),
+            show_time=False,
+            show_path=False,
+            highlighter=rich.highlighter.NullHighlighter(),
+        )
+    )
+
+
 def dispatch(argv: List[str]) -> Any:
     registered_commands = importlib_metadata.entry_points(
         group="twine.registered_commands"
     )
+
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
@@ -60,8 +99,9 @@ def dispatch(argv: List[str]) -> Any:
         help=argparse.SUPPRESS,
         nargs=argparse.REMAINDER,
     )
-
     parser.parse_args(argv, namespace=args)
+
+    configure_logging()
 
     main = registered_commands[args.command].load()
 
