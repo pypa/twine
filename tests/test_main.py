@@ -12,7 +12,11 @@
 
 import sys
 
+import pretend
+import requests
+
 from twine import __main__ as dunder_main
+from twine.commands import upload
 
 
 def test_exception_handling(monkeypatch, capsys):
@@ -29,6 +33,36 @@ def test_exception_handling(monkeypatch, capsys):
     assert [line.rstrip() for line in captured.out.splitlines()] == [
         f"{level} InvalidDistribution: Cannot find file (or expand pattern):",
         "         'missing.whl'",
+    ]
+
+
+def test_http_exception_handling(monkeypatch, capsys):
+    monkeypatch.setattr(sys, "argv", ["twine", "upload", "test.whl"])
+    monkeypatch.setattr(
+        upload,
+        "upload",
+        pretend.raiser(
+            requests.HTTPError(
+                response=pretend.stub(
+                    url="https://example.org",
+                    status_code=400,
+                    reason="Error reason",
+                )
+            )
+        ),
+    )
+
+    error = dunder_main.main()
+    assert error
+
+    captured = capsys.readouterr()
+
+    # Hard-coding control characters for red text; couldn't find a succint alternative.
+    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
+    level = "\x1b[31mERROR   \x1b[0m"
+    assert [line.rstrip() for line in captured.out.splitlines()] == [
+        f"{level} HTTPError: 400 Bad Request from https://example.org",
+        "         Error reason",
     ]
 
 
