@@ -17,7 +17,6 @@ import logging
 
 import pytest
 
-from twine import __main__ as dunder_main
 from twine import exceptions
 from twine import settings
 
