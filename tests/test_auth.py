@@ -223,4 +223,4 @@ def test_warns_for_empty_password(
 
     assert auth.Resolver(config, auth.CredentialInput()).password == password
 
-    assert caplog.messages[0].startswith(f"  {warning}")
+    assert caplog.messages[0].startswith(warning)
