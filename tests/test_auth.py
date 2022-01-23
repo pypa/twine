@@ -219,6 +219,9 @@ def test_warns_for_empty_password(
     config,
     caplog,
 ):
+    # Avoiding additional warning "No recommended backend was available"
+    monkeypatch.setattr(auth.keyring, "get_password", lambda system, user: None)
+
     monkeypatch.setattr(getpass, "getpass", lambda prompt: password)
 
     assert auth.Resolver(config, auth.CredentialInput()).password == password
