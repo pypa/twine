@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import logging
+import logging.config
 from typing import Any, List, Tuple
 
 import importlib_metadata
@@ -48,20 +48,26 @@ console = rich.console.Console(
 
 
 def configure_logging() -> None:
-    root_logger = logging.getLogger("twine")
-
-    # This prevents failures test_main.py due to capsys not being cleared.
-    # TODO: Use dictConfig() instead?
-    for handler in root_logger.handlers:
-        root_logger.removeHandler(handler)
-
-    root_logger.addHandler(
-        rich.logging.RichHandler(
-            console=console,
-            show_time=False,
-            show_path=False,
-            highlighter=rich.highlighter.NullHighlighter(),
-        )
+    # Using dictConfig to override existing loggers, which prevents failures in
+    # test_main.py due to capsys not being cleared.
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "handlers": {
+                "console": {
+                    "class": "rich.logging.RichHandler",
+                    "console": console,
+                    "show_time": False,
+                    "show_path": False,
+                    "highlighter": rich.highlighter.NullHighlighter(),
+                }
+            },
+            "loggers": {
+                "twine": {
+                    "handlers": ["console"],
+                },
+            },
+        }
     )
 
 
