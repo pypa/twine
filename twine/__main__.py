@@ -40,7 +40,8 @@ def main() -> Any:
                         "logging.level.error": "red",
                         "logging.level.critical": "reverse red",
                     }
-                )
+                ),
+                force_terminal=True,
             ),
             show_time=False,
             show_path=False,

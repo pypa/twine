@@ -25,10 +25,11 @@ def test_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Removing trailing whitespace on lines wrapped by Rich; trying to test it was ugly.
-    # TODO: Assert color
+    # Hard-coding control characters for red text; couldn't find a succint alternative.
+    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
+    level = "\x1b[31mERROR   \x1b[0m"
     assert [line.rstrip() for line in captured.out.splitlines()] == [
-        "ERROR    InvalidDistribution: Cannot find file (or expand pattern):",
+        f"{level} InvalidDistribution: Cannot find file (or expand pattern):",
         "         'missing.whl'",
     ]
 
