@@ -27,7 +27,7 @@ logger = logging.getLogger(__name__)
 
 def main() -> Any:
     # Ensure that all errors are logged, even before argparse
-    cli.configure_logging()
+    cli.configure_output()
 
     try:
         error = cli.dispatch(sys.argv[1:])

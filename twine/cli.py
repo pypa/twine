@@ -16,7 +16,7 @@ import logging.config
 from typing import Any, List, Tuple
 
 import importlib_metadata
-import rich.console
+import rich
 import rich.highlighter
 import rich.logging
 import rich.theme
@@ -26,28 +26,28 @@ import twine
 
 args = argparse.Namespace()
 
-# This module attribute facilitates project-wide configuration and usage of Rich.
-# https://rich.readthedocs.io/en/latest/console.html
-console = rich.console.Console(
-    # Setting force_terminal makes testing easier by ensuring color codes.
-    # This could be based on FORCE_COLORS or PY_COLORS in os.environ, but Rich doesn't
-    # support that (https://github.com/Textualize/rich/issues/343), and since this is
-    # a module attribute, os.environ would be read on import, which complicates testing.
-    # no_color is set in dispatch() after argparse.
-    force_terminal=True,
-    theme=rich.theme.Theme(
-        {
-            "logging.level.debug": "green",
-            "logging.level.info": "blue",
-            "logging.level.warning": "yellow",
-            "logging.level.error": "red",
-            "logging.level.critical": "reverse red",
-        }
-    ),
-)
 
+def configure_output() -> None:
+    # Configure the global Console, available via rich.get_console().
+    # https://rich.readthedocs.io/en/latest/reference/init.html
+    # https://rich.readthedocs.io/en/latest/console.html
+    rich.reconfigure(
+        # Setting force_terminal makes testing easier by ensuring color codes. This
+        # could be based on FORCE_COLORS or PY_COLORS in os.environ, since Rich
+        # doesn't support that (https://github.com/Textualize/rich/issues/343).
+        force_terminal=True,
+        no_color=getattr(args, "no_color", False),
+        theme=rich.theme.Theme(
+            {
+                "logging.level.debug": "green",
+                "logging.level.info": "blue",
+                "logging.level.warning": "yellow",
+                "logging.level.error": "red",
+                "logging.level.critical": "reverse red",
+            }
+        ),
+    )
 
-def configure_logging() -> None:
     # Using dictConfig to override existing loggers, which prevents failures in
     # test_main.py due to capsys not being cleared.
     logging.config.dictConfig(
@@ -56,7 +56,6 @@ def configure_logging() -> None:
             "handlers": {
                 "console": {
                     "class": "rich.logging.RichHandler",
-                    "console": console,
                     "show_time": False,
                     "show_path": False,
                     "highlighter": rich.highlighter.NullHighlighter(),
@@ -112,10 +111,7 @@ def dispatch(argv: List[str]) -> Any:
     )
     parser.parse_args(argv, namespace=args)
 
-    # HACK: This attribute isn't documented, but this is an expedient way to alter the
-    # Rich configuration after argparse, while allowing logging to be configured on
-    # startup, ensuring all errors are displayed.
-    console.no_color = args.no_color
+    configure_output()
 
     main = registered_commands[args.command].load()
 
