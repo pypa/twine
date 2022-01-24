@@ -32,7 +32,12 @@ NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 def stub_response():
     """Mock successful upload of a package."""
     return pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
+        is_redirect=False,
+        url="https://test.pypi.org/legacy/",
+        status_code=200,
+        reason="OK",
+        text=None,
+        raise_for_status=lambda: None,
     )
 
 
@@ -138,6 +143,25 @@ def test_print_packages_if_verbose(upload_settings, capsys):
         assert captured.out.count(f"{filename} ({size})") == 1
 
 
+def test_print_response_if_verbose(upload_settings, stub_response, capsys):
+    """Print details about the response from the repostiry."""
+    upload_settings.verbose = True
+
+    result = upload.upload(
+        upload_settings,
+        [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE],
+    )
+    assert result is None
+
+    captured = capsys.readouterr()
+    response_log = (
+        f"Response from {stub_response.url}:\n"
+        f"{stub_response.status_code} {stub_response.reason}"
+    )
+
+    assert captured.out.count(response_log) == 2
+
+
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
     """Add GPG signature provided by user to uploaded package."""
     # Upload a pre-signed distribution
@@ -186,7 +210,8 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
 
     stub_response.is_redirect = False
     stub_response.status_code = 403
-    stub_response.text = "Invalid or non-existent authentication information"
+    stub_response.reason = "Invalid or non-existent authentication information"
+    stub_response.text = stub_response.reason
     stub_response.raise_for_status = pretend.raiser(requests.HTTPError)
 
     with pytest.raises(requests.HTTPError):
@@ -288,8 +313,11 @@ def test_exception_for_redirect(
 
     stub_response = pretend.stub(
         is_redirect=True,
+        url=redirect_url,
         status_code=301,
         headers={"location": redirect_url},
+        reason="Redirect",
+        text="",
     )
 
     stub_repository = pretend.stub(
@@ -323,7 +351,9 @@ def test_prints_skip_message_for_response(
 ):
     upload_settings.skip_existing = True
 
-    stub_response.status_code = 409
+    stub_response.status_code = 400
+    stub_response.reason = "File already exists"
+    stub_response.text = stub_response.reason
 
     # Do the upload, triggering the error response
     stub_repository.package_is_uploaded = lambda package: False

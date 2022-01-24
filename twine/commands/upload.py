@@ -139,6 +139,9 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
             continue
 
         resp = repository.upload(package)
+        logger.info(f"Response from {resp.url}:\n{resp.status_code} {resp.reason}")
+        if resp.text:
+            logger.info(resp.text)
 
         # Bug 92. If we get a redirect we should abort because something seems
         # funky. The behaviour is not well defined and redirects being issued
