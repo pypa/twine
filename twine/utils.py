@@ -204,9 +204,6 @@ def check_status_code(response: requests.Response, verbose: bool) -> None:
                 "Retry with the --verbose option for more details."
             )
 
-        if response.text:
-            logger.info("Content received from server:\n{}".format(response.text))
-
         raise err
 
 

@@ -32,7 +32,12 @@ NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
 def stub_response():
     """Mock successful upload of a package."""
     return pretend.stub(
-        is_redirect=False, status_code=201, raise_for_status=lambda: None
+        is_redirect=False,
+        url="https://test.pypi.org/legacy/",
+        status_code=200,
+        reason="OK",
+        text=None,
+        raise_for_status=lambda: None,
     )
 
 
@@ -134,9 +139,27 @@ def test_print_packages_if_verbose(upload_settings, caplog):
     result = upload.upload(upload_settings, dists_to_upload.keys())
     assert result is None
 
-    assert caplog.messages == [
+    assert [m for m in caplog.messages if m.endswith("KB)")] == [
         f"{filename} ({size})" for filename, size in dists_to_upload.items()
     ]
+
+
+def test_print_response_if_verbose(upload_settings, stub_response, caplog):
+    """Print details about the response from the repostiry."""
+    upload_settings.verbose = True
+
+    result = upload.upload(
+        upload_settings,
+        [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE],
+    )
+    assert result is None
+
+    response_log = (
+        f"Response from {stub_response.url}:\n"
+        f"{stub_response.status_code} {stub_response.reason}"
+    )
+
+    assert caplog.messages.count(response_log) == 2
 
 
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
@@ -189,7 +212,8 @@ def test_exception_for_http_status(
 
     stub_response.is_redirect = False
     stub_response.status_code = 403
-    stub_response.text = "Invalid or non-existent authentication information"
+    stub_response.reason = "Invalid or non-existent authentication information"
+    stub_response.text = stub_response.reason
     stub_response.raise_for_status = pretend.raiser(requests.HTTPError)
 
     with pytest.raises(requests.HTTPError):
@@ -201,7 +225,8 @@ def test_exception_for_http_status(
     if verbose:
         assert caplog.messages == [
             f"{helpers.WHEEL_FIXTURE} (15.4 KB)",
-            f"Content received from server:\n{stub_response.text}",
+            f"Response from {stub_response.url}:\n403 {stub_response.reason}",
+            stub_response.text,
         ]
     else:
         assert caplog.messages == [
@@ -294,8 +319,11 @@ def test_exception_for_redirect(
 
     stub_response = pretend.stub(
         is_redirect=True,
+        url=redirect_url,
         status_code=301,
         headers={"location": redirect_url},
+        reason="Redirect",
+        text="",
     )
 
     stub_repository = pretend.stub(
@@ -329,7 +357,9 @@ def test_prints_skip_message_for_response(
 ):
     upload_settings.skip_existing = True
 
-    stub_response.status_code = 409
+    stub_response.status_code = 400
+    stub_response.reason = "File already exists"
+    stub_response.text = stub_response.reason
 
     # Do the upload, triggering the error response
     stub_repository.package_is_uploaded = lambda package: False

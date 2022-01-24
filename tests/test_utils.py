@@ -280,15 +280,10 @@ def test_check_status_code_for_missing_status_code(
     with pytest.raises(requests.HTTPError):
         utils.check_status_code(response, verbose)
 
-    if verbose:
-        assert caplog.messages == [
-            f"Using configuration from {config_file}",
-            f"Content received from server:\n{response.text}",
-        ]
-    else:
-        assert caplog.messages == [
+        message = (
             "Error during upload. Retry with the --verbose option for more details."
-        ]
+        )
+        assert caplog.messages.count(message) == 0 if verbose else 1
 
 
 @pytest.mark.parametrize(
