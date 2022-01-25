@@ -12,6 +12,23 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.8.0 (2022-01-25)
+------------------------
+
+Features
+^^^^^^^^
+
+- Add ``--verbose`` logging for querying keyring credentials. (`#849 <https://github.com/pypa/twine/issues/849>`_)
+- Log all upload responses with ``--verbose``. (`#859 <https://github.com/pypa/twine/issues/859>`_)
+- Show more helpful error message for invalid metadata. (`#861 <https://github.com/pypa/twine/issues/861>`_)
+
+
+Bugfixes
+^^^^^^^^
+
+- Require a recent version of urllib3. (`#858 <https://github.com/pypa/twine/issues/858>`_)
+
+
 Twine 3.7.1 (2021-12-07)
 ------------------------
 
