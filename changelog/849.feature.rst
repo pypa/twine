@@ -1,1 +1,0 @@
-Add ``--verbose`` logging for querying keyring credentials.
