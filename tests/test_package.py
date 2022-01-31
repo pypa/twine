@@ -38,7 +38,7 @@ def test_sign_file(monkeypatch):
         package.sign("gpg2", None)
     except IOError:
         pass
-    args = ("gpg2", "--detach-sign", "-a", filename)
+    args = ("gpg2", "--detach-sign", "--output", f"{filename}.asc", "-a", filename)
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
@@ -58,14 +58,30 @@ def test_sign_file_with_identity(monkeypatch):
         package.sign("gpg", "identity")
     except IOError:
         pass
-    args = ("gpg", "--detach-sign", "--local-user", "identity", "-a", filename)
+    args = (
+        "gpg",
+        "--detach-sign",
+        "--local-user",
+        "identity",
+        "--output",
+        f"{filename}.asc",
+        "-a",
+        filename,
+    )
     assert replaced_check_call.calls == [pretend.call(args)]
 
 
 def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
     replaced_check_call = pretend.raiser(FileNotFoundError("not found"))
     monkeypatch.setattr(package_file.subprocess, "check_call", replaced_check_call)
-    gpg_args = ("gpg", "--detach-sign", "-a", "pypircfile")
+    gpg_args = (
+        "gpg",
+        "--detach-sign",
+        "--output",
+        "pypircfile.asc",
+        "-a",
+        "pypircfile",
+    )
 
     with pytest.raises(exceptions.InvalidSigningExecutable) as err:
         package_file.PackageFile.run_gpg(gpg_args)
@@ -76,7 +92,14 @@ def test_run_gpg_raises_exception_if_no_gpgs(monkeypatch):
 def test_run_gpg_raises_exception_if_not_using_gpg(monkeypatch):
     replaced_check_call = pretend.raiser(FileNotFoundError("not found"))
     monkeypatch.setattr(package_file.subprocess, "check_call", replaced_check_call)
-    gpg_args = ("not_gpg", "--detach-sign", "-a", "pypircfile")
+    gpg_args = (
+        "not_gpg",
+        "--detach-sign",
+        "--output",
+        "pypircfile.asc",
+        "-a",
+        "pypircfile",
+    )
 
     with pytest.raises(exceptions.InvalidSigningExecutable) as err:
         package_file.PackageFile.run_gpg(gpg_args)
@@ -91,7 +114,14 @@ def test_run_gpg_falls_back_to_gpg2(monkeypatch):
 
     replaced_check_call = pretend.call_recorder(check_call)
     monkeypatch.setattr(package_file.subprocess, "check_call", replaced_check_call)
-    gpg_args = ("gpg", "--detach-sign", "-a", "pypircfile")
+    gpg_args = (
+        "gpg",
+        "--detach-sign",
+        "--output",
+        "pypircfile.asc",
+        "-a",
+        "pypircfile",
+    )
 
     package_file.PackageFile.run_gpg(gpg_args)
 
