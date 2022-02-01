@@ -209,7 +209,7 @@ class PackageFile:
         gpg_args: Tuple[str, ...] = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
-        gpg_args += ("--output", f"{self.filename}.asc")
+        gpg_args += ("--output", self.signed_filename)
         gpg_args += ("-a", self.filename)
         self.run_gpg(gpg_args)
 
