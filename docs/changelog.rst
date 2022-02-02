@@ -12,7 +12,7 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
-Twine 3.8.0 (2022-02-01)
+Twine 3.8.0 (2022-02-02)
 ------------------------
 
 Features
