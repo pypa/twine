@@ -7,7 +7,6 @@ import secrets
 import subprocess
 import sys
 
-import colorama
 import jaraco.envs
 import munch
 import portend
@@ -64,7 +63,7 @@ def test_pypi_upload(sampleproject_dist):
     cli.dispatch(command)
 
 
-def test_pypi_error(sampleproject_dist, monkeypatch):
+def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
     command = [
         "twine",
         "upload",
@@ -79,14 +78,16 @@ def test_pypi_error(sampleproject_dist, monkeypatch):
     monkeypatch.setattr(sys, "argv", command)
 
     message = (
-        re.escape(colorama.Fore.RED)
-        + r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/\n"
-        + r".+?authentication"
+        r"HTTPError: 403 Forbidden from https://test\.pypi\.org/legacy/"
+        + r".+authentication information"
     )
 
-    result = dunder_main.main()
+    error = dunder_main.main()
+    assert error
 
-    assert re.match(message, result)
+    captured = capsys.readouterr()
+
+    assert re.search(message, captured.out, re.DOTALL)
 
 
 @pytest.fixture(
