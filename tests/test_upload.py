@@ -59,7 +59,7 @@ def upload_settings(make_settings, stub_repository):
     return upload_settings
 
 
-def test_make_package_pre_signed_dist(upload_settings, capsys):
+def test_make_package_pre_signed_dist(upload_settings, caplog):
     """Create a PackageFile and print path, size, and user-provided signature."""
     filename = helpers.WHEEL_FIXTURE
     expected_size = "15.4 KB"
@@ -74,12 +74,13 @@ def test_make_package_pre_signed_dist(upload_settings, capsys):
     assert package.filename == filename
     assert package.gpg_signature is not None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(f"{filename} ({expected_size})") == 1
-    assert captured.out.count(f"Signed with {signed_filename}") == 1
+    assert caplog.messages == [
+        f"{filename} ({expected_size})",
+        f"Signed with {signed_filename}",
+    ]
 
 
-def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
+def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
     """Create a PackageFile and print path, size, and Twine-generated signature."""
     filename = helpers.NEW_WHEEL_FIXTURE
     expected_size = "21.9 KB"
@@ -98,9 +99,10 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, capsys):
     assert package.filename == filename
     assert package.gpg_signature is not None
 
-    captured = capsys.readouterr()
-    assert captured.out.count(f"{filename} ({expected_size})") == 1
-    assert captured.out.count(f"Signed with {package.signed_filename}") == 1
+    assert caplog.messages == [
+        f"{filename} ({expected_size})",
+        f"Signed with {package.signed_filename}",
+    ]
 
 
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
@@ -123,13 +125,13 @@ def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
     assert captured.out.count(NEW_RELEASE_URL) == 1
 
 
-def test_print_packages_if_verbose(upload_settings, capsys):
+def test_print_packages_if_verbose(upload_settings, caplog):
     """Print the path and file size of each distribution attempting to be uploaded."""
     dists_to_upload = {
         helpers.WHEEL_FIXTURE: "15.4 KB",
+        helpers.NEW_WHEEL_FIXTURE: "21.9 KB",
         helpers.SDIST_FIXTURE: "20.8 KB",
         helpers.NEW_SDIST_FIXTURE: "26.1 KB",
-        helpers.NEW_WHEEL_FIXTURE: "21.9 KB",
     }
 
     upload_settings.verbose = True
@@ -137,13 +139,12 @@ def test_print_packages_if_verbose(upload_settings, capsys):
     result = upload.upload(upload_settings, dists_to_upload.keys())
     assert result is None
 
-    captured = capsys.readouterr()
+    assert [m for m in caplog.messages if m.endswith("KB)")] == [
+        f"{filename} ({size})" for filename, size in dists_to_upload.items()
+    ]
 
-    for filename, size in dists_to_upload.items():
-        assert captured.out.count(f"{filename} ({size})") == 1
 
-
-def test_print_response_if_verbose(upload_settings, stub_response, capsys):
+def test_print_response_if_verbose(upload_settings, stub_response, caplog):
     """Print details about the response from the repostiry."""
     upload_settings.verbose = True
 
@@ -153,13 +154,12 @@ def test_print_response_if_verbose(upload_settings, stub_response, capsys):
     )
     assert result is None
 
-    captured = capsys.readouterr()
     response_log = (
         f"Response from {stub_response.url}:\n"
         f"{stub_response.status_code} {stub_response.reason}"
     )
 
-    assert captured.out.count(response_log) == 2
+    assert caplog.messages.count(response_log) == 2
 
 
 def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
@@ -205,7 +205,9 @@ def test_success_when_gpg_is_run(upload_settings, stub_repository, monkeypatch):
 
 
 @pytest.mark.parametrize("verbose", [False, True])
-def test_exception_for_http_status(verbose, upload_settings, stub_response, capsys):
+def test_exception_for_http_status(
+    verbose, upload_settings, stub_response, capsys, caplog
+):
     upload_settings.verbose = verbose
 
     stub_response.is_redirect = False
@@ -221,11 +223,15 @@ def test_exception_for_http_status(verbose, upload_settings, stub_response, caps
     assert RELEASE_URL not in captured.out
 
     if verbose:
-        assert stub_response.text in captured.out
-        assert "--verbose" not in captured.out
+        assert caplog.messages == [
+            f"{helpers.WHEEL_FIXTURE} (15.4 KB)",
+            f"Response from {stub_response.url}:\n403 {stub_response.reason}",
+            stub_response.text,
+        ]
     else:
-        assert stub_response.text not in captured.out
-        assert "--verbose" in captured.out
+        assert caplog.messages == [
+            "Error during upload. Retry with the --verbose option for more details."
+        ]
 
 
 def test_get_config_old_format(make_settings, config_file):

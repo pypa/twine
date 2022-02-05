@@ -12,14 +12,62 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging.config
 from typing import Any, List, Tuple
 
 import importlib_metadata
+import rich
+import rich.highlighter
+import rich.logging
+import rich.theme
 from packaging import requirements
 
 import twine
 
 args = argparse.Namespace()
+
+
+def configure_output() -> None:
+    # Configure the global Console, available via rich.get_console().
+    # https://rich.readthedocs.io/en/latest/reference/init.html
+    # https://rich.readthedocs.io/en/latest/console.html
+    rich.reconfigure(
+        # Setting force_terminal makes testing easier by ensuring color codes. This
+        # could be based on FORCE_COLORS or PY_COLORS in os.environ, since Rich
+        # doesn't support that (https://github.com/Textualize/rich/issues/343).
+        force_terminal=True,
+        no_color=getattr(args, "no_color", False),
+        theme=rich.theme.Theme(
+            {
+                "logging.level.debug": "green",
+                "logging.level.info": "blue",
+                "logging.level.warning": "yellow",
+                "logging.level.error": "red",
+                "logging.level.critical": "reverse red",
+            }
+        ),
+    )
+
+    # Using dictConfig to override existing loggers, which prevents failures in
+    # test_main.py due to capsys not being cleared.
+    logging.config.dictConfig(
+        {
+            "version": 1,
+            "handlers": {
+                "console": {
+                    "class": "rich.logging.RichHandler",
+                    "show_time": False,
+                    "show_path": False,
+                    "highlighter": rich.highlighter.NullHighlighter(),
+                }
+            },
+            "loggers": {
+                "twine": {
+                    "handlers": ["console"],
+                },
+            },
+        }
+    )
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
@@ -38,6 +86,7 @@ def dispatch(argv: List[str]) -> Any:
     registered_commands = importlib_metadata.entry_points(
         group="twine.registered_commands"
     )
+
     parser = argparse.ArgumentParser(prog="twine")
     parser.add_argument(
         "--version",
@@ -60,8 +109,9 @@ def dispatch(argv: List[str]) -> Any:
         help=argparse.SUPPRESS,
         nargs=argparse.REMAINDER,
     )
-
     parser.parse_args(argv, namespace=args)
+
+    configure_output()
 
     main = registered_commands[args.command].load()
 

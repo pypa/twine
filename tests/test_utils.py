@@ -265,7 +265,7 @@ def test_check_status_code_for_deprecated_pypi_url(repo_url):
     [True, False],
 )
 def test_check_status_code_for_missing_status_code(
-    capsys, repo_url, verbose, make_settings
+    caplog, repo_url, verbose, make_settings, config_file
 ):
     """Print HTTP errors based on verbosity level."""
     response = pretend.stub(
@@ -280,9 +280,10 @@ def test_check_status_code_for_missing_status_code(
     with pytest.raises(requests.HTTPError):
         utils.check_status_code(response, verbose)
 
-    captured = capsys.readouterr()
-
-    assert captured.out.count("--verbose option") == 0 if verbose else 1
+        message = (
+            "Error during upload. Retry with the --verbose option for more details."
+        )
+        assert caplog.messages.count(message) == 0 if verbose else 1
 
 
 @pytest.mark.parametrize(

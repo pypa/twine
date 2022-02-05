@@ -15,7 +15,6 @@
 import argparse
 import contextlib
 import logging
-import sys
 from typing import Any, ContextManager, Optional, cast
 
 from twine import auth
@@ -150,9 +149,8 @@ class Settings:
     def verbose(self, verbose: bool) -> None:
         """Initialize a logger based on the --verbose option."""
         self._verbose = verbose
-        root_logger = logging.getLogger("twine")
-        root_logger.addHandler(logging.StreamHandler(sys.stdout))
-        root_logger.setLevel(logging.INFO if verbose else logging.WARNING)
+        twine_logger = logging.getLogger("twine")
+        twine_logger.setLevel(logging.INFO if verbose else logging.WARNING)
 
     @staticmethod
     def register_argparse_arguments(parser: argparse.ArgumentParser) -> None:

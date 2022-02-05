@@ -255,9 +255,9 @@ def get_userpass_value(
             warning = f"Your {key} contains control characters"
 
         if warning:
-            logger.warning(f"  {warning}. Did you enter it correctly?")
+            logger.warning(f"{warning}. Did you enter it correctly?")
             logger.warning(
-                "  See https://twine.readthedocs.io/#entering-credentials "
+                "See https://twine.readthedocs.io/#entering-credentials "
                 "for more information."
             )
 

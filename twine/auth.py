@@ -1,7 +1,6 @@
 import functools
 import getpass
 import logging
-import warnings
 from typing import Callable, Optional, Type, cast
 
 import keyring
@@ -64,7 +63,7 @@ class Resolver:
             # To support keyring prior to 15.2
             pass
         except Exception as exc:
-            warnings.warn(str(exc))
+            logger.warning(str(exc))
         return None
 
     def get_password_from_keyring(self) -> Optional[str]:
@@ -74,7 +73,7 @@ class Resolver:
             logger.info("Querying keyring for password")
             return cast(str, keyring.get_password(system, username))
         except Exception as exc:
-            warnings.warn(str(exc))
+            logger.warning(str(exc))
         return None
 
     def username_from_keyring_or_prompt(self) -> str:

@@ -66,16 +66,14 @@ def test_setup_logging(verbose, log_level):
     "verbose",
     [True, False],
 )
-def test_print_config_path_if_verbose(config_file, capsys, make_settings, verbose):
+def test_print_config_path_if_verbose(config_file, caplog, make_settings, verbose):
     """Print the location of the .pypirc config used by the user."""
     make_settings(verbose=verbose)
 
-    captured = capsys.readouterr()
-
     if verbose:
-        assert captured.out == f"Using configuration from {config_file}\n"
+        assert caplog.messages == [f"Using configuration from {config_file}"]
     else:
-        assert captured.out == ""
+        assert caplog.messages == []
 
 
 def test_identity_requires_sign():
