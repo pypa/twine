@@ -6,6 +6,11 @@ on:
   push:
     branches:
       - main
+  # Because the tests can be flaky, they shouldn't be required for merge, but
+  # it's still helpful to run them on PRs.
+  pull_request:
+    branches:
+      - main
   schedule:
     - cron: '0 0 * * *'  # daily
 
