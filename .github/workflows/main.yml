@@ -6,6 +6,10 @@ on:
   schedule:
     - cron: "0 0 * * *" # daily
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}
+  cancel-in-progress: true
+
 env:
   FORCE_COLOR: "1"
   TOX_TESTENV_PASSENV: "FORCE_COLOR"
