@@ -16,9 +16,8 @@ import argparse
 import cgi
 import io
 import re
-import sys
 import textwrap
-from typing import IO, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 import readme_renderer.rst
 
@@ -104,7 +103,6 @@ def _check_file(
 
 def check(
     dists: List[str],
-    output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
     """Check that a distribution will render correctly on PyPI and display the results.
@@ -124,39 +122,39 @@ def check(
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
-        output_stream.write("No files to check.\n")
+        print("No files to check.")
         return False
 
     failure = False
 
     for filename in uploads:
-        output_stream.write("Checking %s: " % filename)
+        print(f"Checking {filename}: ", end="")
         render_warning_stream = _WarningStream()
         warnings, is_ok = _check_file(filename, render_warning_stream)
 
         # Print the status and/or error
         if not is_ok:
             failure = True
-            output_stream.write("FAILED\n")
+            print("FAILED")
 
             error_text = (
                 "`long_description` has syntax errors in markup and "
                 "would not be rendered on PyPI.\n"
             )
-            output_stream.write(textwrap.indent(error_text, "  "))
-            output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
+            print(textwrap.indent(error_text, "  "), end="")
+            print(textwrap.indent(str(render_warning_stream), "    "), end="")
         elif warnings:
             if strict:
                 failure = True
-                output_stream.write("FAILED, due to warnings\n")
+                print("FAILED, due to warnings")
             else:
-                output_stream.write("PASSED, with warnings\n")
+                print("PASSED, with warnings")
         else:
-            output_stream.write("PASSED\n")
+            print("PASSED")
 
         # Print warnings after the status and/or error
         for message in warnings:
-            output_stream.write("  warning: " + message + "\n")
+            print(f"  warning: {message}")
 
     return failure
 
