@@ -15,14 +15,17 @@
 import argparse
 import cgi
 import io
+import logging
 import re
-import textwrap
 from typing import List, Optional, Tuple, cast
 
 import readme_renderer.rst
 
 from twine import commands
 from twine import package as package_file
+
+logger = logging.getLogger(__name__)
+
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
@@ -64,7 +67,7 @@ class _WarningStream:
         )
 
     def __str__(self) -> str:
-        return self.output.getvalue()
+        return self.output.getvalue().strip()
 
 
 def _check_file(
@@ -122,7 +125,7 @@ def check(
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
-        print("No files to check.")
+        logger.error("No files to check.")
         return False
 
     failure = False
@@ -136,13 +139,11 @@ def check(
         if not is_ok:
             failure = True
             print("FAILED")
-
-            error_text = (
-                "`long_description` has syntax errors in markup and "
-                "would not be rendered on PyPI.\n"
+            logger.error(
+                "`long_description` has syntax errors in markup"
+                "and would not be rendered on PyPI."
+                f"\n{render_warning_stream}"
             )
-            print(textwrap.indent(error_text, "  "), end="")
-            print(textwrap.indent(str(render_warning_stream), "    "), end="")
         elif warnings:
             if strict:
                 failure = True
@@ -154,7 +155,7 @@ def check(
 
         # Print warnings after the status and/or error
         for message in warnings:
-            print(f"  warning: {message}")
+            logger.warning(message)
 
     return failure
 
