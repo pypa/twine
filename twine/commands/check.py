@@ -20,6 +20,7 @@ import re
 from typing import List, Optional, Tuple, cast
 
 import readme_renderer.rst
+from rich import print
 
 from twine import commands
 from twine import package as package_file
@@ -138,7 +139,7 @@ def check(
         # Print the status and/or error
         if not is_ok:
             failure = True
-            print("FAILED")
+            print("[red]FAILED[/red]")
             logger.error(
                 "`long_description` has syntax errors in markup"
                 "and would not be rendered on PyPI."
@@ -147,11 +148,11 @@ def check(
         elif warnings:
             if strict:
                 failure = True
-                print("FAILED, due to warnings")
+                print("[red]FAILED due to warnings[/red]")
             else:
-                print("PASSED, with warnings")
+                print("[yellow]PASSED with warnings[/yellow]")
         else:
-            print("PASSED")
+            print("[green]PASSED[/green]")
 
         # Print warnings after the status and/or error
         for message in warnings:
