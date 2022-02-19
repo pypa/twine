@@ -142,7 +142,7 @@ def check(
             print("[red]FAILED[/red]")
             logger.error(
                 "`long_description` has syntax errors in markup"
-                "and would not be rendered on PyPI."
+                " and would not be rendered on PyPI."
                 f"\n{render_warning_stream}"
             )
         elif warnings:

@@ -11,6 +11,8 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import logging
+
 import pretend
 import pytest
 
@@ -43,11 +45,17 @@ class TestWarningStream:
         assert str(self.stream) == "result"
 
 
-def test_check_no_distributions(monkeypatch, capsys):
+def test_check_no_distributions(monkeypatch, caplog):
     monkeypatch.setattr(commands, "_find_dists", lambda a: [])
 
     assert not check.check(["dist/*"])
-    assert capsys.readouterr().out == "No files to check.\n"
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.ERROR,
+            "No files to check.",
+        ),
+    ]
 
 
 def test_check_passing_distribution(monkeypatch, capsys):
@@ -99,7 +107,7 @@ def test_check_passing_distribution_with_none_renderer(
     assert capsys.readouterr().out == "Checking dist/dist.tar.gz: PASSED\n"
 
 
-def test_check_no_description(monkeypatch, capsys):
+def test_check_no_description(monkeypatch, capsys, caplog):
     package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": None,
@@ -117,14 +125,23 @@ def test_check_no_description(monkeypatch, capsys):
     assert not check.check(["dist/*"])
 
     assert capsys.readouterr().out == (
-        "Checking dist/dist.tar.gz: PASSED, with warnings\n"
-        "  warning: `long_description_content_type` missing. "
-        "defaulting to `text/x-rst`.\n"
-        "  warning: `long_description` missing.\n"
+        "Checking dist/dist.tar.gz: PASSED with warnings\n"
     )
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.WARNING,
+            "`long_description_content_type` missing. defaulting to `text/x-rst`.",
+        ),
+        (
+            "twine.commands.check",
+            logging.WARNING,
+            "`long_description` missing.",
+        ),
+    ]
 
 
-def test_strict_fails_on_warnings(monkeypatch, capsys):
+def test_strict_fails_on_warnings(monkeypatch, capsys, caplog):
     package = pretend.stub(
         metadata_dictionary=lambda: {
             "description": None,
@@ -142,14 +159,23 @@ def test_strict_fails_on_warnings(monkeypatch, capsys):
     assert check.check(["dist/*"], strict=True)
 
     assert capsys.readouterr().out == (
-        "Checking dist/dist.tar.gz: FAILED, due to warnings\n"
-        "  warning: `long_description_content_type` missing. "
-        "defaulting to `text/x-rst`.\n"
-        "  warning: `long_description` missing.\n"
+        "Checking dist/dist.tar.gz: FAILED due to warnings\n"
     )
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.WARNING,
+            "`long_description_content_type` missing. defaulting to `text/x-rst`.",
+        ),
+        (
+            "twine.commands.check",
+            logging.WARNING,
+            "`long_description` missing.",
+        ),
+    ]
 
 
-def test_check_failing_distribution(monkeypatch, capsys):
+def test_check_failing_distribution(monkeypatch, capsys, caplog):
     renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
     package = pretend.stub(
         metadata_dictionary=lambda: {
@@ -157,7 +183,7 @@ def test_check_failing_distribution(monkeypatch, capsys):
             "description_content_type": "text/markdown",
         }
     )
-    warning_stream = "WARNING"
+    warning_stream = "Syntax error"
 
     monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
     monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
@@ -170,12 +196,15 @@ def test_check_failing_distribution(monkeypatch, capsys):
 
     assert check.check(["dist/*"])
 
-    assert capsys.readouterr().out == (
-        "Checking dist/dist.tar.gz: FAILED\n"
-        "  `long_description` has syntax errors in markup and would not be "
-        "rendered on PyPI.\n"
-        "    WARNING"
-    )
+    assert capsys.readouterr().out == "Checking dist/dist.tar.gz: FAILED\n"
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.ERROR,
+            "`long_description` has syntax errors in markup and would not be rendered "
+            "on PyPI.\nSyntax error",
+        ),
+    ]
     assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
 
 
@@ -186,3 +215,8 @@ def test_main(monkeypatch):
 
     assert check.main(["dist/*"]) == check_result
     assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]
+
+
+# TODO: Test print() color output
+
+# TODO: Test log formatting
