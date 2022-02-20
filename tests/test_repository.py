@@ -254,35 +254,25 @@ def test_upload_retry(tmpdir, default_repo, capsys):
         metadata_dictionary=lambda: {"name": "fake"},
     )
 
+    def assert_retries(output, total):
+        retries = [line for line in output.splitlines() if line.startswith("Received")]
+        assert retries == [
+            (
+                'Received "500: Internal server error" '
+                f"Package upload appears to have failed.  Retry {i} of {total}"
+            )
+            for i in range(1, total + 1)
+        ]
+
     # Upload with default max_redirects of 5
     default_repo.upload(package)
 
-    msg = [
-        (
-            "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 5"
-        )
-        for i in range(1, 6)
-    ]
-
-    captured = capsys.readouterr()
-    assert captured.out == "\n".join(msg) + "\n"
+    assert_retries(capsys.readouterr().out, 5)
 
     # Upload with custom max_redirects of 3
     default_repo.upload(package, 3)
 
-    msg = [
-        (
-            "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 3"
-        )
-        for i in range(1, 4)
-    ]
-
-    captured = capsys.readouterr()
-    assert captured.out == "\n".join(msg) + "\n"
+    assert_retries(capsys.readouterr().out, 3)
 
 
 @pytest.mark.parametrize(
