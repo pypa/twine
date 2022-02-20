@@ -148,17 +148,16 @@ class Repository:
                 ("content", (package.basefilename, fp, "application/octet-stream"))
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
-            # with tqdm.tqdm(
-            #     total=encoder.len,
-            #     unit="B",
-            #     unit_scale=True,
-            #     unit_divisor=1024,
-            #     miniters=1,
-            #     file=sys.stdout,
-            #     disable=self.disable_progress_bar,
-            # ) as bar:
+
             with rich.progress.Progress(
-                # TODO: % BAR uploaded/total elapsed/remaining speed
+                "[progress.percentage]{task.percentage:>3.0f}%",
+                rich.progress.BarColumn(),
+                rich.progress.DownloadColumn(),
+                "•",
+                rich.progress.TimeElapsedColumn(),
+                rich.progress.TimeRemainingColumn(),
+                "•",
+                rich.progress.TransferSpeedColumn(),
                 disable=self.disable_progress_bar,
             ) as progress:
                 task_id = progress.add_task("Progress:", total=encoder.len)
