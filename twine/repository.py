@@ -12,12 +12,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import sys
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import requests
 import requests_toolbelt
-import tqdm
+import rich.progress
 import urllib3
 from requests import adapters
 from requests_toolbelt.utils import user_agent
@@ -149,22 +148,29 @@ class Repository:
                 ("content", (package.basefilename, fp, "application/octet-stream"))
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
-
-            with tqdm.tqdm(
-                total=encoder.len,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-                miniters=1,
-                file=sys.stdout,
+            # with tqdm.tqdm(
+            #     total=encoder.len,
+            #     unit="B",
+            #     unit_scale=True,
+            #     unit_divisor=1024,
+            #     miniters=1,
+            #     file=sys.stdout,
+            #     disable=self.disable_progress_bar,
+            # ) as bar:
+            with rich.progress.Progress(
+                # TODO: % BAR uploaded/total elapsed/remaining speed
                 disable=self.disable_progress_bar,
-            ) as bar:
+            ) as progress:
+                task_id = progress.add_task("Progress:", total=encoder.len)
 
-                def update_bar(monitor):  # type: ignore
-                    bar.update(monitor.bytes_read - bar.n)
+                def update_progress(monitor):  # type: ignore
+                    progress.update(task_id, completed=monitor.bytes_read)
                     import time; time.sleep(0.2)  # fmt: skip
 
-                monitor = requests_toolbelt.MultipartEncoderMonitor(encoder, update_bar)
+                monitor = requests_toolbelt.MultipartEncoderMonitor(
+                    encoder,
+                    update_progress,
+                )
 
                 resp = self.session.post(
                     self.url,
