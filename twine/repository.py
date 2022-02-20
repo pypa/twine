@@ -37,16 +37,6 @@ WAREHOUSE_WEB = "https://pypi.org/"
 logger = logging.getLogger(__name__)
 
 
-class ProgressBar(tqdm.tqdm):
-    def update_to(self, n: int) -> None:
-        """Update the bar in the way compatible with requests-toolbelt.
-
-        This is identical to tqdm.update, except ``n`` will be the current
-        value - not the delta as tqdm expects.
-        """
-        self.update(n - self.n)  # will also do self.n = n
-
-
 class Repository:
     def __init__(
         self,
@@ -159,7 +149,8 @@ class Repository:
                 ("content", (package.basefilename, fp, "application/octet-stream"))
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
-            with ProgressBar(
+
+            with tqdm.tqdm(
                 total=encoder.len,
                 unit="B",
                 unit_scale=True,
@@ -168,9 +159,12 @@ class Repository:
                 file=sys.stdout,
                 disable=self.disable_progress_bar,
             ) as bar:
-                monitor = requests_toolbelt.MultipartEncoderMonitor(
-                    encoder, lambda monitor: bar.update_to(monitor.bytes_read)
-                )
+
+                def update_bar(monitor):  # type: ignore
+                    bar.update(monitor.bytes_read - bar.n)
+                    import time; time.sleep(0.2)  # fmt: skip
+
+                monitor = requests_toolbelt.MultipartEncoderMonitor(encoder, update_bar)
 
                 resp = self.session.post(
                     self.url,
