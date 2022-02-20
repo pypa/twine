@@ -160,15 +160,14 @@ class Repository:
                 rich.progress.TransferSpeedColumn(),
                 disable=self.disable_progress_bar,
             ) as progress:
-                task_id = progress.add_task("Progress:", total=encoder.len)
-
-                def update_progress(monitor):  # type: ignore
-                    progress.update(task_id, completed=monitor.bytes_read)
-                    import time; time.sleep(0.2)  # fmt: skip
+                task_id = progress.add_task("", total=encoder.len)
 
                 monitor = requests_toolbelt.MultipartEncoderMonitor(
                     encoder,
-                    update_progress,
+                    lambda monitor: progress.update(
+                        task_id,
+                        completed=monitor.bytes_read,
+                    ),
                 )
 
                 resp = self.session.post(
