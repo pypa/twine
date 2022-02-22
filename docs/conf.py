@@ -279,6 +279,7 @@ linkcheck_ignore = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "requests": ("https://docs.python-requests.org/en/latest/", None),
+    "rich": ("https://rich.readthedocs.io/en/stable/", None),
 }
 
 # Be strict about the invalid references:
