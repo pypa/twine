@@ -233,6 +233,27 @@ def test_disable_progress_bar_is_forwarded_to_rich(
     default_repo.upload(package)
 
 
+@pytest.mark.parametrize("finished", [False, True])
+@pytest.mark.parametrize(
+    "task_time, formatted",
+    [
+        (None, "--:--"),
+        (0, "00:00"),
+        (59, "00:59"),
+        (71, "01:11"),
+        (4210, "1:10:10"),
+    ],
+)
+def test_time_column_renders_condensed_time(finished, task_time, formatted):
+    if finished:
+        task = pretend.stub(finished=finished, finished_time=task_time)
+    else:
+        task = pretend.stub(finished=finished, time_remaining=task_time)
+
+    column = repository.CondensedTimeColumn()
+    assert str(column.render(task)) == formatted
+
+
 def test_upload_retry(tmpdir, default_repo, capsys):
     """Print retry messages when the upload response indicates a server error."""
     default_repo.disable_progress_bar = True
