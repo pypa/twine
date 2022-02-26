@@ -257,8 +257,8 @@ def test_upload_retry(tmpdir, default_repo, capsys):
     msg = [
         (
             "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 5"
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 5."
         )
         for i in range(1, 6)
     ]
@@ -272,8 +272,8 @@ def test_upload_retry(tmpdir, default_repo, capsys):
     msg = [
         (
             "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 3"
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 3."
         )
         for i in range(1, 4)
     ]

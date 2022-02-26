@@ -21,6 +21,7 @@ import tqdm
 import urllib3
 from requests import adapters
 from requests_toolbelt.utils import user_agent
+from rich import print
 
 import twine
 from twine import package as package_file
@@ -193,14 +194,9 @@ class Repository:
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
                 print(
-                    'Received "{status_code}: {reason}" Package upload '
-                    "appears to have failed.  Retry {retry} of "
-                    "{max_redirects}".format(
-                        status_code=resp.status_code,
-                        reason=resp.reason,
-                        retry=number_of_redirects,
-                        max_redirects=max_redirects,
-                    )
+                    f'[yellow]Received "{resp.status_code}: {resp.reason}"'
+                    "\nPackage upload appears to have failed."
+                    f" Retry {number_of_redirects} of {max_redirects}."
                 )
             else:
                 return resp

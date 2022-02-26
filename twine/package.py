@@ -20,6 +20,7 @@ from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import importlib_metadata
 import pkginfo
+from rich import print
 
 from twine import exceptions
 from twine import wheel
@@ -222,14 +223,13 @@ class PackageFile:
         except FileNotFoundError:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
-                    "{} executable not available.".format(gpg_args[0])
+                    f"{gpg_args[0]} executable not available."
                 )
 
-        print("gpg executable not available. Attempting fallback to gpg2.")
+        print("[yellow]gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
         except FileNotFoundError:
-            print("gpg2 executable not available.")
             raise exceptions.InvalidSigningExecutable(
                 "'gpg' or 'gpg2' executables not available. "
                 "Try installing one of these or specifying an executable "
