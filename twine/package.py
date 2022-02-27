@@ -13,6 +13,7 @@
 # limitations under the License.
 import hashlib
 import io
+import logging
 import os
 import re
 import subprocess
@@ -20,6 +21,7 @@ from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
 
 import importlib_metadata
 import pkginfo
+from rich import print
 
 from twine import exceptions
 from twine import wheel
@@ -42,6 +44,8 @@ DIST_EXTENSIONS = {
 }
 
 MetadataValue = Union[str, Sequence[str]]
+
+logger = logging.getLogger(__name__)
 
 
 def _safe_name(name: str) -> str:
@@ -222,16 +226,15 @@ class PackageFile:
         except FileNotFoundError:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
-                    "{} executable not available.".format(gpg_args[0])
+                    f"{gpg_args[0]} executable not available."
                 )
 
-        print("gpg executable not available. Attempting fallback to gpg2.")
+        logger.warning("gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
         except FileNotFoundError:
-            print("gpg2 executable not available.")
             raise exceptions.InvalidSigningExecutable(
-                "'gpg' or 'gpg2' executables not available. "
+                "'gpg' or 'gpg2' executables not available.\n"
                 "Try installing one of these or specifying an executable "
                 "with the --sign-with flag."
             )

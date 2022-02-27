@@ -16,6 +16,8 @@ import argparse
 import os.path
 from typing import List, cast
 
+from rich import print
+
 from twine import exceptions
 from twine import package as package_file
 from twine import settings

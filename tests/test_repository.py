@@ -230,7 +230,7 @@ def test_disable_progress_bar_is_forwarded_to_tqdm(
     default_repo.upload(package)
 
 
-def test_upload_retry(tmpdir, default_repo, capsys):
+def test_upload_retry(tmpdir, default_repo, caplog):
     """Print retry messages when the upload response indicates a server error."""
     default_repo.disable_progress_bar = True
 
@@ -254,32 +254,26 @@ def test_upload_retry(tmpdir, default_repo, capsys):
     # Upload with default max_redirects of 5
     default_repo.upload(package)
 
-    msg = [
+    assert caplog.messages == [
         (
-            "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 5"
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 5."
         )
         for i in range(1, 6)
     ]
 
-    captured = capsys.readouterr()
-    assert captured.out == "\n".join(msg) + "\n"
+    caplog.clear()
 
     # Upload with custom max_redirects of 3
     default_repo.upload(package, 3)
 
-    msg = [
+    assert caplog.messages == [
         (
-            "Uploading fake.whl\n"
-            'Received "500: Internal server error" '
-            f"Package upload appears to have failed.  Retry {i} of 3"
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 3."
         )
         for i in range(1, 4)
     ]
-
-    captured = capsys.readouterr()
-    assert captured.out == "\n".join(msg) + "\n"
 
 
 @pytest.mark.parametrize(
