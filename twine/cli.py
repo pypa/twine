@@ -37,6 +37,7 @@ def configure_output() -> None:
         # doesn't support that (https://github.com/Textualize/rich/issues/343).
         force_terminal=True,
         no_color=getattr(args, "no_color", False),
+        highlight=False,
         theme=rich.theme.Theme(
             {
                 "logging.level.debug": "green",
