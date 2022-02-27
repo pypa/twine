@@ -85,18 +85,8 @@ def test_set_certificate_authority(default_repo):
 
 
 def test_make_user_agent_string(default_repo):
-    """Add twine and its dependencies to User-Agent session header."""
-    assert "User-Agent" in default_repo.session.headers
-
-    user_agent = default_repo.session.headers["User-Agent"]
-    packages = (
-        "twine/",
-        "requests/",
-        "requests-toolbelt/",
-        "pkginfo/",
-        "importlib-metadata/",
-    )
-    assert all(p in user_agent for p in packages)
+    """Add twine to User-Agent session header."""
+    assert "twine/" in default_repo.session.headers["User-Agent"]
 
 
 def response_with(**kwattrs):
