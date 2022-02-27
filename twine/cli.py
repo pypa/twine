@@ -72,10 +72,11 @@ def configure_output() -> None:
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = (
         "importlib-metadata",
+        "keyring",
         "pkginfo",
         "requests",
         "requests-toolbelt",
-        "tqdm",
+        "urllib3",
     )
     return [(dep, importlib_metadata.version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
