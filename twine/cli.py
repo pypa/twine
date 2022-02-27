@@ -20,7 +20,6 @@ import rich
 import rich.highlighter
 import rich.logging
 import rich.theme
-from packaging import requirements
 
 import twine
 
@@ -71,8 +70,13 @@ def configure_output() -> None:
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
-    requires = importlib_metadata.requires("twine")  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
-    deps = [requirements.Requirement(r).name for r in requires]
+    deps = (
+        "importlib-metadata",
+        "pkginfo",
+        "requests",
+        "requests-toolbelt",
+        "tqdm",
+    )
     return [(dep, importlib_metadata.version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
 
