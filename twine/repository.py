@@ -193,8 +193,8 @@ class Repository:
                 return resp
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
-                print(
-                    f'[yellow]Received "{resp.status_code}: {resp.reason}"'
+                logger.warning(
+                    f'Received "{resp.status_code}: {resp.reason}"'
                     "\nPackage upload appears to have failed."
                     f" Retry {number_of_redirects} of {max_redirects}."
                 )
