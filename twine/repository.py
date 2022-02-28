@@ -89,12 +89,8 @@ class Repository:
 
     @staticmethod
     def _make_user_agent_string() -> str:
-        from twine import cli
-
-        dependencies = cli.list_dependencies_and_versions()
         user_agent_string = (
             user_agent.UserAgentBuilder("twine", twine.__version__)
-            .include_extras(dependencies)
             .include_implementation()
             .build()
         )

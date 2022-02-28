@@ -1,0 +1,1 @@
+Remove Twine's dependencies from the ``User-Agent`` header when uploading.
