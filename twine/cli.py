@@ -15,7 +15,6 @@ import argparse
 from typing import Any, List, Tuple
 
 import importlib_metadata
-from packaging import requirements
 
 import twine
 
@@ -23,8 +22,14 @@ args = argparse.Namespace()
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
-    requires = importlib_metadata.requires("twine")  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
-    deps = [requirements.Requirement(r).name for r in requires]
+    deps = (
+        "importlib-metadata",
+        "keyring",
+        "pkginfo",
+        "requests",
+        "requests-toolbelt",
+        "urllib3",
+    )
     return [(dep, importlib_metadata.version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
 
