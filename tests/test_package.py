@@ -307,9 +307,10 @@ def test_fips_hash_manager_md5(monkeypatch):
     assert hasher.hexdigest() == hashes
 
 
-def test_fips_hash_manager_blake2(monkeypatch):
+@pytest.mark.parametrize("exception_class", [TypeError, ValueError])
+def test_fips_hash_manager_blake2(exception_class, monkeypatch):
     """Generate hexdigest without BLAKE2 when hashlib is using FIPS mode."""
-    replaced_blake2b = pretend.raiser(ValueError("fipsmode"))
+    replaced_blake2b = pretend.raiser(exception_class("fipsmode"))
     monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
 
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
