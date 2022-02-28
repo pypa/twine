@@ -268,7 +268,7 @@ class HashManager:
         self._blake_hasher = None
         try:
             self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
-        except ValueError:
+        except (ValueError, TypeError):
             # FIPS mode disables blake2
             pass
 
