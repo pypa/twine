@@ -12,6 +12,16 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 3.8.1 (2022-03-02)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Remove Twine's dependencies from the ``User-Agent`` header when uploading. (`#871 <https://github.com/pypa/twine/issues/871>`_)
+- Improve detection of disabled BLAKE2 hashing due to FIPS mode. (`#879 <https://github.com/pypa/twine/issues/879>`_)
+
+
 Twine 3.8.0 (2022-02-02)
 ------------------------
 

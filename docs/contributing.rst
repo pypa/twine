@@ -256,7 +256,7 @@ A checklist for creating, testing, and distributing a new version.
 
    .. code-block:: bash
 
-      tox -e changelog -- --version $VERSION
+      tox -e changelog -- $VERSION
 
       git commit -am "Update changelog for $VERSION"
 
