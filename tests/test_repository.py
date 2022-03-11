@@ -185,18 +185,21 @@ def test_package_is_registered(default_repo):
 
 
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
-def test_disable_progress_bar_is_forwarded_to_tqdm(
+def test_disable_progress_bar_is_forwarded_to_rich(
     monkeypatch, tmpdir, disable_progress_bar, default_repo
 ):
     """Toggle display of upload progress bar."""
 
     @contextmanager
-    def progressbarstub(*args, **kwargs):
+    def ProgressStub(*args, **kwargs):
         assert "disable" in kwargs
         assert kwargs["disable"] == disable_progress_bar
-        yield
+        yield pretend.stub(
+            add_task=lambda description, total: None,
+            update=lambda task_id, completed: None,
+        )
 
-    monkeypatch.setattr(repository, "ProgressBar", progressbarstub)
+    monkeypatch.setattr(repository.rich.progress, "Progress", ProgressStub)
     default_repo.disable_progress_bar = disable_progress_bar
 
     default_repo.session = pretend.stub(
