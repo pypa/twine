@@ -20,6 +20,7 @@ import rich.progress
 import urllib3
 from requests import adapters
 from requests_toolbelt.utils import user_agent
+from rich import print
 
 import twine
 from twine import package as package_file
@@ -77,12 +78,8 @@ class Repository:
 
     @staticmethod
     def _make_user_agent_string() -> str:
-        from twine import cli
-
-        dependencies = cli.list_dependencies_and_versions()
         user_agent_string = (
             user_agent.UserAgentBuilder("twine", twine.__version__)
-            .include_extras(dependencies)
             .include_implementation()
             .build()
         )
@@ -192,15 +189,10 @@ class Repository:
                 return resp
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
-                print(
-                    'Received "{status_code}: {reason}" Package upload '
-                    "appears to have failed.  Retry {retry} of "
-                    "{max_redirects}".format(
-                        status_code=resp.status_code,
-                        reason=resp.reason,
-                        retry=number_of_redirects,
-                        max_redirects=max_redirects,
-                    )
+                logger.warning(
+                    f'Received "{resp.status_code}: {resp.reason}"'
+                    "\nPackage upload appears to have failed."
+                    f" Retry {number_of_redirects} of {max_redirects}."
                 )
             else:
                 return resp

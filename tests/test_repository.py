@@ -85,18 +85,8 @@ def test_set_certificate_authority(default_repo):
 
 
 def test_make_user_agent_string(default_repo):
-    """Add twine and its dependencies to User-Agent session header."""
-    assert "User-Agent" in default_repo.session.headers
-
-    user_agent = default_repo.session.headers["User-Agent"]
-    packages = (
-        "twine/",
-        "requests/",
-        "requests-toolbelt/",
-        "pkginfo/",
-        "importlib_metadata/",
-    )
-    assert all(p in user_agent for p in packages)
+    """Add twine to User-Agent session header."""
+    assert "twine/" in default_repo.session.headers["User-Agent"]
 
 
 def response_with(**kwattrs):
@@ -233,7 +223,7 @@ def test_disable_progress_bar_is_forwarded_to_rich(
     default_repo.upload(package)
 
 
-def test_upload_retry(tmpdir, default_repo, capsys):
+def test_upload_retry(tmpdir, default_repo, caplog):
     """Print retry messages when the upload response indicates a server error."""
     default_repo.disable_progress_bar = True
 
@@ -254,25 +244,29 @@ def test_upload_retry(tmpdir, default_repo, capsys):
         metadata_dictionary=lambda: {"name": "fake"},
     )
 
-    def assert_retries(output, total):
-        retries = [line for line in output.splitlines() if line.startswith("Received")]
-        assert retries == [
-            (
-                'Received "500: Internal server error" '
-                f"Package upload appears to have failed.  Retry {i} of {total}"
-            )
-            for i in range(1, total + 1)
-        ]
-
     # Upload with default max_redirects of 5
     default_repo.upload(package)
 
-    assert_retries(capsys.readouterr().out, 5)
+    assert caplog.messages == [
+        (
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 5."
+        )
+        for i in range(1, 6)
+    ]
+
+    caplog.clear()
 
     # Upload with custom max_redirects of 3
     default_repo.upload(package, 3)
 
-    assert_retries(capsys.readouterr().out, 3)
+    assert caplog.messages == [
+        (
+            'Received "500: Internal server error"\n'
+            f"Package upload appears to have failed. Retry {i} of 3."
+        )
+        for i in range(1, 4)
+    ]
 
 
 @pytest.mark.parametrize(

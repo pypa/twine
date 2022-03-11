@@ -18,6 +18,7 @@ import os.path
 from typing import Dict, List, cast
 
 import requests
+from rich import print
 
 from twine import commands
 from twine import exceptions
@@ -127,15 +128,15 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     uploaded_packages = []
 
     for package in packages_to_upload:
-        skip_message = "  Skipping {} because it appears to already exist".format(
-            package.basefilename
+        skip_message = (
+            f"Skipping {package.basefilename} because it appears to already exist"
         )
 
         # Note: The skip_existing check *needs* to be first, because otherwise
         #       we're going to generate extra HTTP requests against a hardcoded
         #       URL for no reason.
         if upload_settings.skip_existing and repository.package_is_uploaded(package):
-            print(skip_message)
+            logger.warning(skip_message)
             continue
 
         resp = repository.upload(package)
@@ -154,7 +155,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
             )
 
         if skip_upload(resp, upload_settings.skip_existing, package):
-            print(skip_message)
+            logger.warning(skip_message)
             continue
 
         utils.check_status_code(resp, upload_settings.verbose)
@@ -163,7 +164,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
     release_urls = repository.release_urls(uploaded_packages)
     if release_urls:
-        print("\nView at:")
+        print("\n[green]View at:")
         for url in release_urls:
             print(url)
 
