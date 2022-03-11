@@ -154,8 +154,10 @@ class Repository:
                 rich.progress.BarColumn(),
                 rich.progress.DownloadColumn(),
                 "•",
-                rich.progress.TimeElapsedColumn(),
-                rich.progress.TimeRemainingColumn(),
+                rich.progress.TimeRemainingColumn(
+                    compact=True,
+                    elapsed_when_finished=True,
+                ),
                 "•",
                 rich.progress.TransferSpeedColumn(),
                 disable=self.disable_progress_bar,
