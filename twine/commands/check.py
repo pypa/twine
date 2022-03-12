@@ -15,15 +15,18 @@
 import argparse
 import cgi
 import io
+import logging
 import re
-import sys
-import textwrap
-from typing import IO, List, Optional, Tuple, cast
+from typing import List, Optional, Tuple, cast
 
 import readme_renderer.rst
+from rich import print
 
 from twine import commands
 from twine import package as package_file
+
+logger = logging.getLogger(__name__)
+
 
 _RENDERERS = {
     None: readme_renderer.rst,  # Default if description_content_type is None
@@ -65,7 +68,7 @@ class _WarningStream:
         )
 
     def __str__(self) -> str:
-        return self.output.getvalue()
+        return self.output.getvalue().strip()
 
 
 def _check_file(
@@ -104,7 +107,6 @@ def _check_file(
 
 def check(
     dists: List[str],
-    output_stream: IO[str] = sys.stdout,
     strict: bool = False,
 ) -> bool:
     """Check that a distribution will render correctly on PyPI and display the results.
@@ -124,39 +126,37 @@ def check(
     """
     uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
     if not uploads:  # Return early, if there are no files to check.
-        output_stream.write("No files to check.\n")
+        logger.error("No files to check.")
         return False
 
     failure = False
 
     for filename in uploads:
-        output_stream.write("Checking %s: " % filename)
+        print(f"Checking {filename}: ", end="")
         render_warning_stream = _WarningStream()
         warnings, is_ok = _check_file(filename, render_warning_stream)
 
         # Print the status and/or error
         if not is_ok:
             failure = True
-            output_stream.write("FAILED\n")
-
-            error_text = (
-                "`long_description` has syntax errors in markup and "
-                "would not be rendered on PyPI.\n"
+            print("[red]FAILED[/red]")
+            logger.error(
+                "`long_description` has syntax errors in markup"
+                " and would not be rendered on PyPI."
+                f"\n{render_warning_stream}"
             )
-            output_stream.write(textwrap.indent(error_text, "  "))
-            output_stream.write(textwrap.indent(str(render_warning_stream), "    "))
         elif warnings:
             if strict:
                 failure = True
-                output_stream.write("FAILED, due to warnings\n")
+                print("[red]FAILED due to warnings[/red]")
             else:
-                output_stream.write("PASSED, with warnings\n")
+                print("[yellow]PASSED with warnings[/yellow]")
         else:
-            output_stream.write("PASSED\n")
+            print("[green]PASSED[/green]")
 
         # Print warnings after the status and/or error
         for message in warnings:
-            output_stream.write("  warning: " + message + "\n")
+            logger.warning(message)
 
     return failure
 

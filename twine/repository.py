@@ -12,15 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import sys
 from typing import Any, Dict, List, Optional, Set, Tuple, cast
 
 import requests
 import requests_toolbelt
-import tqdm
+import rich.progress
 import urllib3
 from requests import adapters
 from requests_toolbelt.utils import user_agent
+from rich import print
 
 import twine
 from twine import package as package_file
@@ -35,16 +35,6 @@ TEST_WAREHOUSE = "https://test.pypi.org/"
 WAREHOUSE_WEB = "https://pypi.org/"
 
 logger = logging.getLogger(__name__)
-
-
-class ProgressBar(tqdm.tqdm):
-    def update_to(self, n: int) -> None:
-        """Update the bar in the way compatible with requests-toolbelt.
-
-        This is identical to tqdm.update, except ``n`` will be the current
-        value - not the delta as tqdm expects.
-        """
-        self.update(n - self.n)  # will also do self.n = n
 
 
 class Repository:
@@ -88,12 +78,8 @@ class Repository:
 
     @staticmethod
     def _make_user_agent_string() -> str:
-        from twine import cli
-
-        dependencies = cli.list_dependencies_and_versions()
         user_agent_string = (
             user_agent.UserAgentBuilder("twine", twine.__version__)
-            .include_extras(dependencies)
             .include_implementation()
             .build()
         )
@@ -159,17 +145,28 @@ class Repository:
                 ("content", (package.basefilename, fp, "application/octet-stream"))
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
-            with ProgressBar(
-                total=encoder.len,
-                unit="B",
-                unit_scale=True,
-                unit_divisor=1024,
-                miniters=1,
-                file=sys.stdout,
+
+            with rich.progress.Progress(
+                "[progress.percentage]{task.percentage:>3.0f}%",
+                rich.progress.BarColumn(),
+                rich.progress.DownloadColumn(),
+                "•",
+                rich.progress.TimeRemainingColumn(
+                    compact=True,
+                    elapsed_when_finished=True,
+                ),
+                "•",
+                rich.progress.TransferSpeedColumn(),
                 disable=self.disable_progress_bar,
-            ) as bar:
+            ) as progress:
+                task_id = progress.add_task("", total=encoder.len)
+
                 monitor = requests_toolbelt.MultipartEncoderMonitor(
-                    encoder, lambda monitor: bar.update_to(monitor.bytes_read)
+                    encoder,
+                    lambda monitor: progress.update(
+                        task_id,
+                        completed=monitor.bytes_read,
+                    ),
                 )
 
                 resp = self.session.post(
@@ -192,15 +189,10 @@ class Repository:
                 return resp
             if 500 <= resp.status_code < 600:
                 number_of_redirects += 1
-                print(
-                    'Received "{status_code}: {reason}" Package upload '
-                    "appears to have failed.  Retry {retry} of "
-                    "{max_redirects}".format(
-                        status_code=resp.status_code,
-                        reason=resp.reason,
-                        retry=number_of_redirects,
-                        max_redirects=max_redirects,
-                    )
+                logger.warning(
+                    f'Received "{resp.status_code}: {resp.reason}"'
+                    "\nPackage upload appears to have failed."
+                    f" Retry {number_of_redirects} of {max_redirects}."
                 )
             else:
                 return resp
