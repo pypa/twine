@@ -17,7 +17,7 @@ def test_get_password_keyring_overrides_prompt(monkeypatch, config):
     class MockKeyring:
         @staticmethod
         def get_password(system, user):
-            return "{user}@{system} sekure pa55word".format(**locals())
+            return f"{user}@{system} sekure pa55word"
 
     monkeypatch.setattr(auth, "keyring", MockKeyring)
 
@@ -68,7 +68,7 @@ def test_get_username_and_password_keyring_overrides_prompt(
         @staticmethod
         def get_credential(system, user):
             return auth.CredentialInput(
-                "real_user", "real_user@{system} sekure pa55word".format(**locals())
+                "real_user", f"real_user@{system} sekure pa55word"
             )
 
         @staticmethod

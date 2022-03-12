@@ -47,7 +47,7 @@ class WinInst(distribution.Distribution):
                 for x in names
                 if x.endswith(".egg-info") or x.endswith("PKG-INFO")
             ]
-            schwarz = sorted([(len(x), x) for x in tuples])
+            schwarz = sorted((len(x), x) for x in tuples)
             for path in [x[1] for x in schwarz]:
                 candidate = "/".join(path)
                 data = read_file(candidate)
