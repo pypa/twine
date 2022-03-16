@@ -53,7 +53,7 @@ class Wheel(distribution.Distribution):
     def find_candidate_metadata_files(names: List[str]) -> List[List[str]]:
         """Filter files that may be METADATA files."""
         tuples = [x.split("/") for x in names if "METADATA" in x]
-        return [x[1] for x in sorted([(len(x), x) for x in tuples])]
+        return [x[1] for x in sorted((len(x), x) for x in tuples)]
 
     def read(self) -> bytes:
         fqn = os.path.abspath(os.path.normpath(self.filename))

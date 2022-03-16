@@ -11,8 +11,6 @@
 # distributed under the License is distributed on an "AS IS" BASIS,
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
-from __future__ import annotations
-
 # limitations under the License.
 import argparse
 import contextlib
@@ -138,7 +136,7 @@ class Settings:
             # Workaround for https://github.com/python/mypy/issues/5858
             return cast(Optional[str], self.auth.password)
 
-    def _allow_noninteractive(self) -> contextlib.AbstractContextManager[None]:
+    def _allow_noninteractive(self) -> "contextlib.AbstractContextManager[None]":
         """Bypass NonInteractive error when client cert is present."""
         suppressed = (exceptions.NonInteractive,) if self.client_cert else ()
         return contextlib.suppress(*suppressed)

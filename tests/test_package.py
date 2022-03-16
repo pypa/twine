@@ -36,7 +36,7 @@ def test_sign_file(monkeypatch):
     )
     try:
         package.sign("gpg2", None)
-    except IOError:
+    except OSError:
         pass
     args = ("gpg2", "--detach-sign", "-a", filename)
     assert replaced_check_call.calls == [pretend.call(args)]
@@ -56,7 +56,7 @@ def test_sign_file_with_identity(monkeypatch):
     )
     try:
         package.sign("gpg", "identity")
-    except IOError:
+    except OSError:
         pass
     args = ("gpg", "--detach-sign", "--local-user", "identity", "-a", filename)
     assert replaced_check_call.calls == [pretend.call(args)]
@@ -139,51 +139,49 @@ def test_package_safe_name_is_correct(pkg_name, expected_name):
 def test_metadata_dictionary_keys():
     """Merge multiple sources of metadata into a single dictionary."""
     package = package_file.PackageFile.from_filename(helpers.SDIST_FIXTURE, None)
-    assert set(package.metadata_dictionary()) == set(
-        [
-            # identify release
-            "name",
-            "version",
-            # file content
-            "filetype",
-            "pyversion",
-            # additional meta-data
-            "metadata_version",
-            "summary",
-            "home_page",
-            "author",
-            "author_email",
-            "maintainer",
-            "maintainer_email",
-            "license",
-            "description",
-            "keywords",
-            "platform",
-            "classifiers",
-            "download_url",
-            "supported_platform",
-            "comment",
-            "md5_digest",
-            "sha256_digest",
-            "blake2_256_digest",
-            # PEP 314
-            "provides",
-            "requires",
-            "obsoletes",
-            # Metadata 1.2
-            "project_urls",
-            "provides_dist",
-            "obsoletes_dist",
-            "requires_dist",
-            "requires_external",
-            "requires_python",
-            # Metadata 2.1
-            "provides_extras",
-            "description_content_type",
-            # Metadata 2.2
-            "dynamic",
-        ]
-    )
+    assert set(package.metadata_dictionary()) == {
+        # identify release
+        "name",
+        "version",
+        # file content
+        "filetype",
+        "pyversion",
+        # additional meta-data
+        "metadata_version",
+        "summary",
+        "home_page",
+        "author",
+        "author_email",
+        "maintainer",
+        "maintainer_email",
+        "license",
+        "description",
+        "keywords",
+        "platform",
+        "classifiers",
+        "download_url",
+        "supported_platform",
+        "comment",
+        "md5_digest",
+        "sha256_digest",
+        "blake2_256_digest",
+        # PEP 314
+        "provides",
+        "requires",
+        "obsoletes",
+        # Metadata 1.2
+        "project_urls",
+        "provides_dist",
+        "obsoletes_dist",
+        "requires_dist",
+        "requires_external",
+        "requires_python",
+        # Metadata 2.1
+        "provides_extras",
+        "description_content_type",
+        # Metadata 2.2
+        "dynamic",
+    }
 
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])

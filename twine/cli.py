@@ -97,7 +97,7 @@ def dispatch(argv: List[str]) -> Any:
     parser.add_argument(
         "--version",
         action="version",
-        version="%(prog)s version {} ({})".format(twine.__version__, dep_versions()),
+        version=f"%(prog)s version {twine.__version__} ({dep_versions()})",
     )
     parser.add_argument(
         "--no-color",

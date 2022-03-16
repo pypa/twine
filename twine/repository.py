@@ -214,7 +214,7 @@ class Repository:
             releases = self._releases_json_data.get(safe_name)
 
         if releases is None:
-            url = "{url}pypi/{package}/json".format(package=safe_name, url=LEGACY_PYPI)
+            url = f"{LEGACY_PYPI}pypi/{safe_name}/json"
             headers = {"Accept": "application/json"}
             response = self.session.get(url, headers=headers)
             if response.status_code == 200:
@@ -240,7 +240,7 @@ class Repository:
             return set()
 
         return {
-            "{}project/{}/{}/".format(url, package.safe_name, package.metadata.version)
+            f"{url}project/{package.safe_name}/{package.metadata.version}/"
             for package in packages
         }
 
