@@ -1,0 +1,1 @@
+Use GPG ``--output`` option to enable using other GPG implementations.
