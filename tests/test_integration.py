@@ -16,7 +16,10 @@ import requests
 from twine import __main__ as dunder_main
 from twine import cli
 
-pytestmark = [pytest.mark.enable_socket, pytest.mark.flaky(reruns=3, reruns_delay=1)]
+pytestmark = [
+    pytest.mark.enable_socket,
+    pytest.mark.flaky(reruns=3, reruns_delay=1),
+]
 
 
 @pytest.fixture(scope="session")
@@ -27,7 +30,7 @@ def sampleproject_dist(tmp_path_factory):
     )
     with (checkout / "setup.py").open("r+") as setup:
         orig = setup.read()
-        sub = orig.replace("name='sampleproject'", "name='twine-sampleproject'")
+        sub = orig.replace('name="sampleproject"', 'name="twine-sampleproject"')
         assert orig != sub
         setup.seek(0)
         setup.write(sub)
