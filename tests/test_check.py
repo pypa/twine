@@ -107,10 +107,11 @@ def test_check_passing_distribution_with_none_renderer(
     assert capsys.readouterr().out == "Checking dist/dist.tar.gz: PASSED\n"
 
 
-def test_check_no_description(monkeypatch, capsys, caplog):
+@pytest.mark.parametrize("description", [None, "UNKNOWN\n\n", "UNKNOWN\n\n\n"])
+def test_check_no_description(description, monkeypatch, capsys, caplog):
     package = pretend.stub(
         metadata_dictionary=lambda: {
-            "description": None,
+            "description": description,
             "description_content_type": None,
         }
     )
