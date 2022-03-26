@@ -2,9 +2,18 @@ import getpass
 import textwrap
 
 import pytest
+import rich
 
 from twine import settings
 from twine import utils
+
+
+def pytest_configure(config):
+    # Disable color codes and wrapping during tests
+    rich.reconfigure(
+        no_color=True,
+        width=500,
+    )
 
 
 @pytest.fixture()
