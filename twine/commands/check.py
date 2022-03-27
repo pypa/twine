@@ -93,7 +93,7 @@ def _check_file(
     content_type, params = cgi.parse_header(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
-    if description is None or description.rstrip("\n") == "UNKNOWN":
+    if description is None or description.rstrip() == "UNKNOWN":
         warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
