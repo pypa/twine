@@ -24,25 +24,18 @@ from twine.commands import check
 class TestWarningStream:
     def setup(self):
         self.stream = check._WarningStream()
-        self.stream.output = pretend.stub(
-            write=pretend.call_recorder(lambda a: None),
-            getvalue=lambda: "result",
-        )
 
     def test_write_match(self):
         self.stream.write("<string>:2: (WARNING/2) Title underline too short.")
-
-        assert self.stream.output.write.calls == [
-            pretend.call("line 2: Warning: Title underline too short.\n")
-        ]
+        assert self.stream.getvalue() == "line 2: Warning: Title underline too short.\n"
 
     def test_write_nomatch(self):
         self.stream.write("this does not match")
-
-        assert self.stream.output.write.calls == [pretend.call("this does not match")]
+        assert self.stream.getvalue() == "this does not match"
 
     def test_str_representation(self):
-        assert str(self.stream) == "result"
+        self.stream.write("<string>:2: (WARNING/2) Title underline too short.")
+        assert str(self.stream) == "line 2: Warning: Title underline too short."
 
 
 def test_check_no_distributions(monkeypatch, caplog):
