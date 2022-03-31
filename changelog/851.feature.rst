@@ -1,1 +1,0 @@
-Use Rich to add color to ``upload`` logging output.
