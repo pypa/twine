@@ -12,6 +12,26 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 4.0.0 (2022-03-31)
+------------------------
+
+Features
+^^^^^^^^
+
+- Drop support for Python 3.6. (`#869 <https://github.com/pypa/twine/issues/869>`_)
+- Use Rich to add color to ``upload`` output. (`#851 <https://github.com/pypa/twine/issues/851>`_)
+- Use Rich to add color to ``check`` output. (`#874 <https://github.com/pypa/twine/issues/874>`_)
+- Use Rich instead of tqdm for upload progress bar. (`#877 <https://github.com/pypa/twine/issues/877>`_)
+
+
+Bugfixes
+^^^^^^^^
+
+- Remove Twine's dependencies from the ``User-Agent`` header when uploading. (`#871 <https://github.com/pypa/twine/issues/871>`_)
+- Improve detection of disabled BLAKE2 hashing due to FIPS mode. (`#879 <https://github.com/pypa/twine/issues/879>`_)
+- Restore warning for missing ``long_description``. (`#887 <https://github.com/pypa/twine/issues/887>`_)
+
+
 Twine 3.8.0 (2022-02-02)
 ------------------------
 
