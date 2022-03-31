@@ -1,0 +1,1 @@
+Restore warning for missing ``long_description``.

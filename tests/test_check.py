@@ -12,12 +12,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
+import textwrap
 
+import build
 import pretend
 import pytest
 
-from twine import commands
-from twine import package as package_file
 from twine.commands import check
 
 
@@ -38,10 +38,8 @@ class TestWarningStream:
         assert str(self.stream) == "line 2: Warning: Title underline too short."
 
 
-def test_check_no_distributions(monkeypatch, caplog):
-    monkeypatch.setattr(commands, "_find_dists", lambda a: [])
-
-    assert not check.check(["dist/*"])
+def test_fails_no_distributions(caplog):
+    assert not check.check([])
     assert caplog.record_tuples == [
         (
             "twine.commands.check",
@@ -51,75 +49,51 @@ def test_check_no_distributions(monkeypatch, caplog):
     ]
 
 
-def test_check_passing_distribution(monkeypatch, capsys):
-    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: "valid"))
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": "text/markdown",
-        }
-    )
-    warning_stream = ""
+def build_sdist(src_path, project_files):
+    """
+    Build a source distribution similar to `python3 -m build --sdist`.
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-    monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+    Returns the absolute path of the built distribution.
+    """
+    project_files = {
+        "pyproject.toml": (
+            """
+            [build-system]
+            requires = ["setuptools"]
+            build-backend = "setuptools.build_meta"
+            """
+        ),
+        **project_files,
+    }
 
-    assert not check.check(["dist/*"])
-    assert capsys.readouterr().out == "Checking dist/dist.tar.gz: PASSED\n"
-    assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+    for filename, content in project_files.items():
+        (src_path / filename).write_text(textwrap.dedent(content))
+
+    builder = build.ProjectBuilder(src_path)
+    return builder.build("sdist", str(src_path / "dist"))
 
 
-@pytest.mark.parametrize("content_type", ["text/plain", "text/markdown"])
-def test_check_passing_distribution_with_none_renderer(
-    content_type,
-    monkeypatch,
-    capsys,
-):
-    """Pass when rendering a content type can't fail."""
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": content_type,
-        }
-    )
-
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
+@pytest.mark.parametrize("strict", [False, True])
+def test_warns_missing_description(strict, tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                """
+            ),
+        },
     )
 
-    assert not check.check(["dist/*"])
-    assert capsys.readouterr().out == "Checking dist/dist.tar.gz: PASSED\n"
+    assert check.check([sdist], strict=strict) is strict
 
-
-def test_check_no_description(monkeypatch, capsys, caplog):
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": None,
-            "description_content_type": None,
-        }
+    assert capsys.readouterr().out == f"Checking {sdist}: " + (
+        "FAILED due to warnings\n" if strict else "PASSED with warnings\n"
     )
 
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-
-    assert not check.check(["dist/*"])
-
-    assert capsys.readouterr().out == (
-        "Checking dist/dist.tar.gz: PASSED with warnings\n"
-    )
     assert caplog.record_tuples == [
         (
             "twine.commands.check",
@@ -134,32 +108,27 @@ def test_check_no_description(monkeypatch, capsys, caplog):
     ]
 
 
-def test_strict_fails_on_warnings(monkeypatch, capsys, caplog):
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": None,
-            "description_content_type": None,
-        }
+def test_warns_missing_file(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                long_description = file:README.rst
+                long_description_content_type = text/x-rst
+                """
+            ),
+        },
     )
 
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
+    assert not check.check([sdist])
 
-    assert check.check(["dist/*"], strict=True)
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED with warnings\n"
 
-    assert capsys.readouterr().out == (
-        "Checking dist/dist.tar.gz: FAILED due to warnings\n"
-    )
     assert caplog.record_tuples == [
-        (
-            "twine.commands.check",
-            logging.WARNING,
-            "`long_description_content_type` missing. defaulting to `text/x-rst`.",
-        ),
         (
             "twine.commands.check",
             logging.WARNING,
@@ -168,37 +137,138 @@ def test_strict_fails_on_warnings(monkeypatch, capsys, caplog):
     ]
 
 
-def test_check_failing_distribution(monkeypatch, capsys, caplog):
-    renderer = pretend.stub(render=pretend.call_recorder(lambda *a, **kw: None))
-    package = pretend.stub(
-        metadata_dictionary=lambda: {
-            "description": "blah",
-            "description_content_type": "text/markdown",
-        }
+def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                long_description = file:README.rst
+                long_description_content_type = text/x-rst
+                """
+            ),
+            "README.rst": (
+                """
+                ============
+                """
+            ),
+        },
     )
-    warning_stream = "Syntax error"
 
-    monkeypatch.setattr(check, "_RENDERERS", {None: renderer})
-    monkeypatch.setattr(commands, "_find_dists", lambda a: ["dist/dist.tar.gz"])
-    monkeypatch.setattr(
-        package_file,
-        "PackageFile",
-        pretend.stub(from_filename=lambda *a, **kw: package),
-    )
-    monkeypatch.setattr(check, "_WarningStream", lambda: warning_stream)
+    assert check.check([sdist])
 
-    assert check.check(["dist/*"])
+    assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
 
-    assert capsys.readouterr().out == "Checking dist/dist.tar.gz: FAILED\n"
     assert caplog.record_tuples == [
         (
             "twine.commands.check",
             logging.ERROR,
-            "`long_description` has syntax errors in markup and would not be rendered "
-            "on PyPI.\nSyntax error",
+            "`long_description` has syntax errors in markup "
+            "and would not be rendered on PyPI.\n"
+            "line 2: Error: Document or section may not begin with a transition.",
         ),
     ]
-    assert renderer.render.calls == [pretend.call("blah", stream=warning_stream)]
+
+
+def test_fails_rst_no_content(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                long_description = file:README.rst
+                long_description_content_type = text/x-rst
+                """
+            ),
+            "README.rst": (
+                """
+                test-package
+                ============
+                """
+            ),
+        },
+    )
+
+    assert check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
+
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.ERROR,
+            "`long_description` has syntax errors in markup "
+            "and would not be rendered on PyPI.\n",
+        ),
+    ]
+
+
+def test_passes_rst_description(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                long_description = file:README.rst
+                long_description_content_type = text/x-rst
+                """
+            ),
+            "README.rst": (
+                """
+                test-package
+                ============
+
+                A test package.
+                """
+            ),
+        },
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert not caplog.record_tuples
+
+
+@pytest.mark.parametrize("content_type", ["text/markdown", "text/plain"])
+def test_passes_markdown_description(content_type, tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                f"""
+                [metadata]
+                name = test-package
+                version = 0.0.1
+                long_description = file:README.md
+                long_description_content_type = {content_type}
+                """
+            ),
+            "README.md": (
+                """
+                # test-package
+
+                A test package.
+                """
+            ),
+        },
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert not caplog.record_tuples
 
 
 def test_main(monkeypatch):

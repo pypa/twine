@@ -337,7 +337,7 @@ def test_exception_for_redirect(
 
 
 def test_prints_skip_message_for_uploaded_package(
-    upload_settings, stub_repository, capsys
+    upload_settings, stub_repository, capsys, caplog
 ):
     upload_settings.skip_existing = True
 
@@ -348,12 +348,16 @@ def test_prints_skip_message_for_uploaded_package(
     assert result is None
 
     captured = capsys.readouterr()
-    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
     assert RELEASE_URL not in captured.out
+
+    assert caplog.messages == [
+        "Skipping twine-1.5.0-py2.py3-none-any.whl "
+        "because it appears to already exist"
+    ]
 
 
 def test_prints_skip_message_for_response(
-    upload_settings, stub_response, stub_repository, capsys
+    upload_settings, stub_response, stub_repository, capsys, caplog
 ):
     upload_settings.skip_existing = True
 
@@ -368,8 +372,12 @@ def test_prints_skip_message_for_response(
     assert result is None
 
     captured = capsys.readouterr()
-    assert "Skipping twine-1.5.0-py2.py3-none-any.whl" in captured.out
     assert RELEASE_URL not in captured.out
+
+    assert caplog.messages == [
+        "Skipping twine-1.5.0-py2.py3-none-any.whl "
+        "because it appears to already exist"
+    ]
 
 
 @pytest.mark.parametrize(
