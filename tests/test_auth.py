@@ -227,3 +227,20 @@ def test_warns_for_empty_password(
     assert auth.Resolver(config, auth.CredentialInput()).password == password
 
     assert caplog.messages[0].startswith(warning)
+
+
+def test_log_exception_on_keyring_failure(config, monkeypatch, caplog):
+    class FailKeyring:
+        @staticmethod
+        def get_credential(system, username):
+            import os
+
+            # Let's simulate the error that occurred
+            # in https://github.com/pypa/twine/issues/889
+            os.environ["HOME"]
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
+
+    assert not auth.Resolver(config, auth.CredentialInput()).get_username_from_keyring()
+
+    assert "KeyError: 'HOME'" in caplog.text and caplog.messages[0] == "'HOME'"
