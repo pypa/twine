@@ -204,7 +204,8 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
             "twine.commands.check",
             logging.ERROR,
             "`long_description` has syntax errors in markup "
-            "and would not be rendered on PyPI.\n",
+            "and would not be rendered on PyPI.\n"
+            "No content rendered from RST source.",
         ),
     ]
 
