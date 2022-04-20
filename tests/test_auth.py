@@ -152,14 +152,14 @@ def test_get_username_runtime_error_suppressed(
     entered_username, keyring_no_backends_get_credential, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
-    assert caplog.messages == ["fail!"]
+    assert caplog.messages == ["Error from keyring"] and "fail!" in caplog.text
 
 
 def test_get_password_runtime_error_suppressed(
     entered_password, keyring_no_backends, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput("user")).password == "entered pw"
-    assert caplog.messages == ["fail!"]
+    assert caplog.messages == ["Error from keyring"] and "fail!" in caplog.text
 
 
 def test_get_username_return_none(entered_username, monkeypatch, config):
@@ -233,14 +233,13 @@ def test_log_exception_on_keyring_failure(config, monkeypatch, caplog):
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
-            import os
-
-            # Let's simulate the error that occurred
-            # in https://github.com/pypa/twine/issues/889
-            os.environ["HOME"]
+            # Simulate the error from https://github.com/pypa/twine/issues/889
+            environ = {}
+            environ["HOME"]
 
     monkeypatch.setattr(auth, "keyring", FailKeyring())
 
     assert not auth.Resolver(config, auth.CredentialInput()).get_username_from_keyring()
+    assert not auth.Resolver(config, auth.CredentialInput()).get_password_from_keyring()
 
-    assert "KeyError: 'HOME'" in caplog.text and caplog.messages[0] == "'HOME'"
+    assert caplog.messages[0] == "Error from keyring" and "KeyError: 'HOME'" in caplog.text

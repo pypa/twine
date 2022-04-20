@@ -63,7 +63,7 @@ class Resolver:
             # To support keyring prior to 15.2
             pass
         except Exception as exc:
-            logger.exception(exc)
+            logger.warning("Error from keyring", exc_info=exc)
         return None
 
     def get_password_from_keyring(self) -> Optional[str]:
@@ -73,7 +73,7 @@ class Resolver:
             logger.info("Querying keyring for password")
             return cast(str, keyring.get_password(system, username))
         except Exception as exc:
-            logger.exception(exc)
+            logger.warning("Error from keyring", exc_info=exc)
         return None
 
     def username_from_keyring_or_prompt(self) -> str:
