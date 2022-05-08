@@ -22,7 +22,7 @@ import requests
 from twine import cli
 from twine import exceptions
 
-logger = logging.getLogger(__name__)
+logger = logging.getLogger("twine")
 
 
 def main() -> Any:
