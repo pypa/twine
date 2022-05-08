@@ -52,6 +52,7 @@ def configure_output() -> None:
     # test_main.py due to capsys not being cleared.
     logging.config.dictConfig(
         {
+            "disable_existing_loggers": False,
             "version": 1,
             "handlers": {
                 "console": {
@@ -61,10 +62,8 @@ def configure_output() -> None:
                     "highlighter": rich.highlighter.NullHighlighter(),
                 }
             },
-            "loggers": {
-                "twine": {
-                    "handlers": ["console"],
-                },
+            "root": {
+                "handlers": ["console"],
             },
         }
     )
