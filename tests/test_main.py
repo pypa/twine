@@ -27,7 +27,7 @@ def test_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Hard-coding control characters for red text; couldn't find a succint alternative.
+    # Hard-coding control characters for red text; couldn't find a succinct alternative.
     # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
     level = "\x1b[31mERROR   \x1b[0m"
     assert [line.rstrip() for line in captured.out.splitlines()] == [
@@ -57,7 +57,7 @@ def test_http_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Hard-coding control characters for red text; couldn't find a succint alternative.
+    # Hard-coding control characters for red text; couldn't find a succinct alternative.
     # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
     level = "\x1b[31mERROR   \x1b[0m"
     assert [line.rstrip() for line in captured.out.splitlines()] == [
