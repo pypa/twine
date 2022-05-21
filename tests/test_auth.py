@@ -229,7 +229,14 @@ def test_warns_for_empty_password(
     assert caplog.messages[0].startswith(warning)
 
 
-def test_log_exception_on_keyring_failure(config, monkeypatch, caplog):
+@pytest.mark.parametrize(
+    "get_credential",
+    [
+        auth.Resolver.get_username_from_keyring,
+        auth.Resolver.get_password_from_keyring,
+    ],
+)
+def test_log_exception_on_keyring_failure(get_credential, config, monkeypatch, caplog):
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
@@ -239,7 +246,8 @@ def test_log_exception_on_keyring_failure(config, monkeypatch, caplog):
 
     monkeypatch.setattr(auth, "keyring", FailKeyring())
 
-    assert not auth.Resolver(config, auth.CredentialInput()).get_username_from_keyring()
-    assert not auth.Resolver(config, auth.CredentialInput()).get_password_from_keyring()
+    assert not get_credential(auth.Resolver(config, auth.CredentialInput()))
 
-    assert caplog.messages[0] == "Error from keyring" and "KeyError: 'HOME'" in caplog.text
+    assert (
+        caplog.messages[0] == "Error from keyring" and "KeyError: 'HOME'" in caplog.text
+    )
