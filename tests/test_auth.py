@@ -153,14 +153,42 @@ def test_get_username_runtime_error_suppressed(
     entered_username, keyring_no_backends_get_credential, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
-    assert re.search(r"Error from keyring.+fail!", caplog.text, re.DOTALL)
+    assert re.search(
+        r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
+    )
 
 
 def test_get_password_runtime_error_suppressed(
     entered_password, keyring_no_backends, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput("user")).password == "entered pw"
-    assert re.search(r"Error from keyring.+fail!", caplog.text, re.DOTALL)
+    assert re.search(
+        r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
+    )
+
+
+@pytest.mark.parametrize(
+    "get_credential",
+    [
+        auth.Resolver.get_username_from_keyring,
+        auth.Resolver.get_password_from_keyring,
+    ],
+)
+def test_log_exception_on_keyring_failure(get_credential, config, monkeypatch, caplog):
+    class FailKeyring:
+        @staticmethod
+        def get_credential(system, username):
+            # Simulate the error from https://github.com/pypa/twine/issues/889
+            environ = {}
+            environ["HOME"]
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
+
+    assert not get_credential(auth.Resolver(config, auth.CredentialInput()))
+
+    assert re.search(
+        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
+    )
 
 
 def test_get_username_return_none(entered_username, monkeypatch, config):
@@ -228,27 +256,3 @@ def test_warns_for_empty_password(
     assert auth.Resolver(config, auth.CredentialInput()).password == password
 
     assert caplog.messages[0].startswith(warning)
-
-
-@pytest.mark.parametrize(
-    "get_credential",
-    [
-        auth.Resolver.get_username_from_keyring,
-        auth.Resolver.get_password_from_keyring,
-    ],
-)
-def test_log_exception_on_keyring_failure(get_credential, config, monkeypatch, caplog):
-    class FailKeyring:
-        @staticmethod
-        def get_credential(system, username):
-            # Simulate the error from https://github.com/pypa/twine/issues/889
-            environ = {}
-            environ["HOME"]
-
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
-
-    assert not get_credential(auth.Resolver(config, auth.CredentialInput()))
-
-    assert re.search(
-        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
-    )
