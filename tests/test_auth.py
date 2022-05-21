@@ -1,5 +1,6 @@
 import getpass
 import logging
+import re
 
 import pytest
 
@@ -152,14 +153,14 @@ def test_get_username_runtime_error_suppressed(
     entered_username, keyring_no_backends_get_credential, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
-    assert caplog.messages == ["Error from keyring"] and "fail!" in caplog.text
+    assert re.search(r"Error from keyring.+fail!", caplog.text, re.DOTALL)
 
 
 def test_get_password_runtime_error_suppressed(
     entered_password, keyring_no_backends, caplog, config
 ):
     assert auth.Resolver(config, auth.CredentialInput("user")).password == "entered pw"
-    assert caplog.messages == ["Error from keyring"] and "fail!" in caplog.text
+    assert re.search(r"Error from keyring.+fail!", caplog.text, re.DOTALL)
 
 
 def test_get_username_return_none(entered_username, monkeypatch, config):
@@ -248,6 +249,6 @@ def test_log_exception_on_keyring_failure(get_credential, config, monkeypatch, c
 
     assert not get_credential(auth.Resolver(config, auth.CredentialInput()))
 
-    assert (
-        caplog.messages[0] == "Error from keyring" and "KeyError: 'HOME'" in caplog.text
+    assert re.search(
+        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
     )
