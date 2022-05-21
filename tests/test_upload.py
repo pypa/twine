@@ -170,7 +170,7 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
     )
     assert result is None
 
-    # The signature shoud be added via package.add_gpg_signature()
+    # The signature should be added via package.add_gpg_signature()
     package = stub_repository.upload.calls[0].args[0]
     assert package.gpg_signature == (
         "twine-1.5.0-py2.py3-none-any.whl.asc",
@@ -194,7 +194,7 @@ def test_success_when_gpg_is_run(upload_settings, stub_repository, monkeypatch):
     result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
     assert result is None
 
-    # The signature shoud be added via package.sign()
+    # The signature should be added via package.sign()
     package = stub_repository.upload.calls[0].args[0]
     assert len(package.run_gpg.calls) == 1
     assert helpers.WHEEL_FIXTURE in package.run_gpg.calls[0].args[1]
