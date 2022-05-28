@@ -190,21 +190,37 @@ def keyring_missing_home(monkeypatch):
 
 
 def test_get_username_keyring_missing_home_logged(keyring_missing_home, config, caplog):
+    caplog.set_level(logging.INFO)
+
     resolver = auth.Resolver(config, auth.CredentialInput())
     assert not resolver.get_username_from_keyring()
 
     assert re.search(
-        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
+        r"Querying keyring for username"
+        r".+Error from keyring"
+        r".+Traceback"
+        r".+KeyError: 'HOME'"
+        r".+KeyError: 'uid not found: 999'",
+        caplog.text,
+        re.DOTALL,
     )
 
 
 def test_get_password_keyring_missing_home_logged(keyring_missing_home, config, caplog):
+    caplog.set_level(logging.INFO)
+
     resolver = auth.Resolver(config, auth.CredentialInput("user"))
     assert resolver.username == "user"
     assert not resolver.get_password_from_keyring()
 
     assert re.search(
-        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
+        r"Querying keyring for password"
+        r".+Error from keyring"
+        r".+Traceback"
+        r".+KeyError: 'HOME'"
+        r".+KeyError: 'uid not found: 999'",
+        caplog.text,
+        re.DOTALL,
     )
 
 
