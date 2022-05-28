@@ -1,5 +1,4 @@
 import getpass
-import importlib
 import logging
 import re
 
@@ -13,20 +12,6 @@ from twine import utils
 @pytest.fixture
 def config() -> utils.RepositoryConfig:
     return dict(repository="system")
-
-
-@pytest.fixture(autouse=True)
-def reload_keyring():
-    """
-    Force keyring to reinitialize its backend for every test.
-
-    This is a hack to support the keyring_missing_home fixture, but also to avoid
-    surprises in the future.
-
-    Specifically, this clears keyring.core._keyring_backend, which ensures
-    keyring.core.init_backend() is called in the context of a monkeypatch.
-    """
-    importlib.reload(importlib.import_module("keyring.core"))
 
 
 def test_get_username_keyring_defers_to_prompt(monkeypatch, entered_username, config):
@@ -178,26 +163,27 @@ def test_get_password_keyring_runtime_error_logged(
     )
 
 
-@pytest.fixture
-def keyring_missing_home(monkeypatch):
+def _raise_home_key_error():
     """Simulate environment from https://github.com/pypa/twine/issues/889."""
-
-    def getpwuid(_):
+    try:
+        raise KeyError("HOME")
+    except KeyError:
         raise KeyError("uid not found: 999")
 
-    monkeypatch.delenv("HOME")
-    monkeypatch.setattr("pwd.getpwuid", getpwuid)
 
+def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
+    class FailKeyring:
+        @staticmethod
+        def get_credential(system, username):
+            _raise_home_key_error()
 
-def test_get_username_keyring_missing_home_logged(keyring_missing_home, config, caplog):
-    caplog.set_level(logging.INFO)
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
 
     resolver = auth.Resolver(config, auth.CredentialInput())
     assert not resolver.get_username_from_keyring()
 
     assert re.search(
-        r"Querying keyring for username"
-        r".+Error from keyring"
+        r"Error from keyring"
         r".+Traceback"
         r".+KeyError: 'HOME'"
         r".+KeyError: 'uid not found: 999'",
@@ -206,16 +192,20 @@ def test_get_username_keyring_missing_home_logged(keyring_missing_home, config, 
     )
 
 
-def test_get_password_keyring_missing_home_logged(keyring_missing_home, config, caplog):
-    caplog.set_level(logging.INFO)
+def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
+    class FailKeyring:
+        @staticmethod
+        def get_password(system, username):
+            _raise_home_key_error()
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
 
     resolver = auth.Resolver(config, auth.CredentialInput("user"))
     assert resolver.username == "user"
     assert not resolver.get_password_from_keyring()
 
     assert re.search(
-        r"Querying keyring for password"
-        r".+Error from keyring"
+        r"Error from keyring"
         r".+Traceback"
         r".+KeyError: 'HOME'"
         r".+KeyError: 'uid not found: 999'",
