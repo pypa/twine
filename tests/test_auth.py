@@ -1,4 +1,5 @@
 import getpass
+import importlib
 import logging
 import re
 
@@ -12,6 +13,20 @@ from twine import utils
 @pytest.fixture
 def config() -> utils.RepositoryConfig:
     return dict(repository="system")
+
+
+@pytest.fixture(autouse=True)
+def reload_keyring():
+    """
+    Force keyring to reinitialize its backend for every test.
+
+    This is a hack to support the keyring_missing_home fixture, but also to avoid
+    surprises in the future.
+
+    Specifically, this clears keyring.core._keyring_backend, which ensures
+    keyring.core.init_backend() is called in the context of a monkeypatch.
+    """
+    importlib.reload(importlib.import_module("keyring.core"))
 
 
 def test_get_username_keyring_defers_to_prompt(monkeypatch, entered_username, config):
@@ -163,11 +178,14 @@ def test_get_password_keyring_runtime_error_logged(
     )
 
 
-def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
-    # Simulate environment from https://github.com/pypa/twine/issues/889
+@pytest.fixture
+def keyring_missing_home(monkeypatch):
+    """Simulate environment from https://github.com/pypa/twine/issues/889."""
     monkeypatch.delenv("HOME")
     monkeypatch.setattr("os.getuid", lambda: 999)
 
+
+def test_get_username_keyring_missing_home_logged(keyring_missing_home, config, caplog):
     resolver = auth.Resolver(config, auth.CredentialInput())
     assert not resolver.get_username_from_keyring()
 
@@ -176,11 +194,7 @@ def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
     )
 
 
-def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
-    # Simulate environment from https://github.com/pypa/twine/issues/889
-    monkeypatch.delenv("HOME")
-    monkeypatch.setattr("os.getuid", lambda: 999)
-
+def test_get_password_keyring_missing_home_logged(keyring_missing_home, config, caplog):
     resolver = auth.Resolver(config, auth.CredentialInput("user"))
     assert resolver.username == "user"
     assert not resolver.get_password_from_keyring()
