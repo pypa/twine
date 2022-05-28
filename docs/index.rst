@@ -177,8 +177,8 @@ without ``export``-ing it for other tools:
    HTTPS_PROXY=socks5://user:pass@host:port twine upload dist/*
 
 For more information, see the Requests documentation on
-`proxies <https://docs.python-requests.org/en/master/user/advanced/#proxies>`_ and
-`SOCKS <https://docs.python-requests.org/en/master/user/advanced/#socks>`_ , and
+`proxies <https://requests.readthedocs.io/en/latest/user/advanced/#proxies>`_ and
+`SOCKS <https://requests.readthedocs.io/en/latest/user/advanced/#socks>`_ , and
 `an in-depth article about proxy environment variables
 <https://about.gitlab.com/blog/2021/01/27/we-need-to-talk-no-proxy/>`_.
 
