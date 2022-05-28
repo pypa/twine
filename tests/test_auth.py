@@ -171,7 +171,9 @@ def _raise_home_key_error():
         raise KeyError("uid not found: 999")
 
 
-def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
+def test_get_username_keyring_key_error_logged(
+    entered_username, monkeypatch, config, caplog
+):
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
@@ -179,8 +181,7 @@ def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
 
     monkeypatch.setattr(auth, "keyring", FailKeyring())
 
-    resolver = auth.Resolver(config, auth.CredentialInput())
-    assert not resolver.get_username_from_keyring()
+    assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
     assert re.search(
         r"Error from keyring"
@@ -192,7 +193,9 @@ def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
     )
 
 
-def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
+def test_get_password_keyring_key_error_logged(
+    entered_username, entered_password, monkeypatch, config, caplog
+):
     class FailKeyring:
         @staticmethod
         def get_password(system, username):
@@ -200,9 +203,7 @@ def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
 
     monkeypatch.setattr(auth, "keyring", FailKeyring())
 
-    resolver = auth.Resolver(config, auth.CredentialInput("user"))
-    assert resolver.username == "user"
-    assert not resolver.get_password_from_keyring()
+    assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
 
     assert re.search(
         r"Error from keyring"
