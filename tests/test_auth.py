@@ -14,23 +14,23 @@ def config() -> utils.RepositoryConfig:
     return dict(repository="system")
 
 
-def test_get_password_keyring_overrides_prompt(monkeypatch, config):
+def test_get_username_keyring_defers_to_prompt(monkeypatch, entered_username, config):
     class MockKeyring:
         @staticmethod
-        def get_password(system, user):
-            return f"{user}@{system} sekure pa55word"
+        def get_credential(system, user):
+            return None
 
-    monkeypatch.setattr(auth, "keyring", MockKeyring)
+    monkeypatch.setattr(auth, "keyring", MockKeyring())
 
-    pw = auth.Resolver(config, auth.CredentialInput("user")).password
-    assert pw == "user@system sekure pa55word"
+    username = auth.Resolver(config, auth.CredentialInput()).username
+    assert username == "entered user"
 
 
 def test_get_password_keyring_defers_to_prompt(monkeypatch, entered_password, config):
     class MockKeyring:
         @staticmethod
         def get_password(system, user):
-            return
+            return None
 
     monkeypatch.setattr(auth, "keyring", MockKeyring)
 
@@ -188,18 +188,6 @@ def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
     assert re.search(
         r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
     )
-
-
-def test_get_username_return_none(entered_username, monkeypatch, config):
-    """Prompt for username when it's not in keyring."""
-
-    class FailKeyring:
-        @staticmethod
-        def get_credential(system, username):
-            return None
-
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
-    assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
 
 def test_logs_cli_values(caplog):
