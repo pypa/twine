@@ -20,7 +20,7 @@ def test_get_username_keyring_defers_to_prompt(monkeypatch, entered_username, co
         def get_credential(system, user):
             return None
 
-    monkeypatch.setattr(auth, "keyring", MockKeyring())
+    monkeypatch.setattr(auth, "keyring", MockKeyring)
 
     username = auth.Resolver(config, auth.CredentialInput()).username
     assert username == "entered user"
@@ -135,7 +135,7 @@ def test_get_username_keyring_runtime_error_logged(
         def get_credential(system, username):
             raise RuntimeError("fail!")
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
 
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
@@ -156,7 +156,7 @@ def test_get_password_keyring_runtime_error_logged(
         def get_password(system, username):
             raise RuntimeError("fail!")
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
 
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
 
@@ -183,7 +183,7 @@ def test_get_username_keyring_key_error_logged(
         def get_credential(system, username):
             _raise_home_key_error()
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
 
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
@@ -205,7 +205,7 @@ def test_get_password_keyring_key_error_logged(
         def get_password(system, username):
             _raise_home_key_error()
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
 
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
 
