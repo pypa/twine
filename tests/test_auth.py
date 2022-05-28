@@ -52,7 +52,7 @@ def test_empty_password_bypasses_prompt(monkeypatch, entered_password, config):
 
 def test_no_username_non_interactive_aborts(config):
     with pytest.raises(exceptions.NonInteractive):
-        auth.Private(config, auth.CredentialInput("user")).password
+        auth.Private(config, auth.CredentialInput()).username
 
 
 def test_no_password_non_interactive_aborts(config):
