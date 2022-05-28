@@ -181,8 +181,12 @@ def test_get_password_keyring_runtime_error_logged(
 @pytest.fixture
 def keyring_missing_home(monkeypatch):
     """Simulate environment from https://github.com/pypa/twine/issues/889."""
+
+    def getpwuid(_):
+        raise KeyError("uid not found: 999")
+
     monkeypatch.delenv("HOME")
-    monkeypatch.setattr("os.getuid", lambda: 999)
+    monkeypatch.setattr("pwd.getpwuid", getpwuid)
 
 
 def test_get_username_keyring_missing_home_logged(keyring_missing_home, config, caplog):
