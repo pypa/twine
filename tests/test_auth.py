@@ -140,7 +140,9 @@ def test_get_username_keyring_runtime_error_logged(
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
     assert re.search(
-        r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
+        r"Error getting username from keyring.+Traceback.+RuntimeError: fail!",
+        caplog.text,
+        re.DOTALL,
     )
 
 
@@ -159,7 +161,9 @@ def test_get_password_keyring_runtime_error_logged(
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
 
     assert re.search(
-        r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
+        r"Error getting password from keyring.+Traceback.+RuntimeError: fail!",
+        caplog.text,
+        re.DOTALL,
     )
 
 
@@ -184,7 +188,7 @@ def test_get_username_keyring_key_error_logged(
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
 
     assert re.search(
-        r"Error from keyring"
+        r"Error getting username from keyring"
         r".+Traceback"
         r".+KeyError: 'HOME'"
         r".+KeyError: 'uid not found: 999'",
@@ -206,7 +210,7 @@ def test_get_password_keyring_key_error_logged(
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
 
     assert re.search(
-        r"Error from keyring"
+        r"Error getting password from keyring"
         r".+Traceback"
         r".+KeyError: 'HOME'"
         r".+KeyError: 'uid not found: 999'",
