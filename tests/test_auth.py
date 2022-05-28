@@ -167,24 +167,27 @@ def test_get_password_runtime_error_suppressed(
     )
 
 
-@pytest.mark.parametrize(
-    "get_credential",
-    [
-        auth.Resolver.get_username_from_keyring,
-        auth.Resolver.get_password_from_keyring,
-    ],
-)
-def test_log_exception_on_keyring_failure(get_credential, config, monkeypatch, caplog):
-    class FailKeyring:
-        @staticmethod
-        def get_credential(system, username):
-            # Simulate the error from https://github.com/pypa/twine/issues/889
-            environ = {}
-            environ["HOME"]
+def test_keyring_username_missing_home_logs_exception(config, monkeypatch, caplog):
+    # Simulate environment from https://github.com/pypa/twine/issues/889
+    monkeypatch.delenv("HOME")
+    monkeypatch.setattr("os.getuid", lambda: 999)
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
+    resolver = auth.Resolver(config, auth.CredentialInput())
+    assert not resolver.get_username_from_keyring()
 
-    assert not get_credential(auth.Resolver(config, auth.CredentialInput()))
+    assert re.search(
+        r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
+    )
+
+
+def test_keyring_password_missing_home_logs_exception(config, monkeypatch, caplog):
+    # Simulate environment from https://github.com/pypa/twine/issues/889
+    monkeypatch.delenv("HOME")
+    monkeypatch.setattr("os.getuid", lambda: 999)
+
+    resolver = auth.Resolver(config, auth.CredentialInput("user"))
+    assert resolver.username == "user"
+    assert not resolver.get_password_from_keyring()
 
     assert re.search(
         r"Error from keyring.+Traceback.+KeyError: 'HOME'", caplog.text, re.DOTALL
