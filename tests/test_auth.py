@@ -125,49 +125,45 @@ def test_get_password_keyring_missing_non_interactive_aborts(
         auth.Private(config, auth.CredentialInput("user")).password
 
 
-@pytest.fixture
-def keyring_no_backends(monkeypatch):
-    """Simulate missing keyring backend raising RuntimeError on get_password."""
-
+def test_get_username_keyring_runtime_error_logged(
+    entered_username, monkeypatch, config, caplog
+):
     class FailKeyring:
-        @staticmethod
-        def get_password(system, username):
-            raise RuntimeError("fail!")
+        """Simulate missing keyring backend raising RuntimeError on get_credential."""
 
-    monkeypatch.setattr(auth, "keyring", FailKeyring())
-
-
-@pytest.fixture
-def keyring_no_backends_get_credential(monkeypatch):
-    """Simulate missing keyring backend raising RuntimeError on get_credential."""
-
-    class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise RuntimeError("fail!")
 
     monkeypatch.setattr(auth, "keyring", FailKeyring())
 
-
-def test_get_username_runtime_error_suppressed(
-    entered_username, keyring_no_backends_get_credential, caplog, config
-):
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
+
     assert re.search(
         r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
     )
 
 
-def test_get_password_runtime_error_suppressed(
-    entered_password, keyring_no_backends, caplog, config
+def test_get_password_keyring_runtime_error_logged(
+    entered_username, entered_password, monkeypatch, config, caplog
 ):
-    assert auth.Resolver(config, auth.CredentialInput("user")).password == "entered pw"
+    class FailKeyring:
+        """Simulate missing keyring backend raising RuntimeError on get_password."""
+
+        @staticmethod
+        def get_password(system, username):
+            raise RuntimeError("fail!")
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring())
+
+    assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
+
     assert re.search(
         r"Error from keyring.+Traceback.+RuntimeError: fail!", caplog.text, re.DOTALL
     )
 
 
-def test_keyring_username_missing_home_logs_exception(config, monkeypatch, caplog):
+def test_get_username_keyring_missing_home_logged(monkeypatch, config, caplog):
     # Simulate environment from https://github.com/pypa/twine/issues/889
     monkeypatch.delenv("HOME")
     monkeypatch.setattr("os.getuid", lambda: 999)
@@ -180,7 +176,7 @@ def test_keyring_username_missing_home_logs_exception(config, monkeypatch, caplo
     )
 
 
-def test_keyring_password_missing_home_logs_exception(config, monkeypatch, caplog):
+def test_get_password_keyring_missing_home_logged(monkeypatch, config, caplog):
     # Simulate environment from https://github.com/pypa/twine/issues/889
     monkeypatch.delenv("HOME")
     monkeypatch.setattr("os.getuid", lambda: 999)
