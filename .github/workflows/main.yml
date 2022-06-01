@@ -16,6 +16,9 @@ env:
   MIN_PYTHON_VERSION: "3.7"
   DEFAULT_PYTHON_VERSION: "3.9"
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
