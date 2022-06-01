@@ -1,1 +1,0 @@
-Reconfgure root logger to show all log messages.
