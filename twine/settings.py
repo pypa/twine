@@ -233,11 +233,11 @@ class Settings:
         )
         parser.add_argument(
             "--skip-existing",
-            default=False,
-            action="store_true",
+            action=utils.EnvironmentFlag,
+            env="TWINE_SKIP_EXISTING",
             help="Continue uploading files if one already exists. (Only valid "
             "when uploading to PyPI. Other implementations may not "
-            "support this.)",
+            "support this.) Can also be set via %(env)s environment variable.",
         )
         parser.add_argument(
             "--cert",
