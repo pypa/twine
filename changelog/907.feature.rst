@@ -1,0 +1,1 @@
+Add support for specifying ``--skip-existing`` as an environment variable (`TWINE_SKIP_EXISTING`).
