@@ -53,6 +53,7 @@ class Settings:
         comment: Optional[str] = None,
         config_file: str = utils.DEFAULT_CONFIG_FILE,
         skip_existing: bool = False,
+        skip_used: bool = False,
         cacert: Optional[str] = None,
         client_cert: Optional[str] = None,
         repository_name: str = "pypi",
@@ -86,6 +87,10 @@ class Settings:
             Specify whether twine should continue uploading files if one
             of them already exists. This primarily supports PyPI. Other
             package indexes may not be supported.
+        :param skip_used:
+            Specify whether twine should continue uploading files if one
+            of them used to exist. This primarily supports PyPI. Other
+            package indexes may not be supported.
         :param cacert:
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
@@ -109,6 +114,7 @@ class Settings:
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
+        self.skip_used = skip_used
         self._handle_repository_options(
             repository_name=repository_name,
             repository_url=repository_url,
@@ -236,6 +242,14 @@ class Settings:
             default=False,
             action="store_true",
             help="Continue uploading files if one already exists. (Only valid "
+            "when uploading to PyPI. Other implementations may not "
+            "support this.)",
+        )
+        parser.add_argument(
+            "--skip-used",
+            default=False,
+            action="store_true",
+            help="Continue uploading files if one used to exist. (Only valid "
             "when uploading to PyPI. Other implementations may not "
             "support this.)",
         )

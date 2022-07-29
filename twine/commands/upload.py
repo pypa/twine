@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 
 
 def skip_upload(
-    response: requests.Response, skip_existing: bool, package: package_file.PackageFile
+    response: requests.Response, skip_existing: bool, skip_used: bool, package: package_file.PackageFile
 ) -> bool:
     """Determine if a failed upload is an error or can be safely ignored.
 
@@ -40,34 +40,48 @@ def skip_upload(
         If ``True``, use the status and content of ``response`` to determine if the
         package already exists on the repository. If so, then a failed upload is safe
         to ignore.
+    :param skip_existing:
+        If ``True``, use the status and content of ``response`` to determine if the
+        package used to exist on the repository. If so, then a failed upload is safe
+        to ignore.
     :param package:
         The package that was being uploaded.
 
     :return:
         ``True`` if a failed upload can be safely ignored, otherwise ``False``.
     """
-    if not skip_existing:
-        return False
-
     status = response.status_code
     reason = getattr(response, "reason", "").lower()
     text = getattr(response, "text", "").lower()
 
-    # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
-    # error message in the reason attribute. Other implementations return a
-    # 403 or 409 status code.
-    return (
-        # pypiserver (https://pypi.org/project/pypiserver)
-        status == 409
-        # PyPI / TestPyPI / GCP Artifact Registry
-        or (status == 400 and any("already exist" in x for x in [reason, text]))
-        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        or (status == 400 and any("updating asset" in x for x in [reason, text]))
-        # Artifactory (https://jfrog.com/artifactory/)
-        or (status == 403 and "overwrite artifact" in text)
-        # Gitlab Enterprise Edition (https://about.gitlab.com)
-        or (status == 400 and "already been taken" in text)
-    )
+    if skip_existing:
+        # NOTE(sigmavirus24): PyPI presently returns a 400 status code with the
+        # error message in the reason attribute. Other implementations return a
+        # 403 or 409 status code.
+        exists = (
+            # pypiserver (https://pypi.org/project/pypiserver)
+            status == 409
+            # PyPI / TestPyPI / GCP Artifact Registry
+            or (status == 400 and any("already exist" in x for x in [reason, text]))
+            # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
+            or (status == 400 and any("updating asset" in x for x in [reason, text]))
+            # Artifactory (https://jfrog.com/artifactory/)
+            or (status == 403 and "overwrite artifact" in text)
+            # Gitlab Enterprise Edition (https://about.gitlab.com)
+            or (status == 400 and "already been taken" in text)
+        )
+        if exists:
+            return True
+
+    if skip_used:
+        used = (
+            # PyPI / TestPyPI
+            (status == 400 and any("already been used" in x for x in [reason, text]))
+        )
+        if used:
+            return True
+
+    return False
 
 
 def _make_package(
@@ -154,7 +168,9 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
                 resp.headers["location"],
             )
 
-        if skip_upload(resp, upload_settings.skip_existing, package):
+        if skip_upload(resp, upload_settings.skip_existing, upload_settings.skip_used, package):
+            # TODO: The skip message is overly specific now that it could be skipping
+            #       either due to existing _or_ that it used to exist.
             logger.warning(skip_message)
             continue
 
