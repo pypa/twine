@@ -1,0 +1,1 @@
+Fixed replacing underscores by hyphens in package names.
