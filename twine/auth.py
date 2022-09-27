@@ -28,7 +28,7 @@ class Resolver:
     def choose(cls, interactive: bool) -> Type["Resolver"]:
         return cls if interactive else Private
 
-    @property  # type: ignore  # https://github.com/python/mypy/issues/1362
+    @property
     @functools.lru_cache()
     def username(self) -> Optional[str]:
         return utils.get_userpass_value(
@@ -38,7 +38,7 @@ class Resolver:
             prompt_strategy=self.username_from_keyring_or_prompt,
         )
 
-    @property  # type: ignore  # https://github.com/python/mypy/issues/1362
+    @property
     @functools.lru_cache()
     def password(self) -> Optional[str]:
         return utils.get_userpass_value(
