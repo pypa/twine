@@ -127,9 +127,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     repository = upload_settings.create_repository()
     uploaded_packages = []
 
-    # If a user tries to upload signature files with no actual distributions,
-    # then throw an error.
-    if len(packages_to_upload) == 0 and len(signatures) > 0:
+    if signatures and not packages_to_upload:
         raise exceptions.InvalidDistribution(
             "Cannot upload signed files by themselves, must upload with a "
             "corresponding distribution."
