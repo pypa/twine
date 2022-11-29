@@ -52,13 +52,7 @@ jobs:
       - name: Run type-checking
         run: python -m tox -e types
       - name: Run tests
-        run: python -m tox -e py -- --cov-report xml
-      - uses: codecov/codecov-action@v1
-        if: github.event_name != 'schedule'
-        with:
-          file: ./coverage.xml
-          name: ${{ matrix.python-version }} - ${{ matrix.platform }}
-          fail_ci_if_error: true
+        run: python -m tox -e py
 
   # Because the tests can be flaky, they shouldn't be required for merge, but
   # it's still helpful to run them on PRs. See:

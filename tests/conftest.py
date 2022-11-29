@@ -20,6 +20,9 @@ def configure_output():
     """
     rich.reconfigure(
         no_color=True,
+        color_system=None,
+        emoji=False,
+        highlight=False,
         width=500,
     )
 
