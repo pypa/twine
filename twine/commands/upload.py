@@ -130,7 +130,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     if signatures and not packages_to_upload:
         raise exceptions.InvalidDistribution(
             "Cannot upload signed files by themselves, must upload with a "
-            "corresponding distribution."
+            "corresponding distribution file."
         )
 
     for package in packages_to_upload:

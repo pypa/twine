@@ -186,7 +186,7 @@ def test_exception_with_only_pre_signed_file(upload_settings, stub_repository):
 
     assert (
         "Cannot upload signed files by themselves, must upload with a "
-        "corresponding distribution." in err.value.args[0]
+        "corresponding distribution file." in err.value.args[0]
     )
 
 
