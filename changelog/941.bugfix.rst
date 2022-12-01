@@ -1,0 +1,1 @@
+Remove deprecated function to fix ``twine check`` with pkginfo 1.9.0.
