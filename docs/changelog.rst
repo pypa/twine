@@ -12,6 +12,15 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 4.0.2 (2022-11-30)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Remove deprecated function to fix ``twine check`` with pkginfo 1.9.0. (`#941 <https://github.com/pypa/twine/issues/941>`_)
+
+
 Twine 4.0.1 (2022-06-01)
 ------------------------
 
