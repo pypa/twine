@@ -22,20 +22,34 @@ pytestmark = [pytest.mark.enable_socket]
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
+
     subprocess.run(
-        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)]
+        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)],
+        check=True,
     )
-    with (checkout / "setup.py").open("r+") as setup:
-        orig = setup.read()
-        sub = orig.replace('name="sampleproject"', 'name="twine-sampleproject"')
-        assert orig != sub
-        setup.seek(0)
-        setup.write(sub)
-    tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+
+    # TODO: Replace this with Path.read_text() and .write_text()
+    with (checkout / "pyproject.toml").open("r+") as pyproject:
+        orig = pyproject.read()
+
+        tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+        sub = orig.replace(
+            'name = "sampleproject"',
+            'name = "twine-sampleproject"',
+        ).replace(
+            'version = "3.0.0"',
+            f'version = "3.0.0post{tag}"',
+        )
+
+        pyproject.seek(0)
+        pyproject.write(sub)
+
     subprocess.run(
-        [sys.executable, "setup.py", "egg_info", "--tag-build", f"post{tag}", "sdist"],
+        [sys.executable, "-m", "build", "--sdist"],
+        check=True,
         cwd=str(checkout),
     )
+
     (dist,) = checkout.joinpath("dist").glob("*")
     return dist
 
