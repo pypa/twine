@@ -86,6 +86,6 @@ class Wheel(distribution.Distribution):
     def parse(self, data: bytes) -> None:
         super().parse(data)
 
-        fp = io.StringIO(distribution.must_decode(data))
+        fp = io.StringIO(data.decode("utf-8", errors="replace"))
         msg = distribution.parse(fp)
         self.description = msg.get_payload()

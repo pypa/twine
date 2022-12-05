@@ -1,0 +1,1 @@
+Throws an error when uploading signed files without any distribution files.
