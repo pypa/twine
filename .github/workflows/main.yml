@@ -83,12 +83,28 @@ jobs:
       - name: Build docs
         run: python -m tox -e docs
 
-  release:
+  # https://github.com/marketplace/actions/alls-green#why
+  check:  # This job does nothing and is only used for the branch protection
+    if: always()
+
     needs:
       - lint
       - test
-      # Not requiring integration, because they can be flaky
+      - integration
       - docs
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        allowed-failures: integration  # can be flaky
+        jobs: ${{ toJSON(needs) }}
+
+  release:
+    needs:
+      - check
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
