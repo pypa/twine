@@ -2,6 +2,8 @@ name: Main
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   schedule:
     - cron: "0 0 * * *" # daily
@@ -23,8 +25,8 @@ jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
       - name: Install dependencies
@@ -46,8 +48,8 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -55,13 +57,7 @@ jobs:
       - name: Run type-checking
         run: python -m tox -e types
       - name: Run tests
-        run: python -m tox -e py -- --cov-report xml
-      - uses: codecov/codecov-action@v1
-        if: github.event_name != 'schedule'
-        with:
-          file: ./coverage.xml
-          name: ${{ matrix.python-version }} - ${{ matrix.platform }}
-          fail_ci_if_error: true
+        run: python -m tox -e py
 
   # Because the tests can be flaky, they shouldn't be required for merge, but
   # it's still helpful to run them on PRs. See:
@@ -69,8 +65,8 @@ jobs:
   integration:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
@@ -81,8 +77,8 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
@@ -99,8 +95,8 @@ jobs:
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies

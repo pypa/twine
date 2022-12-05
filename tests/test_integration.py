@@ -16,30 +16,41 @@ import requests
 from twine import __main__ as dunder_main
 from twine import cli
 
-pytestmark = [
-    pytest.mark.enable_socket,
-    pytest.mark.flaky(reruns=3, reruns_delay=1),
-]
+pytestmark = [pytest.mark.enable_socket]
 
 
 @pytest.fixture(scope="session")
-def sampleproject_dist(tmp_path_factory):
+def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
-    subprocess.run(
-        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)]
-    )
-    with (checkout / "setup.py").open("r+") as setup:
-        orig = setup.read()
-        sub = orig.replace('name="sampleproject"', 'name="twine-sampleproject"')
-        assert orig != sub
-        setup.seek(0)
-        setup.write(sub)
     tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
+
     subprocess.run(
-        [sys.executable, "setup.py", "egg_info", "--tag-build", f"post{tag}", "sdist"],
+        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)],
+        check=True,
+    )
+
+    pyproject = checkout / "pyproject.toml"
+    pyproject.write_text(
+        pyproject.read_text()
+        .replace(
+            'name = "sampleproject"',
+            'name = "twine-sampleproject"',
+        )
+        .replace(
+            'version = "3.0.0"',
+            f'version = "3.0.0post{tag}"',
+        )
+    )
+
+    subprocess.run(
+        [sys.executable, "-m", "build", "--sdist"],
+        check=True,
         cwd=str(checkout),
     )
-    (dist,) = checkout.joinpath("dist").glob("*")
+
+    [dist, *_] = (checkout / "dist").glob("*")
+    assert dist.name == f"twine-sampleproject-3.0.0.post{tag}.tar.gz"
+
     return dist
 
 

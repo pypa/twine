@@ -43,9 +43,7 @@ class WinInst(distribution.Distribution):
 
         try:
             tuples = [
-                x.split("/")
-                for x in names
-                if x.endswith(".egg-info") or x.endswith("PKG-INFO")
+                x.split("/") for x in names if x.endswith((".egg-info", "PKG-INFO"))
             ]
             schwarz = sorted((len(x), x) for x in tuples)
             for path in [x[1] for x in schwarz]:

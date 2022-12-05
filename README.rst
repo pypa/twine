@@ -10,9 +10,6 @@
 .. image:: https://img.shields.io/github/workflow/status/pypa/twine/Main
    :target: https://github.com/pypa/twine/actions
 
-.. image:: https://img.shields.io/codecov/c/github/pypa/twine
-   :target: https://codecov.io/gh/pypa/twine
-
 twine
 =====
 
