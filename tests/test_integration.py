@@ -20,29 +20,27 @@ pytestmark = [pytest.mark.enable_socket]
 
 
 @pytest.fixture(scope="session")
-def sampleproject_dist(tmp_path_factory):
+def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
+    tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
     subprocess.run(
         ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)],
         check=True,
     )
 
-    # TODO: Replace this with Path.read_text() and .write_text()
-    with (checkout / "pyproject.toml").open("r+") as pyproject:
-        orig = pyproject.read()
-
-        tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
-        sub = orig.replace(
+    pyproject = checkout / "pyproject.toml"
+    pyproject.write_text(
+        pyproject.read_text()
+        .replace(
             'name = "sampleproject"',
             'name = "twine-sampleproject"',
-        ).replace(
+        )
+        .replace(
             'version = "3.0.0"',
             f'version = "3.0.0post{tag}"',
         )
-
-        pyproject.seek(0)
-        pyproject.write(sub)
+    )
 
     subprocess.run(
         [sys.executable, "-m", "build", "--sdist"],
@@ -50,7 +48,9 @@ def sampleproject_dist(tmp_path_factory):
         cwd=str(checkout),
     )
 
-    (dist,) = checkout.joinpath("dist").glob("*")
+    [dist, *_] = (checkout / "dist").glob("*")
+    assert dist.name == f"twine-sampleproject-3.0.0.post{tag}.tar.gz"
+
     return dist
 
 
