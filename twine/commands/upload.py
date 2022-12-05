@@ -127,6 +127,12 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     repository = upload_settings.create_repository()
     uploaded_packages = []
 
+    if signatures and not packages_to_upload:
+        raise exceptions.InvalidDistribution(
+            "Cannot upload signed files by themselves, must upload with a "
+            "corresponding distribution file."
+        )
+
     for package in packages_to_upload:
         skip_message = (
             f"Skipping {package.basefilename} because it appears to already exist"
