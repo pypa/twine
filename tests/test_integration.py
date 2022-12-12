@@ -165,6 +165,17 @@ class DevPiEnv(jaraco.envs.ToxEnv):
         run(devpi_client + ["index", "-c", "dev"])
 
 
+skip_setup_error = pytest.mark.skip(
+    reason="Failing; https://github.com/pypa/twine/issues/684#issuecomment-1347247791"
+)
+
+xfail_win32 = pytest.mark.xfail(
+    sys.platform == "win32",
+    reason="pytest-services watcher_getter fixture does not support Windows",
+)
+
+
+@skip_setup_error
 @pytest.fixture(scope="session")
 def devpi_server(request, watcher_getter, tmp_path_factory):
     env = DevPiEnv()
@@ -184,10 +195,8 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     return munch.Munch.fromDict(locals())
 
 
-@pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
-)
+@skip_setup_error
+@xfail_win32
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
         "upload",
@@ -221,6 +230,7 @@ class PypiserverEnv(jaraco.envs.ToxEnv):
             return requests.get(self.url)
 
 
+@skip_setup_error
 @pytest.fixture(scope="session")
 def pypiserver_instance(request, watcher_getter, tmp_path_factory):
     env = PypiserverEnv()
@@ -245,10 +255,8 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
     return munch.Munch.fromDict(locals())
 
 
-@pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
-)
+@skip_setup_error
+@xfail_win32
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
         "upload",
