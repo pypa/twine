@@ -2,11 +2,15 @@ import contextlib
 import datetime
 import functools
 import pathlib
+import platform
 import re
 import secrets
 import subprocess
 import sys
+import venv
+from types import SimpleNamespace
 
+# TODO: Drop jaraco.envs and munch, and update tox.ini
 import jaraco.envs
 import munch
 import portend
@@ -116,6 +120,16 @@ def uploadable_dist(request):
     return pathlib.Path(__file__).parent / "fixtures" / request.param
 
 
+skip_setup_error = pytest.mark.skip(
+    reason="Failing; https://github.com/pypa/twine/issues/684#issuecomment-1347247791"
+)
+
+xfail_win32 = pytest.mark.xfail(
+    sys.platform == "win32",
+    reason="pytest-services watcher_getter fixture does not support Windows",
+)
+
+
 class DevPiEnv(jaraco.envs.ToxEnv):
     """Run devpi using tox:testenv:devpi."""
 
@@ -165,16 +179,6 @@ class DevPiEnv(jaraco.envs.ToxEnv):
         run(devpi_client + ["index", "-c", "dev"])
 
 
-skip_setup_error = pytest.mark.skip(
-    reason="Failing; https://github.com/pypa/twine/issues/684#issuecomment-1347247791"
-)
-
-xfail_win32 = pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
-)
-
-
 @skip_setup_error
 @pytest.fixture(scope="session")
 def devpi_server(request, watcher_getter, tmp_path_factory):
@@ -211,35 +215,28 @@ def test_devpi_upload(devpi_server, uploadable_dist):
     cli.dispatch(command)
 
 
-class PypiserverEnv(jaraco.envs.ToxEnv):
-    """Run pypiserver using tox:testenv:pypiserver."""
-
-    name = "pypiserver"
-
-    @property
-    @functools.lru_cache()
-    def port(self):
-        return portend.find_available_local_port()
-
-    @property
-    def url(self):
-        return f"http://localhost:{self.port}/"
-
-    def ready(self):
-        with contextlib.suppress(Exception):
-            return requests.get(self.url)
-
-
-@skip_setup_error
 @pytest.fixture(scope="session")
 def pypiserver_instance(request, watcher_getter, tmp_path_factory):
-    env = PypiserverEnv()
-    env.create()
-    proc = watcher_getter(
-        name=str(env.exe("pypi-server")),
+    env_dir = tmp_path_factory.mktemp("venv")
+    bin_dir = env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
+
+    venv.create(env_dir, symlinks=True, with_pip=True, upgrade_deps=True)
+    subprocess.run(
+        [bin_dir / "python", "-m", "pip", "install", "pypiserver"], check=True
+    )
+
+    port = portend.find_available_local_port()
+    url = f"http://localhost:{port}/"
+
+    def ready():
+        with contextlib.suppress(Exception):
+            return requests.get(url)
+
+    watcher_getter(
+        name=str(bin_dir / "pypi-server"),
         arguments=[
             "--port",
-            str(env.port),
+            str(port),
             # allow anonymous uploads
             "-P",
             ".",
@@ -247,15 +244,14 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
             ".",
             tmp_path_factory.mktemp("packages"),
         ],
-        checker=env.ready,
+        checker=ready,
         # Needed for the correct execution order of finalizers
         request=request,
     )
-    url = env.url
-    return munch.Munch.fromDict(locals())
+
+    return SimpleNamespace(url=url)
 
 
-@skip_setup_error
 @xfail_win32
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
