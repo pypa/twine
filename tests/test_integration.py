@@ -10,7 +10,6 @@ import sys
 import venv
 from types import SimpleNamespace
 
-import portend
 import pytest
 import requests
 
@@ -119,7 +118,7 @@ xfail_win32 = pytest.mark.xfail(
 
 
 @pytest.fixture(scope="session")
-def devpi_server(request, watcher_getter, tmp_path_factory):
+def devpi_server(request, port_getter, watcher_getter, tmp_path_factory):
     env_dir = tmp_path_factory.mktemp("venv")
     bin_dir = env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
 
@@ -129,7 +128,7 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     server_dir = tmp_path_factory.mktemp("devpi")
     username = "foober"
     password = secrets.token_urlsafe()
-    port = portend.find_available_local_port()
+    port = port_getter()
     url = f"http://localhost:{port}/"
     repo = f"{url}/{username}/dev/"
 
@@ -174,14 +173,14 @@ def test_devpi_upload(devpi_server, uploadable_dist):
 
 
 @pytest.fixture(scope="session")
-def pypiserver_instance(request, watcher_getter, tmp_path_factory):
+def pypiserver_instance(request, port_getter, watcher_getter, tmp_path_factory):
     env_dir = tmp_path_factory.mktemp("venv")
     bin_dir = env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
 
     venv.create(env_dir, symlinks=True, with_pip=True, upgrade_deps=True)
     run([bin_dir / "python", "-m", "pip", "install", "pypiserver"])
 
-    port = portend.find_available_local_port()
+    port = port_getter()
     url = f"http://localhost:{port}/"
 
     def ready():
