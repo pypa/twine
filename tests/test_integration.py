@@ -107,7 +107,7 @@ def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
 @pytest.fixture(scope="session")
 def venv_exe_dir(tmp_path_factory):
     env_dir = tmp_path_factory.mktemp("venv")
-    venv.create(env_dir, symlinks=True, with_pip=True, upgrade_deps=True)
+    venv.create(env_dir, symlinks=True, with_pip=True)
     return env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
 
 
