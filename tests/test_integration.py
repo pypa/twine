@@ -1,5 +1,6 @@
 import contextlib
 import datetime
+import functools
 import pathlib
 import platform
 import re
@@ -18,16 +19,15 @@ from twine import cli
 
 pytestmark = [pytest.mark.enable_socket]
 
+run = functools.partial(subprocess.run, check=True)
+
 
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
     tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
-    subprocess.run(
-        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)],
-        check=True,
-    )
+    run(["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)])
 
     pyproject = checkout / "pyproject.toml"
     pyproject.write_text(
@@ -42,11 +42,7 @@ def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
         )
     )
 
-    subprocess.run(
-        [sys.executable, "-m", "build", "--sdist"],
-        check=True,
-        cwd=str(checkout),
-    )
+    run([sys.executable, "-m", "build", "--sdist"], cwd=str(checkout))
 
     [dist, *_] = (checkout / "dist").glob("*")
     assert dist.name == f"twine-sampleproject-3.0.0.post{tag}.tar.gz"
@@ -128,10 +124,7 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     bin_dir = env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
 
     venv.create(env_dir, symlinks=True, with_pip=True, upgrade_deps=True)
-    subprocess.run(
-        [bin_dir / "python", "-m", "pip", "install", "devpi-server", "devpi"],
-        check=True,
-    )
+    run([bin_dir / "python", "-m", "pip", "install", "devpi-server", "devpi"])
 
     server_dir = tmp_path_factory.mktemp("devpi")
     username = "foober"
@@ -140,15 +133,14 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     url = f"http://localhost:{port}/"
     repo = f"{url}/{username}/dev/"
 
-    subprocess.run(
+    run(
         [
             bin_dir / "devpi-init",
             "--serverdir",
             str(server_dir),
             "--root-passwd",
             password,
-        ],
-        check=True,
+        ]
     )
 
     def ready():
@@ -164,10 +156,7 @@ def devpi_server(request, watcher_getter, tmp_path_factory):
     )
 
     def devpi_run(cmd):
-        return subprocess.run(
-            [bin_dir / "devpi", "--clientdir", str(server_dir / "client"), *cmd],
-            check=True,
-        )
+        return run([bin_dir / "devpi", "--clientdir", str(server_dir / "client"), *cmd])
 
     devpi_run(["use", url + "root/pypi/"])
     devpi_run(["user", "--create", username, f"password={password}"])
@@ -198,9 +187,7 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
     bin_dir = env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
 
     venv.create(env_dir, symlinks=True, with_pip=True, upgrade_deps=True)
-    subprocess.run(
-        [bin_dir / "python", "-m", "pip", "install", "pypiserver"], check=True
-    )
+    run([bin_dir / "python", "-m", "pip", "install", "pypiserver"])
 
     port = portend.find_available_local_port()
     url = f"http://localhost:{port}/"
