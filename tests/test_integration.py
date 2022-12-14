@@ -20,6 +20,11 @@ pytestmark = [pytest.mark.enable_socket]
 
 run = functools.partial(subprocess.run, check=True)
 
+xfail_win32 = pytest.mark.xfail(
+    sys.platform == "win32",
+    reason="pytest-services watcher_getter fixture does not support Windows",
+)
+
 
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
@@ -116,12 +121,6 @@ def venv_exe_dir(tmp_path_factory):
 )
 def uploadable_dist(request):
     return pathlib.Path(__file__).parent / "fixtures" / request.param
-
-
-xfail_win32 = pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
-)
 
 
 @pytest.fixture(scope="session")
