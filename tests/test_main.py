@@ -18,6 +18,15 @@ import requests
 from twine import __main__ as dunder_main
 from twine.commands import upload
 
+# Hard-coding control characters for red text; couldn't find a succinct alternative
+RED_ERROR = "\x1b[31mERROR   \x1b[0m"
+PLAIN_ERROR = "ERROR   "
+
+
+def _unwrap_lines(text):
+    # Testing wrapped lines was ugly and inconsistent across environments
+    return " ".join(line.strip() for line in text.splitlines())
+
 
 def test_exception_handling(monkeypatch, capsys):
     monkeypatch.setattr(sys, "argv", ["twine", "upload", "missing.whl"])
@@ -27,13 +36,10 @@ def test_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Hard-coding control characters for red text; couldn't find a succinct alternative.
-    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
-    level = "\x1b[31mERROR   \x1b[0m"
-    assert [line.rstrip() for line in captured.out.splitlines()] == [
-        f"{level} InvalidDistribution: Cannot find file (or expand pattern):",
-        "         'missing.whl'",
-    ]
+    assert _unwrap_lines(captured.out) == (
+        f"{RED_ERROR} InvalidDistribution: Cannot find file (or expand pattern): "
+        "'missing.whl'"
+    )
 
 
 def test_http_exception_handling(monkeypatch, capsys):
@@ -57,13 +63,10 @@ def test_http_exception_handling(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Hard-coding control characters for red text; couldn't find a succinct alternative.
-    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
-    level = "\x1b[31mERROR   \x1b[0m"
-    assert [line.rstrip() for line in captured.out.splitlines()] == [
-        f"{level} HTTPError: 400 Bad Request from https://example.org",
-        "         Error reason",
-    ]
+    assert _unwrap_lines(captured.out) == (
+        f"{RED_ERROR} HTTPError: 400 Bad Request from https://example.org "
+        "Error reason"
+    )
 
 
 def test_no_color_exception(monkeypatch, capsys):
@@ -74,11 +77,10 @@ def test_no_color_exception(monkeypatch, capsys):
 
     captured = capsys.readouterr()
 
-    # Removing trailing whitespace on wrapped lines; trying to test it was ugly.
-    assert [line.rstrip() for line in captured.out.splitlines()] == [
-        "ERROR    InvalidDistribution: Cannot find file (or expand pattern):",
-        "         'missing.whl'",
-    ]
+    assert _unwrap_lines(captured.out) == (
+        f"{PLAIN_ERROR} InvalidDistribution: Cannot find file (or expand pattern): "
+        "'missing.whl'"
+    )
 
 
 # TODO: Test verbose output formatting
