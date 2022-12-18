@@ -66,8 +66,8 @@ class _WarningStream(io.StringIO):
 # from Python 3.11 docs
 def parse_content_type(value):
     msg = email.message.EmailMessage()
-    msg['content-type'] = value
-    return msg.get_content_type(), msg['content-type'].params
+    msg["content-type"] = value
+    return msg.get_content_type(), msg["content-type"].params
 
 
 def _check_file(
