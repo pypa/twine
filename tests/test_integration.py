@@ -31,7 +31,7 @@ def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
     tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
-    run(["git", "clone", "https://github.com/pypa/sampleproject", checkout])
+    run(["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)])
 
     pyproject = checkout / "pyproject.toml"
     pyproject.write_text(
