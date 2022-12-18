@@ -18,12 +18,12 @@ from twine import cli
 
 pytestmark = [pytest.mark.enable_socket]
 
-run = functools.partial(subprocess.run, check=True)
-
-xfail_win32 = pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
+skip_if_windows = pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="pytest-services fixtures don't support Windows",
 )
+
+run = functools.partial(subprocess.run, check=True)
 
 
 @pytest.fixture(scope="session")
@@ -31,7 +31,7 @@ def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
     tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
-    run(["git", "clone", "https://github.com/pypa/sampleproject", checkout])
+    run(["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)])
 
     pyproject = checkout / "pyproject.toml"
     pyproject.write_text(
@@ -174,7 +174,7 @@ def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_fa
     return SimpleNamespace(url=repo, username=username, password=password)
 
 
-@xfail_win32
+@skip_if_windows
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
         "upload",
@@ -222,7 +222,7 @@ def pypiserver_instance(
     return SimpleNamespace(url=url)
 
 
-@xfail_win32
+@skip_if_windows
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
         "upload",
