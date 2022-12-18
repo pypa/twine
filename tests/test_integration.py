@@ -7,7 +7,6 @@ import re
 import secrets
 import subprocess
 import sys
-import venv
 from types import SimpleNamespace
 
 import pytest
@@ -104,13 +103,6 @@ def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
     assert re.search(message, captured.out, re.DOTALL)
 
 
-@pytest.fixture(scope="session")
-def venv_exe_dir(tmp_path_factory):
-    env_dir = tmp_path_factory.mktemp("venv")
-    venv.create(env_dir, symlinks=True, with_pip=True)
-    return env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
-
-
 @pytest.fixture(
     params=[
         "twine-1.5.0.tar.gz",
@@ -124,9 +116,7 @@ def uploadable_dist(request):
 
 
 @pytest.fixture(scope="session")
-def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_factory):
-    run([venv_exe_dir / "python", "-m", "pip", "install", "devpi-server", "devpi"])
-
+def devpi_server(request, port_getter, watcher_getter, tmp_path_factory):
     server_dir = tmp_path_factory.mktemp("devpi")
     username = "foober"
     password = secrets.token_urlsafe()
@@ -134,22 +124,14 @@ def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_fa
     url = f"http://localhost:{port}/"
     repo = f"{url}/{username}/dev/"
 
-    run(
-        [
-            venv_exe_dir / "devpi-init",
-            "--serverdir",
-            server_dir,
-            "--root-passwd",
-            password,
-        ]
-    )
+    run(["devpi-init", "--serverdir", server_dir, "--root-passwd", password])
 
     def ready():
         with contextlib.suppress(Exception):
             return requests.get(url)
 
     watcher_getter(
-        name=venv_exe_dir / "devpi-server",
+        name="devpi-server",
         arguments=["--port", str(port), "--serverdir", server_dir],
         checker=ready,
         # Needed for the correct execution order of finalizers
@@ -157,14 +139,7 @@ def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_fa
     )
 
     def devpi_run(cmd):
-        return run(
-            [
-                venv_exe_dir / "devpi",
-                "--clientdir",
-                server_dir / "client",
-                *cmd,
-            ]
-        )
+        return run(["devpi", "--clientdir", server_dir / "client", *cmd])
 
     devpi_run(["use", url + "root/pypi/"])
     devpi_run(["user", "--create", username, f"password={password}"])
@@ -190,11 +165,7 @@ def test_devpi_upload(devpi_server, uploadable_dist):
 
 
 @pytest.fixture(scope="session")
-def pypiserver_instance(
-    request, venv_exe_dir, port_getter, watcher_getter, tmp_path_factory
-):
-    run([venv_exe_dir / "python", "-m", "pip", "install", "pypiserver"])
-
+def pypiserver_instance(request, port_getter, watcher_getter, tmp_path_factory):
     port = port_getter()
     url = f"http://localhost:{port}/"
 
@@ -203,7 +174,7 @@ def pypiserver_instance(
             return requests.get(url)
 
     watcher_getter(
-        name=venv_exe_dir / "pypi-server",
+        name="pypi-server",
         arguments=[
             "--port",
             str(port),
