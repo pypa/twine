@@ -22,7 +22,7 @@ from twine.commands import check
 
 
 class TestWarningStream:
-    def setup(self):
+    def setup_method(self):
         self.stream = check._WarningStream()
 
     def test_write_match(self):
