@@ -18,12 +18,12 @@ from twine import cli
 
 pytestmark = [pytest.mark.enable_socket]
 
-run = functools.partial(subprocess.run, check=True)
-
-xfail_win32 = pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
+skip_if_windows = pytest.mark.skipif(
+    platform.system() == "Windows",
+    reason="pytest-services fixtures don't support Windows",
 )
+
+run = functools.partial(subprocess.run, check=True)
 
 
 @pytest.fixture(scope="session")
@@ -174,6 +174,7 @@ def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_fa
     return SimpleNamespace(url=repo, username=username, password=password)
 
 
+@skip_if_windows
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
         "upload",
@@ -221,6 +222,7 @@ def pypiserver_instance(
     return SimpleNamespace(url=url)
 
 
+@skip_if_windows
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
         "upload",
