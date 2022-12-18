@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import cgi
+import email.message
 import io
 import logging
 import re
@@ -63,6 +63,13 @@ class _WarningStream(io.StringIO):
         return self.getvalue().strip()
 
 
+# from Python 3.11 docs
+def parse_content_type(value):
+    msg = email.message.EmailMessage()
+    msg['content-type'] = value
+    return msg.get_content_type(), msg['content-type'].params
+
+
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
 ) -> Tuple[List[str], bool]:
@@ -82,7 +89,7 @@ def _check_file(
         )
         description_content_type = "text/x-rst"
 
-    content_type, params = cgi.parse_header(description_content_type)
+    content_type, params = parse_content_type(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description is None or description.rstrip() == "UNKNOWN":
