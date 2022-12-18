@@ -2,14 +2,14 @@ import contextlib
 import datetime
 import functools
 import pathlib
+import platform
 import re
 import secrets
 import subprocess
 import sys
+import venv
+from types import SimpleNamespace
 
-import jaraco.envs
-import munch
-import portend
 import pytest
 import requests
 
@@ -18,16 +18,20 @@ from twine import cli
 
 pytestmark = [pytest.mark.enable_socket]
 
+run = functools.partial(subprocess.run, check=True)
+
+xfail_win32 = pytest.mark.xfail(
+    sys.platform == "win32",
+    reason="pytest-services watcher_getter fixture does not support Windows",
+)
+
 
 @pytest.fixture(scope="session")
 def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     checkout = tmp_path_factory.mktemp("sampleproject", numbered=False)
     tag = datetime.datetime.now().strftime("%Y%m%d%H%M%S%f")
 
-    subprocess.run(
-        ["git", "clone", "https://github.com/pypa/sampleproject", str(checkout)],
-        check=True,
-    )
+    run(["git", "clone", "https://github.com/pypa/sampleproject", checkout])
 
     pyproject = checkout / "pyproject.toml"
     pyproject.write_text(
@@ -42,11 +46,7 @@ def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
         )
     )
 
-    subprocess.run(
-        [sys.executable, "-m", "build", "--sdist"],
-        check=True,
-        cwd=str(checkout),
-    )
+    run([sys.executable, "-m", "build", "--sdist"], cwd=checkout)
 
     [dist, *_] = (checkout / "dist").glob("*")
     assert dist.name == f"twine-sampleproject-3.0.0.post{tag}.tar.gz"
@@ -104,6 +104,13 @@ def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
     assert re.search(message, captured.out, re.DOTALL)
 
 
+@pytest.fixture(scope="session")
+def venv_exe_dir(tmp_path_factory):
+    env_dir = tmp_path_factory.mktemp("venv")
+    venv.create(env_dir, symlinks=True, with_pip=True)
+    return env_dir / ("Scripts" if platform.system() == "Windows" else "bin")
+
+
 @pytest.fixture(
     params=[
         "twine-1.5.0.tar.gz",
@@ -116,86 +123,57 @@ def uploadable_dist(request):
     return pathlib.Path(__file__).parent / "fixtures" / request.param
 
 
-class DevPiEnv(jaraco.envs.ToxEnv):
-    """Run devpi using tox:testenv:devpi."""
+@pytest.fixture(scope="session")
+def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_factory):
+    run([venv_exe_dir / "python", "-m", "pip", "install", "devpi-server", "devpi"])
 
-    name = "devpi"
+    server_dir = tmp_path_factory.mktemp("devpi")
     username = "foober"
+    password = secrets.token_urlsafe()
+    port = port_getter()
+    url = f"http://localhost:{port}/"
+    repo = f"{url}/{username}/dev/"
 
-    def create(self, root, password):
-        super().create()
-        self.base = root
-        self.password = password
-        self.port = portend.find_available_local_port()
-        cmd = [
-            self.exe("devpi-init"),
+    run(
+        [
+            venv_exe_dir / "devpi-init",
             "--serverdir",
-            str(root),
+            server_dir,
             "--root-passwd",
             password,
         ]
-        subprocess.run(cmd, check=True)
+    )
 
-    @property
-    def url(self):
-        return f"http://localhost:{self.port}/"
-
-    @property
-    def repo(self):
-        return f"{self.url}/{self.username}/dev/"
-
-    def ready(self):
+    def ready():
         with contextlib.suppress(Exception):
-            return requests.get(self.url)
+            return requests.get(url)
 
-    def init(self):
-        run = functools.partial(subprocess.run, check=True)
-        client_dir = self.base / "client"
-        devpi_client = [
-            self.exe("devpi"),
-            "--clientdir",
-            str(client_dir),
-        ]
-        run(devpi_client + ["use", self.url + "root/pypi/"])
-        run(
-            devpi_client
-            + ["user", "--create", self.username, f"password={self.password}"]
-        )
-        run(devpi_client + ["login", self.username, "--password", self.password])
-        run(devpi_client + ["index", "-c", "dev"])
-
-
-skip_setup_error = pytest.mark.skip(
-    reason="Failing; https://github.com/pypa/twine/issues/684#issuecomment-1347247791"
-)
-
-xfail_win32 = pytest.mark.xfail(
-    sys.platform == "win32",
-    reason="pytest-services watcher_getter fixture does not support Windows",
-)
-
-
-@skip_setup_error
-@pytest.fixture(scope="session")
-def devpi_server(request, watcher_getter, tmp_path_factory):
-    env = DevPiEnv()
-    password = secrets.token_urlsafe()
-    root = tmp_path_factory.mktemp("devpi")
-    env.create(root, password)
-    proc = watcher_getter(
-        name=str(env.exe("devpi-server")),
-        arguments=["--port", str(env.port), "--serverdir", str(root)],
-        checker=env.ready,
+    watcher_getter(
+        name=venv_exe_dir / "devpi-server",
+        arguments=["--port", str(port), "--serverdir", server_dir],
+        checker=ready,
         # Needed for the correct execution order of finalizers
         request=request,
     )
-    env.init()
-    username = env.username
-    url = env.repo
-    return munch.Munch.fromDict(locals())
+
+    def devpi_run(cmd):
+        return run(
+            [
+                venv_exe_dir / "devpi",
+                "--clientdir",
+                server_dir / "client",
+                *cmd,
+            ]
+        )
+
+    devpi_run(["use", url + "root/pypi/"])
+    devpi_run(["user", "--create", username, f"password={password}"])
+    devpi_run(["login", username, "--password", password])
+    devpi_run(["index", "-c", "dev"])
+
+    return SimpleNamespace(url=repo, username=username, password=password)
 
 
-@skip_setup_error
 @xfail_win32
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
@@ -211,35 +189,24 @@ def test_devpi_upload(devpi_server, uploadable_dist):
     cli.dispatch(command)
 
 
-class PypiserverEnv(jaraco.envs.ToxEnv):
-    """Run pypiserver using tox:testenv:pypiserver."""
-
-    name = "pypiserver"
-
-    @property
-    @functools.lru_cache()
-    def port(self):
-        return portend.find_available_local_port()
-
-    @property
-    def url(self):
-        return f"http://localhost:{self.port}/"
-
-    def ready(self):
-        with contextlib.suppress(Exception):
-            return requests.get(self.url)
-
-
-@skip_setup_error
 @pytest.fixture(scope="session")
-def pypiserver_instance(request, watcher_getter, tmp_path_factory):
-    env = PypiserverEnv()
-    env.create()
-    proc = watcher_getter(
-        name=str(env.exe("pypi-server")),
+def pypiserver_instance(
+    request, venv_exe_dir, port_getter, watcher_getter, tmp_path_factory
+):
+    run([venv_exe_dir / "python", "-m", "pip", "install", "pypiserver"])
+
+    port = port_getter()
+    url = f"http://localhost:{port}/"
+
+    def ready():
+        with contextlib.suppress(Exception):
+            return requests.get(url)
+
+    watcher_getter(
+        name=venv_exe_dir / "pypi-server",
         arguments=[
             "--port",
-            str(env.port),
+            str(port),
             # allow anonymous uploads
             "-P",
             ".",
@@ -247,15 +214,14 @@ def pypiserver_instance(request, watcher_getter, tmp_path_factory):
             ".",
             tmp_path_factory.mktemp("packages"),
         ],
-        checker=env.ready,
+        checker=ready,
         # Needed for the correct execution order of finalizers
         request=request,
     )
-    url = env.url
-    return munch.Munch.fromDict(locals())
+
+    return SimpleNamespace(url=url)
 
 
-@skip_setup_error
 @xfail_win32
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
