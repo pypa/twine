@@ -63,7 +63,13 @@ jobs:
   # it's still helpful to run them on PRs. See:
   # https://github.com/pypa/twine/issues/684#issuecomment-703150619
   integration:
-    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        platform:
+          - ubuntu-latest
+          - macos-latest
+          - windows-latest
+    runs-on: ${{ matrix.platform }}
     steps:
       - uses: actions/checkout@v3
       - uses: actions/setup-python@v4

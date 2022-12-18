@@ -174,7 +174,6 @@ def devpi_server(request, venv_exe_dir, port_getter, watcher_getter, tmp_path_fa
     return SimpleNamespace(url=repo, username=username, password=password)
 
 
-@xfail_win32
 def test_devpi_upload(devpi_server, uploadable_dist):
     command = [
         "upload",
@@ -222,7 +221,6 @@ def pypiserver_instance(
     return SimpleNamespace(url=url)
 
 
-@xfail_win32
 def test_pypiserver_upload(pypiserver_instance, uploadable_dist):
     command = [
         "upload",
