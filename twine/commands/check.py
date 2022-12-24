@@ -17,7 +17,7 @@ import email.message
 import io
 import logging
 import re
-from typing import List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import readme_renderer.rst
 from rich import print
@@ -64,7 +64,7 @@ class _WarningStream(io.StringIO):
 
 
 # from Python 3.11 docs
-def parse_content_type(value: str) -> Tuple[str, dict[str, str]]:
+def parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
     msg = email.message.EmailMessage()
     msg["content-type"] = value
     return msg.get_content_type(), msg["content-type"].params
