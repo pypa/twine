@@ -64,7 +64,7 @@ class _WarningStream(io.StringIO):
 
 
 # from Python 3.11 docs
-def parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
+def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
     msg = email.message.EmailMessage()
     msg["content-type"] = value
     return msg.get_content_type(), msg["content-type"].params
@@ -89,7 +89,7 @@ def _check_file(
         )
         description_content_type = "text/x-rst"
 
-    content_type, params = parse_content_type(description_content_type)
+    content_type, params = _parse_content_type(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description is None or description.rstrip() == "UNKNOWN":
