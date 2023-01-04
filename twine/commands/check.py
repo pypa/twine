@@ -63,8 +63,11 @@ class _WarningStream(io.StringIO):
         return self.getvalue().strip()
 
 
-# from Python 3.11 docs
 def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
+    """Implement logic of deprecated cgi.parse_header().
+
+    From https://docs.python.org/3.11/library/cgi.html#cgi.parse_header.
+    """
     msg = email.message.EmailMessage()
     msg["content-type"] = value
     return msg.get_content_type(), msg["content-type"].params
