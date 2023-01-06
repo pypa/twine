@@ -13,11 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import cgi
+import email.message
 import io
 import logging
 import re
-from typing import List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Tuple, cast
 
 import readme_renderer.rst
 from rich import print
@@ -63,6 +63,16 @@ class _WarningStream(io.StringIO):
         return self.getvalue().strip()
 
 
+def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
+    """Implement logic of deprecated cgi.parse_header().
+
+    From https://docs.python.org/3.11/library/cgi.html#cgi.parse_header.
+    """
+    msg = email.message.EmailMessage()
+    msg["content-type"] = value
+    return msg.get_content_type(), msg["content-type"].params
+
+
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
 ) -> Tuple[List[str], bool]:
@@ -82,7 +92,7 @@ def _check_file(
         )
         description_content_type = "text/x-rst"
 
-    content_type, params = cgi.parse_header(description_content_type)
+    content_type, params = _parse_content_type(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description is None or description.rstrip() == "UNKNOWN":
