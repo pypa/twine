@@ -7,7 +7,7 @@
 .. image:: https://img.shields.io/readthedocs/twine
    :target: https://twine.readthedocs.io
 
-.. image:: https://img.shields.io/github/workflow/status/pypa/twine/Main
+.. image:: https://img.shields.io/github/actions/workflow/status/pypa/twine/codeql-analysis.yml?branch=main
    :target: https://github.com/pypa/twine/actions
 
 twine
