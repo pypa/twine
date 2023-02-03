@@ -41,7 +41,6 @@ def test_version_parsing(example_wheel):
 
 
 def test_version_parsing_missing_pyver(monkeypatch, example_wheel):
-
     wheel.wheel_file_re = pretend.stub(match=lambda a: None)
     assert example_wheel.py_version == "any"
 
