@@ -78,7 +78,7 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
         "requests-toolbelt",
         "urllib3",
     )
-    return [(dep, importlib_metadata.version(dep)) for dep in deps]  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+    return [(dep, importlib_metadata.version(dep)) for dep in deps]
 
 
 def dep_versions() -> str:
@@ -118,6 +118,6 @@ def dispatch(argv: List[str]) -> Any:
 
     configure_output()
 
-    main = registered_commands[args.command].load()
+    main = registered_commands[args.command].load()  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
     return main(args.args)
