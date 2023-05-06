@@ -13,10 +13,13 @@ formats:
   - pdf
   - epub
 
+build:
+  os: ubuntu-22.04
+  tools:
+    python: "3.11"
+
 python:
-  # Mininum supported Python version
-  version: "3.7"
-  # Install twine first, because RTD uses `--upgrade-strategy eager`,
+ # Install twine first, because RTD uses `--upgrade-strategy eager`,
   # which installs the latest version of docutils via readme_renderer.
   # However, Sphinx 4.2.0 requires docutils>=0.14,<0.18.
   install:
