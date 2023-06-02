@@ -17,7 +17,7 @@ import logging
 import os
 import re
 import subprocess
-from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union
+from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union, cast
 
 import importlib_metadata
 import pkginfo
@@ -43,7 +43,7 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-MetadataValue = Union[str, Sequence[str]]
+MetadataValue = Union[Optional[str], Sequence[str], Tuple[str, bytes]]
 
 logger = logging.getLogger(__name__)
 
@@ -124,14 +124,12 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
-                path=[filename]
-            )
+            (dist,) = importlib_metadata.Distribution.discover(path=[filename])
             py_version = dist.metadata["Version"]
         elif dtype == "bdist_wheel":
-            py_version = meta.py_version
+            py_version = cast(wheel.Wheel, meta).py_version
         elif dtype == "bdist_wininst":
-            py_version = meta.py_version
+            py_version = cast(wininst.WinInst, meta).py_version
         else:
             py_version = None
 
@@ -143,7 +141,7 @@ class PackageFile:
         Includes values from filename, PKG-INFO, hashers, and signature.
         """
         meta = self.metadata
-        data = {
+        data: Dict[str, MetadataValue] = {
             # identify release
             "name": self.safe_name,
             "version": meta.version,

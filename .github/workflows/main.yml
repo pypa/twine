@@ -2,6 +2,8 @@ name: Main
 
 on:
   push:
+    branches:
+      - main
   pull_request:
   schedule:
     - cron: "0 0 * * *" # daily
@@ -16,12 +18,15 @@ env:
   MIN_PYTHON_VERSION: "3.7"
   DEFAULT_PYTHON_VERSION: "3.9"
 
+permissions:
+  contents: read
+
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.DEFAULT_PYTHON_VERSION }}
       - name: Install dependencies
@@ -43,8 +48,8 @@ jobs:
           - windows-latest
     runs-on: ${{ matrix.platform }}
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
       - name: Install dependencies
@@ -58,10 +63,11 @@ jobs:
   # it's still helpful to run them on PRs. See:
   # https://github.com/pypa/twine/issues/684#issuecomment-703150619
   integration:
+    # Only run on Ubuntu because most of the tests are skipped on Windows
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
@@ -72,8 +78,8 @@ jobs:
   docs:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
@@ -81,17 +87,33 @@ jobs:
       - name: Build docs
         run: python -m tox -e docs
 
-  release:
+  # https://github.com/marketplace/actions/alls-green#why
+  check:  # This job does nothing and is only used for the branch protection
+    if: always()
+
     needs:
       - lint
       - test
-      # Not requiring integration, because they can be flaky
+      - integration
       - docs
+
+    runs-on: ubuntu-latest
+
+    steps:
+    - name: Decide whether the needed jobs succeeded or failed
+      uses: re-actors/alls-green@release/v1
+      with:
+        allowed-failures: integration  # can be flaky
+        jobs: ${{ toJSON(needs) }}
+
+  release:
+    needs:
+      - check
     if: github.event_name == 'push' && contains(github.ref, 'refs/tags/')
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
-      - uses: actions/setup-python@v2
+      - uses: actions/checkout@v3
+      - uses: actions/setup-python@v4
         with:
           python-version: ${{ env.MIN_PYTHON_VERSION }}
       - name: Install dependencies
