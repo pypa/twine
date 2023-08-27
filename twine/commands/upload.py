@@ -128,9 +128,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     # or TestPyPI, which will (as of May 2023) ignore it.
     # This check is currently limited to just those indices, since other
     # indices may still support PGP signatures.
-    if (
-        any(p.gpg_signature for p in packages_to_upload)
-        and "pypi.org" in repository_url
+    if any(p.gpg_signature for p in packages_to_upload) and repository_url.startswith(
+        (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
     ):
         logger.warning(
             "One or more packages has an associated PGP signature; "
