@@ -179,7 +179,7 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository, 
 
     # Ensure that a warning is emitted.
     assert (
-        "One or more packages has an associated armored signature; these will "
+        "One or more packages has an associated PGP signature; these will "
         "be silently ignored by the index" in caplog.messages
     )
 

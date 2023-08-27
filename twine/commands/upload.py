@@ -133,7 +133,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         and "pypi.org" in repository_url
     ):
         logger.warning(
-            "One or more packages has an associated armored signature; "
+            "One or more packages has an associated PGP signature; "
             "these will be silently ignored by the index"
         )
 
