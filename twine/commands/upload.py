@@ -124,6 +124,19 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         _make_package(filename, signatures, upload_settings) for filename in uploads
     ]
 
+    # Warn the user if they're trying to upload a PGP signature to PyPI
+    # or TestPyPI, which will (as of May 2023) ignore it.
+    # This check is currently limited to just those indices, since other
+    # indices may still support PGP signatures.
+    if (
+        any(p.gpg_signature for p in packages_to_upload)
+        and "pypi.org" in repository_url
+    ):
+        logger.warning(
+            "One or more packages has an associated armored signature; "
+            "these will be silently ignored by the index"
+        )
+
     repository = upload_settings.create_repository()
     uploaded_packages = []
 
