@@ -162,7 +162,7 @@ def test_print_response_if_verbose(upload_settings, stub_response, caplog):
     assert caplog.messages.count(response_log) == 2
 
 
-def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
+def test_success_with_pre_signed_distribution(upload_settings, stub_repository, caplog):
     """Add GPG signature provided by user to uploaded package."""
     # Upload a pre-signed distribution
     result = upload.upload(
@@ -175,6 +175,12 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository):
     assert package.gpg_signature == (
         "twine-1.5.0-py2.py3-none-any.whl.asc",
         b"signature",
+    )
+
+    # Ensure that a warning is emitted.
+    assert (
+        "One or more packages has an associated PGP signature; these will "
+        "be silently ignored by the index" in caplog.messages
     )
 
 
