@@ -32,6 +32,9 @@ def main() -> Any:
     try:
         error = cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
+        if not exc.response:
+            raise
+        
         error = True
         status_code = exc.response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
