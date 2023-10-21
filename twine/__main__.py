@@ -32,7 +32,7 @@ def main() -> Any:
     try:
         error = cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
-        if not exc.response:
+        if not exc.response:  # pragma: no cover
             raise
 
         error = True
