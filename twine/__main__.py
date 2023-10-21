@@ -34,7 +34,7 @@ def main() -> Any:
     except requests.HTTPError as exc:
         if not exc.response:
             raise
-        
+
         error = True
         status_code = exc.response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
