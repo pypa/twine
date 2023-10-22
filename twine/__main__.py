@@ -15,7 +15,7 @@
 import http
 import logging
 import sys
-from typing import Any
+from typing import Any, cast
 
 import requests
 
@@ -32,13 +32,16 @@ def main() -> Any:
     try:
         error = cli.dispatch(sys.argv[1:])
     except requests.HTTPError as exc:
+        # Assuming this response will never be None
+        response = cast(requests.Response, exc.response)
+
         error = True
-        status_code = exc.response.status_code
+        status_code = response.status_code
         status_phrase = http.HTTPStatus(status_code).phrase
         logger.error(
             f"{exc.__class__.__name__}: {status_code} {status_phrase} "
-            f"from {exc.response.url}\n"
-            f"{exc.response.reason}"
+            f"from {response.url}\n"
+            f"{response.reason}"
         )
     except exceptions.TwineException as exc:
         error = True
