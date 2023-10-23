@@ -1,0 +1,41 @@
+name: "Feature Request"
+description: "Something is missing from Twine"
+labels: ["enhancement", "feature request"]
+body:
+  - type: checkboxes
+    attributes:
+      label: "Is there an existing issue for this?"
+      description: "Please search to see if there's an existing issue for what you're reporting"
+      options:
+        - label: "I have searched the existing issues (open and closed), and could not find an existing issue"
+          required: true
+
+  - type: textarea
+    id: search-keywords
+    attributes:
+      label: "What keywords did you use to search existing issues?"
+      description: "In the event that you could not find a duplicate, but it existed, this will help us better link issues in the future"
+      placeholder: |
+        authorization
+        artifactory
+        jfrog
+        devpi
+
+  - type: textarea
+    id: problem
+    attributes:
+      label: "Please describe the problem you are attempting to solve with this request"
+      description: "Is there missing behaviour or some other issue?"
+      placeholder: "When I run twine upload it does ... but I wish it would ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: proposed-solution
+    attributes:
+      label: "How do you think we should solve this?"
+
+  - type: textarea
+    id: other
+    attributes:
+      label: "Anything else you'd like to mention?"

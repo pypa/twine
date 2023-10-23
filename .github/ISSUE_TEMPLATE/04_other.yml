@@ -1,0 +1,34 @@
+name: "Other"
+description: "This does not fit into the other categories"
+labels: ["enhancement", "feature request"]
+body:
+  - type: checkboxes
+    attributes:
+      label: "Is there an existing issue for this?"
+      description: "Please search to see if there's an existing issue for what you're reporting"
+      options:
+        - label: "I have searched the existing issues (open and closed), and could not find an existing issue"
+          required: true
+
+  - type: textarea
+    id: search-keywords
+    attributes:
+      label: "What keywords did you use to search existing issues?"
+      description: "In the event that you could not find a duplicate, but it existed, this will help us better link issues in the future"
+      placeholder: |
+        authorization
+        artifactory
+        jfrog
+        devpi
+
+  - type: textarea
+    id: other-description
+    attributes:
+      label: "Please describe why your using this option"
+    validations:
+      required: true
+
+  - type: textarea
+    id: other
+    attributes:
+      label: "Anything else you'd like to mention?"

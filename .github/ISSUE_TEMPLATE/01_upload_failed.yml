@@ -1,0 +1,145 @@
+name: "Upload Error"
+description: "Failed to upload artifact(s)"
+labels: ["support"]
+body:
+  - type: markdown
+    attributes:
+      value: >
+        ## Your Environment
+        Thank you for taking the time to report an issue.
+
+        To more efficiently resolve this issue, we'd like to know some basic
+        information about your system and setup.
+
+  - type: checkboxes
+    attributes:
+      label: "Is there an existing issue for this?"
+      description: "Please search to see if there's an existing issue for what you're reporting"
+      options:
+        - label: "I have searched the existing issues (open and closed), and could not find an existing issue"
+          required: true
+
+  - type: textarea
+    id: search-keywords
+    attributes:
+      label: "What keywords did you use to search existing issues?"
+      description: "In the event that you could not find a duplicate, but it existed, this will help us better link issues in the future"
+      placeholder: |
+        authorization
+        artifactory
+        jfrog
+        devpi
+
+  - type: dropdown
+    id: environment-os
+    attributes:
+      label: "What operating system(s) are you using?"
+      multiple: true
+      options:
+        - "Windows 10"
+        - "Windows 11"
+        - "Linux"
+        - "macOS"
+        - "Other"
+    validations:
+      required: true
+
+  - type: markdown
+    id: environment-os-other
+    attributes:
+      label: "If you selected 'Other', describe your Operating System here"
+    validations:
+      required: false
+
+  - type: textarea
+    id: environment-py
+    attributes:
+      label: "What version of Python are you running?"
+      description: "Please copy and paste the command and output used to retrieve this (this will be console rendered automatically)"
+      placeholder: |
+        $ python --version
+        Python 3.11.4
+      render: console
+    validations:
+      required: true
+
+  - type: textarea
+    id: environment-installer
+    attributes:
+      label: "How did you install twine? Did you use your operating system's package manager or pip or something else?"
+      description: "Please copy and paste the command(s) you used to install twine"
+      placeholder: |
+        $ pip install twine
+        $ dnf install twine
+        $ apt install twine
+        $ brew install twine
+      render: console
+    validations:
+      required: true
+
+  - type: textarea
+    id: version
+    attributes:
+      label: "What version of twine do you have installed (include the complete output)"
+      description: "Please copy and paste the complete output of `twine --version`"
+      placeholder: |
+        $ twine --version
+        twine version 1.15.0 (pkginfo: 1.4.2, requests: 2.19.1, setuptools: 40.4.3,
+        requests-toolbelt: 0.8.0, tqdm: 4.26.0)
+      render: console
+    validations:
+      required: true
+
+  - type: markdown
+    id: package-repository
+    attributes:
+      label: "Which package repository are you using?"
+      placeholder: |
+        pypi.org
+        test.pypi.org
+    validations:
+      required: true
+
+  - type: textarea
+    id: issue
+    attributes:
+      label: "Please describe the issue that you are experiencing"
+      placeholder: "When I run twine upload it does ... but I expect it to do ..."
+    validations:
+      required: true
+
+  - type: textarea
+    id: reproduction-steps
+    attributes:
+      label: "Please list the steps required to reproduce this behaviour"
+      placeholder: |
+        1. Install twine in a virtual environment
+        1. Build this package at github.com/...
+        1. Run `twine upload dist/*`
+    validations:
+      required: true
+
+  - type: textarea
+    id: pkg-info
+    attributes:
+      label: "Please include the PKG-INFO file contents from the artifact you're attempting to upload"
+      description: "note: this will be email formatted automatically"
+      render: email
+    validations:
+      required: true
+
+  - type: textarea
+    id: pypirc
+    attributes:
+      label: "A redacted version of your `.pypirc` file"
+      description: "REMOVE ALL USERNAMES & PASSWORDS; note: this will be ini formatted automatically"
+      render: ini
+    validations:
+      required: true
+
+  - type: textarea
+    id: other
+    attributes:
+      label: "Anything else you'd like to mention?"
+    validations:
+      required: false
