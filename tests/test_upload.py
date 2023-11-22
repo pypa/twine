@@ -188,7 +188,6 @@ def test_warns_potential_pgp_removal_on_3p_index(
     make_settings, stub_repository, caplog
 ):
     """Warn when a PGP signature is specified for upload to a third-party index."""
-
     upload_settings = make_settings(
         """
         [pypi]
