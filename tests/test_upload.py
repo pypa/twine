@@ -17,8 +17,7 @@ import pretend
 import pytest
 import requests
 
-from twine import cli
-from twine import exceptions
+from twine import cli, exceptions
 from twine import package as package_file
 from twine.commands import upload
 
@@ -181,6 +180,43 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository, 
     assert (
         "One or more packages has an associated PGP signature; these will "
         "be silently ignored by the index" in caplog.messages
+    )
+
+
+def test_warns_potential_pgp_removal_on_3p_index(
+    make_settings, stub_repository, caplog
+):
+    """Warn when a PGP signature is specified for upload to a third-party index."""
+
+    upload_settings = make_settings(
+        """
+        [pypi]
+        repository: https://example.com/not-a-real-index/
+        username:foo
+        password:bar
+        """
+    )
+    upload_settings.create_repository = lambda: stub_repository
+
+    # Upload a pre-signed distribution
+    result = upload.upload(
+        upload_settings, [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".asc"]
+    )
+    assert result is None
+
+    # The signature should be added via package.add_gpg_signature()
+    package = stub_repository.upload.calls[0].args[0]
+    assert package.gpg_signature == (
+        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        b"signature",
+    )
+
+    # Ensure that a warning is emitted.
+    assert (
+        "One or more packages has an associated PGP signature; a future "
+        "version of twine may silently ignore these. See "
+        "https://github.com/pypa/twine/issues/1009 for more information"
+        in caplog.messages
     )
 
 
