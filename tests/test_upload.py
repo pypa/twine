@@ -17,7 +17,8 @@ import pretend
 import pytest
 import requests
 
-from twine import cli, exceptions
+from twine import cli
+from twine import exceptions
 from twine import package as package_file
 from twine.commands import upload
 

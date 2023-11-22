@@ -20,8 +20,11 @@ from typing import Dict, List, cast
 import requests
 from rich import print
 
-from twine import commands, exceptions, settings, utils
+from twine import commands
+from twine import exceptions
 from twine import package as package_file
+from twine import settings
+from twine import utils
 
 logger = logging.getLogger(__name__)
 
