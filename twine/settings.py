@@ -127,14 +127,12 @@ class Settings:
 
     @property
     def username(self) -> Optional[str]:
-        # Workaround for https://github.com/python/mypy/issues/5858
-        return cast(Optional[str], self.auth.username)
+        return self.auth.username
 
     @property
     def password(self) -> Optional[str]:
         with self._allow_noninteractive():
-            # Workaround for https://github.com/python/mypy/issues/5858
-            return cast(Optional[str], self.auth.password)
+            return self.auth.password
 
     def _allow_noninteractive(self) -> "contextlib.AbstractContextManager[None]":
         """Bypass NonInteractive error when client cert is present."""
