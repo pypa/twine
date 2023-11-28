@@ -183,19 +183,30 @@ class Repository:
     ) -> requests.Response:
         number_of_redirects = 0
         while number_of_redirects < max_redirects:
-            resp = self._upload(package)
-
-            if resp.status_code == requests.codes.OK:
-                return resp
-            if 500 <= resp.status_code < 600:
+            try:
+                resp = self._upload(package)
+            except (
+                requests.exceptions.ConnectionError,
+                requests.exceptions.ConnectTimeout,
+            ) as exc:
                 number_of_redirects += 1
                 logger.warning(
-                    f'Received "{resp.status_code}: {resp.reason}"'
-                    "\nPackage upload appears to have failed."
+                    f"Exception raised ({exc})."
                     f" Retry {number_of_redirects} of {max_redirects}."
                 )
+                continue
             else:
-                return resp
+                if resp.status_code == requests.codes.OK:
+                    return resp
+                if 500 <= resp.status_code < 600:
+                    number_of_redirects += 1
+                    logger.warning(
+                        f'Received "{resp.status_code}: {resp.reason}"'
+                        "\nPackage upload appears to have failed."
+                        f" Retry {number_of_redirects} of {max_redirects}."
+                    )
+                else:
+                    return resp
 
         return resp
 
