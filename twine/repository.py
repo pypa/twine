@@ -191,7 +191,8 @@ class Repository:
             ) as exc:
                 number_of_redirects += 1
                 logger.warning(
-                    f"Exception raised ({exc})."
+                    f"{exc.__class__.__name__} raised."
+                    "\nPackage upload appears to have failed."
                     f" Retry {number_of_redirects} of {max_redirects}."
                 )
                 continue
@@ -207,8 +208,6 @@ class Repository:
                     )
                 else:
                     return resp
-
-        return resp
 
     def package_is_uploaded(
         self, package: package_file.PackageFile, bypass_cache: bool = False
