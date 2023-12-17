@@ -29,7 +29,7 @@ class Resolver:
         return cls if interactive else Private
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def username(self) -> Optional[str]:
         if cast(str, self.config["repository"]).startswith(
             (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
@@ -46,7 +46,7 @@ class Resolver:
         )
 
     @property
-    @functools.lru_cache()
+    @functools.lru_cache
     def password(self) -> Optional[str]:
         return utils.get_userpass_value(
             self.input.password,
