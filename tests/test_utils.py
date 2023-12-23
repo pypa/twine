@@ -61,11 +61,6 @@ def test_get_config_no_distutils(write_config_file):
             "username": "testuser",
             "password": "testpassword",
         },
-        "testpypi": {
-            "repository": utils.TEST_REPOSITORY,
-            "username": None,
-            "password": None,
-        },
     }
 
 
@@ -105,11 +100,6 @@ def test_get_config_missing(config_file):
     assert utils.get_config(config_file) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
-            "username": None,
-            "password": None,
-        },
-        "testpypi": {
-            "repository": utils.TEST_REPOSITORY,
             "username": None,
             "password": None,
         },
@@ -198,11 +188,6 @@ def test_get_config_deprecated_pypirc():
     assert utils.get_config(deprecated_pypirc_path) == {
         "pypi": {
             "repository": utils.DEFAULT_REPOSITORY,
-            "username": "testusername",
-            "password": "testpassword",
-        },
-        "testpypi": {
-            "repository": utils.TEST_REPOSITORY,
             "username": "testusername",
             "password": "testpassword",
         },

@@ -55,7 +55,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     pypyi and testpypi.
     """
     realpath = os.path.realpath(os.path.expanduser(path))
-    parser = configparser.RawConfigParser()
+    parser = configparser.ConfigParser()
 
     try:
         with open(realpath) as f:
@@ -75,17 +75,17 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     config: DefaultDict[str, RepositoryConfig]
     config = collections.defaultdict(lambda: defaults.copy())
 
-    index_servers = parser.get(
-        "distutils", "index-servers", fallback="pypi testpypi"
-    ).split()
-
     # Don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
-    if "testpypi" in index_servers:
+    if parser.has_section("testpypi"):
         config["testpypi"]["repository"] = TEST_REPOSITORY
 
     # Optional configuration values for individual repositories
-    for repository in index_servers:
+    for repository in parser.sections():
+        if repository == "server-login":
+            # handled by defaults already, don't add an extra key to config
+            continue
+
         for key in [
             "username",
             "repository",
