@@ -77,8 +77,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
 
     # Don't require users to manually configure URLs for these repositories
     config["pypi"]["repository"] = DEFAULT_REPOSITORY
-    if parser.has_section("testpypi"):
-        config["testpypi"]["repository"] = TEST_REPOSITORY
+    config["testpypi"]["repository"] = TEST_REPOSITORY
 
     # Optional configuration values for individual repositories
     for repository in parser.sections():
