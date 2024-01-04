@@ -31,7 +31,7 @@ class Resolver:
     @property
     @functools.lru_cache()
     def username(self) -> Optional[str]:
-        if self.config["repository"].startswith(utils.DEFAULT_REPOSITORY):
+        if cast(str, self.config["repository"]).startswith(utils.DEFAULT_REPOSITORY):
             # As of 2024-01-01, PyPI requires API tokens for uploads, meaning
             # that the username is invariant.
             return "__token__"
@@ -97,7 +97,7 @@ class Resolver:
 
         # As of 2024-01-01, PyPI requires API tokens for uploads;
         # specialize the prompt to clarify that an API token must be provided.
-        if self.config["repository"].startswith(utils.DEFAULT_REPOSITORY):
+        if cast(str, self.config["repository"]).startswith(utils.DEFAULT_REPOSITORY):
             prompt = "API token"
         else:
             prompt = "password"
