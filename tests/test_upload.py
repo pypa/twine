@@ -551,7 +551,7 @@ def test_values_from_env(monkeypatch):
     replaced_upload = pretend.call_recorder(none_upload)
     monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
-        "TWINE_USERNAME": "pypiuser",
+        "TWINE_USERNAME": "this-is-ignored",
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
@@ -559,7 +559,7 @@ def test_values_from_env(monkeypatch):
         cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
-    assert "pypiuser" == upload_settings.username
+    assert "__token__" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
 
 

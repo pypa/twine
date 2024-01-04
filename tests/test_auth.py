@@ -219,7 +219,7 @@ def test_get_password_keyring_key_error_logged(
     )
 
 
-def test_logs_cli_values(caplog):
+def test_logs_cli_values(caplog, config):
     caplog.set_level(logging.INFO, "twine")
 
     res = auth.Resolver(config, auth.CredentialInput("username", "password"))

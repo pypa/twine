@@ -33,7 +33,7 @@ def test_settings_transforms_repository_config(write_config_file):
         """
         [pypi]
         repository: https://upload.pypi.org/legacy/
-        username:username
+        username:this-is-ignored
         password:password
         """
     )
@@ -43,7 +43,7 @@ def test_settings_transforms_repository_config(write_config_file):
     assert s.sign is False
     assert s.sign_with == "gpg"
     assert s.identity is None
-    assert s.username == "username"
+    assert s.username == "__token__"
     assert s.password == "password"
     assert s.cacert is None
     assert s.client_cert is None
