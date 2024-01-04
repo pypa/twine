@@ -19,7 +19,7 @@ import logging
 import os
 import os.path
 import unicodedata
-from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union
+from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union, cast
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -133,7 +133,7 @@ def get_repository_from_config(
         }
 
     try:
-        return get_config(config_file)[repository]
+        config = get_config(config_file)[repository]
     except OSError as exc:
         raise exceptions.InvalidConfiguration(str(exc))
     except KeyError:
@@ -141,6 +141,9 @@ def get_repository_from_config(
             f"Missing '{repository}' section from {config_file}.\n"
             f"More info: https://packaging.python.org/specifications/pypirc/ "
         )
+
+    config["repository"] = normalize_repository_url(cast(str, config["repository"]))
+    return config
 
 
 _HOSTNAMES = {
