@@ -295,9 +295,6 @@ class Settings:
             repository_name,
             repository_url,
         )
-        self.repository_config["repository"] = utils.normalize_repository_url(
-            cast(str, self.repository_config["repository"]),
-        )
 
     def _handle_certificates(
         self, cacert: Optional[str], client_cert: Optional[str]

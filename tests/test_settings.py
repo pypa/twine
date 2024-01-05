@@ -27,13 +27,16 @@ def test_settings_takes_no_positional_arguments():
         settings.Settings("a", "b", "c")
 
 
-def test_settings_transforms_repository_config(write_config_file):
-    """Set repository config and defaults when .pypirc is provided."""
+def test_settings_transforms_repository_config_pypi(write_config_file):
+    """Set repository config and defaults when .pypirc is provided.
+
+    Ignores the username setting due to PyPI being the index.
+    """
     config_file = write_config_file(
         """
         [pypi]
         repository: https://upload.pypi.org/legacy/
-        username:username
+        username:this-is-ignored
         password:password
         """
     )
@@ -43,7 +46,34 @@ def test_settings_transforms_repository_config(write_config_file):
     assert s.sign is False
     assert s.sign_with == "gpg"
     assert s.identity is None
-    assert s.username == "username"
+    assert s.username == "__token__"
+    assert s.password == "password"
+    assert s.cacert is None
+    assert s.client_cert is None
+    assert s.disable_progress_bar is False
+
+
+def test_settings_transforms_repository_config_non_pypi(write_config_file):
+    """Set repository config and defaults when .pypirc is provided."""
+    config_file = write_config_file(
+        """
+        [distutils]
+        index-servers =
+            notpypi
+
+        [notpypi]
+        repository: https://upload.example.org/legacy/
+        username:someusername
+        password:password
+        """
+    )
+
+    s = settings.Settings(config_file=config_file, repository_name="notpypi")
+    assert s.repository_config["repository"] == "https://upload.example.org/legacy/"
+    assert s.sign is False
+    assert s.sign_with == "gpg"
+    assert s.identity is None
+    assert s.username == "someusername"
     assert s.password == "password"
     assert s.cacert is None
     assert s.client_cert is None
