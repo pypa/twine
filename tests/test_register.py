@@ -105,7 +105,6 @@ def test_values_from_env_pypi(monkeypatch, repo):
 
 def test_values_from_env_not_pypi(monkeypatch, write_config_file):
     """Use env vars for settings when run from command line."""
-
     write_config_file(
         """
         [distutils]
