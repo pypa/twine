@@ -94,10 +94,10 @@ class PackageFile:
             if filename.endswith(ext):
                 try:
                     meta = DIST_TYPES[dtype](filename)
-                except EOFError:
+                except EOFError as exc:
                     raise exceptions.InvalidDistribution(
                         "Invalid distribution file: '%s'" % os.path.basename(filename)
-                    )
+                    ) from exc
                 else:
                     break
         else:
@@ -221,21 +221,21 @@ class PackageFile:
         try:
             subprocess.check_call(gpg_args)
             return
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             if gpg_args[0] != "gpg":
                 raise exceptions.InvalidSigningExecutable(
                     f"{gpg_args[0]} executable not available."
-                )
+                ) from exc
 
         logger.warning("gpg executable not available. Attempting fallback to gpg2.")
         try:
             subprocess.check_call(("gpg2",) + gpg_args[1:])
-        except FileNotFoundError:
+        except FileNotFoundError as exc:
             raise exceptions.InvalidSigningExecutable(
                 "'gpg' or 'gpg2' executables not available.\n"
                 "Try installing one of these or specifying an executable "
                 "with the --sign-with flag."
-            )
+            ) from exc
 
 
 class Hexdigest(NamedTuple):

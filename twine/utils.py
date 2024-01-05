@@ -114,7 +114,7 @@ def _validate_repository_url(repository_url: str) -> None:
     except rfc3986.exceptions.RFC3986Exception as exc:
         raise exceptions.UnreachableRepositoryURLDetected(
             f"Invalid repository URL: {exc.args[0]}."
-        )
+        ) from exc
 
 
 def get_repository_from_config(
@@ -135,12 +135,12 @@ def get_repository_from_config(
     try:
         config = get_config(config_file)[repository]
     except OSError as exc:
-        raise exceptions.InvalidConfiguration(str(exc))
-    except KeyError:
+        raise exceptions.InvalidConfiguration(str(exc)) from exc
+    except KeyError as exc:
         raise exceptions.InvalidConfiguration(
             f"Missing '{repository}' section from {config_file}.\n"
             f"More info: https://packaging.python.org/specifications/pypirc/ "
-        )
+        ) from exc
 
     config["repository"] = normalize_repository_url(cast(str, config["repository"]))
     return config
