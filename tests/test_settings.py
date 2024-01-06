@@ -107,7 +107,7 @@ def test_print_config_path_if_verbose(config_file, caplog, make_settings, verbos
 
 
 def test_identity_requires_sign():
-    """Raise an exception when user provides identity but doesn't require sigining."""
+    """Raise an exception when user provides identity but doesn't require signing."""
     with pytest.raises(exceptions.InvalidSigningConfiguration):
         settings.Settings(sign=False, identity="fakeid")
 

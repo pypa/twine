@@ -28,7 +28,7 @@ Bugfixes
 ^^^^^^^^
 
 - Improve logging when keyring fails. (`#890 <https://github.com/pypa/twine/issues/890>`_)
-- Reconfgure root logger to show all log messages. (`#896 <https://github.com/pypa/twine/issues/896>`_)
+- Reconfigure root logger to show all log messages. (`#896 <https://github.com/pypa/twine/issues/896>`_)
 
 
 Twine 4.0.0 (2022-03-31)

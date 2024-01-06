@@ -145,7 +145,7 @@ def test_print_packages_if_verbose(upload_settings, caplog):
 
 
 def test_print_response_if_verbose(upload_settings, stub_response, caplog):
-    """Print details about the response from the repostiry."""
+    """Print details about the response from the repository."""
     upload_settings.verbose = True
 
     result = upload.upload(
