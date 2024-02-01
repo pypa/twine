@@ -12,6 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import logging
 import logging.config
 from typing import Any, List, Tuple
 
@@ -22,6 +23,8 @@ import rich.logging
 import rich.theme
 
 import twine
+
+logger = logging.getLogger(__name__)
 
 args = argparse.Namespace()
 
@@ -67,6 +70,18 @@ def configure_output() -> None:
             },
         }
     )
+
+
+def init_truststore(required: bool = False) -> None:
+    try:
+        import truststore
+    except ImportError as exc:
+        logger.debug("Error importing truststore", exc_info=exc)
+        if required:
+            raise
+    else:
+        # https://truststore.readthedocs.io/en/latest/#using-truststore-with-requests
+        truststore.inject_into_ssl()
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
@@ -117,6 +132,8 @@ def dispatch(argv: List[str]) -> Any:
     parser.parse_args(argv, namespace=args)
 
     configure_output()
+
+    init_truststore()
 
     main = registered_commands[args.command].load()  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
 
