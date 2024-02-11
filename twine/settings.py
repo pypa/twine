@@ -1,4 +1,5 @@
 """Module containing logic for handling settings."""
+
 # Copyright 2018 Ian Stapleton Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
