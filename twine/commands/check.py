@@ -1,4 +1,5 @@
 """Module containing the logic for ``twine check``."""
+
 # Copyright 2018 Dustin Ingram
 #
 # Licensed under the Apache License, Version 2.0 (the "License");

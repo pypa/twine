@@ -1,4 +1,5 @@
 """Module containing the logic for ``twine register``."""
+
 # Copyright 2015 Ian Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
