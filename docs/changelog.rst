@@ -2,8 +2,8 @@
 Changelog
 =========
 
-This project follows the `semantic versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#semantic-versioning-preferred>`_
-and `pre-release versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#pre-release-versioning>`_
+This project follows the `semantic versioning <https://packaging.python.org/en/latest/discussions/versioning/#semantic-versioning-vs-calendar-versioning>`_
+and `pre-release versioning <https://packaging.python.org/en/latest/discussions/versioning/>`_
 schemes recommended by the Python Packaging Authority.
 
 .. Do *NOT* add changelog entries here!
