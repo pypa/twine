@@ -1,1 +1,0 @@
-Use ``email.message`` instead of ``cgi`` as ``cgi`` has been deprecated

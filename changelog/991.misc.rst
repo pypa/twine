@@ -1,1 +1,0 @@
-Fix the ReadTheDocs build by removing minimum python version and specifying build requirements.

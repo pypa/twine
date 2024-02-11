@@ -1,1 +1,0 @@
-Warn about PGP signatures being ignored and deprecated by PyPI
