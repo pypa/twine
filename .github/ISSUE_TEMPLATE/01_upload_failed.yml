@@ -44,7 +44,7 @@ body:
     validations:
       required: true
 
-  - type: markdown
+  - type: input
     id: environment-os-other
     attributes:
       label: "If you selected 'Other', describe your Operating System here"
@@ -90,7 +90,7 @@ body:
     validations:
       required: true
 
-  - type: markdown
+  - type: input
     id: package-repository
     attributes:
       label: "Which package repository are you using?"
