@@ -17,9 +17,14 @@ import logging
 import os
 import re
 import subprocess
+import sys
 from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union, cast
 
-import importlib_metadata
+if sys.version_info >= (3, 10):
+    import importlib.metadata as importlib_metadata
+else:
+    import importlib_metadata
+
 import pkginfo
 from rich import print
 
