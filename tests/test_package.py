@@ -177,7 +177,7 @@ def test_metadata_dictionary_keys():
         "requires_external",
         "requires_python",
         # Metadata 2.1
-        "provides_extras",
+        "provides_extra",
         "description_content_type",
         # Metadata 2.2
         "dynamic",
@@ -268,7 +268,7 @@ def test_metadata_dictionary_values(gpg_signature):
     assert result["requires_python"] == meta.requires_python
 
     # Metadata 2.1
-    assert result["provides_extras"] == meta.provides_extras
+    assert result["provides_extra"] == meta.provides_extras
     assert result["description_content_type"] == meta.description_content_type
 
     # Metadata 2.2
