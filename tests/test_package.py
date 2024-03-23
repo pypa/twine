@@ -340,9 +340,14 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
     "read_data, missing_fields",
     [
         pytest.param(
-            b"Metadata-Version: 2.3\nName: test-package\nVersion: 1.0.0\n",
+            b"Metadata-Version: 102.3\nName: test-package\nVersion: 1.0.0\n",
             "Name, Version",
             id="unsupported Metadata-Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.3\nName: UNKNOWN\nVersion: UNKNOWN\n",
+            "Name, Version",
+            id="missing Name and Version",
         ),
         pytest.param(
             b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: UNKNOWN\n",
@@ -350,9 +355,19 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
             id="missing Name and Version",
         ),
         pytest.param(
+            b"Metadata-Version: 2.3\nName: UNKNOWN\nVersion: 1.0.0\n",
+            "Name",
+            id="missing Name",
+        ),
+        pytest.param(
             b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n",
             "Name",
             id="missing Name",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.3\nName: test-package\nVersion: UNKNOWN\n",
+            "Version",
+            id="missing Version",
         ),
         pytest.param(
             b"Metadata-Version: 2.2\nName: test-package\nVersion: UNKNOWN\n",
