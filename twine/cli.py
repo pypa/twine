@@ -118,6 +118,6 @@ def dispatch(argv: List[str]) -> Any:
 
     configure_output()
 
-    main = registered_commands[args.command].load()  # type: ignore[no-untyped-call] # python/importlib_metadata#288  # noqa: E501
+    main = registered_commands[args.command].load()
 
     return main(args.args)

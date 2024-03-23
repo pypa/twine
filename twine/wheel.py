@@ -16,6 +16,7 @@ import os
 import re
 import zipfile
 from typing import List, Optional
+from typing import cast as type_cast
 
 from pkginfo import distribution
 
@@ -87,5 +88,7 @@ class Wheel(distribution.Distribution):
         super().parse(data)
 
         fp = io.StringIO(data.decode("utf-8", errors="replace"))
+        # msg is ``email.message.Message`` which is a legacy API documented
+        # here: https://docs.python.org/3/library/email.compat32-message.html
         msg = distribution.parse(fp)
-        self.description = msg.get_payload()
+        self.description = type_cast(str, msg.get_payload())
