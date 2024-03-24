@@ -177,7 +177,7 @@ class PackageFile:
             "requires_external": meta.requires_external,
             "requires_python": meta.requires_python,
             # Metadata 2.1
-            "provides_extras": meta.provides_extras,
+            "provides_extra": meta.provides_extras,
             "description_content_type": meta.description_content_type,
             # Metadata 2.2
             "dynamic": meta.dynamic,
