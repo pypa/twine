@@ -269,6 +269,49 @@ def test_upload_retry(tmpdir, default_repo, caplog):
     ]
 
 
+def test_upload_retry_on_connection_error(tmpdir, default_repo, caplog):
+    default_repo.disable_progress_bar = True
+
+    default_repo.session = pretend.stub(
+        post=pretend.raiser(requests.exceptions.ConnectionError)
+    )
+
+    fakefile = tmpdir.join("fake.whl")
+    fakefile.write(".")
+
+    package = pretend.stub(
+        safe_name="fake",
+        metadata=pretend.stub(version="2.12.0"),
+        basefilename="fake.whl",
+        filename=str(fakefile),
+        metadata_dictionary=lambda: {"name": "fake"},
+    )
+
+    # Upload with default max_redirects of 5
+    default_repo.upload(package)
+
+    assert caplog.messages == [
+        (
+            'ConnectionError raised.\n'
+            f"Package upload appears to have failed. Retry {i} of 5."
+        )
+        for i in range(1, 6)
+    ]
+
+    caplog.clear()
+
+    # Upload with custom max_redirects of 3
+    default_repo.upload(package, 3)
+
+    assert caplog.messages == [
+        (
+            'ConnectionError raised.\n'
+            f"Package upload appears to have failed. Retry {i} of 3."
+        )
+        for i in range(1, 4)
+    ]
+
+
 @pytest.mark.parametrize(
     "package_meta,repository_url,release_urls",
     [
