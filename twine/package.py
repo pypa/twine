@@ -51,12 +51,12 @@ logger = logging.getLogger(__name__)
 def _safe_name(name: str) -> str:
     """Convert an arbitrary string to a standard distribution name.
 
-    Any runs of non-alphanumeric/. characters are replaced with a single '-'.
+    Any runs of non-alphanumeric/./_ characters are replaced with a single '-'.
 
     Copied from pkg_resources.safe_name for compatibility with warehouse.
     See https://github.com/pypa/twine/issues/743.
     """
-    return re.sub("[^A-Za-z0-9.]+", "-", name)
+    return re.sub("[^A-Za-z0-9._]+", "-", name)
 
 
 class PackageFile:

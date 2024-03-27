@@ -119,8 +119,8 @@ def test_package_signed_name_is_correct():
     [
         (string.ascii_letters, string.ascii_letters),
         (string.digits, string.digits),
-        (string.punctuation, "-.-"),
-        ("mosaik.SimConfig", "mosaik.SimConfig"),
+        (string.punctuation, "-.-_-"),
+        ("mosaik._SimConfig", "mosaik._SimConfig"),
         ("mosaik$$$$.SimConfig", "mosaik-.SimConfig"),
     ],
 )
