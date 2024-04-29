@@ -17,7 +17,7 @@ import argparse
 import fnmatch
 import logging
 import os.path
-from typing import Dict, List, Tuple, cast
+from typing import Dict, List, NamedTuple, cast
 
 import requests
 from rich import print
@@ -92,9 +92,16 @@ def _make_package(
     return package
 
 
+class Inputs(NamedTuple):
+    """Represents structured user inputs."""
+    dists: List[str]
+    signatures: Dict[str, str]
+    attestations_by_dist: Dict[str, List[str]]
+
+
 def _split_inputs(
     inputs: List[str],
-) -> Tuple[List[str], Dict[str, str], Dict[str, List[str]]]:
+) -> Inputs:
     """
     Split the unstructured list of input files provided by the user into groups.
 
@@ -117,7 +124,7 @@ def _split_inputs(
             a for a in attestations if os.path.basename(a).startswith(dist_basename)
         ]
 
-    return list(dists), signatures, attestations_by_dist
+    return Inputs(dists, signatures, attestations_by_dist)
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
