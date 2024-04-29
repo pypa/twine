@@ -17,8 +17,7 @@ import pretend
 import pytest
 import requests
 
-from twine import cli
-from twine import exceptions
+from twine import cli, exceptions
 from twine import package as package_file
 from twine.commands import upload
 
@@ -103,6 +102,48 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
         f"{filename} ({expected_size})",
         f"Signed with {package.signed_filename}",
     ]
+
+
+def test_split_inputs():
+    """
+    Split inputs into dists, signatures, and attestations.
+    """
+    inputs = [
+        helpers.WHEEL_FIXTURE,
+        helpers.WHEEL_FIXTURE + ".asc",
+        helpers.WHEEL_FIXTURE + ".build.attestation",
+        helpers.WHEEL_FIXTURE + ".publish.attestation",
+        helpers.SDIST_FIXTURE,
+        helpers.SDIST_FIXTURE + ".asc",
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE + ".frob.attestation",
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    dists, signatures, attestations_by_dist = upload._split_inputs(inputs)
+
+    assert dists == [
+        helpers.WHEEL_FIXTURE,
+        helpers.SDIST_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    expected_signatures = {
+        os.path.basename(dist) + ".asc": dist + ".asc"
+        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
+    }
+    assert signatures == expected_signatures
+
+    assert attestations_by_dist == {
+        helpers.WHEEL_FIXTURE: [
+            helpers.WHEEL_FIXTURE + ".build.attestation",
+            helpers.WHEEL_FIXTURE + ".publish.attestation",
+        ],
+        helpers.SDIST_FIXTURE: [],
+        helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
+        helpers.NEW_SDIST_FIXTURE: [],
+    }
 
 
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
