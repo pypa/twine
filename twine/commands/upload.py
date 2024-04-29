@@ -113,9 +113,11 @@ def _split_inputs(
     ``dist-path -> [attestation-path]``.
     """
     signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
-    attestations = set(fnmatch.filter(inputs, "*.*.attestation"))
+    attestations = fnmatch.filter(inputs, "*.*.attestation")
     dists = [
-        dist for dist in inputs if dist not in (set(signatures.values()) | attestations)
+        dist
+        for dist in inputs
+        if dist not in (set(signatures.values()) | set(attestations))
     ]
 
     attestations_by_dist = {}
