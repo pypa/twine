@@ -48,7 +48,15 @@ def sampleproject_dist(tmp_path_factory: pytest.TempPathFactory):
     run([sys.executable, "-m", "build", "--sdist"], cwd=checkout)
 
     [dist, *_] = (checkout / "dist").glob("*")
-    assert dist.name == f"twine-sampleproject-3.0.0.post{tag}.tar.gz"
+    # NOTE: newer versions of setuptools (invoked via build) adhere to PEP 625,
+    # causing the dist name to be `twine_sampleproject` instead of
+    # `twine-sampleproject`. Both are allowed here for now, but the hyphenated
+    # version can be removed eventually.
+    # See: https://github.com/pypa/setuptools/issues/3593
+    assert dist.name in (
+        f"twine-sampleproject-3.0.0.post{tag}.tar.gz",
+        f"twine_sampleproject-3.0.0.post{tag}.tar.gz",
+    )
 
     return dist
 
