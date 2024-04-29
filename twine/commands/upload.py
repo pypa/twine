@@ -94,6 +94,7 @@ def _make_package(
 
 class Inputs(NamedTuple):
     """Represents structured user inputs."""
+
     dists: List[str]
     signatures: Dict[str, str]
     attestations_by_dist: Dict[str, List[str]]

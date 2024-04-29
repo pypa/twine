@@ -119,9 +119,9 @@ def test_split_inputs():
         helpers.NEW_SDIST_FIXTURE,
     ]
 
-    dists, signatures, attestations_by_dist = upload._split_inputs(inputs)
+    inputs = upload._split_inputs(inputs)
 
-    assert dists == [
+    assert inputs.dists == [
         helpers.WHEEL_FIXTURE,
         helpers.SDIST_FIXTURE,
         helpers.NEW_WHEEL_FIXTURE,
@@ -132,9 +132,9 @@ def test_split_inputs():
         os.path.basename(dist) + ".asc": dist + ".asc"
         for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
     }
-    assert signatures == expected_signatures
+    assert inputs.signatures == expected_signatures
 
-    assert attestations_by_dist == {
+    assert inputs.attestations_by_dist == {
         helpers.WHEEL_FIXTURE: [
             helpers.WHEEL_FIXTURE + ".build.attestation",
             helpers.WHEEL_FIXTURE + ".publish.attestation",
