@@ -101,8 +101,8 @@ def _split_inputs(
     buckets: upload files (i.e. dists), signatures, and attestations.
 
     Upload files are returned as a linear list, signatures are returned as a
-    dict of `basename -> path`, and attestations are returned as a dict of
-    `dist-path -> [attestation-path]`.
+    dict of ``basename -> path``, and attestations are returned as a dict of
+    ``dist-path -> [attestation-path]``.
     """
 
     signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
