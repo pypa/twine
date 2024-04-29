@@ -106,9 +106,7 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
 
 
 def test_split_inputs():
-    """
-    Split inputs into dists, signatures, and attestations.
-    """
+    """Split inputs into dists, signatures, and attestations."""
     inputs = [
         helpers.WHEEL_FIXTURE,
         helpers.WHEEL_FIXTURE + ".asc",

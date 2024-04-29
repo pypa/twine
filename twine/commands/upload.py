@@ -17,7 +17,6 @@ import argparse
 import fnmatch
 import logging
 import os.path
-from collections import defaultdict
 from typing import Dict, List, Tuple, cast
 
 import requests
@@ -97,14 +96,14 @@ def _split_inputs(
     inputs: List[str],
 ) -> Tuple[List[str], Dict[str, str], Dict[str, List[str]]]:
     """
-    Split the unstructured list of input files provided by the user into three
-    buckets: upload files (i.e. dists), signatures, and attestations.
+    Split the unstructured list of input files provided by the user into groups.
+
+    Three groups are returned: upload files (i.e. dists), signatures, and attestations.
 
     Upload files are returned as a linear list, signatures are returned as a
     dict of ``basename -> path``, and attestations are returned as a dict of
     ``dist-path -> [attestation-path]``.
     """
-
     signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
     attestations = set(fnmatch.filter(inputs, "*.*.attestation"))
     dists = [
