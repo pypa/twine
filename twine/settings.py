@@ -45,6 +45,7 @@ class Settings:
     def __init__(
         self,
         *,
+        attestations: bool = False,
         sign: bool = False,
         sign_with: str = "gpg",
         identity: Optional[str] = None,
@@ -64,6 +65,8 @@ class Settings:
     ) -> None:
         """Initialize our settings instance.
 
+        :param attestations:
+            Whether the package file should be uploaded with attestations.
         :param sign:
             Configure whether the package file should be signed.
         :param sign_with:
@@ -114,6 +117,7 @@ class Settings:
             repository_name=repository_name,
             repository_url=repository_url,
         )
+        self.attestations = attestations
         self._handle_package_signing(
             sign=sign,
             sign_with=sign_with,
@@ -174,6 +178,12 @@ class Settings:
             help="The repository (package index) URL to upload the package to."
             " This overrides --repository. "
             "(Can also be set via %(env)s environment variable.)",
+        )
+        parser.add_argument(
+            "--attestations",
+            action="store_true",
+            default=False,
+            help="Upload each file's associated attestations.",
         )
         parser.add_argument(
             "-s",

@@ -14,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import fnmatch
 import logging
 import os.path
-from typing import Dict, List, cast
+from typing import Dict, List, NamedTuple, cast
 
 import requests
 from rich import print
@@ -91,6 +92,44 @@ def _make_package(
     return package
 
 
+class Inputs(NamedTuple):
+    """Represents structured user inputs."""
+
+    dists: List[str]
+    signatures: Dict[str, str]
+    attestations_by_dist: Dict[str, List[str]]
+
+
+def _split_inputs(
+    inputs: List[str],
+) -> Inputs:
+    """
+    Split the unstructured list of input files provided by the user into groups.
+
+    Three groups are returned: upload files (i.e. dists), signatures, and attestations.
+
+    Upload files are returned as a linear list, signatures are returned as a
+    dict of ``basename -> path``, and attestations are returned as a dict of
+    ``dist-path -> [attestation-path]``.
+    """
+    signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
+    attestations = fnmatch.filter(inputs, "*.*.attestation")
+    dists = [
+        dist
+        for dist in inputs
+        if dist not in (set(signatures.values()) | set(attestations))
+    ]
+
+    attestations_by_dist = {}
+    for dist in dists:
+        dist_basename = os.path.basename(dist)
+        attestations_by_dist[dist] = [
+            a for a in attestations if os.path.basename(a).startswith(dist_basename)
+        ]
+
+    return Inputs(dists, signatures, attestations_by_dist)
+
+
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     """Upload one or more distributions to a repository, and display the progress.
 
@@ -105,7 +144,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         The configured options related to uploading to a repository.
     :param dists:
         The distribution files to upload to the repository. This can also include
-        ``.asc`` files; the GPG signatures will be added to the corresponding uploads.
+        ``.asc`` and ``.attestation`` files, which will be added to their respective
+        file uploads.
 
     :raises twine.exceptions.TwineException:
         The upload failed due to a configuration error.
@@ -113,9 +153,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         The repository responded with an error.
     """
     dists = commands._find_dists(dists)
-    # Determine if the user has passed in pre-signed distributions
-    signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
-    uploads = [i for i in dists if not i.endswith(".asc")]
+    # Determine if the user has passed in pre-signed distributions or any attestations.
+    uploads, signatures, _ = _split_inputs(dists)
 
     upload_settings.check_repository_url()
     repository_url = cast(str, upload_settings.repository_config["repository"])

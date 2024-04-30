@@ -164,3 +164,7 @@ class TestArgumentParsing:
         monkeypatch.setenv("TWINE_NON_INTERACTIVE", "0")
         args = self.parse_args([])
         assert not args.non_interactive
+
+    def test_attestations_flag(self):
+        args = self.parse_args(["--attestations"])
+        assert args.attestations
