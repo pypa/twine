@@ -69,10 +69,11 @@ def test_make_package_pre_signed_dist(upload_settings, caplog):
     upload_settings.sign = True
     upload_settings.verbose = True
 
-    package = upload._make_package(filename, signatures, upload_settings)
+    package = upload._make_package(filename, signatures, [], upload_settings)
 
     assert package.filename == filename
     assert package.gpg_signature is not None
+    assert package.attestations is None
 
     assert caplog.messages == [
         f"{filename} ({expected_size})",
@@ -94,7 +95,7 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
 
     monkeypatch.setattr(package_file.PackageFile, "sign", stub_sign)
 
-    package = upload._make_package(filename, signatures, upload_settings)
+    package = upload._make_package(filename, signatures, [], upload_settings)
 
     assert package.filename == filename
     assert package.gpg_signature is not None
@@ -103,6 +104,16 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
         f"{filename} ({expected_size})",
         f"Signed with {package.signed_filename}",
     ]
+
+
+def test_make_package_attestations_flagged_but_missing(upload_settings):
+    """Fail when the user requests attestations but does not supply any attestations."""
+    upload_settings.attestations = True
+
+    with pytest.raises(
+        exceptions.InvalidDistribution, match="Upload with attestations requested"
+    ):
+        upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
 
 
 def test_split_inputs():
