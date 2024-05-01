@@ -11,6 +11,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import json
 import string
 
 import pretend
@@ -114,6 +115,40 @@ def test_package_signed_name_is_correct():
     assert package.signed_filename == (filename + ".asc")
 
 
+def test_package_add_attestations(tmp_path):
+    package = package_file.PackageFile.from_filename(helpers.WHEEL_FIXTURE, None)
+
+    assert package.attestations is None
+
+    attestations = []
+    for i in range(3):
+        path = tmp_path / f"fake.{i}.attestation"
+        path.write_text(json.dumps({"fake": f"attestation {i}"}))
+        attestations.append(str(path))
+
+    package.add_attestations(attestations)
+
+    assert package.attestations == [
+        {"fake": "attestation 0"},
+        {"fake": "attestation 1"},
+        {"fake": "attestation 2"},
+    ]
+
+
+def test_package_add_attestations_invalid_json(tmp_path):
+    package = package_file.PackageFile.from_filename(helpers.WHEEL_FIXTURE, None)
+
+    assert package.attestations is None
+
+    attestation = tmp_path / "fake.publish.attestation"
+    attestation.write_text("this is not valid JSON")
+
+    with pytest.raises(
+        exceptions.InvalidDistribution, match="invalid JSON in attestation"
+    ):
+        package.add_attestations([attestation])
+
+
 @pytest.mark.parametrize(
     "pkg_name,expected_name",
     [
@@ -185,7 +220,8 @@ def test_metadata_dictionary_keys():
 
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
-def test_metadata_dictionary_values(gpg_signature):
+@pytest.mark.parametrize("attestation", [(None), ({"fake": "attestation"})])
+def test_metadata_dictionary_values(gpg_signature, attestation):
     """Pass values from pkginfo.Distribution through to dictionary."""
     meta = pretend.stub(
         name="whatever",
@@ -226,6 +262,8 @@ def test_metadata_dictionary_values(gpg_signature):
         filetype=pretend.stub(),
     )
     package.gpg_signature = gpg_signature
+    if attestation:
+        package.attestations = [attestation]
 
     result = package.metadata_dictionary()
 
@@ -276,6 +314,12 @@ def test_metadata_dictionary_values(gpg_signature):
 
     # GPG signature
     assert result.get("gpg_signature") == gpg_signature
+
+    # Attestations
+    if attestation:
+        assert result["attestations"] == json.dumps(package.attestations)
+    else:
+        assert "attestations" not in result
 
 
 TWINE_1_5_0_WHEEL_HEXDIGEST = package_file.Hexdigest(

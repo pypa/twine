@@ -73,9 +73,16 @@ def skip_upload(
 
 
 def _make_package(
-    filename: str, signatures: Dict[str, str], upload_settings: settings.Settings
+    filename: str,
+    signatures: Dict[str, str],
+    attestations: List[str],
+    upload_settings: settings.Settings,
 ) -> package_file.PackageFile:
-    """Create and sign a package, based off of filename, signatures and settings."""
+    """Create and sign a package, based off of filename, signatures, and settings.
+
+    Additionally, any supplied attestations are attached to the package when
+    the settings indicate to do so.
+    """
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
 
     signed_name = package.signed_basefilename
@@ -83,6 +90,17 @@ def _make_package(
         package.add_gpg_signature(signatures[signed_name], signed_name)
     elif upload_settings.sign:
         package.sign(upload_settings.sign_with, upload_settings.identity)
+
+    # Attestations are only attached if explicitly requested with `--attestations`.
+    if upload_settings.attestations:
+        # Passing `--attestations` without any actual attestations present
+        # indicates user confusion, so we fail rather than silently allowing it.
+        if not attestations:
+            raise exceptions.InvalidDistribution(
+                "Upload with attestations requested, but "
+                f"{filename} has no associated attestations"
+            )
+        package.add_attestations(attestations)
 
     file_size = utils.get_file_size(package.filename)
     logger.info(f"{package.filename} ({file_size})")
@@ -154,14 +172,17 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     """
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions or any attestations.
-    uploads, signatures, _ = _split_inputs(dists)
+    uploads, signatures, attestations_by_dist = _split_inputs(dists)
 
     upload_settings.check_repository_url()
     repository_url = cast(str, upload_settings.repository_config["repository"])
     print(f"Uploading distributions to {repository_url}")
 
     packages_to_upload = [
-        _make_package(filename, signatures, upload_settings) for filename in uploads
+        _make_package(
+            filename, signatures, attestations_by_dist[filename], upload_settings
+        )
+        for filename in uploads
     ]
 
     if any(p.gpg_signature for p in packages_to_upload):

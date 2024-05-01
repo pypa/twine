@@ -13,11 +13,12 @@
 # limitations under the License.
 import hashlib
 import io
+import json
 import logging
 import os
 import re
 import subprocess
-from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union, cast
 
 import importlib_metadata
 import pkginfo
@@ -78,6 +79,7 @@ class PackageFile:
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
+        self.attestations: Optional[List[Dict[Any, str]]] = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -186,6 +188,9 @@ class PackageFile:
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature
 
+        if self.attestations is not None:
+            data["attestations"] = json.dumps(self.attestations)
+
         # FIPS disables MD5 and Blake2, making the digest values None. Some package
         # repositories don't allow null values, so this only sends non-null values.
         # See also: https://github.com/pypa/twine/issues/775
@@ -196,6 +201,19 @@ class PackageFile:
             data["blake2_256_digest"] = self.blake2_256_digest
 
         return data
+
+    def add_attestations(self, attestations: List[str]) -> None:
+        loaded_attestations = []
+        for attestation in attestations:
+            with open(attestation, "rb") as att:
+                try:
+                    loaded_attestations.append(json.load(att))
+                except json.JSONDecodeError:
+                    raise exceptions.InvalidDistribution(
+                        f"invalid JSON in attestation: {attestation}"
+                    )
+
+        self.attestations = loaded_attestations
 
     def add_gpg_signature(
         self, signature_filepath: str, signature_filename: str
