@@ -317,7 +317,7 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
 
     # Attestations
     if attestation:
-        assert result.get("attestations") == json.dumps(package.attestations)
+        assert result["attestations"] == json.dumps(package.attestations)
     else:
         assert "attestations" not in result
 
