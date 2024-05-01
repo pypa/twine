@@ -206,14 +206,12 @@ class PackageFile:
         loaded_attestations = []
         for attestation in attestations:
             with open(attestation, "rb") as att:
-                raw_attestation = att.read()
-
-            try:
-                loaded_attestations.append(json.loads(raw_attestation))
-            except json.JSONDecodeError:
-                raise exceptions.InvalidDistribution(
-                    f"invalid JSON in attestation: {attestation}"
-                )
+                try:
+                    loaded_attestations.append(json.load(att))
+                except json.JSONDecodeError:
+                    raise exceptions.InvalidDistribution(
+                        f"invalid JSON in attestation: {attestation}"
+                    )
 
         self.attestations = loaded_attestations
 
