@@ -670,3 +670,16 @@ def test_check_status_code_for_wrong_repo_url(repo_url, upload_settings, stub_re
                 helpers.NEW_WHEEL_FIXTURE,
             ],
         )
+
+
+def test_upload_rejects_attestations_non_pypi(upload_settings):
+    upload_settings.repository_config["repository"] = "https://notpypi.example.com"
+    upload_settings.attestations = True
+
+    with pytest.raises(
+        exceptions.InvalidConfiguration, match="may only be used with PyPI and TestPyPI"
+    ):
+        upload.upload(
+            upload_settings,
+            [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".foo.attestation"],
+        )
