@@ -220,7 +220,8 @@ def test_metadata_dictionary_keys():
 
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
-def test_metadata_dictionary_values(gpg_signature):
+@pytest.mark.parametrize("attestation", [(None), ({"fake": "attestation"})])
+def test_metadata_dictionary_values(gpg_signature, attestation):
     """Pass values from pkginfo.Distribution through to dictionary."""
     meta = pretend.stub(
         name="whatever",
@@ -261,6 +262,8 @@ def test_metadata_dictionary_values(gpg_signature):
         filetype=pretend.stub(),
     )
     package.gpg_signature = gpg_signature
+    if attestation:
+        package.attestations = [attestation]
 
     result = package.metadata_dictionary()
 
@@ -311,6 +314,12 @@ def test_metadata_dictionary_values(gpg_signature):
 
     # GPG signature
     assert result.get("gpg_signature") == gpg_signature
+
+    # Attestations
+    if attestation:
+        assert result.get("attestations") == json.dumps(package.attestations)
+    else:
+        assert "attestations" not in result
 
 
 TWINE_1_5_0_WHEEL_HEXDIGEST = package_file.Hexdigest(
