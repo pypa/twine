@@ -170,12 +170,24 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     :raises requests.HTTPError:
         The repository responded with an error.
     """
+    upload_settings.check_repository_url()
+    repository_url = cast(str, upload_settings.repository_config["repository"])
+
+    # Attestations are only supported on PyPI and TestPyPI at the moment.
+    # We fail early here if the user requests any other index, to prevent
+    # users from attempting to use `--attestations` on other indices and
+    # failing bugs when upload fails.
+    if upload_settings.attestations and not repository_url.startswith(
+        (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
+    ):
+        raise exceptions.InvalidConfiguration(
+            "The --attestations flag may only be used with PyPI and TestPyPI"
+        )
+
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions or any attestations.
     uploads, signatures, attestations_by_dist = _split_inputs(dists)
 
-    upload_settings.check_repository_url()
-    repository_url = cast(str, upload_settings.repository_config["repository"])
     print(f"Uploading distributions to {repository_url}")
 
     packages_to_upload = [
