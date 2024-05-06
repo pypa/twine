@@ -174,14 +174,15 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     repository_url = cast(str, upload_settings.repository_config["repository"])
 
     # Attestations are only supported on PyPI and TestPyPI at the moment.
-    # We fail early here if the user requests any other index, to prevent
-    # users from attempting to use `--attestations` on other indices and
-    # failing bugs when upload fails.
+    # We warn instead of failing to allow twine to be used in local testing
+    # setups (where the PyPI deployment doesn't have a well-known domain).
     if upload_settings.attestations and not repository_url.startswith(
         (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
     ):
-        raise exceptions.InvalidConfiguration(
-            "The --attestations flag may only be used with PyPI and TestPyPI"
+        logger.warning(
+            "Only PyPI and TestPyPI support attestations; "
+            "if you experience failures, remove the --attestations flag and "
+            "re-try this command"
         )
 
     dists = commands._find_dists(dists)

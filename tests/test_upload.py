@@ -672,14 +672,20 @@ def test_check_status_code_for_wrong_repo_url(repo_url, upload_settings, stub_re
         )
 
 
-def test_upload_rejects_attestations_non_pypi(upload_settings):
+def test_upload_warns_attestations_non_pypi(upload_settings, caplog, stub_response):
     upload_settings.repository_config["repository"] = "https://notpypi.example.com"
     upload_settings.attestations = True
 
-    with pytest.raises(
-        exceptions.InvalidConfiguration, match="may only be used with PyPI and TestPyPI"
-    ):
+    # This fails because the attestation isn't a real file, which is fine
+    # since our functionality under test happens before the failure.
+    with pytest.raises(exceptions.InvalidDistribution):
         upload.upload(
             upload_settings,
             [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".foo.attestation"],
         )
+
+    assert (
+        "Only PyPI and TestPyPI support attestations; if you experience "
+        "failures, remove the --attestations flag and re-try this command"
+        in caplog.messages
+    )
