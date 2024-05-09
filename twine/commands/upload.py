@@ -17,6 +17,7 @@ import argparse
 import fnmatch
 import logging
 import os.path
+import re
 from typing import Dict, List, NamedTuple, cast
 
 import requests
@@ -148,6 +149,26 @@ def _split_inputs(
     return Inputs(dists, signatures, attestations_by_dist)
 
 
+def _sanitize_url(url) -> str:
+    """
+    Sanitize URLs, removing any user:password combinations and replacing them with
+    asterisks.  Returns the original URL if the string is a non-matching pattern.
+
+    :param url:
+        str containing a URL to sanitize.
+
+    return:
+        str either sanitized or as entered depending on pattern match.
+    """
+    pattern = "(.*https?://)(\w+:\w+)@(\w+\..*)"
+    m = re.match(pattern, url)
+    if m:
+        newurl = f"{m.group(1)}*****:*****@{m.group(3)}"
+        return newurl
+    else:
+        return url
+
+
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     """Upload one or more distributions to a repository, and display the progress.
 
@@ -189,7 +210,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     # Determine if the user has passed in pre-signed distributions or any attestations.
     uploads, signatures, attestations_by_dist = _split_inputs(dists)
 
-    print(f"Uploading distributions to {repository_url}")
+    print(f"Uploading distributions to {_sanitize_url(repository_url)}")
 
     packages_to_upload = [
         _make_package(
