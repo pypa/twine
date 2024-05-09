@@ -149,8 +149,9 @@ def _split_inputs(
     return Inputs(dists, signatures, attestations_by_dist)
 
 
-def _sanitize_url(url) -> str:
-    """
+def _sanitize_url(url: str) -> str:
+    """Sanitize a URL.
+
     Sanitize URLs, removing any user:password combinations and replacing them with
     asterisks.  Returns the original URL if the string is a non-matching pattern.
 
@@ -160,7 +161,7 @@ def _sanitize_url(url) -> str:
     return:
         str either sanitized or as entered depending on pattern match.
     """
-    pattern = "(.*https?://)(\w+:\w+)@(\w+\..*)"
+    pattern = r"(.*https?://)(\w+:\w+)@(\w+\..*)"
     m = re.match(pattern, url)
     if m:
         newurl = f"{m.group(1)}*****:*****@{m.group(3)}"
