@@ -96,6 +96,8 @@ def test_read_wheel_empty_metadata(tmpdir):
 
     with pytest.raises(
         exceptions.InvalidDistribution,
-        match=re.escape(f"No METADATA in archive: {whl_file}"),
+        match=re.escape(
+            f"No METADATA in archive or METADATA missing 'Metadata-Version': {whl_file}"
+        ),
     ):
         wheel.Wheel(whl_file)

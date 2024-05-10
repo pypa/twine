@@ -73,16 +73,21 @@ class Wheel(distribution.Distribution):
                 "Not a known archive format for file: %s" % fqn
             )
 
+        searched_files: List[str] = []
         try:
             for path in self.find_candidate_metadata_files(names):
                 candidate = "/".join(path)
                 data = read_file(candidate)
                 if b"Metadata-Version" in data:
                     return data
+                searched_files.append(candidate)
         finally:
             archive.close()
 
-        raise exceptions.InvalidDistribution("No METADATA in archive: %s" % fqn)
+        raise exceptions.InvalidDistribution(
+            "No METADATA in archive or METADATA missing 'Metadata-Version': "
+            "%s (searched %s)" % (fqn, ",".join(searched_files))
+        )
 
     def parse(self, data: bytes) -> None:
         super().parse(data)
