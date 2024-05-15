@@ -189,7 +189,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     # Determine if the user has passed in pre-signed distributions or any attestations.
     uploads, signatures, attestations_by_dist = _split_inputs(dists)
 
-    print(f"Uploading distributions to {repository_url}")
+    print(f"Uploading distributions to {utils.sanitize_url(repository_url)}")
 
     packages_to_upload = [
         _make_package(
@@ -250,8 +250,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         # redirects as well.
         if resp.is_redirect:
             raise exceptions.RedirectDetected.from_args(
-                repository_url,
-                resp.headers["location"],
+                utils.sanitize_url(repository_url),
+                utils.sanitize_url(resp.headers["location"]),
             )
 
         if skip_upload(resp, upload_settings.skip_existing, package):
