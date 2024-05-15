@@ -12,6 +12,24 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 5.1.0 (2024-05-15)
+------------------------
+
+Features
+^^^^^^^^
+
+- Add the experimental ``--attestations`` flag. (`#1095 <https://github.com/pypa/twine/issues/1095>`_)
+
+
+Twine 5.1.0 (2024-05-15)
+------------------------
+
+Misc
+^^^^
+
+- `#1104 <https://github.com/pypa/twine/issues/1104>`_
+
+
 Twine 5.0.0 (2024-02-10)
 ------------------------
 

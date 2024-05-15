@@ -1,1 +1,0 @@
-This change will remove sensitive output in URLs for private repositories require a login provided in the format of http(s)://<user>:<pass>@domain.com, replacing the sensitive text with a sanitized "*****:*****" to prevent these details from showing up in log files.
