@@ -150,6 +150,31 @@ def test_get_repository_config_missing(config_file):
     assert utils.get_repository_from_config(config_file, "pypi") == exp
 
 
+def test_get_repository_config_url_with_auth(config_file):
+    repository_url = "https://user:pass@notexisting.python.org/pypi"
+    exp = {
+        "repository": "https://notexisting.python.org/pypi",
+        "username": "user",
+        "password": "pass",
+    }
+    assert utils.get_repository_from_config(config_file, "foo", repository_url) == exp
+    assert utils.get_repository_from_config(config_file, "pypi", repository_url) == exp
+
+
+@pytest.mark.parametrize(
+    "input_url, expected_url",
+    [
+        ("https://upload.pypi.org/legacy/", "https://upload.pypi.org/legacy/"),
+        (
+            "https://user:pass@upload.pypi.org/legacy/",
+            "https://********@upload.pypi.org/legacy/",
+        ),
+    ],
+)
+def test_sanitize_url(input_url: str, expected_url: str) -> None:
+    assert utils.sanitize_url(input_url) == expected_url
+
+
 @pytest.mark.parametrize(
     "repo_url, message",
     [
