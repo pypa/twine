@@ -195,7 +195,7 @@ HTTPS. Its three purposes are to be:
    for publishing on any Python package index
 
 
-Currently, twine has two principle functions: uploading new packages
+Currently, twine has two principal functions: uploading new packages
 and registering new `projects`_ (``register`` is no longer supported
 on PyPI, and is in Twine for use with other package indexes).
 
