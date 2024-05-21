@@ -1,4 +1,3 @@
-
 Fix bug for Repository URLs with auth where the port was lost. When attempting
 to prevent printing authentication credentials in URLs provided with username
 and password, we did not properly handle the case where the URL also contains
