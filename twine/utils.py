@@ -174,7 +174,9 @@ def _config_from_repository_url(url: str) -> RepositoryConfig:
     if parsed.username:
         config["username"] = parsed.username
         config["password"] = parsed.password
-        config["repository"] = urlunparse((parsed.scheme, parsed.hostname) + parsed[2:])
+        config["repository"] = cast(
+            str, rfc3986.urlparse(url).copy_with(userinfo=None).unsplit()
+        )
     config["repository"] = normalize_repository_url(cast(str, config["repository"]))
     return config
 
