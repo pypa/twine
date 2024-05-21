@@ -150,15 +150,38 @@ def test_get_repository_config_missing(config_file):
     assert utils.get_repository_from_config(config_file, "pypi") == exp
 
 
-def test_get_repository_config_url_with_auth(config_file):
-    repository_url = "https://user:pass@notexisting.python.org/pypi"
-    exp = {
-        "repository": "https://notexisting.python.org/pypi",
-        "username": "user",
-        "password": "pass",
-    }
-    assert utils.get_repository_from_config(config_file, "foo", repository_url) == exp
-    assert utils.get_repository_from_config(config_file, "pypi", repository_url) == exp
+@pytest.mark.parametrize(
+    "repository_url, expected_config",
+    [
+        (
+            "https://user:pass@notexisting.python.org/pypi",
+            {
+                "repository": "https://notexisting.python.org/pypi",
+                "username": "user",
+                "password": "pass",
+            },
+        ),
+        (
+            "https://auser:pass@pypi.proxy.local.repo.net:8443",
+            {
+                "repository": "https://pypi.proxy.local.repo.net:8443",
+                "username": "auser",
+                "password": "pass",
+            },
+        ),
+    ],
+)
+def test_get_repository_config_url_with_auth(
+    config_file, repository_url, expected_config
+):
+    assert (
+        utils.get_repository_from_config(config_file, "foo", repository_url)
+        == expected_config
+    )
+    assert (
+        utils.get_repository_from_config(config_file, "pypi", repository_url)
+        == expected_config
+    )
 
 
 @pytest.mark.parametrize(
