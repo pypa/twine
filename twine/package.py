@@ -88,7 +88,7 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = _safe_name(metadata.name)
+        self.safe_name = _safe_name(cast(str, metadata.name))
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
