@@ -18,7 +18,19 @@ import logging
 import os
 import re
 import subprocess
-from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union, cast
+import warnings
+from typing import (
+    Any,
+    Dict,
+    Iterable,
+    List,
+    NamedTuple,
+    Optional,
+    Sequence,
+    Tuple,
+    Union,
+    cast,
+)
 
 import importlib_metadata
 import pkginfo
@@ -95,7 +107,8 @@ class PackageFile:
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
                 try:
-                    meta = DIST_TYPES[dtype](filename)
+                    with warnings.catch_warnings(record=True) as captured:
+                        meta = DIST_TYPES[dtype](filename)
                 except EOFError:
                     raise exceptions.InvalidDistribution(
                         "Invalid distribution file: '%s'" % os.path.basename(filename)
@@ -107,7 +120,13 @@ class PackageFile:
                 "Unknown distribution format: '%s'" % os.path.basename(filename)
             )
 
-        # If pkginfo encounters a metadata version it doesn't support, it may give us
+        supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
+        if cls._is_unknown_metadata_version(captured):
+            raise exceptions.InvalidDistribution(
+                "Make sure the distribution is using a supported Metadata-Version: "
+                f"{', '.join(supported_metadata)}."
+            )
+        # If pkginfo <1.11 encounters a metadata version it doesn't support, it may give
         # back empty metadata. At the very least, we should have a name and version,
         # which could also be empty if, for example, a MANIFEST.in doesn't include
         # setup.cfg.
@@ -115,11 +134,11 @@ class PackageFile:
             f.capitalize() for f in ["name", "version"] if not getattr(meta, f)
         ]
         if missing_fields:
-            supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
             raise exceptions.InvalidDistribution(
                 "Metadata is missing required fields: "
-                f"{', '.join(missing_fields)}.\n"
-                "Make sure the distribution includes the files where those fields "
+                f"{', '.join(missing_fields)}."
+                # TODO: Remove this section after requiring pkginfo>=1.11
+                "\nMake sure the distribution includes the files where those fields "
                 "are specified, and is using a supported Metadata-Version: "
                 f"{', '.join(supported_metadata)}."
             )
@@ -136,6 +155,13 @@ class PackageFile:
             py_version = None
 
         return cls(filename, comment, meta, py_version, dtype)
+
+    @staticmethod
+    def _is_unknown_metadata_version(
+        captured: Iterable[warnings.WarningMessage],
+    ) -> bool:
+        NMV = getattr(pkginfo.distribution, "NewMetadataVersion", None)
+        return any(warning.category is NMV for warning in captured)
 
     def metadata_dictionary(self) -> Dict[str, MetadataValue]:
         """Merge multiple sources of metadata into a single dictionary.
