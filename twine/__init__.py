@@ -35,10 +35,10 @@ import importlib_metadata
 metadata = importlib_metadata.metadata("twine")
 
 
-__title__ = metadata["name"]
-__summary__ = metadata["summary"]
-__uri__ = metadata["home-page"]
-__version__ = metadata["version"]
-__author__ = metadata["author"]
-__email__ = metadata["author-email"]
+__title__ = metadata.get("name")
+__summary__ = metadata.get("summary")
+__uri__ = metadata.get("home-page")
+__version__ = metadata.get("version")
+__author__ = metadata.get("author")
+__email__ = metadata.get("author-email")
 __license__ = None
