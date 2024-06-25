@@ -70,6 +70,7 @@ sampleproject_token = (
 )
 
 
+@pytest.mark.xfail(reason="service is unreliable (#684)")
 def test_pypi_upload(sampleproject_dist):
     command = [
         "upload",
@@ -84,6 +85,7 @@ def test_pypi_upload(sampleproject_dist):
     cli.dispatch(command)
 
 
+@pytest.mark.xfail(reason="service is unreliable (#684)")
 def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
     command = [
         "twine",
