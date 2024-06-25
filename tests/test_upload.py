@@ -604,8 +604,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
     monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
         "TWINE_REPOSITORY": repo,
-        # Ignored because TWINE_REPOSITORY is PyPI/TestPyPI
-        "TWINE_USERNAME": "this-is-ignored",
+        "TWINE_USERNAME": "pypiuser",
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
@@ -613,7 +612,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
         cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
-    assert "__token__" == upload_settings.username
+    assert "pypiuser" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
 
 
