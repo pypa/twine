@@ -33,12 +33,14 @@ __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 import importlib_metadata
 
 metadata = importlib_metadata.metadata("twine")
+_urls = (v.split(",") for v in metadata.get_all("Project-URL", []) if v)
+_author_email = metadata["Author-email"].strip(">").split("<")
 
 
-__title__ = metadata["name"]
-__summary__ = metadata["summary"]
-__uri__ = metadata["home-page"]
-__version__ = metadata["version"]
-__author__ = metadata["author"]
-__email__ = metadata["author-email"]
+__title__ = metadata["Name"]
+__summary__ = metadata["Summary"]
+__uri__ = next(iter(v.strip() for k, v in _urls if k == "Homepage"))
+__version__ = metadata["Version"]
+__author__ = _author_email[0].strip()
+__email__ = _author_email[1]
 __license__ = None
