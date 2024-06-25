@@ -39,6 +39,9 @@ dependencies = [
 	"keyring >= 15.1",
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
+
+	# workaround for #1116
+	"pkginfo < 1.11",
 ]
 dynamic = ["version"]
 
