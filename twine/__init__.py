@@ -37,8 +37,10 @@ metadata = importlib_metadata.metadata("twine")
 
 __title__ = metadata["name"]
 __summary__ = metadata["summary"]
-__uri__ = metadata["home-page"]
+__uri__ = "https://twine.readthedocs.io/"
 __version__ = metadata["version"]
-__author__ = metadata["author"]
-__email__ = metadata["author-email"]
+# __author__ = metadata["author"]
+__author__ = "Donald Stufft and individual contributors"
+# __email__ = metadata["author-email"]
+__email__ = "donald@stufft.io"
 __license__ = None
