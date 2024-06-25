@@ -31,9 +31,9 @@ class Resolver:
     @property
     @functools.lru_cache()
     def username(self) -> Optional[str]:
-        if self.is_pypi():
-            # Username is invariant.
-            return "__token__"
+        if self.is_pypi() and not self.input.username:
+            # Default username.
+            self.input.username = "__token__"
 
         return utils.get_userpass_value(
             self.input.username,
