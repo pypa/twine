@@ -33,6 +33,7 @@ from typing import (
 )
 
 import importlib_metadata
+import packaging.version
 import pkginfo
 from rich import print
 
@@ -134,14 +135,15 @@ class PackageFile:
             f.capitalize() for f in ["name", "version"] if not getattr(meta, f)
         ]
         if missing_fields:
-            raise exceptions.InvalidDistribution(
-                "Metadata is missing required fields: "
-                f"{', '.join(missing_fields)}."
-                # TODO: Remove this section after requiring pkginfo>=1.11
-                "\nMake sure the distribution includes the files where those fields "
-                "are specified, and is using a supported Metadata-Version: "
-                f"{', '.join(supported_metadata)}."
-            )
+            msg = f"Metadata is missing required fields: {', '.join(missing_fields)}."
+            if cls._pkginfo_before_1_11():
+                msg += (
+                    "\n"
+                    "Make sure the distribution includes the files where those fields "
+                    "are specified, and is using a supported Metadata-Version: "
+                    f"{', '.join(supported_metadata)}."
+                )
+            raise exceptions.InvalidDistribution(msg)
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
@@ -162,6 +164,11 @@ class PackageFile:
     ) -> bool:
         NMV = getattr(pkginfo.distribution, "NewMetadataVersion", None)
         return any(warning.category is NMV for warning in captured)
+
+    @staticmethod
+    def _pkginfo_before_1_11() -> bool:
+        ver = packaging.version.Version(importlib_metadata.version("pkginfo"))
+        return ver < packaging.version.Version("1.11")
 
     def metadata_dictionary(self) -> Dict[str, MetadataValue]:
         """Merge multiple sources of metadata into a single dictionary.
