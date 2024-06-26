@@ -18,13 +18,7 @@ import logging
 import os
 import re
 import subprocess
-import sys
 from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union, cast
-
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
 
 import pkginfo
 from rich import print
@@ -32,6 +26,8 @@ from rich import print
 from twine import exceptions
 from twine import wheel
 from twine import wininst
+
+from .compat.py39 import importlib
 
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,
@@ -131,7 +127,7 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(path=[filename])
+            (dist,) = importlib.metadata.Distribution.discover(path=[filename])
             py_version = dist.metadata["Version"]
         elif dtype == "bdist_wheel":
             py_version = cast(wheel.Wheel, meta).py_version

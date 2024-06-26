@@ -31,14 +31,10 @@ __all__ = (
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
 import email.utils
-import sys
 
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
+from .compat.py39 import importlib
 
-metadata = importlib_metadata.metadata("twine")
+metadata = importlib.metadata.metadata("twine")
 
 
 __title__ = metadata["name"]

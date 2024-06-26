@@ -16,17 +16,14 @@ import logging.config
 import sys
 from typing import Any, List, Tuple
 
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
-
 import rich
 import rich.highlighter
 import rich.logging
 import rich.theme
 
 import twine
+
+from .compat.py39 import importlib
 
 args = argparse.Namespace()
 
@@ -84,7 +81,7 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     ]
     if sys.version_info < (3, 10):
         deps.append("importlib-metadata")
-    return [(dep, importlib_metadata.version(dep)) for dep in deps]
+    return [(dep, importlib.metadata.version(dep)) for dep in deps]
 
 
 def dep_versions() -> str:
@@ -94,7 +91,7 @@ def dep_versions() -> str:
 
 
 def dispatch(argv: List[str]) -> Any:
-    registered_commands = importlib_metadata.entry_points(
+    registered_commands = importlib.metadata.entry_points(
         group="twine.registered_commands"
     )
 
