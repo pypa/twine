@@ -13,7 +13,6 @@
 # limitations under the License.
 import argparse
 import logging.config
-import sys
 from typing import Any, List, Tuple
 
 import rich
@@ -23,6 +22,7 @@ import rich.theme
 
 import twine
 
+from .compat import py39
 from .compat.py39 import importlib
 
 args = argparse.Namespace()
@@ -72,15 +72,13 @@ def configure_output() -> None:
 
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
-    deps = [
+    deps = (
         "keyring",
         "pkginfo",
         "requests",
         "requests-toolbelt",
         "urllib3",
-    ]
-    if sys.version_info < (3, 10):
-        deps.append("importlib-metadata")
+    ) + py39.deps
     return [(dep, importlib.metadata.version(dep)) for dep in deps]
 
 
