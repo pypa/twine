@@ -291,6 +291,7 @@ nitpicky = True
 # TODO: Try to add these to intersphinx_mapping
 nitpick_ignore_regex = [
     (r"py:.*", r"pkginfo.*"),
+    ("py:class", r"warnings\.WarningMessage"),
 ]
 
 # -- Options for apidoc output ------------------------------------------------
