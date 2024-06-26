@@ -1,0 +1,1 @@
+Username for PyPI and Test PyPI now defaults to __token__ but no longer overrides a username configured in the environment or supplied on the command line. Workflows still supplying anything other than __token__ for the username when uploading to PyPI or Test PyPI will now fail. Either supply __token__ or do not supply a username at all.
