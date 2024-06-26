@@ -1,14 +1,16 @@
-.. image:: https://img.shields.io/pypi/v/twine.svg
+.. |twine-version| image:: https://img.shields.io/pypi/v/twine.svg
    :target: https://pypi.org/project/twine
 
-.. image:: https://img.shields.io/pypi/pyversions/twine.svg
+.. |python-versions| image:: https://img.shields.io/pypi/pyversions/twine.svg
    :target: https://pypi.org/project/twine
 
-.. image:: https://img.shields.io/readthedocs/twine
+.. |docs-badge| image:: https://img.shields.io/readthedocs/twine
    :target: https://twine.readthedocs.io
 
-.. image:: https://img.shields.io/github/actions/workflow/status/pypa/twine/main.yml?branch=main
+.. |build-badge| image:: https://img.shields.io/github/actions/workflow/status/pypa/twine/main.yml?branch=main
    :target: https://github.com/pypa/twine/actions
+
+|twine-version| |python-versions| |docs-badge| |build-badge|
 
 twine
 =====

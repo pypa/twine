@@ -1,4 +1,5 @@
 """Module containing logic for handling settings."""
+
 # Copyright 2018 Ian Stapleton Cordasco
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -44,6 +45,7 @@ class Settings:
     def __init__(
         self,
         *,
+        attestations: bool = False,
         sign: bool = False,
         sign_with: str = "gpg",
         identity: Optional[str] = None,
@@ -63,6 +65,8 @@ class Settings:
     ) -> None:
         """Initialize our settings instance.
 
+        :param attestations:
+            Whether the package file should be uploaded with attestations.
         :param sign:
             Configure whether the package file should be signed.
         :param sign_with:
@@ -113,6 +117,7 @@ class Settings:
             repository_name=repository_name,
             repository_url=repository_url,
         )
+        self.attestations = attestations
         self._handle_package_signing(
             sign=sign,
             sign_with=sign_with,
@@ -127,14 +132,12 @@ class Settings:
 
     @property
     def username(self) -> Optional[str]:
-        # Workaround for https://github.com/python/mypy/issues/5858
-        return cast(Optional[str], self.auth.username)
+        return self.auth.username
 
     @property
     def password(self) -> Optional[str]:
         with self._allow_noninteractive():
-            # Workaround for https://github.com/python/mypy/issues/5858
-            return cast(Optional[str], self.auth.password)
+            return self.auth.password
 
     def _allow_noninteractive(self) -> "contextlib.AbstractContextManager[None]":
         """Bypass NonInteractive error when client cert is present."""
@@ -175,6 +178,12 @@ class Settings:
             help="The repository (package index) URL to upload the package to."
             " This overrides --repository. "
             "(Can also be set via %(env)s environment variable.)",
+        )
+        parser.add_argument(
+            "--attestations",
+            action="store_true",
+            default=False,
+            help="Upload each file's associated attestations.",
         )
         parser.add_argument(
             "-s",
@@ -296,9 +305,6 @@ class Settings:
             self.config_file,
             repository_name,
             repository_url,
-        )
-        self.repository_config["repository"] = utils.normalize_repository_url(
-            cast(str, self.repository_config["repository"]),
         )
 
     def _handle_certificates(

@@ -79,7 +79,8 @@ def test_non_existent_package(register_settings):
         register.register(register_settings, package)
 
 
-def test_values_from_env(monkeypatch):
+@pytest.mark.parametrize("repo", ["pypi", "testpypi"])
+def test_values_from_env_pypi(monkeypatch, repo):
     """Use env vars for settings when run from command line."""
 
     def none_register(*args, **settings_kwargs):
@@ -88,7 +89,9 @@ def test_values_from_env(monkeypatch):
     replaced_register = pretend.call_recorder(none_register)
     monkeypatch.setattr(register, "register", replaced_register)
     testenv = {
-        "TWINE_USERNAME": "pypiuser",
+        "TWINE_REPOSITORY": repo,
+        # Ignored because the TWINE_REPOSITORY is PyPI/TestPyPI
+        "TWINE_USERNAME": "this-is-ignored",
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
@@ -96,5 +99,39 @@ def test_values_from_env(monkeypatch):
         cli.dispatch(["register", helpers.WHEEL_FIXTURE])
     register_settings = replaced_register.calls[0].args[0]
     assert "pypipassword" == register_settings.password
-    assert "pypiuser" == register_settings.username
+    assert "__token__" == register_settings.username
+    assert "/foo/bar.crt" == register_settings.cacert
+
+
+def test_values_from_env_not_pypi(monkeypatch, write_config_file):
+    """Use env vars for settings when run from command line."""
+    write_config_file(
+        """
+        [distutils]
+        index-servers =
+            notpypi
+
+        [notpypi]
+        repository: https://upload.example.org/legacy/
+        username:someusername
+        password:password
+        """
+    )
+
+    def none_register(*args, **settings_kwargs):
+        pass
+
+    replaced_register = pretend.call_recorder(none_register)
+    monkeypatch.setattr(register, "register", replaced_register)
+    testenv = {
+        "TWINE_REPOSITORY": "notpypi",
+        "TWINE_USERNAME": "someusername",
+        "TWINE_PASSWORD": "pypipassword",
+        "TWINE_CERT": "/foo/bar.crt",
+    }
+    with helpers.set_env(**testenv):
+        cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    register_settings = replaced_register.calls[0].args[0]
+    assert "pypipassword" == register_settings.password
+    assert "someusername" == register_settings.username
     assert "/foo/bar.crt" == register_settings.cacert

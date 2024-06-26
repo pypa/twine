@@ -19,7 +19,7 @@ import logging
 import os
 import os.path
 import unicodedata
-from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union
+from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union, cast
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -100,6 +100,24 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     return dict(config)
 
 
+def sanitize_url(url: str) -> str:
+    """Sanitize a URL.
+
+    Sanitize URLs, removing any user:password combinations and replacing them with
+    asterisks.  Returns the original URL if the string is a non-matching pattern.
+
+    :param url:
+        str containing a URL to sanitize.
+
+    return:
+        str either sanitized or as entered depending on pattern match.
+    """
+    uri = rfc3986.urlparse(url)
+    if uri.userinfo:
+        return cast(str, uri.copy_with(userinfo="*" * 8).unsplit())
+    return url
+
+
 def _validate_repository_url(repository_url: str) -> None:
     """Validate the given url for allowed schemes and components."""
     # Allowed schemes are http and https, based on whether the repository
@@ -126,14 +144,10 @@ def get_repository_from_config(
     # Prefer CLI `repository_url` over `repository` or .pypirc
     if repository_url:
         _validate_repository_url(repository_url)
-        return {
-            "repository": repository_url,
-            "username": None,
-            "password": None,
-        }
+        return _config_from_repository_url(repository_url)
 
     try:
-        return get_config(config_file)[repository]
+        config = get_config(config_file)[repository]
     except OSError as exc:
         raise exceptions.InvalidConfiguration(str(exc))
     except KeyError:
@@ -142,6 +156,9 @@ def get_repository_from_config(
             f"More info: https://packaging.python.org/specifications/pypirc/ "
         )
 
+    config["repository"] = normalize_repository_url(cast(str, config["repository"]))
+    return config
+
 
 _HOSTNAMES = {
     "pypi.python.org",
@@ -149,6 +166,19 @@ _HOSTNAMES = {
     "upload.pypi.org",
     "test.pypi.org",
 }
+
+
+def _config_from_repository_url(url: str) -> RepositoryConfig:
+    parsed = urlparse(url)
+    config = {"repository": url, "username": None, "password": None}
+    if parsed.username:
+        config["username"] = parsed.username
+        config["password"] = parsed.password
+        config["repository"] = cast(
+            str, rfc3986.urlparse(url).copy_with(userinfo=None).unsplit()
+        )
+    config["repository"] = normalize_repository_url(cast(str, config["repository"]))
+    return config
 
 
 def normalize_repository_url(url: str) -> str:

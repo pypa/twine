@@ -2,8 +2,8 @@
 Changelog
 =========
 
-This project follows the `semantic versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#semantic-versioning-preferred>`_
-and `pre-release versioning <https://packaging.python.org/guides/distributing-packages-using-setuptools/#pre-release-versioning>`_
+This project follows the `semantic versioning <https://packaging.python.org/en/latest/discussions/versioning/#semantic-versioning-vs-calendar-versioning>`_
+and `pre-release versioning <https://packaging.python.org/en/latest/discussions/versioning/>`_
 schemes recommended by the Python Packaging Authority.
 
 .. Do *NOT* add changelog entries here!
@@ -11,6 +11,39 @@ schemes recommended by the Python Packaging Authority.
    See https://twine.readthedocs.io/en/latest/contributing.html#changelog-entries for details.
 
 .. towncrier release notes start
+
+Twine 5.1.0 (2024-05-15)
+------------------------
+
+Features
+^^^^^^^^
+
+- Add the experimental ``--attestations`` flag. (`#1095 <https://github.com/pypa/twine/issues/1095>`_)
+
+
+Twine 5.1.0 (2024-05-15)
+------------------------
+
+Misc
+^^^^
+
+- `#1104 <https://github.com/pypa/twine/issues/1104>`_
+
+
+Twine 5.0.0 (2024-02-10)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Use ``email.message`` instead of ``cgi`` as ``cgi`` has been deprecated (`#969 <https://github.com/pypa/twine/issues/969>`_)
+
+
+Misc
+^^^^
+
+- `#931 <https://github.com/pypa/twine/issues/931>`_, `#991 <https://github.com/pypa/twine/issues/991>`_, `#1028 <https://github.com/pypa/twine/issues/1028>`_, `#1040 <https://github.com/pypa/twine/issues/1040>`_
+
 
 Twine 4.0.2 (2022-11-30)
 ------------------------
@@ -28,7 +61,7 @@ Bugfixes
 ^^^^^^^^
 
 - Improve logging when keyring fails. (`#890 <https://github.com/pypa/twine/issues/890>`_)
-- Reconfgure root logger to show all log messages. (`#896 <https://github.com/pypa/twine/issues/896>`_)
+- Reconfigure root logger to show all log messages. (`#896 <https://github.com/pypa/twine/issues/896>`_)
 
 
 Twine 4.0.0 (2022-03-31)

@@ -31,6 +31,13 @@ class Resolver:
     @property
     @functools.lru_cache()
     def username(self) -> Optional[str]:
+        if cast(str, self.config["repository"]).startswith(
+            (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
+        ):
+            # As of 2024-01-01, PyPI requires API tokens for uploads, meaning
+            # that the username is invariant.
+            return "__token__"
+
         return utils.get_userpass_value(
             self.input.username,
             self.config,
@@ -90,7 +97,16 @@ class Resolver:
             logger.info("password set from keyring")
             return password
 
-        return self.prompt("password", getpass.getpass)
+        # As of 2024-01-01, PyPI requires API tokens for uploads;
+        # specialize the prompt to clarify that an API token must be provided.
+        if cast(str, self.config["repository"]).startswith(
+            (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
+        ):
+            prompt = "API token"
+        else:
+            prompt = "password"
+
+        return self.prompt(prompt, getpass.getpass)
 
     def prompt(self, what: str, how: Callable[..., str]) -> str:
         return how(f"Enter your {what}: ")

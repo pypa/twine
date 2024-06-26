@@ -1,5 +1,7 @@
 doc8>=0.8.0
 furo>=2021.10.09
 readme-renderer>=17.4
-Sphinx>=4.3.1
+# Remove this upper bound when twine's minimum Python is 3.9+.
+# See: https://github.com/sphinx-doc/sphinx/issues/11767
+Sphinx>=6,<7.1
 sphinxcontrib-programoutput>=0.17

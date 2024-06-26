@@ -13,12 +13,13 @@
 # limitations under the License.
 import hashlib
 import io
+import json
 import logging
 import os
 import re
 import subprocess
 import sys
-from typing import Dict, NamedTuple, Optional, Sequence, Tuple, Union, cast
+from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union, cast
 
 if sys.version_info >= (3, 10):
     import importlib.metadata as importlib_metadata
@@ -83,6 +84,7 @@ class PackageFile:
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
+        self.attestations: Optional[List[Dict[Any, str]]] = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -182,7 +184,7 @@ class PackageFile:
             "requires_external": meta.requires_external,
             "requires_python": meta.requires_python,
             # Metadata 2.1
-            "provides_extras": meta.provides_extras,
+            "provides_extra": meta.provides_extras,
             "description_content_type": meta.description_content_type,
             # Metadata 2.2
             "dynamic": meta.dynamic,
@@ -190,6 +192,9 @@ class PackageFile:
 
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature
+
+        if self.attestations is not None:
+            data["attestations"] = json.dumps(self.attestations)
 
         # FIPS disables MD5 and Blake2, making the digest values None. Some package
         # repositories don't allow null values, so this only sends non-null values.
@@ -201,6 +206,19 @@ class PackageFile:
             data["blake2_256_digest"] = self.blake2_256_digest
 
         return data
+
+    def add_attestations(self, attestations: List[str]) -> None:
+        loaded_attestations = []
+        for attestation in attestations:
+            with open(attestation, "rb") as att:
+                try:
+                    loaded_attestations.append(json.load(att))
+                except json.JSONDecodeError:
+                    raise exceptions.InvalidDistribution(
+                        f"invalid JSON in attestation: {attestation}"
+                    )
+
+        self.attestations = loaded_attestations
 
     def add_gpg_signature(
         self, signature_filepath: str, signature_filename: str
@@ -271,7 +289,7 @@ class HashManager:
         self._blake_hasher = None
         try:
             self._blake_hasher = hashlib.blake2b(digest_size=256 // 8)
-        except (ValueError, TypeError):
+        except (ValueError, TypeError, AttributeError):
             # FIPS mode disables blake2
             pass
 

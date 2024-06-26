@@ -25,7 +25,7 @@ from rich import print
 import twine
 from twine import package as package_file
 
-KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "content"}
+KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "attestations", "content"}
 
 LEGACY_PYPI = "https://pypi.python.org/"
 LEGACY_TEST_PYPI = "https://testpypi.python.org/"
@@ -246,5 +246,5 @@ class Repository:
 
     def verify_package_integrity(self, package: package_file.PackageFile) -> None:
         # TODO(sigmavirus24): Add a way for users to download the package and
-        # check it's hash against what it has locally.
+        # check its hash against what it has locally.
         pass

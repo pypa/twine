@@ -1,4 +1,5 @@
 """Module containing the logic for ``twine upload``."""
+
 # Copyright 2013 Donald Stufft
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -13,9 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import fnmatch
 import logging
 import os.path
-from typing import Dict, List, cast
+from typing import Dict, List, NamedTuple, cast
 
 import requests
 from rich import print
@@ -71,9 +73,16 @@ def skip_upload(
 
 
 def _make_package(
-    filename: str, signatures: Dict[str, str], upload_settings: settings.Settings
+    filename: str,
+    signatures: Dict[str, str],
+    attestations: List[str],
+    upload_settings: settings.Settings,
 ) -> package_file.PackageFile:
-    """Create and sign a package, based off of filename, signatures and settings."""
+    """Create and sign a package, based off of filename, signatures, and settings.
+
+    Additionally, any supplied attestations are attached to the package when
+    the settings indicate to do so.
+    """
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
 
     signed_name = package.signed_basefilename
@@ -82,12 +91,61 @@ def _make_package(
     elif upload_settings.sign:
         package.sign(upload_settings.sign_with, upload_settings.identity)
 
+    # Attestations are only attached if explicitly requested with `--attestations`.
+    if upload_settings.attestations:
+        # Passing `--attestations` without any actual attestations present
+        # indicates user confusion, so we fail rather than silently allowing it.
+        if not attestations:
+            raise exceptions.InvalidDistribution(
+                "Upload with attestations requested, but "
+                f"{filename} has no associated attestations"
+            )
+        package.add_attestations(attestations)
+
     file_size = utils.get_file_size(package.filename)
     logger.info(f"{package.filename} ({file_size})")
     if package.gpg_signature:
         logger.info(f"Signed with {package.signed_filename}")
 
     return package
+
+
+class Inputs(NamedTuple):
+    """Represents structured user inputs."""
+
+    dists: List[str]
+    signatures: Dict[str, str]
+    attestations_by_dist: Dict[str, List[str]]
+
+
+def _split_inputs(
+    inputs: List[str],
+) -> Inputs:
+    """
+    Split the unstructured list of input files provided by the user into groups.
+
+    Three groups are returned: upload files (i.e. dists), signatures, and attestations.
+
+    Upload files are returned as a linear list, signatures are returned as a
+    dict of ``basename -> path``, and attestations are returned as a dict of
+    ``dist-path -> [attestation-path]``.
+    """
+    signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
+    attestations = fnmatch.filter(inputs, "*.*.attestation")
+    dists = [
+        dist
+        for dist in inputs
+        if dist not in (set(signatures.values()) | set(attestations))
+    ]
+
+    attestations_by_dist = {}
+    for dist in dists:
+        dist_basename = os.path.basename(dist)
+        attestations_by_dist[dist] = [
+            a for a in attestations if os.path.basename(a).startswith(dist_basename)
+        ]
+
+    return Inputs(dists, signatures, attestations_by_dist)
 
 
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
@@ -104,37 +162,61 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         The configured options related to uploading to a repository.
     :param dists:
         The distribution files to upload to the repository. This can also include
-        ``.asc`` files; the GPG signatures will be added to the corresponding uploads.
+        ``.asc`` and ``.attestation`` files, which will be added to their respective
+        file uploads.
 
     :raises twine.exceptions.TwineException:
         The upload failed due to a configuration error.
     :raises requests.HTTPError:
         The repository responded with an error.
     """
-    dists = commands._find_dists(dists)
-    # Determine if the user has passed in pre-signed distributions
-    signatures = {os.path.basename(d): d for d in dists if d.endswith(".asc")}
-    uploads = [i for i in dists if not i.endswith(".asc")]
-
     upload_settings.check_repository_url()
     repository_url = cast(str, upload_settings.repository_config["repository"])
-    print(f"Uploading distributions to {repository_url}")
 
-    packages_to_upload = [
-        _make_package(filename, signatures, upload_settings) for filename in uploads
-    ]
-
-    # Warn the user if they're trying to upload a PGP signature to PyPI
-    # or TestPyPI, which will (as of May 2023) ignore it.
-    # This check is currently limited to just those indices, since other
-    # indices may still support PGP signatures.
-    if any(p.gpg_signature for p in packages_to_upload) and repository_url.startswith(
+    # Attestations are only supported on PyPI and TestPyPI at the moment.
+    # We warn instead of failing to allow twine to be used in local testing
+    # setups (where the PyPI deployment doesn't have a well-known domain).
+    if upload_settings.attestations and not repository_url.startswith(
         (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
     ):
         logger.warning(
-            "One or more packages has an associated PGP signature; "
-            "these will be silently ignored by the index"
+            "Only PyPI and TestPyPI support attestations; "
+            "if you experience failures, remove the --attestations flag and "
+            "re-try this command"
         )
+
+    dists = commands._find_dists(dists)
+    # Determine if the user has passed in pre-signed distributions or any attestations.
+    uploads, signatures, attestations_by_dist = _split_inputs(dists)
+
+    print(f"Uploading distributions to {utils.sanitize_url(repository_url)}")
+
+    packages_to_upload = [
+        _make_package(
+            filename, signatures, attestations_by_dist[filename], upload_settings
+        )
+        for filename in uploads
+    ]
+
+    if any(p.gpg_signature for p in packages_to_upload):
+        if repository_url.startswith((utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)):
+            # Warn the user if they're trying to upload a PGP signature to PyPI
+            # or TestPyPI, which will (as of May 2023) ignore it.
+            # This warning is currently limited to just those indices, since other
+            # indices may still support PGP signatures.
+            logger.warning(
+                "One or more packages has an associated PGP signature; "
+                "these will be silently ignored by the index"
+            )
+        else:
+            # On other indices, warn the user that twine is considering
+            # removing PGP support outright.
+            logger.warning(
+                "One or more packages has an associated PGP signature; "
+                "a future version of twine may silently ignore these. "
+                "See https://github.com/pypa/twine/issues/1009 for more "
+                "information"
+            )
 
     repository = upload_settings.create_repository()
     uploaded_packages = []
@@ -168,8 +250,8 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         # redirects as well.
         if resp.is_redirect:
             raise exceptions.RedirectDetected.from_args(
-                repository_url,
-                resp.headers["location"],
+                utils.sanitize_url(repository_url),
+                utils.sanitize_url(resp.headers["location"]),
             )
 
         if skip_upload(resp, upload_settings.skip_existing, package):

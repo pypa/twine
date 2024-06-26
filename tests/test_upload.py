@@ -69,10 +69,11 @@ def test_make_package_pre_signed_dist(upload_settings, caplog):
     upload_settings.sign = True
     upload_settings.verbose = True
 
-    package = upload._make_package(filename, signatures, upload_settings)
+    package = upload._make_package(filename, signatures, [], upload_settings)
 
     assert package.filename == filename
     assert package.gpg_signature is not None
+    assert package.attestations is None
 
     assert caplog.messages == [
         f"{filename} ({expected_size})",
@@ -94,7 +95,7 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
 
     monkeypatch.setattr(package_file.PackageFile, "sign", stub_sign)
 
-    package = upload._make_package(filename, signatures, upload_settings)
+    package = upload._make_package(filename, signatures, [], upload_settings)
 
     assert package.filename == filename
     assert package.gpg_signature is not None
@@ -103,6 +104,56 @@ def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
         f"{filename} ({expected_size})",
         f"Signed with {package.signed_filename}",
     ]
+
+
+def test_make_package_attestations_flagged_but_missing(upload_settings):
+    """Fail when the user requests attestations but does not supply any attestations."""
+    upload_settings.attestations = True
+
+    with pytest.raises(
+        exceptions.InvalidDistribution, match="Upload with attestations requested"
+    ):
+        upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
+
+
+def test_split_inputs():
+    """Split inputs into dists, signatures, and attestations."""
+    inputs = [
+        helpers.WHEEL_FIXTURE,
+        helpers.WHEEL_FIXTURE + ".asc",
+        helpers.WHEEL_FIXTURE + ".build.attestation",
+        helpers.WHEEL_FIXTURE + ".publish.attestation",
+        helpers.SDIST_FIXTURE,
+        helpers.SDIST_FIXTURE + ".asc",
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE + ".frob.attestation",
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    inputs = upload._split_inputs(inputs)
+
+    assert inputs.dists == [
+        helpers.WHEEL_FIXTURE,
+        helpers.SDIST_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    expected_signatures = {
+        os.path.basename(dist) + ".asc": dist + ".asc"
+        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
+    }
+    assert inputs.signatures == expected_signatures
+
+    assert inputs.attestations_by_dist == {
+        helpers.WHEEL_FIXTURE: [
+            helpers.WHEEL_FIXTURE + ".build.attestation",
+            helpers.WHEEL_FIXTURE + ".publish.attestation",
+        ],
+        helpers.SDIST_FIXTURE: [],
+        helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
+        helpers.NEW_SDIST_FIXTURE: [],
+    }
 
 
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
@@ -145,7 +196,7 @@ def test_print_packages_if_verbose(upload_settings, caplog):
 
 
 def test_print_response_if_verbose(upload_settings, stub_response, caplog):
-    """Print details about the response from the repostiry."""
+    """Print details about the response from the repository."""
     upload_settings.verbose = True
 
     result = upload.upload(
@@ -181,6 +232,42 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository, 
     assert (
         "One or more packages has an associated PGP signature; these will "
         "be silently ignored by the index" in caplog.messages
+    )
+
+
+def test_warns_potential_pgp_removal_on_3p_index(
+    make_settings, stub_repository, caplog
+):
+    """Warn when a PGP signature is specified for upload to a third-party index."""
+    upload_settings = make_settings(
+        """
+        [pypi]
+        repository: https://example.com/not-a-real-index/
+        username:foo
+        password:bar
+        """
+    )
+    upload_settings.create_repository = lambda: stub_repository
+
+    # Upload a pre-signed distribution
+    result = upload.upload(
+        upload_settings, [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".asc"]
+    )
+    assert result is None
+
+    # The signature should be added via package.add_gpg_signature()
+    package = stub_repository.upload.calls[0].args[0]
+    assert package.gpg_signature == (
+        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        b"signature",
+    )
+
+    # Ensure that a warning is emitted.
+    assert (
+        "One or more packages has an associated PGP signature; a future "
+        "version of twine may silently ignore these. See "
+        "https://github.com/pypa/twine/issues/1009 for more information"
+        in caplog.messages
     )
 
 
@@ -508,14 +595,17 @@ def test_skip_upload_respects_skip_existing():
     )
 
 
-def test_values_from_env(monkeypatch):
+@pytest.mark.parametrize("repo", ["pypi", "testpypi"])
+def test_values_from_env_pypi(monkeypatch, repo):
     def none_upload(*args, **settings_kwargs):
         pass
 
     replaced_upload = pretend.call_recorder(none_upload)
     monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
-        "TWINE_USERNAME": "pypiuser",
+        "TWINE_REPOSITORY": repo,
+        # Ignored because TWINE_REPOSITORY is PyPI/TestPyPI
+        "TWINE_USERNAME": "this-is-ignored",
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
@@ -523,7 +613,40 @@ def test_values_from_env(monkeypatch):
         cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
-    assert "pypiuser" == upload_settings.username
+    assert "__token__" == upload_settings.username
+    assert "/foo/bar.crt" == upload_settings.cacert
+
+
+def test_values_from_env_non_pypi(monkeypatch, write_config_file):
+    write_config_file(
+        """
+        [distutils]
+        index-servers =
+            notpypi
+
+        [notpypi]
+        repository: https://upload.example.org/legacy/
+        username:someusername
+        password:password
+        """
+    )
+
+    def none_upload(*args, **settings_kwargs):
+        pass
+
+    replaced_upload = pretend.call_recorder(none_upload)
+    monkeypatch.setattr(upload, "upload", replaced_upload)
+    testenv = {
+        "TWINE_REPOSITORY": "notpypi",
+        "TWINE_USERNAME": "someusername",
+        "TWINE_PASSWORD": "pypipassword",
+        "TWINE_CERT": "/foo/bar.crt",
+    }
+    with helpers.set_env(**testenv):
+        cli.dispatch(["upload", "path/to/file"])
+    upload_settings = replaced_upload.calls[0].args[0]
+    assert "pypipassword" == upload_settings.password
+    assert "someusername" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
 
 
@@ -547,3 +670,22 @@ def test_check_status_code_for_wrong_repo_url(repo_url, upload_settings, stub_re
                 helpers.NEW_WHEEL_FIXTURE,
             ],
         )
+
+
+def test_upload_warns_attestations_non_pypi(upload_settings, caplog, stub_response):
+    upload_settings.repository_config["repository"] = "https://notpypi.example.com"
+    upload_settings.attestations = True
+
+    # This fails because the attestation isn't a real file, which is fine
+    # since our functionality under test happens before the failure.
+    with pytest.raises(exceptions.InvalidDistribution):
+        upload.upload(
+            upload_settings,
+            [helpers.WHEEL_FIXTURE, helpers.WHEEL_FIXTURE + ".foo.attestation"],
+        )
+
+    assert (
+        "Only PyPI and TestPyPI support attestations; if you experience "
+        "failures, remove the --attestations flag and re-try this command"
+        in caplog.messages
+    )

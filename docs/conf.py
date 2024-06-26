@@ -265,15 +265,19 @@ texinfo_documents = [
 # How to display URL addresses: 'footnote', 'no', or 'inline'.
 # texinfo_show_urls = 'footnote'
 
+# See https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-linkcheck_ignore
 linkcheck_ignore = [
-    "http://127.0.0.1*",
+    r"https?://127\.0\.0\.1.*",
     # Avoid errors due to GitHub rate limit
     # https://github.com/sphinx-doc/sphinx/issues/7388
-    "https://github.com/pypa/twine/issues/*",
+    r"https://github\.com/pypa/twine/issues/.*",
     # Avoid errors from channels interpreted as anchors
-    "https://web.libera.chat/#",
+    r"https://web\.libera\.chat/#",
     # Avoid error from InvalidPyPIUploadURL docstring
-    "https://upload.pypi.org/legacy",
+    r"https://upload\.pypi\.org/legacy/?",
+    # Avoid errors from 403/Login Redirects
+    r"https://(test\.)?pypi\.org/manage/project/twine/collaboration/?",
+    r"https://pypi\.org/manage/project/twine/collaboration/?",
 ]
 
 intersphinx_mapping = {
