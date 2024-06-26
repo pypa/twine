@@ -73,12 +73,19 @@ def _safe_name(name: str) -> str:
     return re.sub("[^A-Za-z0-9.]+", "-", name)
 
 
+class CheckedDistribution(pkginfo.Distribution):
+    """A Distribution whose name and version are confirmed to be defined."""
+
+    name: str
+    version: str
+
+
 class PackageFile:
     def __init__(
         self,
         filename: str,
         comment: Optional[str],
-        metadata: pkginfo.Distribution,
+        metadata: CheckedDistribution,
         python_version: Optional[str],
         filetype: Optional[str],
     ) -> None:
@@ -88,7 +95,7 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = _safe_name(cast(str, metadata.name))
+        self.safe_name = _safe_name(metadata.name)
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
@@ -156,7 +163,9 @@ class PackageFile:
         else:
             py_version = None
 
-        return cls(filename, comment, meta, py_version, dtype)
+        return cls(
+            filename, comment, cast(CheckedDistribution, meta), py_version, dtype
+        )
 
     @staticmethod
     def _is_unknown_metadata_version(

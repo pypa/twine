@@ -142,7 +142,10 @@ class Repository:
 
         with open(package.filename, "rb") as fp:
             data_to_send.append(
-                ("content", (package.basefilename, fp, "application/octet-stream"))
+                (
+                    "content",
+                    (package.basefilename, fp, "application/octet-stream"),
+                )
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
 
@@ -223,7 +226,7 @@ class Repository:
                 releases = {}
             self._releases_json_data[safe_name] = releases
 
-        packages = releases.get(cast(str, package.metadata.version), [])
+        packages = releases.get(package.metadata.version, [])
 
         for uploaded_package in packages:
             if uploaded_package["filename"] == package.basefilename:
