@@ -1,6 +1,6 @@
 # pyproject.toml
 [build-system]
-requires = ["setuptools>=61.2", "wheel", "setuptools_scm[toml]>=6.0"]
+requires = ["setuptools>=61.2", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
