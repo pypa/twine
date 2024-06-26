@@ -12,6 +12,21 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 5.1.1 (2024-06-26)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Resolve DeprecationWarnings when extracting ``twine`` metadata. (`#1115 <https://github.com/pypa/twine/issues/1115>`_)
+
+- Fix bug for Repository URLs with auth where the port was lost. When attempting
+  to prevent printing authentication credentials in URLs provided with username
+  and password, we did not properly handle the case where the URL also contains
+  a port (when reconstructing the URL). This is now handled and tested to
+  ensure no regressions. (`#fix-repo-urls-with-auth-and-port <https://github.com/pypa/twine/issues/fix-repo-urls-with-auth-and-port>`_)
+
+
 Twine 5.1.0 (2024-05-15)
 ------------------------
 
