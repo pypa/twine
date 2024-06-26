@@ -30,9 +30,13 @@ __all__ = (
 
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
-import email
+import email.utils
+import sys
 
-import importlib_metadata
+if sys.version_info >= (3, 10):
+    import importlib.metadata as importlib_metadata
+else:
+    import importlib_metadata
 
 metadata = importlib_metadata.metadata("twine")
 
