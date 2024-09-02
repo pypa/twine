@@ -76,4 +76,4 @@ jobs:
         path: "dist/"
 
     - name: "Publish dists to PyPI"
-      uses: "pypa/gh-action-pypi-publish@81e9d935c883d0b210363ab89cf05f3894778450"
+      uses: "pypa/gh-action-pypi-publish@8a08d616893759ef8e1aa1f2785787c0b97e20d6"
