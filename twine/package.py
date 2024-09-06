@@ -18,6 +18,7 @@ import logging
 import os
 import re
 import subprocess
+import sys
 import warnings
 from typing import (
     Any,
@@ -32,7 +33,11 @@ from typing import (
     cast,
 )
 
-import importlib_metadata
+if sys.version_info >= (3, 10):
+    import importlib.metadata as importlib_metadata
+else:
+    import importlib_metadata
+
 import packaging.version
 import pkginfo
 from rich import print

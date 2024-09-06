@@ -209,8 +209,8 @@ class Settings:
             env="TWINE_USERNAME",
             required=False,
             help="The username to authenticate to the repository "
-            "(package index) as. (Can also be set via "
-            "%(env)s environment variable.)",
+            "(package index) as. Has no effect on PyPI or TestPyPI. "
+            "(Can also be set via %(env)s environment variable.)",
         )
         parser.add_argument(
             "-p",

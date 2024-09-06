@@ -53,11 +53,15 @@ Bugfixes
 
 - Use ``email.message`` instead of ``cgi`` as ``cgi`` has been deprecated (`#969 <https://github.com/pypa/twine/issues/969>`_)
 
+Features
+^^^^^^^^
+
+- Remove support for usernames other than ``__token__`` when uploading to PyPI and TestPyPI (`#1040 <https://github.com/pypa/twine/issues/1040>`_)
 
 Misc
 ^^^^
 
-- `#931 <https://github.com/pypa/twine/issues/931>`_, `#991 <https://github.com/pypa/twine/issues/991>`_, `#1028 <https://github.com/pypa/twine/issues/1028>`_, `#1040 <https://github.com/pypa/twine/issues/1040>`_
+- `#931 <https://github.com/pypa/twine/issues/931>`_, `#991 <https://github.com/pypa/twine/issues/991>`_, `#1028 <https://github.com/pypa/twine/issues/1028>`_
 
 
 Twine 4.0.2 (2022-11-30)
