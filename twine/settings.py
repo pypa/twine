@@ -165,8 +165,8 @@ class Settings:
             env="TWINE_REPOSITORY",
             default="pypi",
             help="The repository (package index) to upload the package to. "
-            "Should be a section in the config file (default: "
-            "%(default)s). (Can also be set via %(env)s environment "
+            "Should be a section in the config file [default: "
+            "%(default)s]. (Can also be set via %(env)s environment "
             "variable.)",
         )
         parser.add_argument(
@@ -195,7 +195,7 @@ class Settings:
         parser.add_argument(
             "--sign-with",
             default="gpg",
-            help="GPG program used to sign uploads (default: %(default)s).",
+            help="GPG program used to sign uploads [default: %(default)s].",
         )
         parser.add_argument(
             "-i",
