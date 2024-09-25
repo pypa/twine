@@ -65,7 +65,7 @@ class Resolver:
             logger.info("Querying keyring for username")
             creds = keyring.get_credential(system, None)
             if creds:
-                return cast(str, creds.username)
+                return creds.username
         except AttributeError:
             # To support keyring prior to 15.2
             pass
