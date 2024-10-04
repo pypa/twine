@@ -440,6 +440,19 @@ def test_pkginfo_unrecognized_version(monkeypatch):
     assert "1.0, 1.1, 1.2, 2.0, 2.1, 2.2" in err.value.args[0]
 
 
+def test_pkginfo_returns_no_metadata_py_below_1_11(monkeypatch):
+    """Raise special msg when pkginfo can't interpret metadata on pkginfo < 1.11."""
+    data = b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n"
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: data)
+    monkeypatch.setattr(package_file.importlib_metadata, "version", lambda pkg: "1.10")
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package_file.PackageFile.from_filename(filename, comment=None)
+
+    assert "Make sure the distribution includes" in err.value.args[0]
+
+
 def test_malformed_from_file(monkeypatch):
     """Raise an exception when malformed package file triggers EOFError."""
     filename = "tests/fixtures/malformed.tar.gz"
