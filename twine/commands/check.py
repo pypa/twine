@@ -115,7 +115,7 @@ def check(
     """Check that a distribution will render correctly on PyPI and display the results.
 
     This is currently only validates ``long_description``, but more checks could be
-    added; see https://github.com/pypa/twine/projects/2.
+    added.
 
     :param dists:
         The distribution files to check.
