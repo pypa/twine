@@ -19,7 +19,7 @@ jobs:
 
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+        uses: "actions/checkout@6b42224f41ee5dfe5395e27c8b2746f1f9955030"
 
       - name: "Setup Python"
         uses: "actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3"
