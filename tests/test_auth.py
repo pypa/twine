@@ -1,5 +1,6 @@
 import getpass
 import logging
+import platform
 import re
 
 import pytest
@@ -26,6 +27,15 @@ def test_get_username_keyring_defers_to_prompt(monkeypatch, entered_username, co
     assert username == "entered user"
 
 
+def test_get_username_keyring_not_installed_defers_to_prompt(
+    monkeypatch, entered_username, config
+):
+    monkeypatch.setattr(auth, "keyring", None)
+
+    username = auth.Resolver(config, auth.CredentialInput()).username
+    assert username == "entered user"
+
+
 def test_get_password_keyring_defers_to_prompt(monkeypatch, entered_password, config):
     class MockKeyring:
         @staticmethod
@@ -33,6 +43,15 @@ def test_get_password_keyring_defers_to_prompt(monkeypatch, entered_password, co
             return None
 
     monkeypatch.setattr(auth, "keyring", MockKeyring)
+
+    pw = auth.Resolver(config, auth.CredentialInput("user")).password
+    assert pw == "entered pw"
+
+
+def test_get_password_keyring_not_installed_defers_to_prompt(
+    monkeypatch, entered_password, config
+):
+    monkeypatch.setattr(auth, "keyring", None)
 
     pw = auth.Resolver(config, auth.CredentialInput("user")).password
     assert pw == "entered pw"
@@ -272,3 +291,11 @@ def test_warns_for_empty_password(
     assert auth.Resolver(config, auth.CredentialInput()).password == password
 
     assert caplog.messages[0].startswith(warning)
+
+
+@pytest.mark.skipif(
+    platform.machine() in {"ppc64le", "s390x"},
+    reason="keyring module is optional on ppc64le and s390x",
+)
+def test_keyring_module():
+    assert auth.keyring is not None
