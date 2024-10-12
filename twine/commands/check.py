@@ -126,10 +126,11 @@ def check(
     dists: List[str],
     strict: bool = False,
 ) -> bool:
-    """Check that a distribution will render correctly on PyPI and display the results.
+    """Check that a distribution will upload and render correctly on PyPI.
 
-    This is currently only validates ``long_description``, but more checks could be
-    added.
+    This currently validates
+    - ``long_description``, to make sure it would render correctly on PyPI
+    - ``classifiers``, to make sure that all classifiers are valid
 
     :param dists:
         The distribution files to check.
