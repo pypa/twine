@@ -134,8 +134,6 @@ def check(
 
     :param dists:
         The distribution files to check.
-    :param output_stream:
-        The destination of the resulting output.
     :param strict:
         If ``True``, treat warnings as errors.
 
