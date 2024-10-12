@@ -183,7 +183,13 @@ def main(args: List[str]) -> bool:
     :return:
         The exit status of the ``check`` command.
     """
-    parser = argparse.ArgumentParser(prog="twine check")
+    parser = argparse.ArgumentParser(
+        prog="twine check",
+        description=(
+            "Check distribution files and make sure they will upload and render"
+            " correctly on PyPI. Validates description and all classifiers."
+        ),
+    )
     parser.add_argument(
         "dists",
         nargs="+",
