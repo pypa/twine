@@ -22,6 +22,7 @@ from typing import Dict, List, Optional, Tuple, cast
 
 import readme_renderer.rst
 from rich import print
+from trove_classifiers import classifiers as all_classifiers
 
 from twine import commands
 from twine import package as package_file
@@ -76,14 +77,15 @@ def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
 
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
-) -> Tuple[List[str], bool]:
+) -> Tuple[List[str], List[str]]:
     """Check given distribution."""
     warnings = []
-    is_ok = True
+    errors = []
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
-
     metadata = package.metadata_dictionary()
+
+    # Check description
     description = cast(Optional[str], metadata["description"])
     description_content_type = cast(Optional[str], metadata["description_content_type"])
 
@@ -103,9 +105,21 @@ def _check_file(
             description, stream=render_warning_stream, **params
         )
         if rendering_result is None:
-            is_ok = False
+            errors.append(
+                "`long_description` has syntax errors in markup"
+                " and would not be rendered on PyPI."
+            )
 
-    return warnings, is_ok
+    # Check classifiers
+    dist_classifiers = cast(Optional[List[str]], metadata["classifiers"])
+    for classifier in dist_classifiers:
+        if classifier not in all_classifiers:
+            errors.append(
+                f"`{classifier}` is not a valid classifier"
+                f" and would prevent upload to PyPI."
+            )
+
+    return warnings, errors
 
 
 def check(
@@ -137,17 +151,14 @@ def check(
     for filename in uploads:
         print(f"Checking {filename}: ", end="")
         render_warning_stream = _WarningStream()
-        warnings, is_ok = _check_file(filename, render_warning_stream)
+        warnings, errors = _check_file(filename, render_warning_stream)
 
         # Print the status and/or error
-        if not is_ok:
+        if errors:
             failure = True
             print("[red]FAILED[/red]")
-            logger.error(
-                "`long_description` has syntax errors in markup"
-                " and would not be rendered on PyPI."
-                f"\n{render_warning_stream}"
-            )
+            error_mgs = "\n".join(errors)
+            logger.error(f"{error_mgs}\n" f"{render_warning_stream}")
         elif warnings:
             if strict:
                 failure = True
