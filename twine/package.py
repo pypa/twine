@@ -21,6 +21,8 @@ import subprocess
 import sys
 from typing import Any, Dict, List, NamedTuple, Optional, Sequence, Tuple, Union, cast
 
+from packaging.metadata import Metadata as PackagingMetadata
+
 if sys.version_info >= (3, 10):
     import importlib.metadata as importlib_metadata
 else:
@@ -141,6 +143,49 @@ class PackageFile:
             py_version = None
 
         return cls(filename, comment, meta, py_version, dtype)
+
+    def metadata_obj(self) -> PackagingMetadata:
+        meta = self.metadata
+        # TODO: this should probably take metadata_dictionary as base and modify
+        # it to remove the keys that aren't accepted by packaging.RawMetadata
+        data = {
+            # Metadata 1.0 - PEP 241
+            "metadata_version": meta.metadata_version,
+            "name": self.safe_name,
+            "version": meta.version,
+            "platforms": meta.supported_platforms,
+            "summary": meta.summary,
+            "description": meta.description,
+            "keywords": meta.keywords,
+            "home_page": meta.home_page,
+            "author": meta.author,
+            "author_email": meta.author_email,
+            "license": meta.license,
+            # Metadata 1.1 - PEP 314
+            "supported_platforms": meta.supported_platforms,
+            "download_url": meta.download_url,
+            "classifiers": meta.classifiers,
+            "requires": meta.requires,
+            "provides": meta.provides,
+            "obsoletes": meta.obsoletes,
+            # Metadata 1.2 - PEP 345
+            "maintainer": meta.maintainer,
+            "maintainer_email": meta.maintainer_email,
+            "requires_dist": meta.requires_dist,
+            "provides_dist": meta.provides_dist,
+            "obsoletes_dist": meta.obsoletes_dist,
+            "requires_python": meta.requires_python,
+            "requires_external": meta.requires_external,
+            "project_urls": meta.project_urls,
+            # Metadata 2.1 - PEP 566
+            "description_content_type": meta.description_content_type,
+            "provides_extra": meta.provides_extras,
+        }
+        if meta.metadata_version and meta.metadata_version > "2.1":
+            # Metadata 2.2 - PEP 643
+            data.update({"dynamic": meta.dynamic})
+
+        return PackagingMetadata.from_raw(data, validate=True)  # type: ignore[arg-type]
 
     def metadata_dictionary(self) -> Dict[str, MetadataValue]:
         """Merge multiple sources of metadata into a single dictionary.

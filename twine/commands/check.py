@@ -105,6 +105,9 @@ def _check_file(
         if rendering_result is None:
             is_ok = False
 
+    # Will raise an exception if the metadata is invalid
+    package.metadata_obj()
+
     return warnings, is_ok
 
 
