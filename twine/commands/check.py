@@ -22,7 +22,7 @@ from typing import Dict, List, Optional, Sequence, Tuple, cast
 
 import readme_renderer.rst
 from rich import print
-from trove_classifiers import classifiers as all_classifiers
+from trove_classifiers import classifiers as valid_classifiers
 
 from twine import commands
 from twine import package as package_file
@@ -113,7 +113,7 @@ def _check_file(
     # Check classifiers
     dist_classifiers = cast(Sequence[str], metadata["classifiers"])
     for classifier in dist_classifiers:
-        if classifier not in all_classifiers:
+        if classifier not in valid_classifiers:
             errors.append(
                 f"`{classifier}` is not a valid classifier"
                 f" and would prevent upload to PyPI."
