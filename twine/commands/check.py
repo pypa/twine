@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import dataclasses
 import email.message
 import io
 import logging
@@ -75,12 +76,21 @@ def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
     return msg.get_content_type(), msg["content-type"].params
 
 
+@dataclasses.dataclass
+class CheckedFileResults:
+    warnings: List[str]
+    errors: List[str]
+
+    @property
+    def is_ok(self) -> bool:
+        return len(self.errors) == 0
+
+
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
-) -> Tuple[List[str], List[str]]:
+) -> CheckedFileResults:
     """Check given distribution."""
-    warnings = []
-    errors = []
+    result = CheckedFileResults(warnings=[], errors=[])
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
     metadata = package.metadata_dictionary()
@@ -90,7 +100,7 @@ def _check_file(
     description_content_type = cast(Optional[str], metadata["description_content_type"])
 
     if description_content_type is None:
-        warnings.append(
+        result.warnings.append(
             "`long_description_content_type` missing. defaulting to `text/x-rst`."
         )
         description_content_type = "text/x-rst"
@@ -99,13 +109,13 @@ def _check_file(
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description is None or description.rstrip() == "UNKNOWN":
-        warnings.append("`long_description` missing.")
+        result.warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
             description, stream=render_warning_stream, **params
         )
         if rendering_result is None:
-            errors.append(
+            result.errors.append(
                 "`long_description` has syntax errors in markup"
                 " and would not be rendered on PyPI."
             )
@@ -114,12 +124,12 @@ def _check_file(
     dist_classifiers = cast(Sequence[str], metadata["classifiers"])
     for classifier in dist_classifiers:
         if classifier not in valid_classifiers:
-            errors.append(
+            result.errors.append(
                 f"`{classifier}` is not a valid classifier"
                 f" and would prevent upload to PyPI."
             )
 
-    return warnings, errors
+    return result
 
 
 def check(
@@ -150,15 +160,15 @@ def check(
     for filename in uploads:
         print(f"Checking {filename}: ", end="")
         render_warning_stream = _WarningStream()
-        warnings, errors = _check_file(filename, render_warning_stream)
+        check_result = _check_file(filename, render_warning_stream)
 
         # Print the status and/or error
-        if errors:
+        if not check_result.is_ok:
             failure = True
             print("[red]FAILED[/red]")
-            error_mgs = "\n".join(errors)
+            error_mgs = "\n".join(check_result.errors)
             logger.error(f"{error_mgs}\n" f"{render_warning_stream}")
-        elif warnings:
+        elif check_result.warnings:
             if strict:
                 failure = True
                 print("[red]FAILED due to warnings[/red]")
@@ -168,7 +178,7 @@ def check(
             print("[green]PASSED[/green]")
 
         # Print warnings after the status and/or error
-        for message in warnings:
+        for message in check_result.warnings:
             logger.warning(message)
 
     return failure
