@@ -14,14 +14,16 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import dataclasses
 import email.message
 import io
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Optional, Sequence, Tuple, cast
 
 import readme_renderer.rst
 from rich import print
+from trove_classifiers import classifiers as valid_classifiers
 
 from twine import commands
 from twine import package as package_file
@@ -74,21 +76,31 @@ def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
     return msg.get_content_type(), msg["content-type"].params
 
 
+@dataclasses.dataclass
+class CheckedFileResults:
+    warnings: List[str]
+    errors: List[str]
+
+    @property
+    def is_ok(self) -> bool:
+        return len(self.errors) == 0
+
+
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
-) -> Tuple[List[str], bool]:
+) -> CheckedFileResults:
     """Check given distribution."""
-    warnings = []
-    is_ok = True
+    result = CheckedFileResults(warnings=[], errors=[])
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
-
     metadata = package.metadata_dictionary()
+
+    # Check description
     description = cast(Optional[str], metadata["description"])
     description_content_type = cast(Optional[str], metadata["description_content_type"])
 
     if description_content_type is None:
-        warnings.append(
+        result.warnings.append(
             "`long_description_content_type` missing. defaulting to `text/x-rst`."
         )
         description_content_type = "text/x-rst"
@@ -97,30 +109,41 @@ def _check_file(
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
     if description is None or description.rstrip() == "UNKNOWN":
-        warnings.append("`long_description` missing.")
+        result.warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
             description, stream=render_warning_stream, **params
         )
         if rendering_result is None:
-            is_ok = False
+            result.errors.append(
+                "`long_description` has syntax errors in markup"
+                " and would not be rendered on PyPI."
+            )
 
-    return warnings, is_ok
+    # Check classifiers
+    dist_classifiers = cast(Sequence[str], metadata["classifiers"])
+    for classifier in dist_classifiers:
+        if classifier not in valid_classifiers:
+            result.errors.append(
+                f"`{classifier}` is not a valid classifier"
+                f" and would prevent upload to PyPI."
+            )
+
+    return result
 
 
 def check(
     dists: List[str],
     strict: bool = False,
 ) -> bool:
-    """Check that a distribution will render correctly on PyPI and display the results.
+    """Check that a distribution will upload and render correctly on PyPI.
 
-    This is currently only validates ``long_description``, but more checks could be
-    added.
+    This currently validates
+    - ``long_description``, to make sure it would render correctly on PyPI
+    - ``classifiers``, to make sure that all classifiers are valid
 
     :param dists:
         The distribution files to check.
-    :param output_stream:
-        The destination of the resulting output.
     :param strict:
         If ``True``, treat warnings as errors.
 
@@ -137,18 +160,15 @@ def check(
     for filename in uploads:
         print(f"Checking {filename}: ", end="")
         render_warning_stream = _WarningStream()
-        warnings, is_ok = _check_file(filename, render_warning_stream)
+        check_result = _check_file(filename, render_warning_stream)
 
         # Print the status and/or error
-        if not is_ok:
+        if not check_result.is_ok:
             failure = True
             print("[red]FAILED[/red]")
-            logger.error(
-                "`long_description` has syntax errors in markup"
-                " and would not be rendered on PyPI."
-                f"\n{render_warning_stream}"
-            )
-        elif warnings:
+            error_mgs = "\n".join(check_result.errors)
+            logger.error(f"{error_mgs}\n" f"{render_warning_stream}")
+        elif check_result.warnings:
             if strict:
                 failure = True
                 print("[red]FAILED due to warnings[/red]")
@@ -158,7 +178,7 @@ def check(
             print("[green]PASSED[/green]")
 
         # Print warnings after the status and/or error
-        for message in warnings:
+        for message in check_result.warnings:
             logger.warning(message)
 
     return failure
@@ -173,7 +193,13 @@ def main(args: List[str]) -> bool:
     :return:
         The exit status of the ``check`` command.
     """
-    parser = argparse.ArgumentParser(prog="twine check")
+    parser = argparse.ArgumentParser(
+        prog="twine check",
+        description=(
+            "Check distribution files and make sure they will upload and render"
+            " correctly on PyPI. Validates description and all classifiers."
+        ),
+    )
     parser.add_argument(
         "dists",
         nargs="+",
