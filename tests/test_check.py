@@ -293,7 +293,7 @@ def test_fails_invalid_classifiers(tmp_path, capsys, caplog):
                     long_description = file:README.md
                     long_description_content_type = text/markdown
                     classifiers =
-                        Framework :: Django :: 5
+                        Framework | Django |  5
                     """
             ),
             "README.md": (
@@ -315,7 +315,7 @@ def test_fails_invalid_classifiers(tmp_path, capsys, caplog):
         (
             "twine.commands.check",
             logging.ERROR,
-            "`Framework :: Django :: 5` is not a valid classifier"
+            "`Framework | Django |  5` is not a valid classifier"
             " and would prevent upload to PyPI.\n",
         )
     ]
