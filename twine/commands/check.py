@@ -96,7 +96,7 @@ def _check_file(
     content_type, params = _parse_content_type(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
-    if description is None or description.rstrip() == "UNKNOWN":
+    if not description or description.rstrip() == "UNKNOWN":
         warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
