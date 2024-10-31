@@ -49,7 +49,7 @@ def test_fails_no_distributions(caplog):
     ]
 
 
-def build_package(src_path, project_files, distribution = "sdist"):
+def build_package(src_path, project_files, distribution="sdist"):
     """
     Build a source distribution similar to `python3 -m build --sdist`.
 
