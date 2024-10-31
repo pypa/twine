@@ -281,6 +281,80 @@ def test_main(monkeypatch):
     assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]
 
 
+def test_fails_invalid_classifiers(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                    [metadata]
+                    name = test-package
+                    version = 0.0.1
+                    long_description = file:README.md
+                    long_description_content_type = text/markdown
+                    classifiers =
+                        Framework | Django |  5
+                    """
+            ),
+            "README.md": (
+                """
+                # test-package
+
+                A test package.
+                """
+            ),
+        },
+    )
+
+    assert check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
+
+    assert len(caplog.record_tuples) > 0
+    assert caplog.record_tuples == [
+        (
+            "twine.commands.check",
+            logging.ERROR,
+            "`Framework | Django |  5` is not a valid classifier"
+            " and would prevent upload to PyPI.\n",
+        )
+    ]
+
+
+def test_passes_valid_classifiers(tmp_path, capsys, caplog):
+    sdist = build_sdist(
+        tmp_path,
+        {
+            "setup.cfg": (
+                """
+                    [metadata]
+                    name = test-package
+                    version = 0.0.1
+                    long_description = file:README.md
+                    long_description_content_type = text/markdown
+                    classifiers =
+                        Programming Language :: Python :: 3
+                        Framework :: Django
+                        Framework :: Django :: 5.1
+                    """
+            ),
+            "README.md": (
+                """
+                # test-package
+
+                A test package.
+                """
+            ),
+        },
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert caplog.record_tuples == []
+
+
 # TODO: Test print() color output
 
 # TODO: Test log formatting
