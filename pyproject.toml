@@ -36,7 +36,7 @@ dependencies = [
 	"requests >= 2.20",
 	"requests-toolbelt >= 0.8.0, != 0.9.0",
 	"urllib3 >= 1.26.0",
-	"importlib-metadata >= 3.6",
+	"importlib-metadata >= 3.6; python_version < '3.10'",
 	# workaround for missing binaries on these platforms, see #1158
 	"keyring >= 15.1; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
