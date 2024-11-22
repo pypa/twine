@@ -75,7 +75,7 @@ def test_read_non_existent_wheel_file_name():
     with pytest.raises(
         exceptions.InvalidDistribution, match=re.escape(f"No such file: {file_name}")
     ):
-        wheel.Wheel(file_name)
+        wheel.Wheel(file_name).read()
 
 
 def test_read_invalid_wheel_extension():
@@ -85,7 +85,7 @@ def test_read_invalid_wheel_extension():
         exceptions.InvalidDistribution,
         match=re.escape(f"Not a known archive format for file: {file_name}"),
     ):
-        wheel.Wheel(file_name)
+        wheel.Wheel(file_name).read()
 
 
 def test_read_wheel_empty_metadata(tmpdir):
@@ -100,4 +100,4 @@ def test_read_wheel_empty_metadata(tmpdir):
             f"No METADATA in archive or METADATA missing 'Metadata-Version': {whl_file}"
         ),
     ):
-        wheel.Wheel(whl_file)
+        wheel.Wheel(whl_file).read()

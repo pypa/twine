@@ -1,0 +1,8 @@
+- ``packaging`` is used instead of ``pkginfo`` for parsing and
+  validating metadata. This aligns metadata validation to the one
+  performed by PyPI. ``pkginfo`` is not a dependency anymore.
+- Metadata fields defined added with metadata version 2.4 as defined
+  by PEP 639 are now sent to the package index when a distribution is
+  uploaded. This results in licensing information to appear correctly
+  on the package page on PyPI when uploading packages using metadata
+  version 2.4.
