@@ -1,0 +1,10 @@
+- ``packaging`` is used instead of ``pkginfo`` for parsing and validating
+  metadata. This aligns metadata validation to the one performed by PyPI.
+  ``packaging`` version 24.0 or later is required. Support for metadata
+  version 2.4 requires ``packaging`` 24.2 or later. ``pkginfo`` is not a
+  dependency anymore.
+- With ``packaging`` version 24.2 or later, metadata fields added with
+  metadata version 2.4 as defined by PEP 639 are now sent to the package index
+  when a distribution is uploaded. This results in licensing information to
+  appear correctly on the package page on PyPI when uploading packages using
+  metadata version 2.4.

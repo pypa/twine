@@ -16,6 +16,7 @@ import string
 
 import pretend
 import pytest
+from packaging import metadata
 
 from twine import exceptions
 from twine import package as package_file
@@ -31,7 +32,7 @@ def test_sign_file(monkeypatch):
     package = package_file.PackageFile(
         filename=filename,
         comment=None,
-        metadata=pretend.stub(name="deprecated-pypirc"),
+        metadata=metadata.RawMetadata(name="deprecated-pypirc", version="1.2.3"),
         python_version=None,
         filetype=None,
     )
@@ -51,7 +52,7 @@ def test_sign_file_with_identity(monkeypatch):
     package = package_file.PackageFile(
         filename=filename,
         comment=None,
-        metadata=pretend.stub(name="deprecated-pypirc"),
+        metadata=metadata.RawMetadata(name="deprecated-pypirc", version="1.2.3"),
         python_version=None,
         filetype=None,
     )
@@ -106,7 +107,7 @@ def test_package_signed_name_is_correct():
     package = package_file.PackageFile(
         filename=filename,
         comment=None,
-        metadata=pretend.stub(name="deprecated-pypirc"),
+        metadata=metadata.RawMetadata(name="deprecated-pypirc", version="1.2.3"),
         python_version=None,
         filetype=None,
     )
@@ -163,7 +164,7 @@ def test_package_safe_name_is_correct(pkg_name, expected_name):
     package = package_file.PackageFile(
         filename="tests/fixtures/deprecated-pypirc",
         comment=None,
-        metadata=pretend.stub(name=pkg_name),
+        metadata=metadata.RawMetadata(name=pkg_name, version="1.2.3"),
         python_version=None,
         filetype=None,
     )
@@ -171,87 +172,49 @@ def test_package_safe_name_is_correct(pkg_name, expected_name):
     assert package.safe_name == expected_name
 
 
-def test_metadata_dictionary_keys():
-    """Merge multiple sources of metadata into a single dictionary."""
-    package = package_file.PackageFile.from_filename(helpers.SDIST_FIXTURE, None)
-    assert set(package.metadata_dictionary()) == {
-        # identify release
-        "name",
-        "version",
-        # file content
-        "filetype",
-        "pyversion",
-        # additional meta-data
-        "metadata_version",
-        "summary",
-        "home_page",
-        "author",
-        "author_email",
-        "maintainer",
-        "maintainer_email",
-        "license",
-        "description",
-        "keywords",
-        "platform",
-        "classifiers",
-        "download_url",
-        "supported_platform",
-        "comment",
-        "md5_digest",
-        "sha256_digest",
-        "blake2_256_digest",
-        # PEP 314
-        "provides",
-        "requires",
-        "obsoletes",
-        # Metadata 1.2
-        "project_urls",
-        "provides_dist",
-        "obsoletes_dist",
-        "requires_dist",
-        "requires_external",
-        "requires_python",
-        # Metadata 2.1
-        "provides_extra",
-        "description_content_type",
-        # Metadata 2.2
-        "dynamic",
-    }
+def test_metadata_keys_consistency():
+    """Check that the translation keys exist in the respective ``TypedDict``."""
+    raw_keys = metadata.RawMetadata.__annotations__.keys()
+    assert set(package_file._RAW_TO_PACKAGE_METADATA.keys()).issubset(raw_keys)
+    package_keys = package_file.PackageMetadata.__annotations__.keys()
+    assert set(package_file._RAW_TO_PACKAGE_METADATA.values()).issubset(package_keys)
 
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
 @pytest.mark.parametrize("attestation", [(None), ({"fake": "attestation"})])
 def test_metadata_dictionary_values(gpg_signature, attestation):
-    """Pass values from pkginfo.Distribution through to dictionary."""
-    meta = pretend.stub(
-        name="whatever",
-        version=pretend.stub(),
+    """Pass values from ``metadata.RawMetadata`` through to ``PackageMetadata``."""
+    meta = metadata.RawMetadata(
         metadata_version=pretend.stub(),
+        name="whatever",
+        version="1.2.3",
+        platforms=pretend.stub(),
         summary=pretend.stub(),
+        description=pretend.stub(),
+        keywords=pretend.stub(),
         home_page=pretend.stub(),
         author=pretend.stub(),
         author_email=pretend.stub(),
-        maintainer=pretend.stub(),
-        maintainer_email=pretend.stub(),
         license=pretend.stub(),
-        description=pretend.stub(),
-        keywords=pretend.stub(),
-        platforms=pretend.stub(),
-        classifiers=pretend.stub(),
-        download_url=pretend.stub(),
         supported_platforms=pretend.stub(),
+        download_url=pretend.stub(),
+        classifiers=pretend.stub(),
         provides=pretend.stub(),
         requires=pretend.stub(),
         obsoletes=pretend.stub(),
-        project_urls=pretend.stub(),
+        maintainer=pretend.stub(),
+        maintainer_email=pretend.stub(),
+        requires_dist=pretend.stub(),
         provides_dist=pretend.stub(),
         obsoletes_dist=pretend.stub(),
-        requires_dist=pretend.stub(),
-        requires_external=pretend.stub(),
         requires_python=pretend.stub(),
-        provides_extras=pretend.stub(),
+        requires_external=pretend.stub(),
+        project_urls=pretend.stub(),
         description_content_type=pretend.stub(),
+        provides_extra=pretend.stub(),
         dynamic=pretend.stub(),
+        license_expression=pretend.stub(),
+        license_files=pretend.stub(),
     )
 
     package = package_file.PackageFile(
@@ -267,50 +230,52 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
 
     result = package.metadata_dictionary()
 
-    # identify release
+    # Medata 1.0 - PEP 241
+    assert result["metadata_version"] == meta["metadata_version"]
     assert result["name"] == package.safe_name
-    assert result["version"] == meta.version
+    assert result["version"] == package.version == meta["version"]
+    assert result["platform"] == meta["platforms"]
+    assert result["summary"] == meta["summary"]
+    assert result["description"] == meta["description"]
+    assert result["keywords"] == meta["keywords"]
+    assert result["home_page"] == meta["home_page"]
+    assert result["author"] == meta["author"]
+    assert result["author_email"] == meta["author_email"]
+    assert result["license"] == meta["license"]
 
-    # file content
+    # Metadata 1.1 - PEP 314
+    assert result["supported_platform"] == meta["supported_platforms"]
+    assert result["download_url"] == meta["download_url"]
+    assert result["classifiers"] == meta["classifiers"]
+    assert result["provides"] == meta["provides"]
+    assert result["requires"] == meta["requires"]
+    assert result["obsoletes"] == meta["obsoletes"]
+
+    # Metadata 1.2 - PEP 345
+    assert result["maintainer"] == meta["maintainer"]
+    assert result["maintainer_email"] == meta["maintainer_email"]
+    assert result["requires_dist"] == meta["requires_dist"]
+    assert result["provides_dist"] == meta["provides_dist"]
+    assert result["obsoletes_dist"] == meta["obsoletes_dist"]
+    assert result["requires_python"] == meta["requires_python"]
+    assert result["requires_external"] == meta["requires_external"]
+    assert result["project_urls"] == meta["project_urls"]
+
+    # Metadata 2.1 - PEP 566
+    assert result["description_content_type"] == meta["description_content_type"]
+    assert result["provides_extra"] == meta["provides_extra"]
+
+    # Metadata 2.2 - PEP 643
+    assert result["dynamic"] == meta["dynamic"]
+
+    # Metadata 2.4 - PEP 639
+    assert result["license_expression"] == meta["license_expression"]
+    assert result["license_file"] == meta["license_files"]
+
+    # Additional metadata
+    assert result["comment"] == package.comment
     assert result["filetype"] == package.filetype
     assert result["pyversion"] == package.python_version
-
-    # additional meta-data
-    assert result["metadata_version"] == meta.metadata_version
-    assert result["summary"] == meta.summary
-    assert result["home_page"] == meta.home_page
-    assert result["author"] == meta.author
-    assert result["author_email"] == meta.author_email
-    assert result["maintainer"] == meta.maintainer
-    assert result["maintainer_email"] == meta.maintainer_email
-    assert result["license"] == meta.license
-    assert result["description"] == meta.description
-    assert result["keywords"] == meta.keywords
-    assert result["platform"] == meta.platforms
-    assert result["classifiers"] == meta.classifiers
-    assert result["download_url"] == meta.download_url
-    assert result["supported_platform"] == meta.supported_platforms
-    assert result["comment"] == package.comment
-
-    # PEP 314
-    assert result["provides"] == meta.provides
-    assert result["requires"] == meta.requires
-    assert result["obsoletes"] == meta.obsoletes
-
-    # Metadata 1.2
-    assert result["project_urls"] == meta.project_urls
-    assert result["provides_dist"] == meta.provides_dist
-    assert result["obsoletes_dist"] == meta.obsoletes_dist
-    assert result["requires_dist"] == meta.requires_dist
-    assert result["requires_external"] == meta.requires_external
-    assert result["requires_python"] == meta.requires_python
-
-    # Metadata 2.1
-    assert result["provides_extra"] == meta.provides_extras
-    assert result["description_content_type"] == meta.description_content_type
-
-    # Metadata 2.2
-    assert result["dynamic"] == meta.dynamic
 
     # GPG signature
     assert result.get("gpg_signature") == gpg_signature
@@ -381,41 +346,61 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
 
 
 @pytest.mark.parametrize(
-    "read_data, missing_fields",
+    "read_data, exception_message",
     [
         pytest.param(
-            b"Metadata-Version: 2.3\nName: UNKNOWN\nVersion: UNKNOWN\n",
-            "Name, Version",
-            id="missing Name and Version",
-        ),
-        pytest.param(
-            b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: UNKNOWN\n",
-            "Name, Version",
-            id="missing Name and Version",
-        ),
-        pytest.param(
-            b"Metadata-Version: 2.3\nName: UNKNOWN\nVersion: 1.0.0\n",
-            "Name",
-            id="missing Name",
-        ),
-        pytest.param(
-            b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n",
-            "Name",
-            id="missing Name",
+            b"Metadata-Version: 102.3\nName: test-package\nVersion: 1.0.0\n",
+            "'102.3' is not a valid metadata version",
+            id="unsupported Metadata-Version",
         ),
         pytest.param(
             b"Metadata-Version: 2.3\nName: test-package\nVersion: UNKNOWN\n",
-            "Version",
-            id="missing Version",
+            "'UNKNOWN' is invalid for 'version'",
+            id="invalid Version",
         ),
         pytest.param(
             b"Metadata-Version: 2.2\nName: test-package\nVersion: UNKNOWN\n",
-            "Version",
+            "'UNKNOWN' is invalid for 'version'",
+            id="invalid Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.3\n",
+            "'name' is a required field; 'version' is a required field",
+            id="missing Name and Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\n",
+            "'name' is a required field; 'version' is a required field",
+            id="missing Name and Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.3\nVersion: 1.0.0\n",
+            "'name' is a required field",
+            id="missing Name",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nVersion: 1.0.0\n",
+            "'name' is a required field",
+            id="missing Name",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.3\nName: test-package\n",
+            "'version' is a required field",
             id="missing Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nName: test-package\n",
+            "'version' is a required field",
+            id="missing Version",
+        ),
+        pytest.param(
+            b"Metadata-Version: 2.2\nName: test-package\nVersion: 1.0.0\nFoo: bar\n",
+            "unrecognized or malformed field 'foo'",
+            id="unrecognized field",
         ),
     ],
 )
-def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
+def test_pkginfo_returns_no_metadata(read_data, exception_message, monkeypatch):
     """Raise an exception when pkginfo can't interpret the metadata."""
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
@@ -423,34 +408,7 @@ def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
     with pytest.raises(exceptions.InvalidDistribution) as err:
         package_file.PackageFile.from_filename(filename, comment=None)
 
-    assert (
-        f"Metadata is missing required fields: {missing_fields}." in err.value.args[0]
-    )
-
-
-def test_pkginfo_unrecognized_version(monkeypatch):
-    """Raise an exception when pkginfo doesn't recognize the version."""
-    data = b"Metadata-Version: 102.3\nName: test-package\nVersion: 1.0.0\n"
-    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: data)
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
-
-    with pytest.raises(exceptions.InvalidDistribution) as err:
-        package_file.PackageFile.from_filename(filename, comment=None)
-
-    assert "1.0, 1.1, 1.2, 2.0, 2.1, 2.2" in err.value.args[0]
-
-
-def test_pkginfo_returns_no_metadata_py_below_1_11(monkeypatch):
-    """Raise special msg when pkginfo can't interpret metadata on pkginfo < 1.11."""
-    data = b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n"
-    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: data)
-    monkeypatch.setattr(package_file.importlib_metadata, "version", lambda pkg: "1.10")
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
-
-    with pytest.raises(exceptions.InvalidDistribution) as err:
-        package_file.PackageFile.from_filename(filename, comment=None)
-
-    assert "Make sure the distribution includes" in err.value.args[0]
+    assert exception_message in err.value.args[0]
 
 
 def test_malformed_from_file(monkeypatch):

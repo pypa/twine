@@ -11,20 +11,18 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import io
 import os
 import re
 import zipfile
-from typing import List, Optional
-from typing import cast as type_cast
+from typing import List
 
-from pkginfo import distribution
+import packaging.metadata
 
+from twine import distribution
 from twine import exceptions
 
 # Monkeypatch Metadata 2.0 support
-distribution.HEADER_ATTRS_2_0 = distribution.HEADER_ATTRS_1_2
-distribution.HEADER_ATTRS.update({"2.0": distribution.HEADER_ATTRS_2_0})
+packaging.metadata._VALID_METADATA_VERSIONS = ["1.0", "1.1", "1.2", "2.0", "2.1", "2.2", "2.3", "2.4"]
 
 
 wheel_file_re = re.compile(
@@ -36,15 +34,14 @@ wheel_file_re = re.compile(
 
 
 class Wheel(distribution.Distribution):
-    def __init__(self, filename: str, metadata_version: Optional[str] = None) -> None:
+    def __init__(self, filename: str) -> None:
+        if not os.path.exists(filename):
+            raise exceptions.InvalidDistribution(f"No such file: {filename}")
         self.filename = filename
-        self.basefilename = os.path.basename(self.filename)
-        self.metadata_version = metadata_version
-        self.extractMetadata()
 
     @property
     def py_version(self) -> str:
-        wheel_info = wheel_file_re.match(self.basefilename)
+        wheel_info = wheel_file_re.match(os.path.basename(self.filename))
         if wheel_info is None:
             return "any"
         else:
@@ -88,12 +85,3 @@ class Wheel(distribution.Distribution):
             "No METADATA in archive or METADATA missing 'Metadata-Version': "
             "%s (searched %s)" % (fqn, ",".join(searched_files))
         )
-
-    def parse(self, data: bytes) -> None:
-        super().parse(data)
-
-        fp = io.StringIO(data.decode("utf-8", errors="replace"))
-        # msg is ``email.message.Message`` which is a legacy API documented
-        # here: https://docs.python.org/3/library/email.compat32-message.html
-        msg = distribution.parse(fp)
-        self.description = type_cast(str, msg.get_payload())
