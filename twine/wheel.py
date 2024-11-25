@@ -16,14 +16,8 @@ import re
 import zipfile
 from typing import List
 
-import packaging.metadata
-
 from twine import distribution
 from twine import exceptions
-
-# Monkeypatch Metadata 2.0 support
-packaging.metadata._VALID_METADATA_VERSIONS = ["1.0", "1.1", "1.2", "2.0", "2.1", "2.2", "2.3", "2.4"]
-
 
 wheel_file_re = re.compile(
     r"""^(?P<namever>(?P<name>.+?)(-(?P<ver>\d.+?))?)
