@@ -27,6 +27,18 @@ from twine import exceptions
 from twine import sdist
 from twine import wheel
 
+# Monkeypatch Metadata 2.0 support
+metadata._VALID_METADATA_VERSIONS = [
+    "1.0",
+    "1.1",
+    "1.2",
+    "2.0",
+    "2.1",
+    "2.2",
+    "2.3",
+    "2.4",
+]
+
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,
     "sdist": sdist.SDist,
