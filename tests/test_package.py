@@ -432,3 +432,34 @@ def test_package_from_unrecognized_file_error():
     with pytest.raises(exceptions.InvalidDistribution) as err:
         package_file.PackageFile.from_filename(filename, comment=None)
     assert "Unknown distribution format" in err.value.args[0]
+
+
+@pytest.mark.parametrize(
+    "read_data, filtered",
+    [
+        pytest.param(
+            "Metadata-Version: 2.1\n"
+            "Name: test-package\n"
+            "Version: 1.0.0\n"
+            "License-File: LICENSE\n",
+            True,
+            id="invalid License-File",
+        ),
+        pytest.param(
+            "Metadata-Version: 2.4\n"
+            "Name: test-package\n"
+            "Version: 1.0.0\n"
+            "License-File: LICENSE\n",
+            False,
+            id="valid License-File",
+        ),
+    ],
+)
+def test_setuptools_license_file(read_data, filtered, monkeypatch):
+    """Drop License-File metadata entries if Metadata-Version is less than 2.4."""
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+
+    package = package_file.PackageFile.from_filename(filename, comment=None)
+    meta = package.metadata_dictionary()
+    assert filtered != ("license_file" in meta)

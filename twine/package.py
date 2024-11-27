@@ -21,6 +21,7 @@ import subprocess
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, TypedDict
 
 from packaging import metadata
+from packaging import version
 from rich import print
 
 from twine import exceptions
@@ -221,6 +222,16 @@ class PackageFile:
                     )
                 )
             )
+        # setuptools emits License-File metadata fields while declaring
+        # Metadata-Version 2.1. This is invalid because the metadata
+        # specification does not allow to add arbitrary fields, and because
+        # the semantic implemented by setuptools is different than the one
+        # described in PEP 639. However, rejecting these packages would be
+        # too disruptive. Drop License-File metadata entries from the data
+        # sent to the package index if the declared metadata version is less
+        # than 2.4.
+        if version.Version(meta.get("metadata_version", "0")) < version.Version("2.4"):
+            meta.pop("license_files", None)
         try:
             metadata.Metadata.from_raw(meta)
         except metadata.ExceptionGroup as group:
