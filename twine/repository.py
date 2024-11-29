@@ -142,7 +142,10 @@ class Repository:
 
         with open(package.filename, "rb") as fp:
             data_to_send.append(
-                ("content", (package.basefilename, fp, "application/octet-stream"))
+                (
+                    "content",
+                    (package.basefilename, fp, "application/octet-stream"),
+                )
             )
             encoder = requests_toolbelt.MultipartEncoder(data_to_send)
 
