@@ -14,10 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
-import fnmatch
 import logging
-import os.path
-from typing import Dict, List, NamedTuple, cast
+from typing import Dict, List, cast
 
 import requests
 from rich import print
@@ -110,44 +108,6 @@ def _make_package(
     return package
 
 
-class Inputs(NamedTuple):
-    """Represents structured user inputs."""
-
-    dists: List[str]
-    signatures: Dict[str, str]
-    attestations_by_dist: Dict[str, List[str]]
-
-
-def _split_inputs(
-    inputs: List[str],
-) -> Inputs:
-    """
-    Split the unstructured list of input files provided by the user into groups.
-
-    Three groups are returned: upload files (i.e. dists), signatures, and attestations.
-
-    Upload files are returned as a linear list, signatures are returned as a
-    dict of ``basename -> path``, and attestations are returned as a dict of
-    ``dist-path -> [attestation-path]``.
-    """
-    signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
-    attestations = fnmatch.filter(inputs, "*.*.attestation")
-    dists = [
-        dist
-        for dist in inputs
-        if dist not in (set(signatures.values()) | set(attestations))
-    ]
-
-    attestations_by_dist = {}
-    for dist in dists:
-        dist_basename = os.path.basename(dist)
-        attestations_by_dist[dist] = [
-            a for a in attestations if os.path.basename(a).startswith(dist_basename)
-        ]
-
-    return Inputs(dists, signatures, attestations_by_dist)
-
-
 def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     """Upload one or more distributions to a repository, and display the progress.
 
@@ -187,7 +147,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
 
     dists = commands._find_dists(dists)
     # Determine if the user has passed in pre-signed distributions or any attestations.
-    uploads, signatures, attestations_by_dist = _split_inputs(dists)
+    uploads, signatures, attestations_by_dist = commands._split_inputs(dists)
 
     print(f"Uploading distributions to {utils.sanitize_url(repository_url)}")
 

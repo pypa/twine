@@ -19,10 +19,10 @@ jobs:
 
     steps:
       - name: "Checkout repository"
-        uses: "actions/checkout@a5ac7e51b41094c92402da3b24376905380afc29"
+        uses: "actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683"
 
       - name: "Setup Python"
-        uses: "actions/setup-python@f677139bbe7f9c59b41e40162b753c062f5d49a3"
+        uses: "actions/setup-python@0b93645e9fea7318ecaed2b359559ac225c90a2b"
         with:
           python-version: "3.x"
 
@@ -40,7 +40,7 @@ jobs:
           cd dist && echo "hashes=$(sha256sum * | base64 -w0)" >> $GITHUB_OUTPUT
 
       - name: "Upload dists"
-        uses: "actions/upload-artifact@50769540e7f4bd5e21e526ee35c689e35e0d6874"
+        uses: "actions/upload-artifact@b4b15b8c7c6ac21ea08fcf65892d2ee8f75cf882"
         with:
           name: "dist"
           path: "dist/"
@@ -76,4 +76,4 @@ jobs:
         path: "dist/"
 
     - name: "Publish dists to PyPI"
-      uses: "pypa/gh-action-pypi-publish@8a08d616893759ef8e1aa1f2785787c0b97e20d6"
+      uses: "pypa/gh-action-pypi-publish@fb13cb306901256ace3dab689990e13a5550ffaa"

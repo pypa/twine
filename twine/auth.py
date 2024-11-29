@@ -1,9 +1,17 @@
 import functools
 import getpass
 import logging
-from typing import Callable, Optional, Type, cast
+from typing import TYPE_CHECKING, Callable, Optional, Type, cast
 
-import keyring
+# keyring has an indirect dependency on PyCA cryptography, which has no
+# pre-built wheels for ppc64le and s390x, see #1158.
+if TYPE_CHECKING:
+    import keyring
+else:
+    try:
+        import keyring
+    except ModuleNotFoundError:  # pragma: no cover
+        keyring = None
 
 from twine import exceptions
 from twine import utils
@@ -60,6 +68,9 @@ class Resolver:
         return self.config["repository"]
 
     def get_username_from_keyring(self) -> Optional[str]:
+        if keyring is None:
+            logger.info("keyring module is not available")
+            return None
         try:
             system = cast(str, self.system)
             logger.info("Querying keyring for username")
@@ -74,6 +85,9 @@ class Resolver:
         return None
 
     def get_password_from_keyring(self) -> Optional[str]:
+        if keyring is None:
+            logger.info("keyring module is not available")
+            return None
         try:
             system = cast(str, self.system)
             username = cast(str, self.username)
