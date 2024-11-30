@@ -22,8 +22,6 @@ from rich import print
 from twine import package as package_file
 from twine.utils import make_requests_session
 
-KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature"}
-
 LEGACY_PYPI = "https://pypi.python.org/"
 LEGACY_TEST_PYPI = "https://testpypi.python.org/"
 WAREHOUSE = "https://upload.pypi.org/"
@@ -65,10 +63,14 @@ class Repository:
     def _convert_data_to_list_of_tuples(data: Dict[str, Any]) -> List[Tuple[str, Any]]:
         data_to_send = []
         for key, value in data.items():
-            if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
+            if key == "gpg_signature":
+                assert isinstance(value, tuple)
                 data_to_send.append((key, value))
-            else:
+            elif isinstance(value, (list, tuple)):
                 data_to_send.extend((key, item) for item in value)
+            else:
+                assert isinstance(value, str)
+                data_to_send.append((key, value))
         return data_to_send
 
     def set_certificate_authority(self, cacert: Optional[str]) -> None:
