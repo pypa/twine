@@ -96,8 +96,7 @@ class Repository:
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
                 data_to_send.append((key, value))
             else:
-                for item in value:
-                    data_to_send.append((key, item))
+                data_to_send.extend((key, item) for item in value)
         return data_to_send
 
     def set_certificate_authority(self, cacert: Optional[str]) -> None:
