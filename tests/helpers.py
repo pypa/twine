@@ -18,10 +18,11 @@ import os
 import pathlib
 
 TESTS_DIR = pathlib.Path(__file__).parent
-SDIST_FIXTURE = os.path.join(TESTS_DIR, "fixtures/twine-1.5.0.tar.gz")
-WHEEL_FIXTURE = os.path.join(TESTS_DIR, "fixtures/twine-1.5.0-py2.py3-none-any.whl")
-NEW_SDIST_FIXTURE = os.path.join(TESTS_DIR, "fixtures/twine-1.6.5.tar.gz")
-NEW_WHEEL_FIXTURE = os.path.join(TESTS_DIR, "fixtures/twine-1.6.5-py2.py3-none-any.whl")
+FIXTURES_DIR = os.path.join(TESTS_DIR, "fixtures")
+SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0.tar.gz")
+WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0-py2.py3-none-any.whl")
+NEW_SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5.tar.gz")
+NEW_WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5-py2.py3-none-any.whl")
 
 
 @contextlib.contextmanager

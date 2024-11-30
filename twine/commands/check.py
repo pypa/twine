@@ -127,6 +127,7 @@ def check(
     :return:
         ``True`` if there are rendering errors, otherwise ``False``.
     """
+    dists = commands._find_dists(dists)
     uploads, _, _ = commands._split_inputs(dists)
     if not uploads:  # Return early, if there are no files to check.
         logger.error("No files to check.")
