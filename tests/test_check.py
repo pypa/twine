@@ -49,7 +49,7 @@ def test_fails_no_distributions(caplog):
     ]
 
 
-def build_sdist(src_path, project_files):
+def build_package(src_path, project_files, distribution="sdist"):
     """
     Build a source distribution similar to `python3 -m build --sdist`.
 
@@ -70,12 +70,13 @@ def build_sdist(src_path, project_files):
         (src_path / filename).write_text(textwrap.dedent(content))
 
     builder = build.ProjectBuilder(src_path)
-    return builder.build("sdist", str(src_path / "dist"))
+    return builder.build(distribution, str(src_path / "dist"))
 
 
+@pytest.mark.parametrize("distribution", ["sdist", "wheel"])
 @pytest.mark.parametrize("strict", [False, True])
-def test_warns_missing_description(strict, tmp_path, capsys, caplog):
-    sdist = build_sdist(
+def test_warns_missing_description(distribution, strict, tmp_path, capsys, caplog):
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (
@@ -86,6 +87,7 @@ def test_warns_missing_description(strict, tmp_path, capsys, caplog):
                 """
             ),
         },
+        distribution=distribution,
     )
 
     assert check.check([sdist], strict=strict) is strict
@@ -109,7 +111,7 @@ def test_warns_missing_description(strict, tmp_path, capsys, caplog):
 
 
 def test_warns_missing_file(tmp_path, capsys, caplog):
-    sdist = build_sdist(
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (
@@ -138,7 +140,7 @@ def test_warns_missing_file(tmp_path, capsys, caplog):
 
 
 def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
-    sdist = build_sdist(
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (
@@ -174,7 +176,7 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
 
 
 def test_fails_rst_no_content(tmp_path, capsys, caplog):
-    sdist = build_sdist(
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (
@@ -211,7 +213,7 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
 
 
 def test_passes_rst_description(tmp_path, capsys, caplog):
-    sdist = build_sdist(
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (
@@ -243,7 +245,7 @@ def test_passes_rst_description(tmp_path, capsys, caplog):
 
 @pytest.mark.parametrize("content_type", ["text/markdown", "text/plain"])
 def test_passes_markdown_description(content_type, tmp_path, capsys, caplog):
-    sdist = build_sdist(
+    sdist = build_package(
         tmp_path,
         {
             "setup.cfg": (

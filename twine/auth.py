@@ -1,9 +1,17 @@
 import functools
 import getpass
 import logging
-from typing import Callable, Optional, Type, cast
+from typing import TYPE_CHECKING, Callable, Optional, Type, cast
 
-import keyring
+# keyring has an indirect dependency on PyCA cryptography, which has no
+# pre-built wheels for ppc64le and s390x, see #1158.
+if TYPE_CHECKING:
+    import keyring
+else:
+    try:
+        import keyring
+    except ModuleNotFoundError:  # pragma: no cover
+        keyring = None
 
 from twine import exceptions
 from twine import utils
@@ -31,12 +39,9 @@ class Resolver:
     @property
     @functools.lru_cache()
     def username(self) -> Optional[str]:
-        if cast(str, self.config["repository"]).startswith(
-            (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
-        ):
-            # As of 2024-01-01, PyPI requires API tokens for uploads, meaning
-            # that the username is invariant.
-            return "__token__"
+        if self.is_pypi() and not self.input.username:
+            # Default username.
+            self.input.username = "__token__"
 
         return utils.get_userpass_value(
             self.input.username,
@@ -60,12 +65,15 @@ class Resolver:
         return self.config["repository"]
 
     def get_username_from_keyring(self) -> Optional[str]:
+        if keyring is None:
+            logger.info("keyring module is not available")
+            return None
         try:
             system = cast(str, self.system)
             logger.info("Querying keyring for username")
             creds = keyring.get_credential(system, None)
             if creds:
-                return cast(str, creds.username)
+                return creds.username
         except AttributeError:
             # To support keyring prior to 15.2
             pass
@@ -74,6 +82,9 @@ class Resolver:
         return None
 
     def get_password_from_keyring(self) -> Optional[str]:
+        if keyring is None:
+            logger.info("keyring module is not available")
+            return None
         try:
             system = cast(str, self.system)
             username = cast(str, self.username)
@@ -97,19 +108,22 @@ class Resolver:
             logger.info("password set from keyring")
             return password
 
-        # As of 2024-01-01, PyPI requires API tokens for uploads;
-        # specialize the prompt to clarify that an API token must be provided.
-        if cast(str, self.config["repository"]).startswith(
-            (utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY)
-        ):
-            prompt = "API token"
-        else:
-            prompt = "password"
+        # Prompt for API token when required.
+        what = "API token" if self.is_pypi() else "password"
 
-        return self.prompt(prompt, getpass.getpass)
+        return self.prompt(what, getpass.getpass)
 
     def prompt(self, what: str, how: Callable[..., str]) -> str:
         return how(f"Enter your {what}: ")
+
+    def is_pypi(self) -> bool:
+        """As of 2024-01-01, PyPI requires API tokens for uploads."""
+        return cast(str, self.config["repository"]).startswith(
+            (
+                utils.DEFAULT_REPOSITORY,
+                utils.TEST_REPOSITORY,
+            )
+        )
 
 
 class Private(Resolver):

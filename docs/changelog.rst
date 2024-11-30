@@ -12,6 +12,42 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 6.0.0 (2024-11-29)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Restore support for pkginfo 1.11 (`#1116 <https://github.com/pypa/twine/issues/1116>`_)
+
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Username for PyPI and Test PyPI now defaults to __token__ but no longer overrides a username configured in the environment or supplied on the command line. Workflows still supplying anything other than __token__ for the username when uploading to PyPI or Test PyPI will now fail. Either supply __token__ or do not supply a username at all. (`#1121 <https://github.com/pypa/twine/issues/1121>`_)
+
+
+Misc
+^^^^
+
+- `#1024 <https://github.com/pypa/twine/issues/1024>`_
+
+
+Twine 5.1.1 (2024-06-26)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Resolve DeprecationWarnings when extracting ``twine`` metadata. (`#1115 <https://github.com/pypa/twine/issues/1115>`_)
+
+- Fix bug for Repository URLs with auth where the port was lost. When attempting
+  to prevent printing authentication credentials in URLs provided with username
+  and password, we did not properly handle the case where the URL also contains
+  a port (when reconstructing the URL). This is now handled and tested to
+  ensure no regressions. (`#fix-repo-urls-with-auth-and-port <https://github.com/pypa/twine/issues/fix-repo-urls-with-auth-and-port>`_)
+
+
 Twine 5.1.0 (2024-05-15)
 ------------------------
 
@@ -38,11 +74,15 @@ Bugfixes
 
 - Use ``email.message`` instead of ``cgi`` as ``cgi`` has been deprecated (`#969 <https://github.com/pypa/twine/issues/969>`_)
 
+Features
+^^^^^^^^
+
+- Remove support for usernames other than ``__token__`` when uploading to PyPI and TestPyPI (`#1040 <https://github.com/pypa/twine/issues/1040>`_)
 
 Misc
 ^^^^
 
-- `#931 <https://github.com/pypa/twine/issues/931>`_, `#991 <https://github.com/pypa/twine/issues/991>`_, `#1028 <https://github.com/pypa/twine/issues/1028>`_, `#1040 <https://github.com/pypa/twine/issues/1040>`_
+- `#931 <https://github.com/pypa/twine/issues/931>`_, `#991 <https://github.com/pypa/twine/issues/991>`_, `#1028 <https://github.com/pypa/twine/issues/1028>`_
 
 
 Twine 4.0.2 (2022-11-30)

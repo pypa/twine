@@ -116,46 +116,6 @@ def test_make_package_attestations_flagged_but_missing(upload_settings):
         upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
 
 
-def test_split_inputs():
-    """Split inputs into dists, signatures, and attestations."""
-    inputs = [
-        helpers.WHEEL_FIXTURE,
-        helpers.WHEEL_FIXTURE + ".asc",
-        helpers.WHEEL_FIXTURE + ".build.attestation",
-        helpers.WHEEL_FIXTURE + ".publish.attestation",
-        helpers.SDIST_FIXTURE,
-        helpers.SDIST_FIXTURE + ".asc",
-        helpers.NEW_WHEEL_FIXTURE,
-        helpers.NEW_WHEEL_FIXTURE + ".frob.attestation",
-        helpers.NEW_SDIST_FIXTURE,
-    ]
-
-    inputs = upload._split_inputs(inputs)
-
-    assert inputs.dists == [
-        helpers.WHEEL_FIXTURE,
-        helpers.SDIST_FIXTURE,
-        helpers.NEW_WHEEL_FIXTURE,
-        helpers.NEW_SDIST_FIXTURE,
-    ]
-
-    expected_signatures = {
-        os.path.basename(dist) + ".asc": dist + ".asc"
-        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
-    }
-    assert inputs.signatures == expected_signatures
-
-    assert inputs.attestations_by_dist == {
-        helpers.WHEEL_FIXTURE: [
-            helpers.WHEEL_FIXTURE + ".build.attestation",
-            helpers.WHEEL_FIXTURE + ".publish.attestation",
-        ],
-        helpers.SDIST_FIXTURE: [],
-        helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
-        helpers.NEW_SDIST_FIXTURE: [],
-    }
-
-
 def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
     """Print PyPI release URLS for each uploaded package."""
     stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
@@ -604,8 +564,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
     monkeypatch.setattr(upload, "upload", replaced_upload)
     testenv = {
         "TWINE_REPOSITORY": repo,
-        # Ignored because TWINE_REPOSITORY is PyPI/TestPyPI
-        "TWINE_USERNAME": "this-is-ignored",
+        "TWINE_USERNAME": "pypiuser",
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
@@ -613,7 +572,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
         cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
-    assert "__token__" == upload_settings.username
+    assert "pypiuser" == upload_settings.username
     assert "/foo/bar.crt" == upload_settings.cacert
 
 

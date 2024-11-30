@@ -96,7 +96,7 @@ def _check_file(
     content_type, params = _parse_content_type(description_content_type)
     renderer = _RENDERERS.get(content_type, _RENDERERS[None])
 
-    if description is None or description.rstrip() == "UNKNOWN":
+    if not description or description.rstrip() == "UNKNOWN":
         warnings.append("`long_description` missing.")
     elif renderer:
         rendering_result = renderer.render(
@@ -115,7 +115,7 @@ def check(
     """Check that a distribution will render correctly on PyPI and display the results.
 
     This is currently only validates ``long_description``, but more checks could be
-    added; see https://github.com/pypa/twine/projects/2.
+    added.
 
     :param dists:
         The distribution files to check.
@@ -127,7 +127,7 @@ def check(
     :return:
         ``True`` if there are rendering errors, otherwise ``False``.
     """
-    uploads = [i for i in commands._find_dists(dists) if not i.endswith(".asc")]
+    uploads, _, _ = commands._split_inputs(dists)
     if not uploads:  # Return early, if there are no files to check.
         logger.error("No files to check.")
         return False

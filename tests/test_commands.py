@@ -2,6 +2,7 @@ import os
 
 import pytest
 
+from tests import helpers
 from twine import commands
 from twine import exceptions
 
@@ -49,3 +50,43 @@ def test_find_dists_handles_real_files():
     ]
     files = commands._find_dists(expected)
     assert expected == files
+
+
+def test_split_inputs():
+    """Split inputs into dists, signatures, and attestations."""
+    inputs = [
+        helpers.WHEEL_FIXTURE,
+        helpers.WHEEL_FIXTURE + ".asc",
+        helpers.WHEEL_FIXTURE + ".build.attestation",
+        helpers.WHEEL_FIXTURE + ".publish.attestation",
+        helpers.SDIST_FIXTURE,
+        helpers.SDIST_FIXTURE + ".asc",
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE + ".frob.attestation",
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    inputs = commands._split_inputs(inputs)
+
+    assert inputs.dists == [
+        helpers.WHEEL_FIXTURE,
+        helpers.SDIST_FIXTURE,
+        helpers.NEW_WHEEL_FIXTURE,
+        helpers.NEW_SDIST_FIXTURE,
+    ]
+
+    expected_signatures = {
+        os.path.basename(dist) + ".asc": dist + ".asc"
+        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
+    }
+    assert inputs.signatures == expected_signatures
+
+    assert inputs.attestations_by_dist == {
+        helpers.WHEEL_FIXTURE: [
+            helpers.WHEEL_FIXTURE + ".build.attestation",
+            helpers.WHEEL_FIXTURE + ".publish.attestation",
+        ],
+        helpers.SDIST_FIXTURE: [],
+        helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
+        helpers.NEW_SDIST_FIXTURE: [],
+    }

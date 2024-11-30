@@ -1,6 +1,6 @@
 # pyproject.toml
 [build-system]
-requires = ["setuptools>=61.2", "wheel", "setuptools_scm[toml]>=6.0"]
+requires = ["setuptools>=61.2", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -26,6 +26,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
 	"Programming Language :: Python :: Implementation :: CPython",
 ]
 requires-python = ">=3.8"
@@ -35,10 +36,12 @@ dependencies = [
 	"requests >= 2.20",
 	"requests-toolbelt >= 0.8.0, != 0.9.0",
 	"urllib3 >= 1.26.0",
-	"importlib-metadata >= 3.6",
-	"keyring >= 15.1",
+	"importlib-metadata >= 3.6; python_version < '3.10'",
+	# workaround for missing binaries on these platforms, see #1158
+	"keyring >= 15.1; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
+	"packaging",
 ]
 dynamic = ["version"]
 
@@ -57,14 +60,14 @@ check = "twine.commands.check:main"
 upload = "twine.commands.upload:main"
 register = "twine.commands.register:main"
 
+[project.optional-dependencies]
+keyring = ["keyring >= 15.1"]
+
 [project.scripts]
 twine = "twine.__main__:main"
 
 [tool.setuptools]
-packages = [
-	"twine",
-	"twine.commands",
-]
+packages = ["twine", "twine.commands"]
 include-package-data = true
 license-files = ["LICENSE"]
 
