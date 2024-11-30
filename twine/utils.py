@@ -19,7 +19,8 @@ import logging
 import os
 import os.path
 import unicodedata
-from typing import Any, Callable, Optional, Sequence, Union, cast
+from collections.abc import Sequence
+from typing import Any, Callable, Optional, Union, cast
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 

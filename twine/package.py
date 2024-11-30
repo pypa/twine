@@ -20,15 +20,9 @@ import re
 import subprocess
 import sys
 import warnings
-from typing import (
-    Any,
-    Iterable,
-    NamedTuple,
-    Optional,
-    Sequence,
-    Union,
-    cast,
-)
+from collections.abc import Iterable
+from collections.abc import Sequence
+from typing import Any, NamedTuple, Optional, Union, cast
 
 if sys.version_info >= (3, 10):
     import importlib.metadata as importlib_metadata
