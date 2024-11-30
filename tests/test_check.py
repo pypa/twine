@@ -18,6 +18,7 @@ import build
 import pretend
 import pytest
 
+from tests import helpers
 from twine.commands import check
 
 
@@ -281,6 +282,21 @@ def test_main(monkeypatch):
 
     assert check.main(["dist/*"]) == check_result
     assert check_stub.calls == [pretend.call(["dist/*"], strict=False)]
+
+
+def test_check_expands_glob(monkeypatch):
+    """Regression test for #1187."""
+    warning_stream = pretend.stub()
+    warning_stream_cls = pretend.call_recorder(lambda: warning_stream)
+    monkeypatch.setattr(check, "_WarningStream", warning_stream_cls)
+
+    check_file = pretend.call_recorder(lambda fn, stream: ([], True))
+    monkeypatch.setattr(check, "_check_file", check_file)
+
+    assert not check.main([f"{helpers.FIXTURES_DIR}/*"])
+
+    # check_file is called more than once, indicating the glob has been expanded
+    assert len(check_file.calls) > 1
 
 
 # TODO: Test print() color output
