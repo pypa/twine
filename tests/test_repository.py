@@ -41,16 +41,6 @@ def test_gpg_signature_structure_is_preserved():
     assert tuples == [("gpg_signature", ("filename.asc", "filecontent"))]
 
 
-def test_content_structure_is_preserved():
-    """Preserve 'content' key when converting metadata."""
-    data = {
-        "content": ("filename", "filecontent"),
-    }
-
-    tuples = repository.Repository._convert_data_to_list_of_tuples(data)
-    assert tuples == [("content", ("filename", "filecontent"))]
-
-
 def test_iterables_are_flattened():
     """Flatten iterable metadata to list of tuples."""
     data = {

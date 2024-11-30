@@ -22,7 +22,7 @@ from rich import print
 from twine import package as package_file
 from twine.utils import make_requests_session
 
-KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "attestations", "content"}
+KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "attestations"}
 
 LEGACY_PYPI = "https://pypi.python.org/"
 LEGACY_TEST_PYPI = "https://testpypi.python.org/"
