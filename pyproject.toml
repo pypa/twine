@@ -26,6 +26,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
+	"Programming Language :: Python :: 3.13",
 	"Programming Language :: Python :: Implementation :: CPython",
 ]
 requires-python = ">=3.8"
@@ -66,10 +67,7 @@ keyring = ["keyring >= 15.1"]
 twine = "twine.__main__:main"
 
 [tool.setuptools]
-packages = [
-	"twine",
-	"twine.commands",
-]
+packages = ["twine", "twine.commands"]
 include-package-data = true
 license-files = ["LICENSE"]
 
