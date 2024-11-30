@@ -12,6 +12,27 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 6.0.0 (2024-11-29)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Restore support for pkginfo 1.11 (`#1116 <https://github.com/pypa/twine/issues/1116>`_)
+
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Username for PyPI and Test PyPI now defaults to __token__ but no longer overrides a username configured in the environment or supplied on the command line. Workflows still supplying anything other than __token__ for the username when uploading to PyPI or Test PyPI will now fail. Either supply __token__ or do not supply a username at all. (`#1121 <https://github.com/pypa/twine/issues/1121>`_)
+
+
+Misc
+^^^^
+
+- `#1024 <https://github.com/pypa/twine/issues/1024>`_
+
+
 Twine 5.1.1 (2024-06-26)
 ------------------------
 
