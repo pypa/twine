@@ -384,11 +384,6 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
     "read_data, missing_fields",
     [
         pytest.param(
-            b"Metadata-Version: 102.3\nName: test-package\nVersion: 1.0.0\n",
-            "Name, Version",
-            id="unsupported Metadata-Version",
-        ),
-        pytest.param(
             b"Metadata-Version: 2.3\nName: UNKNOWN\nVersion: UNKNOWN\n",
             "Name, Version",
             id="missing Name and Version",
@@ -421,10 +416,7 @@ def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
     ],
 )
 def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
-    """Raise an exception when pkginfo can't interpret the metadata.
-
-    This could be caused by a version number or format it doesn't support yet.
-    """
+    """Raise an exception when pkginfo can't interpret the metadata."""
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
 
@@ -434,7 +426,31 @@ def test_pkginfo_returns_no_metadata(read_data, missing_fields, monkeypatch):
     assert (
         f"Metadata is missing required fields: {missing_fields}." in err.value.args[0]
     )
+
+
+def test_pkginfo_unrecognized_version(monkeypatch):
+    """Raise an exception when pkginfo doesn't recognize the version."""
+    data = b"Metadata-Version: 102.3\nName: test-package\nVersion: 1.0.0\n"
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: data)
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package_file.PackageFile.from_filename(filename, comment=None)
+
     assert "1.0, 1.1, 1.2, 2.0, 2.1, 2.2" in err.value.args[0]
+
+
+def test_pkginfo_returns_no_metadata_py_below_1_11(monkeypatch):
+    """Raise special msg when pkginfo can't interpret metadata on pkginfo < 1.11."""
+    data = b"Metadata-Version: 2.2\nName: UNKNOWN\nVersion: 1.0.0\n"
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: data)
+    monkeypatch.setattr(package_file.importlib_metadata, "version", lambda pkg: "1.10")
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package_file.PackageFile.from_filename(filename, comment=None)
+
+    assert "Make sure the distribution includes" in err.value.args[0]
 
 
 def test_malformed_from_file(monkeypatch):

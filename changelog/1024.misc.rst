@@ -1,1 +1,0 @@
-Only require ``importlib_metadata`` on older Pythons.
