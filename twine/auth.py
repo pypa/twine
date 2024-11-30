@@ -1,7 +1,7 @@
 import functools
 import getpass
 import logging
-from typing import TYPE_CHECKING, Callable, Optional, Type, cast
+from typing import TYPE_CHECKING, Callable, Optional, cast
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -33,7 +33,7 @@ class Resolver:
         self.input = input
 
     @classmethod
-    def choose(cls, interactive: bool) -> Type["Resolver"]:
+    def choose(cls, interactive: bool) -> type["Resolver"]:
         return cls if interactive else Private
 
     @property

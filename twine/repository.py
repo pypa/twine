@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Optional, cast
 
 import requests
 import requests_toolbelt
@@ -62,7 +62,7 @@ class Repository:
             self.session.mount(scheme, self._make_adapter_with_retries())
 
         # Working around https://github.com/python/typing/issues/182
-        self._releases_json_data: Dict[str, Dict[str, Any]] = {}
+        self._releases_json_data: dict[str, dict[str, Any]] = {}
         self.disable_progress_bar = disable_progress_bar
 
     @staticmethod
@@ -90,7 +90,7 @@ class Repository:
         self.session.close()
 
     @staticmethod
-    def _convert_data_to_list_of_tuples(data: Dict[str, Any]) -> List[Tuple[str, Any]]:
+    def _convert_data_to_list_of_tuples(data: dict[str, Any]) -> list[tuple[str, Any]]:
         data_to_send = []
         for key, value in data.items():
             if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
@@ -233,7 +233,7 @@ class Repository:
 
         return False
 
-    def release_urls(self, packages: List[package_file.PackageFile]) -> Set[str]:
+    def release_urls(self, packages: list[package_file.PackageFile]) -> set[str]:
         if self.url.startswith(WAREHOUSE):
             url = WAREHOUSE_WEB
         elif self.url.startswith(TEST_WAREHOUSE):

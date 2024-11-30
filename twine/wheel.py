@@ -15,7 +15,7 @@ import io
 import os
 import re
 import zipfile
-from typing import List, Optional
+from typing import Optional
 from typing import cast as type_cast
 
 from pkginfo import distribution
@@ -51,7 +51,7 @@ class Wheel(distribution.Distribution):
             return wheel_info.group("pyver")
 
     @staticmethod
-    def find_candidate_metadata_files(names: List[str]) -> List[List[str]]:
+    def find_candidate_metadata_files(names: list[str]) -> list[list[str]]:
         """Filter files that may be METADATA files."""
         tuples = [x.split("/") for x in names if "METADATA" in x]
         return [x[1] for x in sorted((len(x), x) for x in tuples)]
@@ -73,7 +73,7 @@ class Wheel(distribution.Distribution):
                 "Not a known archive format for file: %s" % fqn
             )
 
-        searched_files: List[str] = []
+        searched_files: list[str] = []
         try:
             for path in self.find_candidate_metadata_files(names):
                 candidate = "/".join(path)

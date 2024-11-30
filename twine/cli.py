@@ -14,7 +14,7 @@
 import argparse
 import logging.config
 import sys
-from typing import Any, List, Tuple
+from typing import Any
 
 if sys.version_info >= (3, 10):
     import importlib.metadata as importlib_metadata
@@ -74,7 +74,7 @@ def configure_output() -> None:
     )
 
 
-def list_dependencies_and_versions() -> List[Tuple[str, str]]:
+def list_dependencies_and_versions() -> list[tuple[str, str]]:
     deps = [
         "keyring",
         "pkginfo",
@@ -93,7 +93,7 @@ def dep_versions() -> str:
     )
 
 
-def dispatch(argv: List[str]) -> Any:
+def dispatch(argv: list[str]) -> Any:
     registered_commands = importlib_metadata.entry_points(
         group="twine.registered_commands"
     )

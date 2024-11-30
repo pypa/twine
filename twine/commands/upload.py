@@ -15,7 +15,7 @@
 # limitations under the License.
 import argparse
 import logging
-from typing import Dict, List, cast
+from typing import cast
 
 import requests
 from rich import print
@@ -72,8 +72,8 @@ def skip_upload(
 
 def _make_package(
     filename: str,
-    signatures: Dict[str, str],
-    attestations: List[str],
+    signatures: dict[str, str],
+    attestations: list[str],
     upload_settings: settings.Settings,
 ) -> package_file.PackageFile:
     """Create and sign a package, based off of filename, signatures, and settings.
@@ -108,7 +108,7 @@ def _make_package(
     return package
 
 
-def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
+def upload(upload_settings: settings.Settings, dists: list[str]) -> None:
     """Upload one or more distributions to a repository, and display the progress.
 
     If a package already exists on the repository, most repositories will return an
@@ -233,7 +233,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
     repository.close()
 
 
-def main(args: List[str]) -> None:
+def main(args: list[str]) -> None:
     """Execute the ``upload`` command.
 
     :param args:

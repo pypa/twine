@@ -15,7 +15,7 @@
 # limitations under the License.
 import argparse
 import os.path
-from typing import List, cast
+from typing import cast
 
 from rich import print
 
@@ -63,7 +63,7 @@ def register(register_settings: settings.Settings, package: str) -> None:
     resp.raise_for_status()
 
 
-def main(args: List[str]) -> None:
+def main(args: list[str]) -> None:
     """Execute the ``register`` command.
 
     :param args:

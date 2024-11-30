@@ -19,7 +19,7 @@ import logging
 import os
 import os.path
 import unicodedata
-from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union, cast
+from typing import Any, Callable, Optional, Sequence, Union, cast
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -41,12 +41,12 @@ DEFAULT_CONFIG_FILE = "~/.pypirc"
 # Type annotations would be cleaner if this were Dict[str, str], but that
 # requires reworking the username/password handling, probably starting with
 # get_userpass_value.
-RepositoryConfig = Dict[str, Optional[str]]
+RepositoryConfig = dict[str, Optional[str]]
 
 logger = logging.getLogger(__name__)
 
 
-def get_config(path: str) -> Dict[str, RepositoryConfig]:
+def get_config(path: str) -> dict[str, RepositoryConfig]:
     """Read repository configuration from a file (i.e. ~/.pypirc).
 
     Format: https://packaging.python.org/specifications/pypirc/
@@ -72,7 +72,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
         "password": parser.get("server-login", "password", fallback=None),
     }
 
-    config: DefaultDict[str, RepositoryConfig]
+    config: collections.defaultdict[str, RepositoryConfig]
     config = collections.defaultdict(lambda: defaults.copy())
 
     index_servers = parser.get(

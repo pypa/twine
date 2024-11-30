@@ -20,14 +20,14 @@ https://github.com/pypa/twine/issues/194 and https://github.com/pypa/twine/issue
 import fnmatch
 import glob
 import os.path
-from typing import Dict, List, NamedTuple
+from typing import NamedTuple
 
 from twine import exceptions
 
-__all__: List[str] = []
+__all__: list[str] = []
 
 
-def _group_wheel_files_first(files: List[str]) -> List[str]:
+def _group_wheel_files_first(files: list[str]) -> list[str]:
     if not any(fname for fname in files if fname.endswith(".whl")):
         # Return early if there's no wheel files
         return files
@@ -37,7 +37,7 @@ def _group_wheel_files_first(files: List[str]) -> List[str]:
     return files
 
 
-def _find_dists(dists: List[str]) -> List[str]:
+def _find_dists(dists: list[str]) -> list[str]:
     uploads = []
     for filename in dists:
         if os.path.exists(filename):
@@ -58,13 +58,13 @@ def _find_dists(dists: List[str]) -> List[str]:
 class Inputs(NamedTuple):
     """Represents structured user inputs."""
 
-    dists: List[str]
-    signatures: Dict[str, str]
-    attestations_by_dist: Dict[str, List[str]]
+    dists: list[str]
+    signatures: dict[str, str]
+    attestations_by_dist: dict[str, list[str]]
 
 
 def _split_inputs(
-    inputs: List[str],
+    inputs: list[str],
 ) -> Inputs:
     """
     Split the unstructured list of input files provided by the user into groups.

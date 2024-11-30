@@ -22,13 +22,10 @@ import sys
 import warnings
 from typing import (
     Any,
-    Dict,
     Iterable,
-    List,
     NamedTuple,
     Optional,
     Sequence,
-    Tuple,
     Union,
     cast,
 )
@@ -62,7 +59,7 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
-MetadataValue = Union[Optional[str], Sequence[str], Tuple[str, bytes]]
+MetadataValue = Union[Optional[str], Sequence[str], tuple[str, bytes]]
 
 logger = logging.getLogger(__name__)
 
@@ -103,8 +100,8 @@ class PackageFile:
         self.safe_name = _safe_name(metadata.name)
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
-        self.gpg_signature: Optional[Tuple[str, bytes]] = None
-        self.attestations: Optional[List[Dict[Any, str]]] = None
+        self.gpg_signature: Optional[tuple[str, bytes]] = None
+        self.attestations: Optional[list[dict[Any, str]]] = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -184,13 +181,13 @@ class PackageFile:
         ver = packaging.version.Version(importlib_metadata.version("pkginfo"))
         return ver < packaging.version.Version("1.11")
 
-    def metadata_dictionary(self) -> Dict[str, MetadataValue]:
+    def metadata_dictionary(self) -> dict[str, MetadataValue]:
         """Merge multiple sources of metadata into a single dictionary.
 
         Includes values from filename, PKG-INFO, hashers, and signature.
         """
         meta = self.metadata
-        data: Dict[str, MetadataValue] = {
+        data: dict[str, MetadataValue] = {
             # identify release
             "name": self.safe_name,
             "version": meta.version,
@@ -249,7 +246,7 @@ class PackageFile:
 
         return data
 
-    def add_attestations(self, attestations: List[str]) -> None:
+    def add_attestations(self, attestations: list[str]) -> None:
         loaded_attestations = []
         for attestation in attestations:
             with open(attestation, "rb") as att:
@@ -273,7 +270,7 @@ class PackageFile:
 
     def sign(self, sign_with: str, identity: Optional[str]) -> None:
         print(f"Signing {self.basefilename}")
-        gpg_args: Tuple[str, ...] = (sign_with, "--detach-sign")
+        gpg_args: tuple[str, ...] = (sign_with, "--detach-sign")
         if identity:
             gpg_args += ("--local-user", identity)
         gpg_args += ("-a", self.filename)
@@ -282,7 +279,7 @@ class PackageFile:
         self.add_gpg_signature(self.signed_filename, self.signed_basefilename)
 
     @classmethod
-    def run_gpg(cls, gpg_args: Tuple[str, ...]) -> None:
+    def run_gpg(cls, gpg_args: tuple[str, ...]) -> None:
         try:
             subprocess.check_call(gpg_args)
             return

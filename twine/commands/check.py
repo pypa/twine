@@ -18,7 +18,7 @@ import email.message
 import io
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Optional, cast
 
 import readme_renderer.rst
 from rich import print
@@ -64,7 +64,7 @@ class _WarningStream(io.StringIO):
         return self.getvalue().strip()
 
 
-def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
+def _parse_content_type(value: str) -> tuple[str, dict[str, str]]:
     """Implement logic of deprecated cgi.parse_header().
 
     From https://docs.python.org/3.11/library/cgi.html#cgi.parse_header.
@@ -76,7 +76,7 @@ def _parse_content_type(value: str) -> Tuple[str, Dict[str, str]]:
 
 def _check_file(
     filename: str, render_warning_stream: _WarningStream
-) -> Tuple[List[str], bool]:
+) -> tuple[list[str], bool]:
     """Check given distribution."""
     warnings = []
     is_ok = True
@@ -109,7 +109,7 @@ def _check_file(
 
 
 def check(
-    dists: List[str],
+    dists: list[str],
     strict: bool = False,
 ) -> bool:
     """Check that a distribution will render correctly on PyPI and display the results.
@@ -164,7 +164,7 @@ def check(
     return failure
 
 
-def main(args: List[str]) -> bool:
+def main(args: list[str]) -> bool:
     """Execute the ``check`` command.
 
     :param args:
