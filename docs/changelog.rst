@@ -12,6 +12,22 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 6.0.1 (2024-11-30)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Fixed a regression where ``twine check`` would fail to expand
+  wildcards, e.g. ``twine check 'dist/*'``. (`#1188 <https://github.com/pypa/twine/issues/1188>`_)
+
+
+Misc
+^^^^
+
+- `#1184 <https://github.com/pypa/twine/issues/1184>`_
+
+
 Twine 6.0.0 (2024-11-29)
 ------------------------
 
