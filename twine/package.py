@@ -157,7 +157,6 @@ class PackageFile:
                 )
             raise exceptions.InvalidDistribution(msg)
 
-        py_version: Optional[str]
         if dtype == "bdist_egg":
             (dist,) = importlib_metadata.Distribution.discover(path=[filename])
             py_version = dist.metadata["Version"]
@@ -165,8 +164,11 @@ class PackageFile:
             py_version = cast(wheel.Wheel, meta).py_version
         elif dtype == "bdist_wininst":
             py_version = cast(wininst.WinInst, meta).py_version
+        elif dtype == "sdist":
+            py_version = "source"
         else:
-            py_version = None
+            # This should not be reached.
+            raise ValueError
 
         return cls(
             filename, comment, cast(CheckedDistribution, meta), py_version, dtype
