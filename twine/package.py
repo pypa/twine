@@ -62,6 +62,21 @@ DIST_EXTENSIONS = {
     ".zip": "sdist",
 }
 
+# Match the regualr expression used by ``pkg_resources``, extended to
+# include the file extension and the end-of-string anchor.
+egg_filename_re = re.compile(
+    r"""
+    (?P<name>[^-]+) (
+        -(?P<ver>[^-]+) (
+            -py(?P<pyver>[^-]+) (
+                -(?P<plat>.+)
+            )?
+        )?
+    )?\.egg$
+    """,
+    re.VERBOSE | re.IGNORECASE,
+)
+
 MetadataValue = Union[Optional[str], Sequence[str], Tuple[str, bytes]]
 
 logger = logging.getLogger(__name__)
@@ -159,8 +174,9 @@ class PackageFile:
 
         py_version: Optional[str]
         if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(path=[filename])
-            py_version = dist.metadata["Version"]
+            m = egg_filename_re.match(os.path.basename(filename))
+            assert m is not None, "for mypy"
+            py_version = m.group("pyver")
         elif dtype == "bdist_wheel":
             py_version = cast(wheel.Wheel, meta).py_version
         elif dtype == "bdist_wininst":

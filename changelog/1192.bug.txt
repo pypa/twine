@@ -1,0 +1,1 @@
+- Fix python_version metadata extraction for bdist_egg distributions.
