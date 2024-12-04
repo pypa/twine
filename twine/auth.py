@@ -16,6 +16,11 @@ else:
     except ModuleNotFoundError:  # pragma: no cover
         keyring = None
 
+try:
+    from id import detect_credential  # type: ignore
+except ModuleNotFoundError:  # pragma: no cover
+    detect_credential = None
+
 from twine import exceptions
 from twine import utils
 
@@ -35,11 +40,9 @@ class Resolver:
         self,
         config: utils.RepositoryConfig,
         input: CredentialInput,
-        trusted_publishing: bool = False,
     ) -> None:
         self.config = config
         self.input = input
-        self.trusted_publishing = trusted_publishing
 
     @classmethod
     def choose(cls, interactive: bool) -> Type["Resolver"]:
@@ -62,24 +65,16 @@ class Resolver:
     @property
     @functools.lru_cache()
     def password(self) -> Optional[str]:
-        if self.trusted_publishing:
-            # Trusted publishing (OpenID Connect): get one token from the CI
-            # system, and exchange that for a PyPI token.
-            from id import detect_credential  # type: ignore
-
-            repository_domain = cast(str, urlparse(self.system).netloc)
-            audience = self._oidc_audience(repository_domain)
-            oidc_token = detect_credential(audience)
-
-            token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
-
-            mint_token_resp = requests.post(
-                token_exchange_url,
-                json={"token": oidc_token},
-                timeout=5,  # S113 wants a timeout
+        if (
+            self.is_pypi()
+            and self.username == "__token__"
+            and self.input.password is None
+            and detect_credential is not None
+        ):
+            logger.info(
+                "Trying to use trusted publishing (no token was explicitly provided)"
             )
-            mint_token_resp.raise_for_status()
-            return cast(str, mint_token_resp.json()["token"])
+            return self.make_trusted_publishing_token()
 
         return utils.get_userpass_value(
             self.input.password,
@@ -88,14 +83,32 @@ class Resolver:
             prompt_strategy=self.password_from_keyring_or_prompt,
         )
 
-    @staticmethod
-    def _oidc_audience(repository_domain: str) -> str:
+    def make_trusted_publishing_token(self) -> str:
+        # Trusted publishing (OpenID Connect): get one token from the CI
+        # system, and exchange that for a PyPI token.
+        repository_domain = cast(str, urlparse(self.system).netloc)
+        session = requests.Session()  # TODO: user agent & retries
+
         # Indices are expected to support `https://{domain}/_/oidc/audience`,
         # which tells OIDC exchange clients which audience to use.
         audience_url = f"https://{repository_domain}/_/oidc/audience"
-        resp = requests.get(audience_url, timeout=5)
+        resp = session.get(audience_url, timeout=5)
         resp.raise_for_status()
-        return cast(str, resp.json()["audience"])
+        audience = cast(str, resp.json()["audience"])
+
+        oidc_token = detect_credential(audience)
+        logger.debug("Got OIDC token for audience %s", audience)
+
+        token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
+
+        mint_token_resp = session.post(
+            token_exchange_url,
+            json={"token": oidc_token},
+            timeout=5,  # S113 wants a timeout
+        )
+        mint_token_resp.raise_for_status()
+        logger.debug("Minted upload token for trusted publishing")
+        return cast(str, mint_token_resp.json()["token"])
 
     @property
     def system(self) -> Optional[str]:

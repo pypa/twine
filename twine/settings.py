@@ -51,7 +51,6 @@ class Settings:
         identity: Optional[str] = None,
         username: Optional[str] = None,
         password: Optional[str] = None,
-        trusted_publish: bool = False,
         non_interactive: bool = False,
         comment: Optional[str] = None,
         config_file: str = utils.DEFAULT_CONFIG_FILE,
@@ -129,7 +128,6 @@ class Settings:
         self.auth = auth.Resolver.choose(not non_interactive)(
             self.repository_config,
             auth.CredentialInput(username, password),
-            trusted_publishing=trusted_publish,
         )
 
     @property
@@ -223,15 +221,6 @@ class Settings:
             help="The password to authenticate to the repository "
             "(package index) with. (Can also be set via "
             "%(env)s environment variable.)",
-        )
-        parser.add_argument(
-            "--trusted-publish",
-            default=False,
-            required=False,
-            action="store_true",
-            help="Upload from CI using trusted publishing. Use this without "
-            "specifying username & password. Requires an optional extra "
-            "dependency (install twine[trusted-publishing]).",
         )
         parser.add_argument(
             "--non-interactive",
