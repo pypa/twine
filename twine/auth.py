@@ -2,6 +2,9 @@ import functools
 import getpass
 import logging
 from typing import TYPE_CHECKING, Callable, Optional, Type, cast
+from urllib.parse import urlparse
+
+import requests
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -28,9 +31,12 @@ class CredentialInput:
 
 
 class Resolver:
-    def __init__(self, config: utils.RepositoryConfig, input: CredentialInput) -> None:
+    def __init__(
+        self, config: utils.RepositoryConfig, input: CredentialInput, oidc: bool = False
+    ) -> None:
         self.config = config
         self.input = input
+        self.oidc = oidc
 
     @classmethod
     def choose(cls, interactive: bool) -> Type["Resolver"]:
@@ -53,12 +59,40 @@ class Resolver:
     @property
     @functools.lru_cache()
     def password(self) -> Optional[str]:
+        if self.oidc:
+            # Trusted publishing (OpenID Connect): get one token from the CI
+            # system, and exchange that for a PyPI token.
+            from id import detect_credential
+
+            repository_domain = urlparse(self.system).netloc
+            audience = self._oidc_audience(repository_domain)
+            oidc_token = detect_credential(audience)
+
+            token_exchange_url = f'https://{repository_domain}/_/oidc/mint-token'
+
+            mint_token_resp = requests.post(
+                token_exchange_url,
+                json={'token': oidc_token},
+                timeout=5,  # S113 wants a timeout
+            )
+            mint_token_resp.raise_for_status()
+            return mint_token_resp.json()['token']
+
         return utils.get_userpass_value(
             self.input.password,
             self.config,
             key="password",
             prompt_strategy=self.password_from_keyring_or_prompt,
         )
+
+    @staticmethod
+    def _oidc_audience(repository_domain):
+        # Indices are expected to support `https://{domain}/_/oidc/audience`,
+        # which tells OIDC exchange clients which audience to use.
+        audience_url = f'https://{repository_domain}/_/oidc/audience'
+        resp = requests.get(audience_url, timeout=5)
+        resp.raise_for_status()
+        return resp.json()['audience']
 
     @property
     def system(self) -> Optional[str]:
