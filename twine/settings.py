@@ -231,7 +231,7 @@ class Settings:
             action="store_true",
             help="Upload from CI using trusted publishing. Use this without "
             "specifying username & password. Requires an optional extra "
-                 "dependency (install twine[oidc]).",
+            "dependency (install twine[oidc]).",
         )
         parser.add_argument(
             "--non-interactive",
