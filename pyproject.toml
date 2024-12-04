@@ -62,7 +62,7 @@ register = "twine.commands.register:main"
 
 [project.optional-dependencies]
 keyring = ["keyring >= 15.1"]
-oidc = ["id"]
+trusted-publishing = ["id"]
 
 [project.scripts]
 twine = "twine.__main__:main"

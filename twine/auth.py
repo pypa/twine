@@ -32,11 +32,14 @@ class CredentialInput:
 
 class Resolver:
     def __init__(
-        self, config: utils.RepositoryConfig, input: CredentialInput, oidc: bool = False
+        self,
+        config: utils.RepositoryConfig,
+        input: CredentialInput,
+        trusted_publishing: bool = False,
     ) -> None:
         self.config = config
         self.input = input
-        self.oidc = oidc
+        self.trusted_publishing = trusted_publishing
 
     @classmethod
     def choose(cls, interactive: bool) -> Type["Resolver"]:
@@ -59,7 +62,7 @@ class Resolver:
     @property
     @functools.lru_cache()
     def password(self) -> Optional[str]:
-        if self.oidc:
+        if self.trusted_publishing:
             # Trusted publishing (OpenID Connect): get one token from the CI
             # system, and exchange that for a PyPI token.
             from id import detect_credential  # type: ignore
