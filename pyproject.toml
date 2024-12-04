@@ -42,6 +42,7 @@ dependencies = [
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
 	"packaging",
+	"id",
 ]
 dynamic = ["version"]
 
@@ -62,7 +63,6 @@ register = "twine.commands.register:main"
 
 [project.optional-dependencies]
 keyring = ["keyring >= 15.1"]
-trusted-publishing = ["id"]
 
 [project.scripts]
 twine = "twine.__main__:main"

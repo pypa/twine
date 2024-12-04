@@ -5,6 +5,7 @@ from typing import TYPE_CHECKING, Callable, Optional, Type, cast
 from urllib.parse import urlparse
 
 import requests
+from id import detect_credential  # type: ignore
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -15,11 +16,6 @@ else:
         import keyring
     except ModuleNotFoundError:  # pragma: no cover
         keyring = None
-
-try:
-    from id import detect_credential  # type: ignore
-except ModuleNotFoundError:  # pragma: no cover
-    detect_credential = None
 
 from twine import exceptions
 from twine import utils
@@ -69,7 +65,6 @@ class Resolver:
             self.is_pypi()
             and self.username == "__token__"
             and self.input.password is None
-            and detect_credential is not None
         ):
             logger.info(
                 "Trying to use trusted publishing (no token was explicitly provided)"
