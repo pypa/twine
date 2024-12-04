@@ -466,3 +466,9 @@ def test_malformed_from_file(monkeypatch):
 def test_package_from_egg():
     filename = "tests/fixtures/twine-3.3.0-py3.9.egg"
     package_file.PackageFile.from_filename(filename, comment=None)
+
+
+def test_package_from_sdist():
+    filename = "tests/fixtures/twine-1.5.0.tar.gz"
+    p = package_file.PackageFile.from_filename(filename, comment=None)
+    assert p.python_version == "source"
