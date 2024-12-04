@@ -62,9 +62,9 @@ class Resolver:
         if self.oidc:
             # Trusted publishing (OpenID Connect): get one token from the CI
             # system, and exchange that for a PyPI token.
-            from id import detect_credential
+            from id import detect_credential  # type: ignore
 
-            repository_domain = urlparse(self.system).netloc
+            repository_domain = cast(str, urlparse(self.system).netloc)
             audience = self._oidc_audience(repository_domain)
             oidc_token = detect_credential(audience)
 
@@ -76,7 +76,7 @@ class Resolver:
                 timeout=5,  # S113 wants a timeout
             )
             mint_token_resp.raise_for_status()
-            return mint_token_resp.json()["token"]
+            return cast(str, mint_token_resp.json()["token"])
 
         return utils.get_userpass_value(
             self.input.password,
@@ -86,13 +86,13 @@ class Resolver:
         )
 
     @staticmethod
-    def _oidc_audience(repository_domain):
+    def _oidc_audience(repository_domain: str) -> str:
         # Indices are expected to support `https://{domain}/_/oidc/audience`,
         # which tells OIDC exchange clients which audience to use.
         audience_url = f"https://{repository_domain}/_/oidc/audience"
         resp = requests.get(audience_url, timeout=5)
         resp.raise_for_status()
-        return resp.json()["audience"]
+        return cast(str, resp.json()["audience"])
 
     @property
     def system(self) -> Optional[str]:
