@@ -1,11 +1,13 @@
 import functools
 import getpass
+import json
 import logging
 from typing import TYPE_CHECKING, Callable, Optional, Type, cast
 from urllib.parse import urlparse
 
 import requests
-from id import detect_credential  # type: ignore
+from id import AmbientCredentialError  # type: ignore
+from id import detect_credential
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -61,24 +63,14 @@ class Resolver:
     @property
     @functools.lru_cache()
     def password(self) -> Optional[str]:
-        if (
-            self.is_pypi()
-            and self.username == "__token__"
-            and self.input.password is None
-        ):
-            logger.info(
-                "Trying to use trusted publishing (no token was explicitly provided)"
-            )
-            return self.make_trusted_publishing_token()
-
         return utils.get_userpass_value(
             self.input.password,
             self.config,
             key="password",
-            prompt_strategy=self.password_from_keyring_or_prompt,
+            prompt_strategy=self.password_from_keyring_or_trusted_publishing_or_prompt,
         )
 
-    def make_trusted_publishing_token(self) -> str:
+    def make_trusted_publishing_token(self) -> Optional[str]:
         # Trusted publishing (OpenID Connect): get one token from the CI
         # system, and exchange that for a PyPI token.
         repository_domain = cast(str, urlparse(self.system).netloc)
@@ -91,7 +83,20 @@ class Resolver:
         resp.raise_for_status()
         audience = cast(str, resp.json()["audience"])
 
-        oidc_token = detect_credential(audience)
+        try:
+            oidc_token = detect_credential(audience)
+        except AmbientCredentialError as e:
+            # If we get here, we're on a supported CI platform for trusted
+            # publishing, and we have not been given any token, so we can error.
+            raise exceptions.TrustedPublishingFailure(
+                "Unable to retrieve an OIDC token from the CI platform for "
+                f"trusted publishing {e}"
+            )
+
+        if oidc_token is None:
+            logger.debug("This environment is not supported for trusted publishing")
+            return None  # Fall back to prompting for a token (if possible)
+
         logger.debug("Got OIDC token for audience %s", audience)
 
         token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
@@ -101,9 +106,25 @@ class Resolver:
             json={"token": oidc_token},
             timeout=5,  # S113 wants a timeout
         )
-        mint_token_resp.raise_for_status()
+        try:
+            mint_token_payload = mint_token_resp.json()
+        except json.JSONDecodeError:
+            raise exceptions.TrustedPublishingFailure(
+                "The token-minting request returned invalid JSON"
+            )
+
+        if not mint_token_resp.ok:
+            reasons = "\n".join(
+                f'* `{error["code"]}`: {error["description"]}'
+                for error in mint_token_payload["errors"]
+            )
+            raise exceptions.TrustedPublishingFailure(
+                "The token request failed; the index server gave the following "
+                f"reasons:\n\n{reasons}"
+            )
+
         logger.debug("Minted upload token for trusted publishing")
-        return cast(str, mint_token_resp.json()["token"])
+        return cast(str, mint_token_payload["token"])
 
     @property
     def system(self) -> Optional[str]:
@@ -147,11 +168,18 @@ class Resolver:
 
         return self.prompt("username", input)
 
-    def password_from_keyring_or_prompt(self) -> str:
+    def password_from_keyring_or_trusted_publishing_or_prompt(self) -> str:
         password = self.get_password_from_keyring()
         if password:
             logger.info("password set from keyring")
             return password
+
+        if self.is_pypi() and self.username == "__token__":
+            logger.debug(
+                "Trying to use trusted publishing (no token was explicitly provided)"
+            )
+            if (token := self.make_trusted_publishing_token()) is not None:
+                return token
 
         # Prompt for API token when required.
         what = "API token" if self.is_pypi() else "password"
