@@ -44,19 +44,14 @@ from rich import print
 
 from twine import exceptions
 from twine import wheel
-from twine import wininst
 
 DIST_TYPES = {
-    "bdist_wheel": wheel.Wheel,
-    "bdist_wininst": wininst.WinInst,
-    "bdist_egg": pkginfo.BDist,
+    "wheel": wheel.Wheel,
     "sdist": pkginfo.SDist,
 }
 
 DIST_EXTENSIONS = {
-    ".whl": "bdist_wheel",
-    ".exe": "bdist_wininst",
-    ".egg": "bdist_egg",
+    ".whl": "wheel",
     ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
     ".zip": "sdist",
@@ -157,13 +152,8 @@ class PackageFile:
                 )
             raise exceptions.InvalidDistribution(msg)
 
-        if dtype == "bdist_egg":
-            (dist,) = importlib_metadata.Distribution.discover(path=[filename])
-            py_version = dist.metadata["Version"]
-        elif dtype == "bdist_wheel":
+        if dtype == "wheel":
             py_version = cast(wheel.Wheel, meta).py_version
-        elif dtype == "bdist_wininst":
-            py_version = cast(wininst.WinInst, meta).py_version
         elif dtype == "sdist":
             py_version = "source"
         else:

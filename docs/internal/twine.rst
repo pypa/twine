@@ -15,4 +15,3 @@ twine package
    twine.settings
    twine.utils
    twine.wheel
-   twine.wininst

@@ -463,12 +463,14 @@ def test_malformed_from_file(monkeypatch):
     assert "Invalid distribution file" in err.value.args[0]
 
 
-def test_package_from_egg():
-    filename = "tests/fixtures/twine-3.3.0-py3.9.egg"
-    package_file.PackageFile.from_filename(filename, comment=None)
-
-
 def test_package_from_sdist():
     filename = "tests/fixtures/twine-1.5.0.tar.gz"
     p = package_file.PackageFile.from_filename(filename, comment=None)
     assert p.python_version == "source"
+
+
+def test_package_from_unrecognized_file_error():
+    filename = "twine/package.py"
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package_file.PackageFile.from_filename(filename, comment=None)
+    assert "Unknown distribution format" in err.value.args[0]
