@@ -15,8 +15,8 @@ concurrency:
 env:
   FORCE_COLOR: "1"
   TOX_TESTENV_PASSENV: "FORCE_COLOR"
-  MIN_PYTHON_VERSION: "3.8"
-  DEFAULT_PYTHON_VERSION: "3.10"
+  MIN_PYTHON_VERSION: "3.9"
+  DEFAULT_PYTHON_VERSION: "3.11"
 
 permissions:
   contents: read
@@ -38,7 +38,6 @@ jobs:
     strategy:
       matrix:
         python-version:
-          - "3.8"
           - "3.9"
           - "3.10"
           - "3.11"
