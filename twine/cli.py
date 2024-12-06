@@ -76,7 +76,7 @@ def configure_output() -> None:
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = [
-        "keyring",
+        "keyring",  # optional for non-desktop use
         "pkginfo",
         "requests",
         "requests-toolbelt",
@@ -84,7 +84,16 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     ]
     if sys.version_info < (3, 10):
         deps.append("importlib-metadata")
-    return [(dep, importlib_metadata.version(dep)) for dep in deps]
+
+    result: List[Tuple[str, str]] = []
+    for dep in deps:
+        try:
+            version = importlib_metadata.version(dep)
+        except importlib_metadata.PackageNotFoundError:
+            version = "NOT INSTALLED"
+        result.append((dep, version))
+
+    return result
 
 
 def dep_versions() -> str:
