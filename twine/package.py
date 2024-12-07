@@ -46,12 +46,12 @@ from twine import exceptions
 from twine import wheel
 
 DIST_TYPES = {
-    "wheel": wheel.Wheel,
+    "bdist_wheel": wheel.Wheel,
     "sdist": pkginfo.SDist,
 }
 
 DIST_EXTENSIONS = {
-    ".whl": "wheel",
+    ".whl": "bdist_wheel",
     ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
     ".zip": "sdist",
@@ -152,7 +152,7 @@ class PackageFile:
                 )
             raise exceptions.InvalidDistribution(msg)
 
-        if dtype == "wheel":
+        if dtype == "bdist_wheel":
             py_version = cast(wheel.Wheel, meta).py_version
         elif dtype == "sdist":
             py_version = "source"
