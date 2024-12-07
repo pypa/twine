@@ -283,16 +283,11 @@ linkcheck_ignore = [
 intersphinx_mapping = {
     "python": ("https://docs.python.org/3", None),
     "requests": ("https://requests.readthedocs.io/en/latest/", None),
+    "packaging": ("https://packaging.pypa.io/en/latest/", None),
 }
 
 # Be strict about the invalid references:
 nitpicky = True
-
-# TODO: Try to add these to intersphinx_mapping
-nitpick_ignore_regex = [
-    (r"py:.*", r"pkginfo.*"),
-    ("py:class", r"warnings\.WarningMessage"),
-]
 
 # -- Options for apidoc output ------------------------------------------------
 

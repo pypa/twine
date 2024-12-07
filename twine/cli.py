@@ -77,7 +77,7 @@ def configure_output() -> None:
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = [
         "keyring",  # optional for non-desktop use
-        "pkginfo",
+        "packaging",
         "requests",
         "requests-toolbelt",
         "urllib3",
