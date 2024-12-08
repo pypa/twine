@@ -13,11 +13,14 @@ from id import detect_credential
 # pre-built wheels for ppc64le and s390x, see #1158.
 if TYPE_CHECKING:
     import keyring
+    from keyring.errors import NoKeyringError
 else:
     try:
         import keyring
+        from keyring.errors import NoKeyringError
     except ModuleNotFoundError:  # pragma: no cover
         keyring = None
+        NoKeyringError = None
 
 from twine import exceptions
 from twine import utils
@@ -156,6 +159,8 @@ class Resolver:
             username = cast(str, self.username)
             logger.info("Querying keyring for password")
             return cast(str, keyring.get_password(system, username))
+        except NoKeyringError:
+            logger.info("No keyring backend found")
         except Exception as exc:
             logger.warning("Error getting password from keyring", exc_info=exc)
         return None
