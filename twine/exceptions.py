@@ -116,6 +116,12 @@ class NonInteractive(TwineException):
     pass
 
 
+class TrustedPublishingFailure(TwineException):
+    """Raised if we expected to use trusted publishing but couldn't."""
+
+    pass
+
+
 class InvalidPyPIUploadURL(TwineException):
     """Repository configuration tries to use PyPI with an incorrect URL.
 
