@@ -5,7 +5,6 @@ import logging
 from typing import TYPE_CHECKING, Callable, Optional, Type, cast
 from urllib.parse import urlparse
 
-import requests
 from id import AmbientCredentialError  # type: ignore
 from id import detect_credential
 
@@ -77,7 +76,7 @@ class Resolver:
         # Trusted publishing (OpenID Connect): get one token from the CI
         # system, and exchange that for a PyPI token.
         repository_domain = cast(str, urlparse(self.system).netloc)
-        session = requests.Session()  # TODO: user agent & retries
+        session = utils.make_requests_session()
 
         # Indices are expected to support `https://{domain}/_/oidc/audience`,
         # which tells OIDC exchange clients which audience to use.

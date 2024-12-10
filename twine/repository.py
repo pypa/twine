@@ -12,18 +12,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-from typing import Any, Dict, List, Optional, Set, Tuple, cast
+from typing import Any, Dict, List, Optional, Set, Tuple
 
 import requests
 import requests_toolbelt
 import rich.progress
-import urllib3
-from requests import adapters
-from requests_toolbelt.utils import user_agent
 from rich import print
 
-import twine
 from twine import package as package_file
+from twine.utils import make_requests_session
 
 KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "attestations", "content"}
 
@@ -47,7 +44,7 @@ class Repository:
     ) -> None:
         self.url = repository_url
 
-        self.session = requests.session()
+        self.session = make_requests_session()
         # requests.Session.auth should be Union[None, Tuple[str, str], ...]
         # But username or password could be None
         # See TODO for utils.RepositoryConfig
@@ -57,34 +54,9 @@ class Repository:
         logger.info(f"username: {username if username else '<empty>'}")
         logger.info(f"password: <{'hidden' if password else 'empty'}>")
 
-        self.session.headers["User-Agent"] = self._make_user_agent_string()
-        for scheme in ("http://", "https://"):
-            self.session.mount(scheme, self._make_adapter_with_retries())
-
         # Working around https://github.com/python/typing/issues/182
         self._releases_json_data: Dict[str, Dict[str, Any]] = {}
         self.disable_progress_bar = disable_progress_bar
-
-    @staticmethod
-    def _make_adapter_with_retries() -> adapters.HTTPAdapter:
-        retry = urllib3.Retry(
-            allowed_methods=["GET"],
-            connect=5,
-            total=10,
-            status_forcelist=[500, 501, 502, 503],
-        )
-
-        return adapters.HTTPAdapter(max_retries=retry)
-
-    @staticmethod
-    def _make_user_agent_string() -> str:
-        user_agent_string = (
-            user_agent.UserAgentBuilder("twine", twine.__version__)
-            .include_implementation()
-            .build()
-        )
-
-        return cast(str, user_agent_string)
 
     def close(self) -> None:
         self.session.close()
