@@ -25,7 +25,11 @@ from urllib.parse import urlunparse
 
 import requests
 import rfc3986
+import urllib3
+from requests.adapters import HTTPAdapter
+from requests_toolbelt.utils import user_agent
 
+import twine
 from twine import exceptions
 
 # Shim for input to allow testing.
@@ -302,6 +306,28 @@ get_cacert = functools.partial(get_userpass_value, key="ca_cert")
 
 #: Get the client certificate via :func:`get_userpass_value`.
 get_clientcert = functools.partial(get_userpass_value, key="client_cert")
+
+
+def make_requests_session() -> requests.Session:
+    """Prepare a requests Session with retries & twine's user-agent string."""
+    s = requests.Session()
+
+    retry = urllib3.Retry(
+        allowed_methods=["GET"],
+        connect=5,
+        total=10,
+        status_forcelist=[500, 501, 502, 503],
+    )
+
+    for scheme in ("http://", "https://"):
+        s.mount(scheme, HTTPAdapter(max_retries=retry))
+
+    s.headers["User-Agent"] = (
+        user_agent.UserAgentBuilder("twine", twine.__version__)
+        .include_implementation()
+        .build()
+    )
+    return s
 
 
 class EnvironmentDefault(argparse.Action):

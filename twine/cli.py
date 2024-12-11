@@ -81,6 +81,7 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
         "requests",
         "requests-toolbelt",
         "urllib3",
+        "id",
     ]
     if sys.version_info < (3, 10):
         deps.append("importlib-metadata")
