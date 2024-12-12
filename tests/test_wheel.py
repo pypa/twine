@@ -12,10 +12,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import pathlib
-import re
 import zipfile
 
-import pretend
 import pytest
 
 from twine import exceptions
@@ -33,26 +31,24 @@ def test_version_parsing(example_wheel):
     assert example_wheel.py_version == "py2.py3"
 
 
-def test_version_parsing_missing_pyver(monkeypatch, example_wheel):
-    wheel.wheel_file_re = pretend.stub(match=lambda a: None)
-    assert example_wheel.py_version == "any"
+@pytest.mark.parametrize(
+    "file_name,valid",
+    [
+        ("name-1.2.3-py313-none-any.whl", True),
+        ("name-1.2.3-42-py313-none-any.whl", True),
+        ("long_name-1.2.3-py3-none-any.whl", True),
+        ("missing_components-1.2.3.whl", False),
+    ],
+)
+def test_parse_wheel_file_name(file_name, valid):
+    assert bool(wheel.wheel_file_re.match(file_name)) == valid
 
 
-def test_find_metadata_files():
-    names = [
-        "package/lib/__init__.py",
-        "package/lib/version.py",
-        "package/METADATA.txt",
-        "package/METADATA.json",
-        "package/METADATA",
-    ]
-    expected = [
-        ["package", "METADATA"],
-        ["package", "METADATA.json"],
-        ["package", "METADATA.txt"],
-    ]
-    candidates = wheel.Wheel.find_candidate_metadata_files(names)
-    assert expected == candidates
+def test_invalid_file_name(monkeypatch):
+    parent = pathlib.Path(__file__).parent
+    file_name = str(parent / "fixtures" / "twine-1.5.0-py2.whl")
+    with pytest.raises(exceptions.InvalidDistribution, match="Invalid wheel filename"):
+        wheel.Wheel(file_name)
 
 
 def test_read_valid(example_wheel):
@@ -64,33 +60,35 @@ def test_read_valid(example_wheel):
 
 def test_read_non_existent_wheel_file_name():
     """Raise an exception when wheel file doesn't exist."""
-    file_name = str(pathlib.Path("/foo/bar/baz.whl").resolve())
-    with pytest.raises(
-        exceptions.InvalidDistribution, match=re.escape(f"No such file: {file_name}")
-    ):
+    file_name = str(pathlib.Path("/foo/bar/baz-1.2.3-py3-none-any.whl").resolve())
+    with pytest.raises(exceptions.InvalidDistribution, match="No such file"):
         wheel.Wheel(file_name).read()
 
 
 def test_read_invalid_wheel_extension():
     """Raise an exception when file is missing .whl extension."""
     file_name = str(pathlib.Path(__file__).parent / "fixtures" / "twine-1.5.0.tar.gz")
-    with pytest.raises(
-        exceptions.InvalidDistribution,
-        match=re.escape(f"Not a known archive format for file: {file_name}"),
-    ):
+    with pytest.raises(exceptions.InvalidDistribution, match="Invalid wheel filename"):
         wheel.Wheel(file_name).read()
 
 
-def test_read_wheel_empty_metadata(tmpdir):
+def test_read_wheel_missing_metadata(example_wheel, monkeypatch):
     """Raise an exception when a wheel file is missing METADATA."""
-    whl_file = tmpdir.mkdir("wheel").join("not-a-wheel.whl")
-    with zipfile.ZipFile(whl_file, "w") as zip_file:
-        zip_file.writestr("METADATA", "")
 
-    with pytest.raises(
-        exceptions.InvalidDistribution,
-        match=re.escape(
-            f"No METADATA in archive or METADATA missing 'Metadata-Version': {whl_file}"
-        ),
-    ):
-        wheel.Wheel(whl_file).read()
+    def patch(self, name):
+        raise KeyError
+
+    monkeypatch.setattr(zipfile.ZipFile, "read", patch)
+    parent = pathlib.Path(__file__).parent
+    file_name = str(parent / "fixtures" / "twine-1.5.0-py2.py3-none-any.whl")
+    with pytest.raises(exceptions.InvalidDistribution, match="No METADATA in archive"):
+        wheel.Wheel(file_name).read()
+
+
+def test_read_wheel_empty_metadata(example_wheel, monkeypatch):
+    """Raise an exception when a wheel file is missing METADATA."""
+    monkeypatch.setattr(zipfile.ZipFile, "read", lambda self, name: b"")
+    parent = pathlib.Path(__file__).parent
+    file_name = str(parent / "fixtures" / "twine-1.5.0-py2.py3-none-any.whl")
+    with pytest.raises(exceptions.InvalidDistribution, match="No METADATA in archive"):
+        wheel.Wheel(file_name).read()
