@@ -52,7 +52,6 @@ DIST_TYPES = {
 
 DIST_EXTENSIONS = {
     ".whl": "bdist_wheel",
-    ".tar.bz2": "sdist",
     ".tar.gz": "sdist",
     ".zip": "sdist",
 }
