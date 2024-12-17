@@ -152,13 +152,13 @@ class PackageMetadata(TypedDict, total=False):
     license_file: List[str]
 
     # Additional metadata
-    comment: Optional[str]
+    comment: str
     pyversion: str
     filetype: str
     gpg_signature: Tuple[str, bytes]
     attestations: str
     md5_digest: str
-    sha256_digest: Optional[str]
+    sha256_digest: str
     blake2_256_digest: str
 
 
@@ -256,14 +256,23 @@ class PackageFile:
                 # names are computed but they can only be valid key names.
                 data[field] = value  # type: ignore[literal-required]
 
-        # override name with safe name
+        # Override name with safe name.
         data["name"] = self.safe_name
-        # file content
+
+        # File content.
         data["pyversion"] = self.python_version
         data["filetype"] = self.filetype
-        # additional meta-data
-        data["comment"] = self.comment
-        data["sha256_digest"] = self.sha2_digest
+
+        # Additional meta-data: some of these fileds may not be set. Some
+        # package repositories do not allow null values, so this only sends
+        # non-null values. In particular, FIPS disables MD5 and Blake2, making
+        # the digest values null. See https://github.com/pypa/twine/issues/775
+
+        if self.comment is not None:
+            data["comment"] = self.comment
+
+        if self.sha2_digest is not None:
+            data["sha256_digest"] = self.sha2_digest
 
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature
@@ -271,9 +280,6 @@ class PackageFile:
         if self.attestations is not None:
             data["attestations"] = json.dumps(self.attestations)
 
-        # FIPS disables MD5 and Blake2, making the digest values None. Some package
-        # repositories don't allow null values, so this only sends non-null values.
-        # See also: https://github.com/pypa/twine/issues/775
         if self.md5_digest:
             data["md5_digest"] = self.md5_digest
 
