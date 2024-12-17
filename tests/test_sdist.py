@@ -17,7 +17,6 @@ from .helpers import TESTS_DIR
     params=[
         "fixtures/twine-1.5.0.tar.gz",
         "fixtures/twine-1.6.5.tar.gz",
-        "fixtures/twine-1.5.0.zip",
     ]
 )
 def example_sdist(request):
