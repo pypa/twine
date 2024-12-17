@@ -79,7 +79,7 @@ class Repository:
             elif isinstance(value, (list, tuple)):
                 data_to_send.extend((key, item) for item in value)
             else:
-                assert isinstance(value, str) or value is None
+                assert isinstance(value, str)
                 data_to_send.append((key, value))
         return data_to_send
 
