@@ -18,6 +18,7 @@ import pretend
 import pytest
 import requests
 
+from twine import package
 from twine import repository
 from twine import utils
 
@@ -37,18 +38,8 @@ def test_gpg_signature_structure_is_preserved():
         "gpg_signature": ("filename.asc", "filecontent"),
     }
 
-    tuples = repository.Repository._convert_data_to_list_of_tuples(data)
+    tuples = repository.Repository._convert_metadata_to_list_of_tuples(data)
     assert tuples == [("gpg_signature", ("filename.asc", "filecontent"))]
-
-
-def test_content_structure_is_preserved():
-    """Preserve 'content' key when converting metadata."""
-    data = {
-        "content": ("filename", "filecontent"),
-    }
-
-    tuples = repository.Repository._convert_data_to_list_of_tuples(data)
-    assert tuples == [("content", ("filename", "filecontent"))]
 
 
 def test_iterables_are_flattened():
@@ -57,15 +48,34 @@ def test_iterables_are_flattened():
         "platform": ["UNKNOWN"],
     }
 
-    tuples = repository.Repository._convert_data_to_list_of_tuples(data)
+    tuples = repository.Repository._convert_metadata_to_list_of_tuples(data)
     assert tuples == [("platform", "UNKNOWN")]
 
     data = {
         "platform": ["UNKNOWN", "ANOTHERPLATFORM"],
     }
 
-    tuples = repository.Repository._convert_data_to_list_of_tuples(data)
+    tuples = repository.Repository._convert_metadata_to_list_of_tuples(data)
     assert tuples == [("platform", "UNKNOWN"), ("platform", "ANOTHERPLATFORM")]
+
+
+def test_all_metadata_fields_are_flattened(monkeypatch):
+    """Verify that package metadata fields are correctly flattened."""
+    # This file contains all metadata fields known up to metadata version 2.4.
+    metadata = open("tests/fixtures/everything.metadata")
+    monkeypatch.setattr(package.wheel.Wheel, "read", metadata.read)
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    data = package.PackageFile.from_filename(
+        filename, comment="comment"
+    ).metadata_dictionary()
+    tuples = repository.Repository._convert_metadata_to_list_of_tuples(data)
+    # Verifies that all metadata fields parsed by ``packaging.metadata`` are
+    # correctly flattened into a list of (str, str) tuples. This does not
+    # apply to the ``gpg_signature`` field, but this field is not added here
+    # as there are specific tests for it.
+    for key, value in tuples:
+        assert isinstance(key, str)
+        assert isinstance(value, str)
 
 
 def test_set_client_certificate(default_repo):
@@ -103,7 +113,7 @@ def test_package_is_uploaded_404s(default_repo):
     default_repo.session = pretend.stub(
         get=lambda url, headers: response_with(status_code=404)
     )
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"))
+    package = pretend.stub(safe_name="fake", version="2.12.0")
 
     assert default_repo.package_is_uploaded(package) is False
 
@@ -115,7 +125,7 @@ def test_package_is_uploaded_200s_with_no_releases(default_repo):
             status_code=200, _content=b'{"releases": {}}', _content_consumed=True
         ),
     )
-    package = pretend.stub(safe_name="fake", metadata=pretend.stub(version="2.12.0"))
+    package = pretend.stub(safe_name="fake", version="2.12.0")
 
     assert default_repo.package_is_uploaded(package) is False
 
@@ -125,8 +135,8 @@ def test_package_is_uploaded_with_releases_using_cache(default_repo):
     default_repo._releases_json_data = {"fake": {"0.1": [{"filename": "fake.whl"}]}}
     package = pretend.stub(
         safe_name="fake",
+        version="0.1",
         basefilename="fake.whl",
-        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package) is True
@@ -143,8 +153,8 @@ def test_package_is_uploaded_with_releases_not_using_cache(default_repo):
     )
     package = pretend.stub(
         safe_name="fake",
+        version="0.1",
         basefilename="fake.whl",
-        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package, bypass_cache=True) is True
@@ -161,8 +171,8 @@ def test_package_is_uploaded_different_filenames(default_repo):
     )
     package = pretend.stub(
         safe_name="fake",
+        version="0.1",
         basefilename="foo.whl",
-        metadata=pretend.stub(version="0.1"),
     )
 
     assert default_repo.package_is_uploaded(package) is False
@@ -308,8 +318,7 @@ def test_upload_retry(tmpdir, default_repo, caplog):
 def test_release_urls(package_meta, repository_url, release_urls):
     """Generate a set of PyPI release URLs for a list of packages."""
     packages = [
-        pretend.stub(safe_name=name, metadata=pretend.stub(version=version))
-        for name, version in package_meta
+        pretend.stub(safe_name=name, version=version) for name, version in package_meta
     ]
 
     repo = repository.Repository(

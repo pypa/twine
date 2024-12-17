@@ -22,8 +22,6 @@ from rich import print
 from twine import package as package_file
 from twine.utils import make_requests_session
 
-KEYWORDS_TO_NOT_FLATTEN = {"gpg_signature", "attestations", "content"}
-
 LEGACY_PYPI = "https://pypi.python.org/"
 LEGACY_TEST_PYPI = "https://testpypi.python.org/"
 WAREHOUSE = "https://upload.pypi.org/"
@@ -62,13 +60,27 @@ class Repository:
         self.session.close()
 
     @staticmethod
-    def _convert_data_to_list_of_tuples(data: Dict[str, Any]) -> List[Tuple[str, Any]]:
-        data_to_send = []
+    def _convert_metadata_to_list_of_tuples(
+        data: package_file.PackageMetadata,
+    ) -> List[Tuple[str, Any]]:
+        # This does what ``warehouse.forklift.parse_form_metadata()`` does, in reverse.
+        data_to_send: List[Tuple[str, Any]] = []
         for key, value in data.items():
-            if key in KEYWORDS_TO_NOT_FLATTEN or not isinstance(value, (list, tuple)):
+            if key == "gpg_signature":
+                assert isinstance(value, tuple)
                 data_to_send.append((key, value))
-            else:
+            elif key == "project_urls":
+                assert isinstance(value, dict)
+                for name, url in value.items():
+                    data_to_send.append((key, f"{name}, {url}"))
+            elif key == "keywords":
+                assert isinstance(value, list)
+                data_to_send.append((key, ", ".join(value)))
+            elif isinstance(value, (list, tuple)):
                 data_to_send.extend((key, item) for item in value)
+            else:
+                assert isinstance(value, str) or value is None
+                data_to_send.append((key, value))
         return data_to_send
 
     def set_certificate_authority(self, cacert: Optional[str]) -> None:
@@ -80,12 +92,12 @@ class Repository:
             self.session.cert = clientcert
 
     def register(self, package: package_file.PackageFile) -> requests.Response:
-        data = package.metadata_dictionary()
-        data.update({":action": "submit", "protocol_version": "1"})
-
         print(f"Registering {package.basefilename}")
 
-        data_to_send = self._convert_data_to_list_of_tuples(data)
+        metadata = package.metadata_dictionary()
+        data_to_send = self._convert_metadata_to_list_of_tuples(metadata)
+        data_to_send.append((":action", "submit"))
+        data_to_send.append(("protocol_version", "1"))
         encoder = requests_toolbelt.MultipartEncoder(data_to_send)
         resp = self.session.post(
             self.url,
@@ -98,19 +110,12 @@ class Repository:
         return resp
 
     def _upload(self, package: package_file.PackageFile) -> requests.Response:
-        data = package.metadata_dictionary()
-        data.update(
-            {
-                # action
-                ":action": "file_upload",
-                "protocol_version": "1",
-            }
-        )
-
-        data_to_send = self._convert_data_to_list_of_tuples(data)
-
         print(f"Uploading {package.basefilename}")
 
+        metadata = package.metadata_dictionary()
+        data_to_send = self._convert_metadata_to_list_of_tuples(metadata)
+        data_to_send.append((":action", "file_upload"))
+        data_to_send.append(("protocol_version", "1"))
         with open(package.filename, "rb") as fp:
             data_to_send.append(
                 (
@@ -197,7 +202,7 @@ class Repository:
                 releases = {}
             self._releases_json_data[safe_name] = releases
 
-        packages = releases.get(package.metadata.version, [])
+        packages = releases.get(package.version, [])
 
         for uploaded_package in packages:
             if uploaded_package["filename"] == package.basefilename:
@@ -214,7 +219,7 @@ class Repository:
             return set()
 
         return {
-            f"{url}project/{package.safe_name}/{package.metadata.version}/"
+            f"{url}project/{package.safe_name}/{package.version}/"
             for package in packages
         }
 

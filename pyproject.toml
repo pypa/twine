@@ -31,7 +31,6 @@ classifiers = [
 ]
 requires-python = ">=3.8"
 dependencies = [
-	"pkginfo >= 1.8.1",
 	"readme-renderer >= 35.0",
 	"requests >= 2.20",
 	"requests-toolbelt >= 0.8.0, != 0.9.0",
@@ -41,7 +40,7 @@ dependencies = [
 	"keyring >= 15.1; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
-	"packaging",
+	"packaging >= 24.0",
 	"id",
 ]
 dynamic = ["version"]

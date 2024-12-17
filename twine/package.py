@@ -18,36 +18,31 @@ import logging
 import os
 import re
 import subprocess
-import sys
-import warnings
-from typing import (
-    Any,
-    Dict,
-    Iterable,
-    List,
-    NamedTuple,
-    Optional,
-    Sequence,
-    Tuple,
-    Union,
-    cast,
-)
+from typing import Any, Dict, List, NamedTuple, Optional, Tuple, TypedDict
 
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
-
-import packaging.version
-import pkginfo
+from packaging import metadata
+from packaging import version
 from rich import print
 
 from twine import exceptions
+from twine import sdist
 from twine import wheel
+
+# Monkeypatch Metadata 2.0 support
+metadata._VALID_METADATA_VERSIONS = [
+    "1.0",
+    "1.1",
+    "1.2",
+    "2.0",
+    "2.1",
+    "2.2",
+    "2.3",
+    "2.4",
+]
 
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,
-    "sdist": pkginfo.SDist,
+    "sdist": sdist.SDist,
 }
 
 DIST_EXTENSIONS = {
@@ -55,8 +50,6 @@ DIST_EXTENSIONS = {
     ".tar.gz": "sdist",
     ".zip": "sdist",
 }
-
-MetadataValue = Union[Optional[str], Sequence[str], Tuple[str, bytes]]
 
 logger = logging.getLogger(__name__)
 
@@ -72,11 +65,101 @@ def _safe_name(name: str) -> str:
     return re.sub("[^A-Za-z0-9.]+", "-", name)
 
 
-class CheckedDistribution(pkginfo.Distribution):
-    """A Distribution whose name and version are confirmed to be defined."""
+# Map ``metadata.RawMetadata`` fields to ``PackageMetadata`` fields.  Some
+# fields are renamed to match the names expected in the upload form.
+_RAW_TO_PACKAGE_METADATA = {
+    # Metadata 1.0 - PEP 241
+    "metadata_version": "metadata_version",
+    "name": "name",
+    "version": "version",
+    "platforms": "platform",  # Renamed
+    "summary": "summary",
+    "description": "description",
+    "keywords": "keywords",
+    "home_page": "home_page",
+    "author": "author",
+    "author_email": "author_email",
+    "license": "license",
+    # Metadata 1.1 - PEP 314
+    "supported_platforms": "supported_platform",  # Renamed
+    "download_url": "download_url",
+    "classifiers": "classifiers",
+    "requires": "requires",
+    "provides": "provides",
+    "obsoletes": "obsoletes",
+    # Metadata 1.2 - PEP 345
+    "maintainer": "maintainer",
+    "maintainer_email": "maintainer_email",
+    "requires_dist": "requires_dist",
+    "provides_dist": "provides_dist",
+    "obsoletes_dist": "obsoletes_dist",
+    "requires_python": "requires_python",
+    "requires_external": "requires_external",
+    "project_urls": "project_urls",
+    # Metadata 2.1 - PEP 566
+    "description_content_type": "description_content_type",
+    "provides_extra": "provides_extra",
+    # Metadata 2.2 - PEP 643
+    "dynamic": "dynamic",
+    # Metadata 2.4 - PEP 639
+    "license_expression": "license_expression",
+    "license_files": "license_file",  # Renamed
+}
 
+
+class PackageMetadata(TypedDict, total=False):
+
+    # Metadata 1.0 - PEP 241
+    metadata_version: str
     name: str
     version: str
+    platform: List[str]
+    summary: str
+    description: str
+    keywords: List[str]
+    home_page: str
+    author: str
+    author_email: str
+    license: str
+
+    # Metadata 1.1 - PEP 314
+    supported_platform: List[str]
+    download_url: str
+    classifiers: List[str]
+    requires: List[str]
+    provides: List[str]
+    obsoletes: List[str]
+
+    # Metadata 1.2 - PEP 345
+    maintainer: str
+    maintainer_email: str
+    requires_dist: List[str]
+    provides_dist: List[str]
+    obsoletes_dist: List[str]
+    requires_python: str
+    requires_external: List[str]
+    project_urls: Dict[str, str]
+
+    # Metadata 2.1 - PEP 566
+    description_content_type: str
+    provides_extra: List[str]
+
+    # Metadata 2.2 - PEP 643
+    dynamic: List[str]
+
+    # Metadata 2.4 - PEP 639
+    license_expression: str
+    license_file: List[str]
+
+    # Additional metadata
+    comment: Optional[str]
+    pyversion: str
+    filetype: str
+    gpg_signature: Tuple[str, bytes]
+    attestations: str
+    md5_digest: str
+    sha256_digest: Optional[str]
+    blake2_256_digest: str
 
 
 class PackageFile:
@@ -84,9 +167,9 @@ class PackageFile:
         self,
         filename: str,
         comment: Optional[str],
-        metadata: CheckedDistribution,
-        python_version: Optional[str],
-        filetype: Optional[str],
+        metadata: metadata.RawMetadata,
+        python_version: str,
+        filetype: str,
     ) -> None:
         self.filename = filename
         self.basefilename = os.path.basename(filename)
@@ -94,7 +177,8 @@ class PackageFile:
         self.metadata = metadata
         self.python_version = python_version
         self.filetype = filetype
-        self.safe_name = _safe_name(metadata.name)
+        self.safe_name = _safe_name(metadata["name"])
+        self.version: str = metadata["version"]
         self.signed_filename = self.filename + ".asc"
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
@@ -114,8 +198,9 @@ class PackageFile:
         for ext, dtype in DIST_EXTENSIONS.items():
             if filename.endswith(ext):
                 try:
-                    with warnings.catch_warnings(record=True) as captured:
-                        meta = DIST_TYPES[dtype](filename)
+                    dist = DIST_TYPES[dtype](filename)
+                    data = dist.read()
+                    py_version = dist.py_version
                 except EOFError:
                     raise exceptions.InvalidDistribution(
                         "Invalid distribution file: '%s'" % os.path.basename(filename)
@@ -127,101 +212,58 @@ class PackageFile:
                 "Unknown distribution format: '%s'" % os.path.basename(filename)
             )
 
-        supported_metadata = list(pkginfo.distribution.HEADER_ATTRS)
-        if cls._is_unknown_metadata_version(captured):
+        # Parse and validate metadata.
+        meta, unparsed = metadata.parse_email(data)
+        if unparsed:
             raise exceptions.InvalidDistribution(
-                "Make sure the distribution is using a supported Metadata-Version: "
-                f"{', '.join(supported_metadata)}."
-            )
-        # If pkginfo <1.11 encounters a metadata version it doesn't support, it may give
-        # back empty metadata. At the very least, we should have a name and version,
-        # which could also be empty if, for example, a MANIFEST.in doesn't include
-        # setup.cfg.
-        missing_fields = [
-            f.capitalize() for f in ["name", "version"] if not getattr(meta, f)
-        ]
-        if missing_fields:
-            msg = f"Metadata is missing required fields: {', '.join(missing_fields)}."
-            if cls._pkginfo_before_1_11():
-                msg += (
-                    "\n"
-                    "Make sure the distribution includes the files where those fields "
-                    "are specified, and is using a supported Metadata-Version: "
-                    f"{', '.join(supported_metadata)}."
+                "Invalid distribution metadata: {}".format(
+                    "; ".join(
+                        f"unrecognized or malformed field {key!r}" for key in unparsed
+                    )
                 )
-            raise exceptions.InvalidDistribution(msg)
+            )
+        # setuptools emits License-File metadata fields while declaring
+        # Metadata-Version 2.1. This is invalid because the metadata
+        # specification does not allow to add arbitrary fields, and because
+        # the semantic implemented by setuptools is different than the one
+        # described in PEP 639. However, rejecting these packages would be
+        # too disruptive. Drop License-File metadata entries from the data
+        # sent to the package index if the declared metadata version is less
+        # than 2.4.
+        if version.Version(meta.get("metadata_version", "0")) < version.Version("2.4"):
+            meta.pop("license_files", None)
+        try:
+            metadata.Metadata.from_raw(meta)
+        except metadata.ExceptionGroup as group:
+            raise exceptions.InvalidDistribution(
+                "Invalid distribution metadata: {}".format(
+                    "; ".join(sorted(str(e) for e in group.exceptions))
+                )
+            )
 
-        if dtype == "bdist_wheel":
-            py_version = cast(wheel.Wheel, meta).py_version
-        elif dtype == "sdist":
-            py_version = "source"
-        else:
-            # This should not be reached.
-            raise ValueError
+        return cls(filename, comment, meta, py_version, dtype)
 
-        return cls(
-            filename, comment, cast(CheckedDistribution, meta), py_version, dtype
-        )
-
-    @staticmethod
-    def _is_unknown_metadata_version(
-        captured: Iterable[warnings.WarningMessage],
-    ) -> bool:
-        NMV = getattr(pkginfo.distribution, "NewMetadataVersion", None)
-        return any(warning.category is NMV for warning in captured)
-
-    @staticmethod
-    def _pkginfo_before_1_11() -> bool:
-        ver = packaging.version.Version(importlib_metadata.version("pkginfo"))
-        return ver < packaging.version.Version("1.11")
-
-    def metadata_dictionary(self) -> Dict[str, MetadataValue]:
+    def metadata_dictionary(self) -> PackageMetadata:
         """Merge multiple sources of metadata into a single dictionary.
 
         Includes values from filename, PKG-INFO, hashers, and signature.
         """
-        meta = self.metadata
-        data: Dict[str, MetadataValue] = {
-            # identify release
-            "name": self.safe_name,
-            "version": meta.version,
-            # file content
-            "filetype": self.filetype,
-            "pyversion": self.python_version,
-            # additional meta-data
-            "metadata_version": meta.metadata_version,
-            "summary": meta.summary,
-            "home_page": meta.home_page,
-            "author": meta.author,
-            "author_email": meta.author_email,
-            "maintainer": meta.maintainer,
-            "maintainer_email": meta.maintainer_email,
-            "license": meta.license,
-            "description": meta.description,
-            "keywords": meta.keywords,
-            "platform": meta.platforms,
-            "classifiers": meta.classifiers,
-            "download_url": meta.download_url,
-            "supported_platform": meta.supported_platforms,
-            "comment": self.comment,
-            "sha256_digest": self.sha2_digest,
-            # PEP 314
-            "provides": meta.provides,
-            "requires": meta.requires,
-            "obsoletes": meta.obsoletes,
-            # Metadata 1.2
-            "project_urls": meta.project_urls,
-            "provides_dist": meta.provides_dist,
-            "obsoletes_dist": meta.obsoletes_dist,
-            "requires_dist": meta.requires_dist,
-            "requires_external": meta.requires_external,
-            "requires_python": meta.requires_python,
-            # Metadata 2.1
-            "provides_extra": meta.provides_extras,
-            "description_content_type": meta.description_content_type,
-            # Metadata 2.2
-            "dynamic": meta.dynamic,
-        }
+        data = PackageMetadata()
+        for key, value in self.metadata.items():
+            field = _RAW_TO_PACKAGE_METADATA.get(key)
+            if field:
+                # A ``TypedDict`` only support literal key names. Here key
+                # names are computed but they can only be valid key names.
+                data[field] = value  # type: ignore[literal-required]
+
+        # override name with safe name
+        data["name"] = self.safe_name
+        # file content
+        data["pyversion"] = self.python_version
+        data["filetype"] = self.filetype
+        # additional meta-data
+        data["comment"] = self.comment
+        data["sha256_digest"] = self.sha2_digest
 
         if self.gpg_signature is not None:
             data["gpg_signature"] = self.gpg_signature

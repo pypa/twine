@@ -18,7 +18,7 @@ import email.message
 import io
 import logging
 import re
-from typing import Dict, List, Optional, Tuple, cast
+from typing import Dict, List, Tuple
 
 import readme_renderer.rst
 from rich import print
@@ -84,8 +84,8 @@ def _check_file(
     package = package_file.PackageFile.from_filename(filename, comment=None)
 
     metadata = package.metadata_dictionary()
-    description = cast(Optional[str], metadata["description"])
-    description_content_type = cast(Optional[str], metadata["description_content_type"])
+    description = metadata.get("description")
+    description_content_type = metadata.get("description_content_type")
 
     if description_content_type is None:
         warnings.append(
