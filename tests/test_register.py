@@ -5,8 +5,6 @@ from twine import cli
 from twine import exceptions
 from twine.commands import register
 
-from . import helpers
-
 
 @pytest.fixture()
 def register_settings(make_settings):
@@ -21,7 +19,7 @@ def register_settings(make_settings):
     )
 
 
-def test_successful_register(register_settings):
+def test_successful_register(register_settings, test_wheel):
     """Return a successful result for a valid repository url and package."""
     stub_response = pretend.stub(
         is_redirect=False,
@@ -36,12 +34,12 @@ def test_successful_register(register_settings):
 
     register_settings.create_repository = lambda: stub_repository
 
-    result = register.register(register_settings, helpers.WHEEL_FIXTURE)
+    result = register.register(register_settings, str(test_wheel))
 
     assert result is None
 
 
-def test_exception_for_redirect(register_settings):
+def test_exception_for_redirect(register_settings, test_wheel):
     """Raise an exception when repository URL results in a redirect."""
     repository_url = register_settings.repository_config["repository"]
     redirect_url = "https://malicious.website.org/danger/"
@@ -62,10 +60,10 @@ def test_exception_for_redirect(register_settings):
         exceptions.RedirectDetected,
         match=rf"{repository_url}.+{redirect_url}.+\nIf you trust these URLs",
     ):
-        register.register(register_settings, helpers.WHEEL_FIXTURE)
+        register.register(register_settings, str(test_wheel))
 
 
-def test_non_existent_package(register_settings):
+def test_non_existent_package(register_settings, test_wheel):
     """Raise an exception when package file doesn't exist."""
     stub_repository = pretend.stub()
 
@@ -80,7 +78,7 @@ def test_non_existent_package(register_settings):
 
 
 @pytest.mark.parametrize("repo", ["pypi", "testpypi"])
-def test_values_from_env_pypi(monkeypatch, repo):
+def test_values_from_env_pypi(monkeypatch, repo, test_wheel):
     """Use env vars for settings when run from command line."""
 
     def none_register(*args, **settings_kwargs):
@@ -96,14 +94,14 @@ def test_values_from_env_pypi(monkeypatch, repo):
     }
     for key, value in testenv.items():
         monkeypatch.setenv(key, value)
-    cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    cli.dispatch(["register", str(test_wheel)])
     register_settings = replaced_register.calls[0].args[0]
     assert "pypipassword" == register_settings.password
     assert "pypiuser" == register_settings.username
     assert "/foo/bar.crt" == register_settings.cacert
 
 
-def test_values_from_env_not_pypi(monkeypatch, write_config_file):
+def test_values_from_env_not_pypi(monkeypatch, write_config_file, test_wheel):
     """Use env vars for settings when run from command line."""
     write_config_file(
         """
@@ -131,7 +129,7 @@ def test_values_from_env_not_pypi(monkeypatch, write_config_file):
     }
     for key, value in testenv.items():
         monkeypatch.setenv(key, value)
-    cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    cli.dispatch(["register", str(test_wheel)])
     register_settings = replaced_register.calls[0].args[0]
     assert "pypipassword" == register_settings.password
     assert "someusername" == register_settings.username
