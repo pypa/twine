@@ -21,8 +21,6 @@ import requests
 from twine import exceptions
 from twine import utils
 
-from . import helpers
-
 
 def test_get_config(write_config_file):
     config_file = write_config_file(
@@ -279,16 +277,19 @@ def test_get_userpass_value(cli_value, config, key, strategy, expected):
         ("URL", "https://example.org", {"URL": "https://pypi.org"}, "https://pypi.org"),
     ],
 )
-def test_default_to_environment_action(env_name, default, environ, expected):
+def test_default_to_environment_action(
+    monkeypatch, env_name, default, environ, expected
+):
     option_strings = ("-x", "--example")
     dest = "example"
-    with helpers.set_env(**environ):
-        action = utils.EnvironmentDefault(
-            env=env_name,
-            default=default,
-            option_strings=option_strings,
-            dest=dest,
-        )
+    for key, value in environ.items():
+        monkeypatch.setenv(key, value)
+    action = utils.EnvironmentDefault(
+        env=env_name,
+        default=default,
+        option_strings=option_strings,
+        dest=dest,
+    )
     assert action.env == env_name
     assert action.default == expected
 

@@ -13,7 +13,6 @@
 # limitations under the License.
 """Test functions useful across twine's tests."""
 
-import contextlib
 import os
 import pathlib
 
@@ -23,26 +22,3 @@ SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0.tar.gz")
 WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0-py2.py3-none-any.whl")
 NEW_SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5.tar.gz")
 NEW_WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5-py2.py3-none-any.whl")
-
-
-@contextlib.contextmanager
-def set_env(**environ):
-    """Set the process environment variables temporarily.
-
-    >>> with set_env(PLUGINS_DIR=u'test/plugins'):
-    ...   "PLUGINS_DIR" in os.environ
-    True
-
-    >>> "PLUGINS_DIR" in os.environ
-    False
-
-    :param environ: Environment variables to set
-    :type environ: dict[str, unicode]
-    """
-    old_environ = dict(os.environ)
-    os.environ.update(environ)
-    try:
-        yield
-    finally:
-        os.environ.clear()
-        os.environ.update(old_environ)
