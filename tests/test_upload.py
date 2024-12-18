@@ -568,8 +568,9 @@ def test_values_from_env_pypi(monkeypatch, repo):
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
-    with helpers.set_env(**testenv):
-        cli.dispatch(["upload", "path/to/file"])
+    for key, value in testenv.items():
+        monkeypatch.setenv(key, value)
+    cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
     assert "pypiuser" == upload_settings.username
@@ -601,8 +602,9 @@ def test_values_from_env_non_pypi(monkeypatch, write_config_file):
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
-    with helpers.set_env(**testenv):
-        cli.dispatch(["upload", "path/to/file"])
+    for key, value in testenv.items():
+        monkeypatch.setenv(key, value)
+    cli.dispatch(["upload", "path/to/file"])
     upload_settings = replaced_upload.calls[0].args[0]
     assert "pypipassword" == upload_settings.password
     assert "someusername" == upload_settings.username
