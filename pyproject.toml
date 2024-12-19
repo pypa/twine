@@ -21,7 +21,6 @@ classifiers = [
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: Python :: 3 :: Only",
-	"Programming Language :: Python :: 3.8",
 	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
@@ -29,7 +28,7 @@ classifiers = [
 	"Programming Language :: Python :: 3.13",
 	"Programming Language :: Python :: Implementation :: CPython",
 ]
-requires-python = ">=3.8"
+requires-python = ">=3.9"
 dependencies = [
 	"readme-renderer >= 35.0",
 	"requests >= 2.20",
