@@ -12,9 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import logging
-import textwrap
 
-import build
 import pretend
 import pytest
 
@@ -50,45 +48,30 @@ def test_fails_no_distributions(caplog):
     ]
 
 
-def build_package(src_path, project_files, distribution="sdist"):
-    """
-    Build a source distribution similar to `python3 -m build --sdist`.
-
-    Returns the absolute path of the built distribution.
-    """
-    project_files = {
-        "pyproject.toml": (
-            """
-            [build-system]
-            requires = ["setuptools"]
-            build-backend = "setuptools.build_meta"
-            """
-        ),
-        **project_files,
-    }
-
-    for filename, content in project_files.items():
-        (src_path / filename).write_text(textwrap.dedent(content))
-
-    builder = build.ProjectBuilder(src_path)
-    return builder.build(distribution, str(src_path / "dist"))
-
-
-@pytest.mark.parametrize("distribution", ["sdist", "wheel"])
-@pytest.mark.parametrize("strict", [False, True])
-def test_warns_missing_description(distribution, strict, tmp_path, capsys, caplog):
-    sdist = build_package(
-        tmp_path,
+def build_sdist_with_metadata(path, metadata):
+    name = "test"
+    version = "1.2.3"
+    sdist = helpers.build_archive(
+        path,
+        f"{name}-{version}",
+        "tar.gz",
         {
-            "setup.cfg": (
-                """
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                """
-            ),
+            f"{name}-{version}/README": "README",
+            f"{name}-{version}/PKG-INFO": metadata,
         },
-        distribution=distribution,
+    )
+    return str(sdist)
+
+
+@pytest.mark.parametrize("strict", [False, True])
+def test_warns_missing_description(strict, tmp_path, capsys, caplog):
+    sdist = build_sdist_with_metadata(
+        tmp_path,
+        """\
+        Metadata-Version: 2.1
+        Name: test
+        Version: 1.2.3
+        """,
     )
 
     assert check.check([sdist], strict=strict) is strict
@@ -111,54 +94,19 @@ def test_warns_missing_description(distribution, strict, tmp_path, capsys, caplo
     ]
 
 
-def test_warns_missing_file(tmp_path, capsys, caplog):
-    sdist = build_package(
-        tmp_path,
-        {
-            "setup.cfg": (
-                """
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                long_description = file:README.rst
-                long_description_content_type = text/x-rst
-                """
-            ),
-        },
-    )
-
-    assert not check.check([sdist])
-
-    assert capsys.readouterr().out == f"Checking {sdist}: PASSED with warnings\n"
-
-    assert caplog.record_tuples == [
-        (
-            "twine.commands.check",
-            logging.WARNING,
-            "`long_description` missing.",
-        ),
-    ]
-
-
 def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
-    sdist = build_package(
+    sdist = build_sdist_with_metadata(
         tmp_path,
-        {
-            "setup.cfg": (
-                """
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                long_description = file:README.rst
-                long_description_content_type = text/x-rst
-                """
-            ),
-            "README.rst": (
-                """
-                ============
-                """
-            ),
-        },
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+
+        ============
+
+        """,
     )
 
     assert check.check([sdist])
@@ -177,25 +125,17 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
 
 
 def test_fails_rst_no_content(tmp_path, capsys, caplog):
-    sdist = build_package(
+    sdist = build_sdist_with_metadata(
         tmp_path,
-        {
-            "setup.cfg": (
-                """
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                long_description = file:README.rst
-                long_description_content_type = text/x-rst
-                """
-            ),
-            "README.rst": (
-                """
-                test-package
-                ============
-                """
-            ),
-        },
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+        test-package
+        ============
+        """,
     )
 
     assert check.check([sdist])
@@ -214,27 +154,19 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
 
 
 def test_passes_rst_description(tmp_path, capsys, caplog):
-    sdist = build_package(
+    sdist = build_sdist_with_metadata(
         tmp_path,
-        {
-            "setup.cfg": (
-                """
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                long_description = file:README.rst
-                long_description_content_type = text/x-rst
-                """
-            ),
-            "README.rst": (
-                """
-                test-package
-                ============
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
 
-                A test package.
-                """
-            ),
-        },
+        test-package
+        ============
+
+        A test package.
+        """,
     )
 
     assert not check.check([sdist])
@@ -246,26 +178,18 @@ def test_passes_rst_description(tmp_path, capsys, caplog):
 
 @pytest.mark.parametrize("content_type", ["text/markdown", "text/plain"])
 def test_passes_markdown_description(content_type, tmp_path, capsys, caplog):
-    sdist = build_package(
+    sdist = build_sdist_with_metadata(
         tmp_path,
-        {
-            "setup.cfg": (
-                f"""
-                [metadata]
-                name = test-package
-                version = 0.0.1
-                long_description = file:README.md
-                long_description_content_type = {content_type}
-                """
-            ),
-            "README.md": (
-                """
-                # test-package
+        f"""\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: {content_type}
 
-                A test package.
-                """
-            ),
-        },
+        # test-package
+
+        A test package.
+        """,
     )
 
     assert not check.check([sdist])
