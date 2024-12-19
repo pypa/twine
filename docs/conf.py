@@ -278,6 +278,12 @@ linkcheck_ignore = [
     # Avoid errors from 403/Login Redirects
     r"https://(test\.)?pypi\.org/manage/project/twine/collaboration/?",
     r"https://pypi\.org/manage/project/twine/collaboration/?",
+    # PyPI uses <section id=""> anchor links that are not understood by
+    # linkcheck. Ignore these link targets in the check until they are
+    # supported.  Maybe use linkcheck_anchors_ignore_for_url configuration
+    # option once Sphinx 7.1 or later is used, see
+    # https://www.sphinx-doc.org/en/master/usage/configuration.html#confval-linkcheck_anchors_ignore_for_url
+    r"https://pypi\.org/project/[^/]+/\#",
 ]
 
 intersphinx_mapping = {

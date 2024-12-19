@@ -94,8 +94,9 @@ def test_values_from_env_pypi(monkeypatch, repo):
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
-    with helpers.set_env(**testenv):
-        cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    for key, value in testenv.items():
+        monkeypatch.setenv(key, value)
+    cli.dispatch(["register", helpers.WHEEL_FIXTURE])
     register_settings = replaced_register.calls[0].args[0]
     assert "pypipassword" == register_settings.password
     assert "pypiuser" == register_settings.username
@@ -128,8 +129,9 @@ def test_values_from_env_not_pypi(monkeypatch, write_config_file):
         "TWINE_PASSWORD": "pypipassword",
         "TWINE_CERT": "/foo/bar.crt",
     }
-    with helpers.set_env(**testenv):
-        cli.dispatch(["register", helpers.WHEEL_FIXTURE])
+    for key, value in testenv.items():
+        monkeypatch.setenv(key, value)
+    cli.dispatch(["register", helpers.WHEEL_FIXTURE])
     register_settings = replaced_register.calls[0].args[0]
     assert "pypipassword" == register_settings.password
     assert "someusername" == register_settings.username
