@@ -1,9 +1,6 @@
-import io
 import os
 import pathlib
 import tarfile
-import textwrap
-import zipfile
 
 import pytest
 
@@ -11,6 +8,7 @@ from twine import exceptions
 from twine import sdist
 
 from .helpers import TESTS_DIR
+from .helpers import build_archive
 
 
 @pytest.fixture(
@@ -28,31 +26,6 @@ def example_sdist(request):
 @pytest.fixture(params=["tar.gz", "zip"])
 def archive_format(request):
     return request.param
-
-
-def build_archive(path, name, archive_format, files):
-    filepath = path / f"{name}.{archive_format}"
-
-    if archive_format == "tar.gz":
-        with tarfile.open(filepath, "x:gz") as archive:
-            for mname, content in files.items():
-                if isinstance(content, tarfile.TarInfo):
-                    content.name = mname
-                    archive.addfile(content)
-                else:
-                    data = textwrap.dedent(content).encode("utf8")
-                    member = tarfile.TarInfo(mname)
-                    member.size = len(data)
-                    archive.addfile(member, io.BytesIO(data))
-        return str(filepath)
-
-    if archive_format == "zip":
-        with zipfile.ZipFile(filepath, mode="w") as archive:
-            for mname, content in files.items():
-                archive.writestr(mname, textwrap.dedent(content))
-        return str(filepath)
-
-    raise ValueError(format)
 
 
 def test_read_example(example_sdist):
@@ -79,7 +52,7 @@ def test_formar_not_supported():
 
 def test_read(archive_format, tmp_path):
     """Read PKG-INFO from a valid sdist."""
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         archive_format,
@@ -93,7 +66,7 @@ def test_read(archive_format, tmp_path):
         },
     )
 
-    metadata = sdist.SDist(filename).read()
+    metadata = sdist.SDist(str(filepath)).read()
     assert b"Metadata-Version: 1.1" in metadata
     assert b"Name: test" in metadata
     assert b"Version: 1.2.3" in metadata
@@ -101,7 +74,7 @@ def test_read(archive_format, tmp_path):
 
 def test_missing_pkg_info(archive_format, tmp_path):
     """Raise an exception when sdist does not contain PKG-INFO."""
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         archive_format,
@@ -111,12 +84,12 @@ def test_missing_pkg_info(archive_format, tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="No PKG-INFO in archive"):
-        sdist.SDist(filename).read()
+        sdist.SDist(str(filepath)).read()
 
 
 def test_invalid_pkg_info(archive_format, tmp_path):
     """Raise an exception when PKG-INFO does not contain ``Metadata-Version``."""
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         archive_format,
@@ -130,12 +103,12 @@ def test_invalid_pkg_info(archive_format, tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="No PKG-INFO in archive"):
-        sdist.SDist(filename).read()
+        sdist.SDist(str(filepath)).read()
 
 
 def test_pkg_info_directory(archive_format, tmp_path):
     """Raise an exception when PKG-INFO is a directory."""
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         archive_format,
@@ -150,7 +123,7 @@ def test_pkg_info_directory(archive_format, tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="No PKG-INFO in archive"):
-        sdist.SDist(filename).read()
+        sdist.SDist(str(filepath)).read()
 
 
 def test_pkg_info_not_regular_file(tmp_path):
@@ -159,7 +132,7 @@ def test_pkg_info_not_regular_file(tmp_path):
     link.type = tarfile.LNKTYPE
     link.linkname = "README"
 
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         "tar.gz",
@@ -170,12 +143,12 @@ def test_pkg_info_not_regular_file(tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="PKG-INFO is not a reg"):
-        sdist.SDist(filename).read()
+        sdist.SDist(str(filepath)).read()
 
 
 def test_multiple_top_level(archive_format, tmp_path):
     """Raise an exception when there are too many top-level members."""
-    filename = build_archive(
+    filepath = build_archive(
         tmp_path,
         "test-1.2.3",
         archive_format,
@@ -191,7 +164,7 @@ def test_multiple_top_level(archive_format, tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="Too many top-level"):
-        sdist.SDist(filename).read()
+        sdist.SDist(str(filepath)).read()
 
 
 def test_py_version(example_sdist):
