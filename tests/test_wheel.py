@@ -11,7 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
 import pathlib
 import re
 import zipfile
@@ -22,17 +21,11 @@ import pytest
 from twine import exceptions
 from twine import wheel
 
-from . import helpers
 
-
-@pytest.fixture(
-    params=[
-        "fixtures/twine-1.5.0-py2.py3-none-any.whl",
-        "alt-fixtures/twine-1.5.0-py2.py3-none-any.whl",
-    ]
-)
+@pytest.fixture()
 def example_wheel(request):
-    file_name = os.path.join(helpers.TESTS_DIR, request.param)
+    parent = pathlib.Path(__file__).parent
+    file_name = str(parent / "fixtures" / "twine-1.5.0-py2.py3-none-any.whl")
     return wheel.Wheel(file_name)
 
 
