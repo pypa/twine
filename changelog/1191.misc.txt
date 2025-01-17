@@ -1,3 +1,0 @@
-- Use ``"source"`` instead of ``None`` as ``pyversion`` for ``sdist``
-  uploads. This is what PyPI (and most likely other package indexes)
-  expects.

@@ -12,6 +12,40 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+Twine 6.1.0 (2025-01-17)
+------------------------
+
+Features
+^^^^^^^^
+
+- Twine now has preliminary built-in support for
+  `Trusted Publishing <https://docs.pypi.org/trusted-publishers/>`_ as an
+  authentication mechanism. (`#1194 <https://github.com/pypa/twine/pull/1194>`_)
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Remove support for ``egg`` and ``wininst`` distribution types. These are not
+  accepted by PyPI and not produced by any modern build-backeds.
+  (`#1195 <https://github.com/pypa/twine/issues/1195>`_)
+
+- Twine no longer supports ``.tar.bz2`` source distributions.
+  (`#1200 <https://github.com/pypa/twine/pull/1200>`_)
+
+Misc
+^^^^
+
+- ``packaging`` is used instead of ``pkginfo`` for parsing and validating
+  metadata. This aligns metadata validation to the one performed by PyPI.
+  ``packaging`` version 24.0 or later is required. Support for metadata
+  version 2.4 requires ``packaging`` 24.2 or later. ``pkginfo`` is not a
+  dependency anymore. (`#1180 <https://github.com/pypa/twine/issues/1180>`_)
+
+- Use ``"source"`` instead of ``None`` as ``pyversion`` for ``sdist``
+  uploads. This is what PyPI (and most likely other package indexes)
+  expects. (`#1191 <https://github.com/pypa/twine/issues/1191>`_)
+
+
 Twine 6.0.1 (2024-11-30)
 ------------------------
 

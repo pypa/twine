@@ -1,2 +1,0 @@
-- Remove support for ``egg`` and ``wininst` distribution types. These are not
-  accepted by PyPI and not produced by any modern build-backeds.
