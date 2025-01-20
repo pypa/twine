@@ -26,7 +26,7 @@ Deprecations and Removals
 ^^^^^^^^^^^^^^^^^^^^^^^^^
 
 - Remove support for ``egg`` and ``wininst`` distribution types. These are not
-  accepted by PyPI and not produced by any modern build-backeds.
+  accepted by PyPI and not produced by any modern build-backends.
   (`#1195 <https://github.com/pypa/twine/issues/1195>`_)
 
 - Twine no longer supports ``.tar.bz2`` source distributions.
