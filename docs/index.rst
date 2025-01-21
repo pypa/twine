@@ -251,5 +251,5 @@ See `Twine issue #338`_ for discussion and background.
 .. _`wheels`: https://packaging.python.org/glossary/#term-Wheel
 .. _`not supported on PyPI`:
    https://packaging.python.org/guides/migrating-to-pypi-org/#registering-package-names-metadata
-.. _`issue #1627 on Warehouse`: https://github.com/pypa/warehouse/issues/1627
+.. _`issue #1627 on Warehouse`: https://github.com/pypi/warehouse/issues/1627
 .. _`Twine issue #338`: https://github.com/pypa/twine/issues/338
