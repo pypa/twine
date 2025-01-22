@@ -1,0 +1,2 @@
+Fix compatibility kludge for invalid License-File metadata entries emitted by
+build backends to work also with ``packaging`` version 24.0.
