@@ -520,6 +520,16 @@ def test_prints_skip_message_for_response(
             ),
             id="gitlab_enterprise",
         ),
+        pytest.param(
+            dict(
+                status_code=400,
+                text=(
+                    "pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl"
+                    " cannot be updated"
+                ),
+            ),
+            id="sonatype_nexus",
+        ),
     ],
 )
 def test_skip_existing_skips_files_on_repository(response_kwargs):
