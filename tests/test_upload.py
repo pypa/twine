@@ -466,7 +466,7 @@ def test_prints_skip_message_for_response(
                     "http://www.foo.bar"
                 ),
             ),
-            id="nexus",
+            id="nexus_old_case1",
         ),
         pytest.param(
             dict(
@@ -474,6 +474,18 @@ def test_prints_skip_message_for_response(
                 text=(
                     '<div class="content-section">\n'
                     "    Repository does not allow updating assets: pypi-local\n"
+                    "</div>\n"
+                ),
+            ),
+            id="nexus_old_case2",
+        ),
+        pytest.param(
+            dict(
+                status_code=400,
+                text=(
+                    '<div class="content-section">\n'
+                    "    pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl "
+                    "cannot be updated"
                     "</div>\n"
                 ),
             ),
@@ -519,16 +531,6 @@ def test_prints_skip_message_for_response(
                 ),
             ),
             id="gitlab_enterprise",
-        ),
-        pytest.param(
-            dict(
-                status_code=400,
-                text=(
-                    "pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl"
-                    " cannot be updated"
-                ),
-            ),
-            id="sonatype_nexus",
         ),
     ],
 )
