@@ -1,1 +1,1 @@
-Fix a couple of instances of missing ``f`` from f-strings.
+Fix a couple of incorrectly rendered error messages.
