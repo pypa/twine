@@ -141,7 +141,10 @@ def test_pkg_info_not_regular_file(tmp_path):
         },
     )
 
-    with pytest.raises(exceptions.InvalidDistribution, match="PKG-INFO is not a reg"):
+    with pytest.raises(
+        exceptions.InvalidDistribution,
+        match=r"^PKG-INFO is not a reg.*test-1.2.3.tar.gz$",
+    ):
         sdist.SDist(str(filepath)).read()
 
 
@@ -162,7 +165,10 @@ def test_multiple_top_level(archive_format, tmp_path):
         },
     )
 
-    with pytest.raises(exceptions.InvalidDistribution, match="Too many top-level"):
+    with pytest.raises(
+        exceptions.InvalidDistribution,
+        match=r"^Too many top-level.*test-1.2.3.(tar.gz|zip)$",
+    ):
         sdist.SDist(str(filepath)).read()
 
 

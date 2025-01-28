@@ -40,14 +40,14 @@ class TarGzSDist(SDist):
             root = os.path.commonpath(sdist.getnames())
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(
-                    "Too many top-level members in sdist archive: {self.filename}"
+                    f"Too many top-level members in sdist archive: {self.filename}"
                 )
             # ...containing the package metadata in a ``PKG-INFO`` file.
             with suppress(KeyError):
                 member = sdist.getmember(root.rstrip("/") + "/PKG-INFO")
                 if not member.isfile():
                     raise exceptions.InvalidDistribution(
-                        "PKG-INFO is not a regular file: {self.filename}"
+                        f"PKG-INFO is not a regular file: {self.filename}"
                     )
                 fd = sdist.extractfile(member)
                 assert fd is not None, "for mypy"
@@ -69,7 +69,7 @@ class ZipSDist(SDist):
             root = os.path.commonpath(sdist.namelist())
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(
-                    "Too many top-level members in sdist archive: {self.filename}"
+                    f"Too many top-level members in sdist archive: {self.filename}"
                 )
             # ...containing the package metadata in a ``PKG-INFO`` file.
             with suppress(KeyError):
