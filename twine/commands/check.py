@@ -170,18 +170,19 @@ def check(
 def main(args: List[str]) -> bool:
     """Execute the ``check`` command.
 
-    This currently only validates ``long_description``, but more checks could be
-    added.
-
-    Note: check is not intended to catch all reasons why an upload to PyPI might fail.
-
     :param args:
         The command-line arguments.
 
     :return:
         The exit status of the ``check`` command.
     """
-    parser = argparse.ArgumentParser(prog="twine check")
+    description = """
+    This currently only validates ``long_description``, but more checks could be
+    added.
+
+    Note: check is not intended to catch all reasons why an upload to PyPI might fail.
+    """
+    parser = argparse.ArgumentParser(prog="twine check", description=description)
     parser.add_argument(
         "dists",
         nargs="+",
