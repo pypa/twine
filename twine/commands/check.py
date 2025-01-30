@@ -114,8 +114,10 @@ def check(
 ) -> bool:
     """Check that a distribution will render correctly on PyPI and display the results.
 
-    This is currently only validates ``long_description``, but more checks could be
+    This currently only validates ``long_description``, but more checks could be
     added.
+
+    Note: check is not intended to catch all reasons why an upload to PyPI might fail.
 
     :param dists:
         The distribution files to check.
@@ -167,6 +169,11 @@ def check(
 
 def main(args: List[str]) -> bool:
     """Execute the ``check`` command.
+
+    This currently only validates ``long_description``, but more checks could be
+    added.
+
+    Note: check is not intended to catch all reasons why an upload to PyPI might fail.
 
     :param args:
         The command-line arguments.
