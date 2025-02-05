@@ -37,7 +37,7 @@ dependencies = [
 	"urllib3 >= 1.26.0",
 	"importlib-metadata >= 3.6; python_version < '3.10'",
 	# workaround for missing binaries on these platforms, see #1158
-	"keyring >= 15.1; platform_machine != 'ppc64le' and platform_machine != 's390x'",
+	"keyring >= 21.2.0; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
 	"packaging >= 24.0",
@@ -61,7 +61,7 @@ upload = "twine.commands.upload:main"
 register = "twine.commands.register:main"
 
 [project.optional-dependencies]
-keyring = ["keyring >= 15.1"]
+keyring = ["keyring >= 21.2.0"]
 
 [project.scripts]
 twine = "twine.__main__:main"

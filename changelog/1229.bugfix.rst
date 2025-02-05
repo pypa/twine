@@ -1,0 +1,2 @@
+``twine`` now enforces ``keyring >= 21.2.0``, which was previously
+implicitly required by API usage.
