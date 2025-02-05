@@ -1,0 +1,1 @@
+Fix handling of multiline ``Description`` metadata fields.
