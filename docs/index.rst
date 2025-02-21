@@ -192,19 +192,16 @@ require `additional installation steps`_.
 Once Twine is installed, use the ``keyring`` program to set a username and
 password to use for each repository to which you may upload.
 
-For example, to set a username and password for PyPI:
+For example, to set an API token for PyPI:
 
 .. code-block:: bash
 
-   keyring set https://upload.pypi.org/legacy/ your-username
+   keyring set https://upload.pypi.org/legacy/ __token__
 
-and enter the password when prompted.
+and paste your API key when prompted.
 
 For a different repository, replace the URL with the relevant repository
 URL. For example, for Test PyPI, use ``https://test.pypi.org/legacy/``.
-
-The next time you run ``twine``, it will prompt you for a username, and then
-get the appropriate password from Keyring.
 
 .. note::
 
