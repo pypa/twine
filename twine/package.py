@@ -65,6 +65,28 @@ def _safe_name(name: str) -> str:
     return re.sub("[^A-Za-z0-9.]+", "-", name)
 
 
+def _dedent(string: str) -> str:
+    """Remove line continuation suffix used for the ``Description`` metadata field.
+
+    The metadata standard prescribes that continuation lines should be
+    prefixed with 7 spaces followed by a pipe character, however, setuptools
+    used to prefix continuation lines with 8 spaces. Handle both here.
+
+    If not all lines following the first start with either of the accepted
+    prefixes, the string is returned without modifications.
+    """
+    lines = string.splitlines()
+    if (
+        False  # This is here only to force black into something sensible.
+        or all(line.startswith("       |") for line in lines[1:])
+        or all(line.startswith("        ") for line in lines[1:])
+    ):
+        for i in range(1, len(lines)):
+            lines[i] = lines[i][8:]
+        return "\n".join(lines)
+    return string
+
+
 # Map ``metadata.RawMetadata`` fields to ``PackageMetadata`` fields.  Some
 # fields are renamed to match the names expected in the upload form.
 _RAW_TO_PACKAGE_METADATA = {
@@ -232,6 +254,11 @@ class PackageFile:
         # than 2.4.
         if version.Version(meta.get("metadata_version", "0")) < version.Version("2.4"):
             meta.pop("license_files", None)
+
+        description = meta.get("description", None)
+        if description is not None:
+            meta["description"] = _dedent(description)
+
         try:
             metadata.Metadata.from_raw(meta)
         except metadata.ExceptionGroup as group:
