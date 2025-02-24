@@ -14,9 +14,11 @@
 import json
 import string
 
+import packaging
 import pretend
 import pytest
 from packaging import metadata
+from packaging import version
 
 from twine import exceptions
 from twine import package as package_file
@@ -175,6 +177,10 @@ def test_package_safe_name_is_correct(pkg_name, expected_name):
 def test_metadata_keys_consistency():
     """Check that the translation keys exist in the respective ``TypedDict``."""
     raw_keys = metadata.RawMetadata.__annotations__.keys()
+    if version.Version(packaging.__version__) < version.Version("24.1"):
+        # ``packaging`` version 24.0 and earlier do not know about the
+        # License-Expression and License-File metadata fields yet.
+        raw_keys = raw_keys | set(("license_files", "license_expression"))
     assert set(package_file._RAW_TO_PACKAGE_METADATA.keys()).issubset(raw_keys)
     package_keys = package_file.PackageMetadata.__annotations__.keys()
     assert set(package_file._RAW_TO_PACKAGE_METADATA.values()).issubset(package_keys)
@@ -434,32 +440,37 @@ def test_package_from_unrecognized_file_error():
     assert "Unknown distribution format" in err.value.args[0]
 
 
-@pytest.mark.parametrize(
-    "read_data, filtered",
-    [
-        pytest.param(
-            "Metadata-Version: 2.1\n"
-            "Name: test-package\n"
-            "Version: 1.0.0\n"
-            "License-File: LICENSE\n",
-            True,
-            id="invalid License-File",
-        ),
-        pytest.param(
-            "Metadata-Version: 2.4\n"
-            "Name: test-package\n"
-            "Version: 1.0.0\n"
-            "License-File: LICENSE\n",
-            False,
-            id="valid License-File",
-        ),
-    ],
-)
-def test_setuptools_license_file(read_data, filtered, monkeypatch):
+def test_setuptools_license_file_invalid(monkeypatch):
     """Drop License-File metadata entries if Metadata-Version is less than 2.4."""
+    read_data = (
+        "Metadata-Version: 2.1\n"
+        "Name: test-package\n"
+        "Version: 1.0.0\n"
+        "License-File: LICENSE\n"
+    )
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
     meta = package.metadata_dictionary()
-    assert filtered != ("license_file" in meta)
+    assert "license_file" not in meta
+
+
+@pytest.mark.skipif(
+    version.Version(packaging.__version__) < version.Version("24.1"),
+    reason="packaging is too old",
+)
+def test_setuptools_license_file_valid(monkeypatch):
+    """License-File metadata entries are kept when Metadata-Version is 2.4."""
+    read_data = (
+        "Metadata-Version: 2.4\n"
+        "Name: test-package\n"
+        "Version: 1.0.0\n"
+        "License-File: LICENSE\n"
+    )
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+
+    package = package_file.PackageFile.from_filename(filename, comment=None)
+    meta = package.metadata_dictionary()
+    assert "license_file" in meta
