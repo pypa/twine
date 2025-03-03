@@ -62,7 +62,13 @@ def skip_upload(
         # PyPI / TestPyPI / GCP Artifact Registry
         or (status == 400 and any("already exist" in x for x in [reason, text]))
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        or (status == 400 and any("updating asset" in x for x in [reason, text]))
+        or (
+            status == 400
+            and (
+                any("updating asset" in x for x in [reason, text])
+                or ("cannot be updated" in text)
+            )
+        )
         # Artifactory (https://jfrog.com/artifactory/)
         or (status == 403 and "overwrite artifact" in text)
         # Gitlab Enterprise Edition (https://about.gitlab.com)
