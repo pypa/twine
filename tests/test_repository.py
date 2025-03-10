@@ -14,9 +14,11 @@
 import logging
 from contextlib import contextmanager
 
+import packaging
 import pretend
 import pytest
 import requests
+from packaging import version
 
 from twine import package
 from twine import repository
@@ -61,8 +63,12 @@ def test_iterables_are_flattened():
 
 def test_all_metadata_fields_are_flattened(monkeypatch):
     """Verify that package metadata fields are correctly flattened."""
-    # This file contains all metadata fields known up to metadata version 2.4.
-    metadata = open("tests/fixtures/everything.metadata")
+    if version.Version(packaging.__version__) < version.Version("24.1"):
+        # All metadata fields up to metadata version 2.3
+        metadata = open("tests/fixtures/everything.metadata23")
+    else:
+        # All metadata fields up to metadata version 2.4
+        metadata = open("tests/fixtures/everything.metadata24")
     monkeypatch.setattr(package.wheel.Wheel, "read", metadata.read)
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     data = package.PackageFile.from_filename(
