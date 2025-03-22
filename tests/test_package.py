@@ -155,8 +155,8 @@ def test_package_add_attestations_invalid_json(tmp_path):
     [
         (string.ascii_letters, string.ascii_letters),
         (string.digits, string.digits),
-        (string.punctuation, "-.-"),
-        ("mosaik.SimConfig", "mosaik.SimConfig"),
+        (string.punctuation, "-.-_-"),
+        ("mosaik._SimConfig", "mosaik._SimConfig"),
         ("mosaik$$$$.SimConfig", "mosaik-.SimConfig"),
     ],
 )
