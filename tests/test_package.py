@@ -463,3 +463,58 @@ def test_setuptools_license_file(read_data, filtered, monkeypatch):
     package = package_file.PackageFile.from_filename(filename, comment=None)
     meta = package.metadata_dictionary()
     assert filtered != ("license_file" in meta)
+
+
+@pytest.mark.parametrize(
+    "description,expected",
+    [
+        # fmt: off
+        pytest.param(
+            "\n"
+            "Two\n"
+            "Lines\n",
+            "Two\nLines\n",
+            id="body",
+        ),
+        pytest.param(
+            "Description: Two\n"
+            "       |Lines\n"
+            "       |\n",
+            "Two\nLines\n",
+            id="multiline-header",
+        ),
+        pytest.param(
+            "Description: Two\n"
+            "        Lines\n"
+            "        \n",
+            "Two\nLines\n",
+            id="multiline-header-setuptools",
+        ),
+        pytest.param(
+            "Description: Two\n"
+            "        Lines\n"
+            "  Maybe Three",
+            "Two\n        Lines\n  Maybe Three",
+            id="multiline-inconsistent",
+        ),
+        pytest.param(
+            "Description: Two\n"
+            "       |Lines\n"
+            "        Maybe Three",
+            "Two\n       |Lines\n        Maybe Three",
+            id="multiline-mixed",
+        ),
+        # fmt: on
+    ],
+)
+def test_description_field_continuation(description, expected, monkeypatch):
+    """License-File metadata entries are kept when Metadata-Version is 2.4."""
+    read_data = (
+        "Metadata-Version: 2.4\n"
+        "Name: test-package\n"
+        "Version: 1.0.0\n" + description
+    )
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
+    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    package = package_file.PackageFile.from_filename(filename, comment=None)
+    assert package.metadata["description"] == expected
