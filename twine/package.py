@@ -214,14 +214,7 @@ class PackageFile:
 
         # Parse and validate metadata.
         meta, unparsed = metadata.parse_email(data)
-        if unparsed:
-            raise exceptions.InvalidDistribution(
-                "Invalid distribution metadata: {}".format(
-                    "; ".join(
-                        f"unrecognized or malformed field {key!r}" for key in unparsed
-                    )
-                )
-            )
+
         # setuptools emits License-File metadata fields while declaring
         # Metadata-Version 2.1. This is invalid because the metadata
         # specification does not allow to add arbitrary fields, and because
@@ -232,6 +225,22 @@ class PackageFile:
         # than 2.4.
         if version.Version(meta.get("metadata_version", "0")) < version.Version("2.4"):
             meta.pop("license_files", None)
+            # Support for metadata version 2.4 requires packaging version 24.1
+            # or later. When parsing metadata with an older packaging, the
+            # invalid License-File fields are not understood and added to the
+            # unparsed dictionary. Remove them to avoid triggering the
+            # following check.
+            unparsed.pop("license-file", None)
+
+        if unparsed:
+            raise exceptions.InvalidDistribution(
+                "Invalid distribution metadata: {}".format(
+                    "; ".join(
+                        f"unrecognized or malformed field {key!r}" for key in unparsed
+                    )
+                )
+            )
+
         try:
             metadata.Metadata.from_raw(meta)
         except metadata.ExceptionGroup as group:
