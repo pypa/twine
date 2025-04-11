@@ -159,6 +159,13 @@ def get_repository_from_config(
             f"Missing '{repository}' section from {config_file}.\n"
             f"More info: https://packaging.python.org/specifications/pypirc/ "
         )
+    except configparser.Error:
+        # NOTE: We intentionally fully mask the configparser exception here,
+        # since it could leak tokens and other sensitive values.
+        raise exceptions.InvalidConfiguration(
+            f"Malformed configuration in {config_file}.\n"
+            f"More info: https://packaging.python.org/specifications/pypirc/ "
+        )
 
     config["repository"] = normalize_repository_url(cast(str, config["repository"]))
     return config

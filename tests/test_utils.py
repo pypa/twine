@@ -227,6 +227,36 @@ def test_get_repository_config_missing_repository(write_config_file):
         utils.get_repository_from_config(config_file, "missing-repository")
 
 
+@pytest.mark.parametrize(
+    "invalid_config",
+    [
+        # No surrounding [server] section
+        """
+    username = testuser
+    password = testpassword
+    """,
+        # Valid section but bare API token
+        """
+    [pypi]
+    pypi-lolololol
+    """,
+        # No section, bare API token
+        """
+    pypi-lolololol
+    """,
+    ],
+)
+def test_get_repository_config_invalid_syntax(write_config_file, invalid_config):
+    """Raise an exception when the .pypirc has invalid syntax."""
+    config_file = write_config_file(invalid_config)
+
+    with pytest.raises(
+        exceptions.InvalidConfiguration,
+        match="Malformed configuration",
+    ):
+        utils.get_repository_from_config(config_file, "pypi")
+
+
 @pytest.mark.parametrize("repository", ["pypi", "missing-repository"])
 def test_get_repository_config_missing_file(repository):
     """Raise an exception when a custom config file doesn't exist."""
