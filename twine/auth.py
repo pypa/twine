@@ -96,10 +96,10 @@ class Resolver:
             )
 
         if oidc_token is None:
-            logger.debug("This environment is not supported for trusted publishing")
+            logger.warning("This environment is not supported for trusted publishing")
             return None  # Fall back to prompting for a token (if possible)
 
-        logger.debug("Got OIDC token for audience %s", audience)
+        logger.info("Got OIDC token for audience %s", audience)
 
         token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
 
@@ -125,7 +125,7 @@ class Resolver:
                 f"reasons:\n\n{reasons}"
             )
 
-        logger.debug("Minted upload token for trusted publishing")
+        logger.info("Minted upload token for trusted publishing")
         return cast(str, mint_token_payload["token"])
 
     @property
@@ -179,7 +179,7 @@ class Resolver:
             return password
 
         if self.is_pypi() and self.username == "__token__":
-            logger.debug(
+            logger.info(
                 "Trying to use trusted publishing (no token was explicitly provided)"
             )
             if (token := self.make_trusted_publishing_token()) is not None:
