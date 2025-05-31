@@ -99,7 +99,7 @@ class Resolver:
             logger.warning("This environment is not supported for trusted publishing")
             return None  # Fall back to prompting for a token (if possible)
 
-        logger.info("Got OIDC token for audience %s", audience)
+        logger.warning("Got OIDC token for audience %s", audience)
 
         token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
 
@@ -125,7 +125,7 @@ class Resolver:
                 f"reasons:\n\n{reasons}"
             )
 
-        logger.info("Minted upload token for trusted publishing")
+        logger.warning("Minted upload token for trusted publishing")
         return cast(str, mint_token_payload["token"])
 
     @property
