@@ -39,6 +39,7 @@ else:
     import importlib_metadata
 
 metadata = importlib_metadata.metadata("twine")
+assert metadata is not None  # nosec: B101
 
 
 __title__ = metadata["name"]
