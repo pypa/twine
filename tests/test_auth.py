@@ -1,9 +1,13 @@
+import base64
 import getpass
 import logging
 import platform
 import re
+import time
+import typing as t
 
 import pytest
+import requests.auth
 
 from twine import auth
 from twine import exceptions
@@ -299,3 +303,154 @@ def test_warns_for_empty_password(
 )
 def test_keyring_module():
     assert auth.keyring is not None
+
+
+def test_resolver_authenticator_config_authentication(config):
+    config.update(username="username", password="password")
+    res = auth.Resolver(config, auth.CredentialInput())
+    assert isinstance(res.authenticator, requests.auth.HTTPBasicAuth)
+
+
+def test_resolver_authenticator_credential_input_authentication(config):
+    res = auth.Resolver(config, auth.CredentialInput("username", "password"))
+    assert isinstance(res.authenticator, requests.auth.HTTPBasicAuth)
+
+
+def test_resolver_authenticator_trusted_publishing_authentication(config):
+    res = auth.Resolver(
+        config, auth.CredentialInput(username="__token__", password="skip-stdin")
+    )
+    res._tp_token = auth.TrustedPublishingToken(
+        success=True,
+        token="fake-tp-token",
+    )
+    assert isinstance(res.authenticator, auth.TrustedPublishingAuthenticator)
+
+
+class MockResponse:
+    def __init__(self, status_code: int, json: t.Any) -> None:
+        self.status_code = status_code
+        self._json = json
+
+    def json(self, *args, **kwargs) -> t.Any:
+        return self._json
+
+    def raise_for_status(self) -> None:
+        if 400 <= self.status_code:
+            raise requests.exceptions.HTTPError()
+
+    def ok(self) -> bool:
+        return self.status_code == 200
+
+
+class MockSession:
+    def __init__(
+        self,
+        get_response_list: t.List[MockResponse],
+        post_response_list: t.List[MockResponse],
+    ) -> None:
+        self.post_counter = self.get_counter = 0
+        self.get_response_list = get_response_list
+        self.post_response_list = post_response_list
+
+    def get(self, url: str, **kwargs) -> MockResponse:
+        response = self.get_response_list[self.get_counter]
+        self.get_counter += 1
+        return response
+
+    def post(self, url: str, **kwargs) -> MockResponse:
+        response = self.post_response_list[self.post_counter]
+        self.post_counter += 1
+        return response
+
+
+def test_trusted_publish_authenticator_refreshes_token(monkeypatch, config):
+    def make_session():
+        return MockSession(
+            get_response_list=[
+                MockResponse(status_code=200, json={"audience": "fake-aud"})
+            ],
+            post_response_list=[
+                MockResponse(
+                    status_code=200,
+                    json={
+                        "success": True,
+                        "token": "new-token",
+                        "expires": int(time.time()) + 900,
+                    },
+                ),
+            ],
+        )
+
+    def detect_credential(*args, **kwargs) -> str:
+        return "fake-oidc-token"
+
+    config.update({"repository": utils.TEST_REPOSITORY})
+    res = auth.Resolver(config, auth.CredentialInput(username="__token__"))
+    res._tp_token = auth.TrustedPublishingToken(
+        success=True,
+        token="expiring-tp-token",
+    )
+    res._expires = int(time.time()) + 4 * 60
+    monkeypatch.setattr(auth, "detect_credential", detect_credential)
+    monkeypatch.setattr(auth.utils, "make_requests_session", make_session)
+    authenticator = auth.TrustedPublishingAuthenticator(resolver=res)
+    prepped_req = requests.models.PreparedRequest()
+    prepped_req.prepare_headers({})
+    request = authenticator(prepped_req)
+    assert (
+        request.headers["Authorization"]
+        == f"Basic {base64.b64encode(b'__token__:new-token').decode()}"
+    )
+
+
+def test_trusted_publish_authenticator_reuses_token(monkeypatch, config):
+    def make_session():
+        return MockSession(
+            get_response_list=[
+                MockResponse(status_code=200, json={"audience": "fake-aud"})
+            ],
+            post_response_list=[
+                MockResponse(
+                    status_code=200,
+                    json={
+                        "success": True,
+                        "token": "new-token",
+                        "expires": int(time.time()) + 900,
+                    },
+                ),
+            ],
+        )
+
+    def detect_credential(*args, **kwargs) -> str:
+        return "fake-oidc-token"
+
+    config.update({"repository": utils.TEST_REPOSITORY})
+    res = auth.Resolver(config, auth.CredentialInput(username="__token__"))
+    res._tp_token = auth.TrustedPublishingToken(
+        success=True,
+        token="valid-tp-token",
+    )
+    res._expires = int(time.time()) + 900
+    monkeypatch.setattr(auth, "detect_credential", detect_credential)
+    monkeypatch.setattr(auth.utils, "make_requests_session", make_session)
+    authenticator = auth.TrustedPublishingAuthenticator(resolver=res)
+    prepped_req = requests.models.PreparedRequest()
+    prepped_req.prepare_headers({})
+    request = authenticator(prepped_req)
+    assert (
+        request.headers["Authorization"]
+        == f"Basic {base64.b64encode(b'__token__:valid-tp-token').decode()}"
+    )
+
+
+def test_inability_to_make_token_raises_error():
+    class MockResolver:
+        def make_trusted_publishing_token(self) -> None:
+            return None
+
+    authenticator = auth.TrustedPublishingAuthenticator(
+        resolver=MockResolver(),
+    )
+    with pytest.raises(exceptions.TrustedPublishingFailure):
+        authenticator(None)
