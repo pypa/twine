@@ -181,7 +181,7 @@ class Resolver:
             )
 
         if oidc_token is None:
-            logger.debug("This environment is not supported for trusted publishing")
+            logger.warning("This environment is not supported for trusted publishing")
             if self._tp_token and int(time.time()) > cast(
                 int, self._tp_token.get("expires", self._expires)
             ):
@@ -190,7 +190,7 @@ class Resolver:
             # while longer, let's continue using it instead of prompting
             return self._tp_token
 
-        logger.debug("Got OIDC token for audience %s", audience)
+        logger.warning("Got OIDC token for audience %s", audience)
 
         token_exchange_url = f"https://{repository_domain}/_/oidc/mint-token"
 
@@ -216,7 +216,7 @@ class Resolver:
                 f" reasons:\n\n{reasons}"
             )
 
-        logger.debug("Minted upload token for trusted publishing")
+        logger.warning("Minted upload token for trusted publishing")
         self._tp_token = cast(TrustedPublishingToken, mint_token_payload)
         self._expires = int(time.time()) + 900
         return self._tp_token
@@ -278,7 +278,7 @@ class Resolver:
             return password
 
         if self.is_pypi() and self.username == TOKEN_USERNAME:
-            logger.debug(
+            logger.info(
                 "Trying to use trusted publishing (no token was explicitly provided)"
             )
             if (token := self.make_trusted_publishing_token()) is not None:
