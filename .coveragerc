@@ -13,6 +13,7 @@ exclude_lines =
 
     # exclude typing.TYPE_CHECKING
     if TYPE_CHECKING:
+    if t.TYPE_CHECKING:
 
 [html]
 show_contexts = True

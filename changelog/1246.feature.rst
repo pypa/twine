@@ -1,0 +1,7 @@
+Automatically refresh short-lived PyPI token in long running Trusted Publishing
+uploads.
+
+In the event that a trusted publishing upload job is taking longer than the
+validity period of a trusted publishing token (15 minutes at the time of this
+writing), *and* we are already 10 minutes into that validity period, we will
+begin to attempt to replace the token on each subsequent request.
