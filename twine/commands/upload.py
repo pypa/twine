@@ -64,7 +64,7 @@ def skip_upload(
         # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
         or (status == 400 and any("updating asset" in x for x in [reason, text]))
         # Artifactory (https://jfrog.com/artifactory/)
-        or (status == 403 and "overwrite artifact" in text)
+        or (status == 403 and "overwrite" in text and "artifact" in text)
         # Gitlab Enterprise Edition (https://about.gitlab.com)
         or (status == 400 and "already been taken" in text)
     )
