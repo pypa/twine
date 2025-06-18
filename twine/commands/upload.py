@@ -61,12 +61,6 @@ def skip_upload(
         status == 409
         # PyPI / TestPyPI / GCP Artifact Registry
         or (status == 400 and any("already exist" in x for x in [reason, text]))
-        # Nexus Repository OSS (https://www.sonatype.com/nexus-repository-oss)
-        or (status == 400 and any("updating asset" in x for x in [reason, text]))
-        # Artifactory (https://jfrog.com/artifactory/)
-        or (status == 403 and "overwrite artifact" in text)
-        # Gitlab Enterprise Edition (https://about.gitlab.com)
-        or (status == 400 and "already been taken" in text)
     )
 
 
@@ -131,6 +125,7 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
         The repository responded with an error.
     """
     upload_settings.check_repository_url()
+    upload_settings.verify_feature_capability()
     repository_url = cast(str, upload_settings.repository_config["repository"])
 
     # Attestations are only supported on PyPI and TestPyPI at the moment.

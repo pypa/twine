@@ -13,6 +13,7 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import typing as t
 
 
 class TwineException(Exception):
@@ -75,6 +76,49 @@ class UploadToDeprecatedPyPIDetected(TwineException):
             "https://packaging.python.org/guides/migrating-to-pypi-org/"
             " .".format(target_url, default_url, test_url)
         )
+
+
+class UnsupportedConfiguration(TwineException):
+    """An upload attempt was detected using features not supported by a repository.
+
+    The features specified either in configuration or on the command-line.
+    """
+
+    class Builder:
+        """Build the parameters for an UnsupportedConfiguration exception.
+
+        In the event we add additional features we are not allowing with
+        something other than PyPI or TestPyPI, we can use a builder to
+        accumulate them all instead of requiring someone to run multiple times
+        to discover all unsupported configuration options.
+        """
+
+        repository_url: str
+        features: t.List[str]
+
+        def __init__(self) -> None:
+            self.repository_url = ""
+            self.features = []
+
+        def with_repository_url(
+            self, repository_url: str
+        ) -> "UnsupportedConfiguration.Builder":
+            self.repository_url = repository_url
+            return self
+
+        def with_feature(self, feature: str) -> "UnsupportedConfiguration.Builder":
+            self.features.append(feature)
+            return self
+
+        def finalize(self) -> "UnsupportedConfiguration":
+            return UnsupportedConfiguration(
+                f"The configured repository {self.repository_url!r} does not "
+                "have support for the following features: "
+                f"{', '.join(self.features)} and is an unsupported "
+                "configuration",
+                self.repository_url,
+                *self.features,
+            )
 
 
 class UnreachableRepositoryURLDetected(TwineException):
