@@ -460,27 +460,6 @@ def test_prints_skip_message_for_response(
         ),
         pytest.param(
             dict(
-                status_code=400,
-                reason=(
-                    "Repository does not allow updating assets: pypi for url: "
-                    "http://www.foo.bar"
-                ),
-            ),
-            id="nexus",
-        ),
-        pytest.param(
-            dict(
-                status_code=400,
-                text=(
-                    '<div class="content-section">\n'
-                    "    Repository does not allow updating assets: pypi-local\n"
-                    "</div>\n"
-                ),
-            ),
-            id="nexus_new",
-        ),
-        pytest.param(
-            dict(
                 status_code=409,
                 reason=(
                     'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
@@ -488,37 +467,6 @@ def test_prints_skip_message_for_response(
                 ),
             ),
             id="pypiserver",
-        ),
-        pytest.param(
-            dict(
-                status_code=403,
-                text=(
-                    "Not enough permissions to overwrite artifact "
-                    "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
-                    "(user 'twine-deployer' needs DELETE permission)."
-                ),
-            ),
-            id="artifactory_old",
-        ),
-        pytest.param(
-            dict(
-                status_code=403,
-                text=(
-                    "Not enough permissions to delete/overwrite artifact "
-                    "'pypi-local:twine/1.5.0/twine-1.5.0-py2.py3-none-any.whl'"
-                    "(user 'twine-deployer' needs DELETE permission)."
-                ),
-            ),
-            id="artifactory_new",
-        ),
-        pytest.param(
-            dict(
-                status_code=400,
-                text=(
-                    '{"message":"validation failed: file name has already been taken"}'
-                ),
-            ),
-            id="gitlab_enterprise",
         ),
     ],
 )

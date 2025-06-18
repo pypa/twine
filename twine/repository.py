@@ -181,6 +181,23 @@ class Repository:
     def package_is_uploaded(
         self, package: package_file.PackageFile, bypass_cache: bool = False
     ) -> bool:
+        """Determine if a package has been uploaded to PyPI already.
+
+        .. warning:: This does not support indexes other than PyPI or TestPyPI
+
+        :param package:
+            The package file that will otherwise be uploaded.
+        :type package:
+            :class:`~twine.package.PackageFile`
+        :param bypass_cache:
+            Force a request to PyPI.
+        :type bypass_cache:
+            bool
+        :returns:
+            True if package has already been uploaded, False otherwise
+        :rtype:
+            bool
+        """
         # NOTE(sigmavirus24): Not all indices are PyPI and pypi.io doesn't
         # have a similar interface for finding the package versions.
         if not self.url.startswith((LEGACY_PYPI, WAREHOUSE, OLD_WAREHOUSE)):

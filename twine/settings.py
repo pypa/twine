@@ -313,6 +313,25 @@ class Settings:
         self.cacert = utils.get_cacert(cacert, self.repository_config)
         self.client_cert = utils.get_clientcert(client_cert, self.repository_config)
 
+    def verify_feature_capability(self) -> None:
+        """Verify configured settings are supported for the configured repository.
+
+        This presently checks:
+        - ``--skip-existing`` was only provided for PyPI and TestPyPI
+
+        :raises twine.exceptions.UnsupportedConfiguration:
+            The configured features are not available with the configured
+            repository.
+        """
+        repository_url = cast(str, self.repository_config["repository"])
+
+        if self.skip_existing and not repository_url.startswith(
+            (repository.WAREHOUSE, repository.TEST_WAREHOUSE)
+        ):
+            raise exceptions.UnsupportedConfiguration.Builder().with_feature(
+                "--skip-existing"
+            ).with_repository_url(repository_url).finalize()
+
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.
 
