@@ -1,6 +1,6 @@
 # pyproject.toml
 [build-system]
-requires = ["setuptools>=61.2", "setuptools_scm[toml]>=6.0"]
+requires = ["setuptools>=77.0.3", "setuptools_scm[toml]>=6.0"]
 build-backend = "setuptools.build_meta"
 
 [project]
@@ -9,9 +9,10 @@ authors = [
 	{ name = "Donald Stufft and individual contributors", email = "donald@stufft.io" },
 ]
 description = "Collection of utilities for publishing packages on PyPI"
+license = "Apache-2.0"
+license-files = ["LICENSE"]
 classifiers = [
 	"Intended Audience :: Developers",
-	"License :: OSI Approved :: Apache Software License",
 	"Natural Language :: English",
 	"Operating System :: MacOS :: MacOS X",
 	"Operating System :: POSIX",
@@ -68,7 +69,6 @@ twine = "twine.__main__:main"
 [tool.setuptools]
 packages = ["twine", "twine.commands"]
 include-package-data = true
-license-files = ["LICENSE"]
 
 [tool.setuptools_scm]
 
