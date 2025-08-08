@@ -119,7 +119,7 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
             logging.ERROR,
             "`long_description` has syntax errors in markup "
             "and would not be rendered on PyPI.\n"
-            "line 2: Error: Document or section may not begin with a transition.",
+            "line 2: Warning: Document or section may not begin with a transition.",
         ),
     ]
 
