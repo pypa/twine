@@ -294,7 +294,6 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
 
 
 TWINE_1_5_0_WHEEL_HEXDIGEST = package_file.Hexdigest(
-    "1919f967e990bee7413e2a4bc35fd5d1",
     "d86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67",
     "b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0",
 )
@@ -306,18 +305,6 @@ def test_hash_manager():
     hasher = package_file.HashManager(filename)
     hasher.hash()
     assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
-
-
-def test_fips_hash_manager_md5(monkeypatch):
-    """Generate hexdigest without MD5 when hashlib is using FIPS mode."""
-    replaced_md5 = pretend.raiser(ValueError("fipsmode"))
-    monkeypatch.setattr(package_file.hashlib, "md5", replaced_md5)
-
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
-    hasher = package_file.HashManager(filename)
-    hasher.hash()
-    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(md5=None)
-    assert hasher.hexdigest() == hashes
 
 
 @pytest.mark.parametrize("exception_class", [TypeError, ValueError])
@@ -333,21 +320,18 @@ def test_fips_hash_manager_blake2(exception_class, monkeypatch):
     assert hasher.hexdigest() == hashes
 
 
-def test_fips_metadata_excludes_md5_and_blake2(monkeypatch):
+def test_fips_metadata_excludes_blake2(monkeypatch):
     """Generate a valid metadata dictionary for Nexus when FIPS is enabled.
 
     See also: https://github.com/pypa/twine/issues/775
     """
     replaced_blake2b = pretend.raiser(ValueError("fipsmode"))
-    replaced_md5 = pretend.raiser(ValueError("fipsmode"))
-    monkeypatch.setattr(package_file.hashlib, "md5", replaced_md5)
     monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
 
     filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
     pf = package_file.PackageFile.from_filename(filename, None)
 
     mddict = pf.metadata_dictionary()
-    assert "md5_digest" not in mddict
     assert "blake2_256_digest" not in mddict
 
 
