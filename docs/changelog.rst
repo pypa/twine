@@ -12,6 +12,71 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+twine 6.2.0 (2025-09-04)
+------------------------
+
+Features
+^^^^^^^^
+
+- Automatically refresh short-lived PyPI token in long running Trusted
+  Publishing uploads.
+
+  In the event that a trusted publishing upload job is taking longer than the
+  validity period of a trusted publishing token (15 minutes at the time of this
+  writing), *and* we are already 10 minutes into that validity period, we will
+  begin to attempt to replace the token on each subsequent request. (`#1246 <https://github.com/pypa/twine/issues/1246>`_)
+
+
+Bugfixes
+^^^^^^^^
+
+- Fix compatibility kludge for invalid License-File metadata entries emitted by
+  build backends to work also with ``packaging`` version 24.0. (`#1217 <https://github.com/pypa/twine/issues/1217>`_)
+- Fix a couple of incorrectly rendered error messages. (`#1224 <https://github.com/pypa/twine/issues/1224>`_)
+- ``twine`` now enforces ``keyring >= 21.2.0``, which was previously
+  implicitly required by API usage. (`#1229 <https://github.com/pypa/twine/issues/1229>`_)
+- ``twine`` now catches ``configparser.Error`` to prevent accidental
+  leaks of secret tokens or passwords to the user's console. (`#1240 <https://github.com/pypa/twine/issues/1240>`_)
+
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Remove hacks that support ``--skip-existing`` for indexes other than PyPI and
+  TestPyPI.
+
+  To date, these hacks continue to accrue and there have been numerous issues
+  with them, not the least of which being that every time we update them, the
+  paid index providers change things to break the compatibility we implement
+  for them. Beyond that, these hacks do not work when text is internationalized
+  in the response from the index provider.
+
+  For a sample of past issues, see:
+
+  - https://github.com/pypa/twine/issues/1251
+
+  - https://github.com/pypa/twine/issues/918
+
+  - https://github.com/pypa/twine/issues/856
+
+  - https://github.com/pypa/twine/issues/693
+
+  - https://github.com/pypa/twine/issues/332 (`#1251 <https://github.com/pypa/twine/issues/1251>`_)
+- Remove support for MD5 digests during uploads.
+
+  This support was entirely vestigial, as MD5 is not a secure hash function
+  and is not actually required on upload by PyPI.
+
+  Indices that cross-reference the uploaded content with a digest should
+  use the provided SHA-256 and/or BLAKE2 digests instead. (`#1262 <https://github.com/pypa/twine/issues/1262>`_)
+
+
+Misc
+^^^^
+
+- `#1247 <https://github.com/pypa/twine/issues/1247>`_
+
+
 Twine 6.1.0 (2025-01-17)
 ------------------------
 
