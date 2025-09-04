@@ -18,8 +18,8 @@ twine 6.2.0 (2025-09-04)
 Features
 ^^^^^^^^
 
-- Automatically refresh short-lived PyPI token in long running Trusted Publishing
-  uploads.
+- Automatically refresh short-lived PyPI token in long running Trusted
+  Publishing uploads.
 
   In the event that a trusted publishing upload job is taking longer than the
   validity period of a trusted publishing token (15 minutes at the time of this
@@ -47,9 +47,9 @@ Deprecations and Removals
 
   To date, these hacks continue to accrue and there have been numerous issues
   with them, not the least of which being that every time we update them, the
-  paid index providers change things to break the compatibility we implement for
-  them. Beyond that, these hacks do not work when text is internationalized in
-  the response from the index provider.
+  paid index providers change things to break the compatibility we implement
+  for them. Beyond that, these hacks do not work when text is internationalized
+  in the response from the index provider.
 
   For a sample of past issues, see:
 
