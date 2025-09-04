@@ -1,7 +1,0 @@
-Remove support for MD5 digests during uploads.
-
-This support was entirely vestigial, as MD5 is not a secure hash function
-and is not actually required on upload by PyPI.
-
-Indices that cross-reference the uploaded content with a digest should
-use the provided SHA-256 and/or BLAKE2 digests instead.

@@ -1,2 +1,0 @@
-``twine`` now catches ``configparser.Error`` to prevent accidental
-leaks of secret tokens or passwords to the user's console.
