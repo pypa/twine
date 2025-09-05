@@ -1,5 +1,7 @@
 import getpass
 import logging.config
+import pathlib
+import tempfile
 import textwrap
 
 import pytest
@@ -7,6 +9,9 @@ import rich
 
 from twine import settings
 from twine import utils
+
+from .helpers import build_sdist
+from .helpers import build_wheel
 
 
 @pytest.fixture(autouse=True)
@@ -83,3 +88,31 @@ def make_settings(write_config_file):
 @pytest.fixture
 def entered_password(monkeypatch):
     monkeypatch.setattr(getpass, "getpass", lambda prompt: "entered pw")
+
+
+@pytest.fixture(scope="session")
+def tmp_path_session(tmp_path_factory):
+    return pathlib.Path(
+        tempfile.mkdtemp(
+            prefix="twine-test-",
+            dir=tmp_path_factory.mktemp("test"),
+        )
+    )
+
+
+@pytest.fixture
+def test_wheel(tmp_path_session):
+    return build_wheel(tmp_path_session, "test", "1.2.3", {})
+
+
+@pytest.fixture
+def test_wheel_signature(test_wheel):
+    signature = test_wheel.with_suffix(".whl.asc")
+    signature.write_text("-----BEGIN PGP SIGNATURE-----")
+    yield signature
+    signature.unlink()
+
+
+@pytest.fixture
+def test_sdist(tmp_path_session):
+    return build_sdist(tmp_path_session, "test", "1.2.3", {})
