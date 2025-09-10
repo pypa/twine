@@ -23,6 +23,8 @@ from twine import exceptions
 from twine import repository
 from twine import utils
 
+logger = logging.getLogger(__name__)
+
 
 class Settings:
     """Object that manages the configuration for Twine.
@@ -61,6 +63,7 @@ class Settings:
         repository_url: Optional[str] = None,
         verbose: bool = False,
         disable_progress_bar: bool = False,
+        lenient: bool = False,
         **ignored_kwargs: Any,
     ) -> None:
         """Initialize our settings instance.
@@ -107,11 +110,14 @@ class Settings:
             Show verbose output.
         :param disable_progress_bar:
             Disable the progress bar.
+        :param lenient:
+            Emit some errors as warnings and attempt to keep going.
         """
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
+        self.lenient = lenient
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name,
@@ -278,6 +284,13 @@ class Settings:
             action="store_true",
             help="Disable the progress bar.",
         )
+        parser.add_argument(
+            "--lenient",
+            default=False,
+            required=False,
+            action="store_true",
+            help="Emit some errors as warnings and try to keep going.",
+        )
 
     @classmethod
     def from_argparse(cls, args: argparse.Namespace) -> "Settings":
@@ -325,12 +338,21 @@ class Settings:
         """
         repository_url = cast(str, self.repository_config["repository"])
 
+        exc = None
         if self.skip_existing and not repository_url.startswith(
             (repository.WAREHOUSE, repository.TEST_WAREHOUSE)
         ):
-            raise exceptions.UnsupportedConfiguration.Builder().with_feature(
-                "--skip-existing"
-            ).with_repository_url(repository_url).finalize()
+            exc = (
+                exceptions.UnsupportedConfiguration.Builder()
+                .with_feature("--skip-existing")
+                .with_repository_url(repository_url)
+                .finalize()
+            )
+        if exc is not None:
+            if self.lenient:
+                logger.warning("Unsupported configuration: %s", exc)
+            else:
+                raise exc
 
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.

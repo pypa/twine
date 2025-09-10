@@ -111,14 +111,20 @@ class UnsupportedConfiguration(TwineException):
             return self
 
         def finalize(self) -> "UnsupportedConfiguration":
-            return UnsupportedConfiguration(
-                f"The configured repository {self.repository_url!r} does not "
-                "have support for the following features: "
-                f"{', '.join(self.features)} and is an unsupported "
-                "configuration",
+            return UnsupportedConfiguration.from_args(
                 self.repository_url,
-                *self.features,
+                self.features,
             )
+
+    @classmethod
+    def from_args(
+        cls, repository_url: str, features: t.List[str]
+    ) -> "UnsupportedConfiguration":
+        return cls(
+            f"The configured repository {repository_url!r} may not have"
+            f" support for the following features: {', '.join(features)}"
+            " and is an unsupported configuration."
+        )
 
 
 class UnreachableRepositoryURLDetected(TwineException):
