@@ -81,7 +81,7 @@ def test_settings_transforms_repository_config_non_pypi(write_config_file):
     assert s.disable_progress_bar is False
 
 
-def test_settings_verify_feature_compatibility() -> None:
+def test_settings_verify_feature_compatibility(caplog) -> None:
     s = settings.Settings(skip_existing=True)
     s.repository_config = {"repository": repository.WAREHOUSE}
     try:
@@ -104,6 +104,18 @@ def test_settings_verify_feature_compatibility() -> None:
     s.repository_config["repository"] = "https://not-really-pypi.example.com/legacy"
     with pytest.raises(exceptions.UnsupportedConfiguration):
         s.verify_feature_capability()
+
+    s.lenient = True
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            "Expected exception to be logged instead of raised, but"
+            f" {unexpected_exc!r} was raised"
+        )
+    assert len(caplog.messages) == 1
+    assert "Unsupported configuration" in caplog.messages[0]
+    s.lenient = False
 
     s.skip_existing = False
     try:
