@@ -1,0 +1,5 @@
+Add ``--lenient`` option to allow certain errors to be emitted as warnings
+instead of causing Twine to exit.
+
+Note that use of this option represents acknowledgement that uploads may fail
+through no fault of Twine!
