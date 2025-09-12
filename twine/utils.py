@@ -62,7 +62,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     parser = configparser.RawConfigParser()
 
     try:
-        with open(realpath) as f:
+        with open(realpath, encoding="utf-8") as f:
             parser.read_file(f)
             logger.info(f"Using configuration from {realpath}")
     except FileNotFoundError:
