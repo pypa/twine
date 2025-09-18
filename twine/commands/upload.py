@@ -209,6 +209,18 @@ def upload(upload_settings: settings.Settings, dists: List[str]) -> None:
                 utils.sanitize_url(resp.headers["location"]),
             )
 
+        if resp.status_code in upload_settings.ignored_http_statuses:
+            logger.warning(
+                f"Ignoring HTTP {resp.status_code} response to "
+                f"{package.basefilename} upload as requested."
+                + (
+                    "  Retry with the --verbose option for more details."
+                    if not upload_settings.verbose
+                    else ""
+                )
+            )
+            continue
+
         if skip_upload(resp, upload_settings.skip_existing, package):
             logger.warning(skip_message)
             continue

@@ -1,0 +1,5 @@
+Add ``--ignore-http-status`` option for use only with non-PyPI repositories.
+
+This option allows the user of a repository other than PyPI or TestPyPI to
+specify one or more HTTP status codes that Twine should not treat as fatal when
+encountered on uploading a file, allowing it to continue to upload other files.

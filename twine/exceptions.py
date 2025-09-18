@@ -112,12 +112,9 @@ class UnsupportedConfiguration(TwineException):
 
         def finalize(self) -> "UnsupportedConfiguration":
             return UnsupportedConfiguration(
-                f"The configured repository {self.repository_url!r} does not "
-                "have support for the following features: "
-                f"{', '.join(self.features)} and is an unsupported "
-                "configuration",
-                self.repository_url,
-                *self.features,
+                f"Twine does not support using the following features with the"
+                f" configured repository ({self.repository_url!r}): "
+                f"{', '.join(self.features)}",
             )
 
 

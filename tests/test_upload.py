@@ -445,6 +445,32 @@ def test_prints_skip_message_for_response(
     ]
 
 
+def test_prints_ignored_message_for_ignored_response(
+    upload_settings, stub_response, stub_repository, capsys, caplog
+):
+    upload_settings.repository_config["repository"] = "https://notpypi.example.com"
+    upload_settings.ignored_http_statuses = {409}
+
+    stub_response.status_code = 409
+    stub_response.reason = "Doesn't really matter, not checked"
+    stub_response.text = stub_response.reason
+
+    # Do the upload, triggering the error response
+    stub_repository.package_is_uploaded = lambda package: False
+
+    result = upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
+    assert result is None
+
+    captured = capsys.readouterr()
+    assert RELEASE_URL not in captured.out
+
+    assert caplog.messages == [
+        "Ignoring HTTP 409 response to twine-1.5.0-py2.py3-none-any.whl"
+        " upload as requested.  Retry with the --verbose option for more"
+        " details."
+    ]
+
+
 @pytest.mark.parametrize(
     "response_kwargs",
     [

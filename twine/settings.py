@@ -55,6 +55,7 @@ class Settings:
         comment: Optional[str] = None,
         config_file: str = utils.DEFAULT_CONFIG_FILE,
         skip_existing: bool = False,
+        ignored_http_statuses: Optional[list[int]] = None,
         cacert: Optional[str] = None,
         client_cert: Optional[str] = None,
         repository_name: str = "pypi",
@@ -88,8 +89,10 @@ class Settings:
             The path to the configuration file to use.
         :param skip_existing:
             Specify whether twine should continue uploading files if one
-            of them already exists. This primarily supports PyPI. Other
-            package indexes may not be supported.
+            of them already exists. Only for use with PyPI.
+        :param ignored_http_statuses:
+            Specify a set of HTTP status codes to ignore, continuing to upload
+            other files.
         :param cacert:
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
@@ -113,6 +116,7 @@ class Settings:
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
+        self.ignored_http_statuses = set(ignored_http_statuses or [])
         self._handle_repository_options(
             repository_name=repository_name,
             repository_url=repository_url,
@@ -245,8 +249,18 @@ class Settings:
             default=False,
             action="store_true",
             help="Continue uploading files if one already exists. (Only valid "
-            "when uploading to PyPI. Other implementations may not "
-            "support this.)",
+            "when uploading to PyPI. Not supported with other "
+            "implementations.)",
+        )
+        parser.add_argument(
+            "--ignore-http-status",
+            type=int,
+            action="append",
+            dest="ignored_http_statuses",
+            metavar="status_code",
+            help="Ignore the specified HTTP status code and continue uploading"
+            " files. May be specified multiple times."
+            " (Not supported when uploading to PyPI.)",
         )
         parser.add_argument(
             "--cert",
@@ -318,6 +332,7 @@ class Settings:
 
         This presently checks:
         - ``--skip-existing`` was only provided for PyPI and TestPyPI
+        - ``--ignore-http-status`` was not provided for PyPI or TestPyPI
 
         :raises twine.exceptions.UnsupportedConfiguration:
             The configured features are not available with the configured
@@ -325,12 +340,22 @@ class Settings:
         """
         repository_url = cast(str, self.repository_config["repository"])
 
-        if self.skip_existing and not repository_url.startswith(
-            (repository.WAREHOUSE, repository.TEST_WAREHOUSE)
-        ):
-            raise exceptions.UnsupportedConfiguration.Builder().with_feature(
-                "--skip-existing"
-            ).with_repository_url(repository_url).finalize()
+        exc_builder = exceptions.UnsupportedConfiguration.Builder()
+        exc_builder.with_repository_url(repository_url)
+
+        pypi_urls = (repository.WAREHOUSE, repository.TEST_WAREHOUSE)
+
+        if repository_url.startswith(pypi_urls):
+            # is PyPI
+            if self.ignored_http_statuses:
+                exc_builder.with_feature("--ignore-http-status")
+        else:
+            # is not PyPI
+            if self.skip_existing:
+                exc_builder.with_feature("--skip-existing")
+
+        if exc_builder.features:
+            raise exc_builder.finalize()
 
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.

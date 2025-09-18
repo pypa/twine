@@ -114,6 +114,23 @@ def test_settings_verify_feature_compatibility() -> None:
             f" but got {unexpected_exc!r}"
         )
 
+    s.ignored_http_statuses = {409}
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            f"Expected feature capability to work with non-PyPI but got"
+            f" {unexpected_exc!r}"
+        )
+
+    s.repository_config["repository"] = repository.WAREHOUSE
+    with pytest.raises(exceptions.UnsupportedConfiguration):
+        s.verify_feature_capability()
+
+    s.repository_config["repository"] = repository.TEST_WAREHOUSE
+    with pytest.raises(exceptions.UnsupportedConfiguration):
+        s.verify_feature_capability()
+
 
 @pytest.mark.parametrize(
     "verbose, log_level", [(True, logging.INFO), (False, logging.WARNING)]
@@ -187,6 +204,9 @@ class TestArgumentParsing:
         settings.Settings.register_argparse_arguments(parser)
         return parser.parse_args(args)
 
+    def parse_args_into_settings(self, args):
+        return settings.Settings.from_argparse(self.parse_args(args))
+
     def test_non_interactive_flag(self):
         args = self.parse_args(["--non-interactive"])
         assert args.non_interactive
@@ -202,3 +222,13 @@ class TestArgumentParsing:
     def test_attestations_flag(self):
         args = self.parse_args(["--attestations"])
         assert args.attestations
+
+    def test_ignore_http_status(self):
+        s = self.parse_args_into_settings(["--ignore-http-status", "409"])
+        assert s.ignored_http_statuses == {409}
+
+    def test_ignore_multiple_http_statuses(self):
+        s = self.parse_args_into_settings(
+            ["--ignore-http-status", "409", "--ignore-http-status", "400"]
+        )
+        assert s.ignored_http_statuses == {400, 409}
