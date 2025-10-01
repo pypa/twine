@@ -71,6 +71,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
                 parser.read_file(f_utf8)
             logger.info(f"Using configuration from {realpath} (decoded with UTF-8 fallback)")
     except FileNotFoundError:
+        # User probably set --config-file, but the file can't be read
         if path != DEFAULT_CONFIG_FILE:
             raise
 
