@@ -93,18 +93,11 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     parser = configparser.RawConfigParser()
 
     try:
-        try:
-            parser = _parse_config(realpath)
-        except FileNotFoundError:
-            # User probably set --config-file, but the file can't be read
-            if path != DEFAULT_CONFIG_FILE:
-                raise
-    except UnicodeDecodeError:
-        # This should not happen because _parse_config handles UnicodeDecodeError,
-        # but keep this here defensively in case of unexpected behavior.
-        with open(realpath, encoding="utf-8") as f_utf8:
-            parser.read_file(f_utf8)
-        logger.info(f"Using configuration from {realpath} (decoded with UTF-8 fallback)")
+        parser = _parse_config(realpath)
+    except FileNotFoundError:
+        # User probably set --config-file, but the file can't be read
+        if path != DEFAULT_CONFIG_FILE:
+            raise
 
     # server-login is obsolete, but retained for backwards compatibility
     defaults: RepositoryConfig = {
