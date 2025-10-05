@@ -50,6 +50,36 @@ RepositoryConfig = Dict[str, Optional[str]]
 logger = logging.getLogger(__name__)
 
 
+def _parse_file(path: str, **open_kwargs: Any) -> configparser.RawConfigParser:
+    """Open and parse a configuration file.
+
+    This helper performs a single open/read operation so that if a
+    UnicodeDecodeError is raised it happens before the parser has been
+    partially populated.
+    """
+    parser = configparser.RawConfigParser()
+    with open(path, **open_kwargs) as f:
+        parser.read_file(f)
+    return parser
+
+
+def _parse_config(path: str) -> configparser.RawConfigParser:
+    """Parse a config file with a UTF-8 fallback on decode errors.
+
+    Try to parse using the default system encoding first; if a
+    UnicodeDecodeError occurs, retry using UTF-8 and log that a fallback
+    was used.
+    """
+    try:
+        parser = _parse_file(path)
+        logger.info(f"Using configuration from {path}")
+        return parser
+    except UnicodeDecodeError:
+        parser = _parse_file(path, encoding="utf-8")
+        logger.info(f"Using configuration from {path} (decoded with UTF-8 fallback)")
+        return parser
+
+
 def get_config(path: str) -> Dict[str, RepositoryConfig]:
     """Read repository configuration from a file (i.e. ~/.pypirc).
 
@@ -59,21 +89,22 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     pypyi and testpypi.
     """
     realpath = os.path.realpath(os.path.expanduser(path))
+
     parser = configparser.RawConfigParser()
 
     try:
         try:
-            with open(realpath) as f:
-                parser.read_file(f)
-                logger.info(f"Using configuration from {realpath}")
-        except UnicodeDecodeError:
-            with open(realpath, encoding="utf-8") as f_utf8:
-                parser.read_file(f_utf8)
-            logger.info(f"Using configuration from {realpath} (decoded with UTF-8 fallback)")
-    except FileNotFoundError:
-        # User probably set --config-file, but the file can't be read
-        if path != DEFAULT_CONFIG_FILE:
-            raise
+            parser = _parse_config(realpath)
+        except FileNotFoundError:
+            # User probably set --config-file, but the file can't be read
+            if path != DEFAULT_CONFIG_FILE:
+                raise
+    except UnicodeDecodeError:
+        # This should not happen because _parse_config handles UnicodeDecodeError,
+        # but keep this here defensively in case of unexpected behavior.
+        with open(realpath, encoding="utf-8") as f_utf8:
+            parser.read_file(f_utf8)
+        logger.info(f"Using configuration from {realpath} (decoded with UTF-8 fallback)")
 
     # server-login is obsolete, but retained for backwards compatibility
     defaults: RepositoryConfig = {
