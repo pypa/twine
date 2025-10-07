@@ -1,4 +1,3 @@
-"""python
 import logging
 import locale
 
@@ -61,4 +60,3 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     # フォールバック通知が出ていないこと（通常の使用メッセージは出るはず）
     assert "decoded with UTF-8 fallback" not in caplog.text
     assert f"Using configuration from {ini_path}" in caplog.text
-"""
