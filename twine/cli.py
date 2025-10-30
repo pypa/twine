@@ -76,11 +76,14 @@ def configure_output() -> None:
 
 def list_dependencies_and_versions() -> List[Tuple[str, str]]:
     deps = [
-        "keyring",  # optional for non-desktop use
-        "packaging",
+        "readme-renderer",
         "requests",
         "requests-toolbelt",
         "urllib3",
+        "keyring",  # optional for non-desktop use
+        "rfc3986",
+        "rich",
+        "packaging",
         "id",
     ]
     if sys.version_info < (3, 10):
