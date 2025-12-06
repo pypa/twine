@@ -70,13 +70,19 @@ def _parse_config(path: str) -> configparser.RawConfigParser:
     UnicodeDecodeError occurs, retry using UTF-8 and log that a fallback
     was used.
     """
+    logger.info("Parsing configuration from %s", path)
     try:
         parser = _parse_file(path)
-        logger.info(f"Using configuration from {path}")
-        return parser
     except UnicodeDecodeError:
+        logger.info("Configuration file not readable with default locale encoding, trying UTF-8")
+    else:
+        return parser
+        
+    try:
         parser = _parse_file(path, encoding="utf-8")
-        logger.info(f"Using configuration from {path} (decoded with UTF-8 fallback)")
+    except UnicodeDecodeError as ude:
+        raise exceptions.UnableToReadConfigurationFile(path=path)
+    else:
         return parser
 
 
