@@ -45,7 +45,7 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     """
     When the default encoding is UTF-8, no fallback is necessary and the file
     should be parsed via the normal path. Because logs can vary across
-    environments, only verify that the "Using configuration from <path>" message
+    environments, only verify that the "Parsing configuration from <path>" message
     appears.
     """
     ini_path = tmp_path / "pypirc"
