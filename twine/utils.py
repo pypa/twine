@@ -91,7 +91,7 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     Format: https://packaging.python.org/specifications/pypirc/
 
     If the default config file doesn't exist, return a default configuration for
-    pypyi and testpypi.
+    pypi and testpypi.
     """
     realpath = os.path.realpath(os.path.expanduser(path))
 
