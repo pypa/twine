@@ -77,7 +77,6 @@ def _parse_config(path: str) -> configparser.RawConfigParser:
         logger.info("Configuration file not readable with default locale encoding, trying UTF-8")
     else:
         return parser
-        
     try:
         parser = _parse_file(path, encoding="utf-8")
     except UnicodeDecodeError as ude:
