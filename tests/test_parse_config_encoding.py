@@ -64,4 +64,4 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     # Because environment differences (docutils output or open() behavior) can change
     # whether a fallback occurs, do not strictly assert the absence of a fallback.
     # Instead, at minimum verify that the used configuration file path is present in the logs.
-    assert f"Using configuration from {ini_path}" in caplog.text
+    assert f"Parsing configuration from {ini_path}" in caplog.text
