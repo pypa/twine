@@ -1,6 +1,7 @@
+import builtins
 import logging
 import locale
-
+import pathlib
 
 from twine import utils
 
@@ -20,16 +21,38 @@ password = secret
 
 def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
     """
-    If the default encoding is made to look like cp932, the first open() should
-    raise a UnicodeDecodeError and _parse_config should take the UTF-8 fallback path.
-    Also verify that a log message about the fallback is emitted.
+    If the first read of the file raises a UnicodeDecodeError, _parse_config
+    should take the UTF-8 fallback path. This test simulates a decode failure
+    on the first I/O and then allows normal I/O so the fallback is exercised.
     """
     ini_path = tmp_path / "pypirc"
     expected_username = "テストユーザー🐍"
     _write_utf8_ini(ini_path, expected_username)
 
-    # Make the system preferred encoding appear as cp932
-    monkeypatch.setattr(locale, "getpreferredencoding", lambda do_set=False: "cp932")
+    # Coordinate a single "raise once" behavior across multiple common I/O entrypoints.
+    call = {"n": 0}
+    original_open = builtins.open
+    original_read_text = pathlib.Path.read_text
+
+    def open_raise_once(*args, **kwargs):
+        # Only raise on the very first attempted open; afterwards delegate to real open.
+        if call["n"] == 0:
+            call["n"] += 1
+            # UnicodeDecodeError(encoding, object, start, end, reason)
+            raise UnicodeDecodeError("utf-8", b"", 0, 1, "simulated")
+        return original_open(*args, **kwargs)
+
+    def read_text_raise_once(self, encoding=None, errors=None):
+        # Only raise on the very first attempted read_text; afterwards delegate.
+        if call["n"] == 0:
+            call["n"] += 1
+            raise UnicodeDecodeError("utf-8", b"", 0, 1, "simulated")
+        return original_read_text(self, encoding=encoding, errors=errors)
+
+    # Patch both builtins.open and pathlib.Path.read_text to be robust against
+    # whichever API _parse_config uses internally.
+    monkeypatch.setattr(builtins, "open", open_raise_once)
+    monkeypatch.setattr(pathlib.Path, "read_text", read_text_raise_once, raising=True)
 
     caplog.set_level(logging.INFO, logger="twine")
     parser = utils._parse_config(str(ini_path))
@@ -43,16 +66,16 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
 
 def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_path):
     """
-    When the default encoding is UTF-8, no fallback is necessary and the file
-    should be parsed via the normal path. Because logs can vary across
-    environments, only verify that the "Parsing configuration from <path>" message
-    appears.
+    When the default encoding is UTF-8, no forced decode failure is simulated
+    and the file should be parsed via the normal path. Verify that the used
+    configuration file path is present in the logs.
     """
     ini_path = tmp_path / "pypirc"
     expected_username = "テストユーザー🐍"
     _write_utf8_ini(ini_path, expected_username)
 
-    # Simulate the default encoding being UTF-8
+    # Simulate the default encoding being UTF-8 (keeps behavior deterministic
+    # for environments that inspect preferred encoding).
     monkeypatch.setattr(locale, "getpreferredencoding", lambda do_set=False: "utf-8")
 
     caplog.set_level(logging.INFO, logger="twine")
@@ -61,7 +84,5 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     # Ensure the parsed result is correct
     assert parser.get("server-login", "username") == expected_username
 
-    # Because environment differences (docutils output or open() behavior) can change
-    # whether a fallback occurs, do not strictly assert the absence of a fallback.
-    # Instead, at minimum verify that the used configuration file path is present in the logs.
+    # Verify that the used configuration file path is present in the logs.
     assert f"Parsing configuration from {ini_path}" in caplog.text
