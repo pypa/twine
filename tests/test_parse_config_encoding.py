@@ -1,6 +1,5 @@
 import builtins
 import logging
-import locale
 import pathlib
 
 from twine import utils
@@ -66,17 +65,34 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
 
 def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_path):
     """
-    When the default encoding is UTF-8, no forced decode failure is simulated
-    and the file should be parsed via the normal path. Verify that the used
-    configuration file path is present in the logs.
+    When the default encoding is UTF-8, no fallback is necessary and the file
+    should be parsed via the normal path. To make this deterministic across
+    Python versions/environments, force I/O calls without an explicit encoding
+    to use UTF-8 by wrapping open / Path.read_text.
     """
     ini_path = tmp_path / "pypirc"
     expected_username = "テストユーザー🐍"
     _write_utf8_ini(ini_path, expected_username)
 
-    # Simulate the default encoding being UTF-8 (keeps behavior deterministic
-    # for environments that inspect preferred encoding).
-    monkeypatch.setattr(locale, "getpreferredencoding", lambda do_set=False: "utf-8")
+    # Wrap builtins.open so that if encoding is not provided, we force utf-8.
+    original_open = builtins.open
+
+    def open_force_utf8(file, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
+        if encoding is None and "b" not in mode:
+            # delegate to real open but force utf-8 as default encoding
+            return original_open(file, mode, buffering=buffering, encoding="utf-8", errors=errors, newline=newline, closefd=closefd, opener=opener)
+        return original_open(file, mode, buffering=buffering, encoding=encoding, errors=errors, newline=newline, closefd=closefd, opener=opener)
+
+    # Wrap pathlib.Path.read_text similarly
+    original_read_text = pathlib.Path.read_text
+
+    def read_text_force_utf8(self, encoding=None, errors=None):
+        if encoding is None:
+            return original_read_text(self, encoding="utf-8", errors=errors)
+        return original_read_text(self, encoding=encoding, errors=errors)
+
+    monkeypatch.setattr(builtins, "open", open_force_utf8)
+    monkeypatch.setattr(pathlib.Path, "read_text", read_text_force_utf8, raising=True)
 
     caplog.set_level(logging.INFO, logger="twine")
     parser = utils._parse_config(str(ini_path))
