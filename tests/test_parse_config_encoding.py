@@ -38,7 +38,7 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
     assert parser.get("server-login", "username") == expected_username
 
     # Ensure a log message indicating the fallback is present
-    assert "decoded with UTF-8 fallback" in caplog.text
+    assert "Configuration file not readable with default locale encoding, trying UTF-8" in caplog.text
 
 
 def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_path):
