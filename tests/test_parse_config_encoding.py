@@ -1,7 +1,6 @@
 import logging
 import locale
 
-import pytest
 
 from twine import utils
 
