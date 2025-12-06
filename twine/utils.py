@@ -96,8 +96,6 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
     """
     realpath = os.path.realpath(os.path.expanduser(path))
 
-    parser = configparser.RawConfigParser()
-
     try:
         parser = _parse_config(realpath)
     except FileNotFoundError:
