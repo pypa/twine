@@ -55,6 +55,7 @@ class Settings:
         comment: Optional[str] = None,
         config_file: str = utils.DEFAULT_CONFIG_FILE,
         skip_existing: bool = False,
+        skip_existing_non_pypi: bool = False,
         cacert: Optional[str] = None,
         client_cert: Optional[str] = None,
         repository_name: str = "pypi",
@@ -90,6 +91,9 @@ class Settings:
             Specify whether twine should continue uploading files if one
             of them already exists. This primarily supports PyPI. Other
             package indexes may not be supported.
+        :param skip_existing_non_pypi:
+            Allow --skip-existing to work with non-PyPI repositories.
+            Use at your own risk with third-party registries.
         :param cacert:
             The path to the bundle of certificates used to verify the TLS
             connection to the package index.
@@ -113,6 +117,7 @@ class Settings:
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
+        self.skip_existing_non_pypi = skip_existing_non_pypi
         self._handle_repository_options(
             repository_name=repository_name,
             repository_url=repository_url,
@@ -245,8 +250,17 @@ class Settings:
             default=False,
             action="store_true",
             help="Continue uploading files if one already exists. (Only valid "
-            "when uploading to PyPI. Other implementations may not "
+            "when uploading to PyPI by default. For other repositories, use "
+            "--skip-existing-non-pypi flag. Other implementations may not "
             "support this.)",
+        )
+        parser.add_argument(
+            "--skip-existing-non-pypi",
+            action=utils.EnvironmentFlag,
+            env="TWINE_SKIP_EXISTING_NON_PYPI",
+            help="Allow --skip-existing to work with non-PyPI repositories. "
+            "Use at your own risk with third-party registries. (Can also be "
+            "set via %(env)s environment variable.)",
         )
         parser.add_argument(
             "--cert",
@@ -317,7 +331,10 @@ class Settings:
         """Verify configured settings are supported for the configured repository.
 
         This presently checks:
-        - ``--skip-existing`` was only provided for PyPI and TestPyPI
+
+        - ``--skip-existing`` was only provided for PyPI and TestPyPI, unless
+          explicitly allowed via --skip-existing-non-pypi flag or
+          TWINE_SKIP_EXISTING_NON_PYPI environment variable
 
         :raises twine.exceptions.UnsupportedConfiguration:
             The configured features are not available with the configured
@@ -328,9 +345,15 @@ class Settings:
         if self.skip_existing and not repository_url.startswith(
             (repository.WAREHOUSE, repository.TEST_WAREHOUSE)
         ):
-            raise exceptions.UnsupportedConfiguration.Builder().with_feature(
-                "--skip-existing"
-            ).with_repository_url(repository_url).finalize()
+            # Allow opt-in for non-PyPI repositories (e.g., for testing or
+            # third-party registries that support PEP 694's 409 response)
+            if not self.skip_existing_non_pypi:
+                raise (
+                    exceptions.UnsupportedConfiguration.Builder()
+                    .with_feature("--skip-existing")
+                    .with_repository_url(repository_url)
+                    .finalize()
+                )
 
     def check_repository_url(self) -> None:
         """Verify we are not using legacy PyPI.

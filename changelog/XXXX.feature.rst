@@ -1,0 +1,1 @@
+Add opt-in support for ``--skip-existing`` on non-PyPI repositories via the ``--skip-existing-non-pypi`` CLI flag or ``TWINE_SKIP_EXISTING_NON_PYPI`` environment variable, enabling testing scenarios and support for PEP 694-compliant third-party registries.
