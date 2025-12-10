@@ -164,6 +164,8 @@ on a CI/build server).
   self-signed or untrusted certificates.
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
+* ``TWINE_SKIP_EXISTING_NON_PYPI`` - Allow ``--skip-existing`` to work with
+  non-PyPI repositories. Set to ``1`` or ``true`` to enable.
 
 Proxy Support
 ^^^^^^^^^^^^^

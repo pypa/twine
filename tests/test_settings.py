@@ -115,6 +115,62 @@ def test_settings_verify_feature_compatibility() -> None:
         )
 
 
+def test_settings_verify_feature_compatibility_with_flag() -> None:
+    """Test that skip_existing_non_pypi parameter allows skip-existing for non-PyPI."""
+    # Without the flag, should raise
+    s = settings.Settings(skip_existing=True, skip_existing_non_pypi=False)
+    s.repository_config = {"repository": "https://not-pypi.example.com/legacy"}
+    with pytest.raises(exceptions.UnsupportedConfiguration):
+        s.verify_feature_capability()
+
+    # With the flag set to True, should not raise
+    s = settings.Settings(skip_existing=True, skip_existing_non_pypi=True)
+    s.repository_config = {"repository": "https://not-pypi.example.com/legacy"}
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            "Expected skip-existing to work with non-PyPI when "
+            f"skip_existing_non_pypi=True but got {unexpected_exc!r}"
+        )
+
+
+def test_settings_skip_existing_non_pypi_still_works_for_pypi() -> None:
+    """Test that PyPI and TestPyPI work regardless of skip_existing_non_pypi flag."""
+    # PyPI should work without the flag
+    s = settings.Settings(skip_existing=True, skip_existing_non_pypi=False)
+    s.repository_config = {"repository": repository.WAREHOUSE}
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            "Expected PyPI to work without skip_existing_non_pypi "
+            f"but got {unexpected_exc!r}"
+        )
+
+    # TestPyPI should work without the flag
+    s = settings.Settings(skip_existing=True, skip_existing_non_pypi=False)
+    s.repository_config = {"repository": repository.TEST_WAREHOUSE}
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            "Expected TestPyPI to work without skip_existing_non_pypi "
+            f"but got {unexpected_exc!r}"
+        )
+
+    # PyPI should still work with the flag
+    s = settings.Settings(skip_existing=True, skip_existing_non_pypi=True)
+    s.repository_config = {"repository": repository.WAREHOUSE}
+    try:
+        s.verify_feature_capability()
+    except exceptions.UnsupportedConfiguration as unexpected_exc:
+        pytest.fail(
+            "Expected PyPI to work with skip_existing_non_pypi "
+            f"but got {unexpected_exc!r}"
+        )
+
+
 @pytest.mark.parametrize(
     "verbose, log_level", [(True, logging.INFO), (False, logging.WARNING)]
 )
@@ -202,3 +258,15 @@ class TestArgumentParsing:
     def test_attestations_flag(self):
         args = self.parse_args(["--attestations"])
         assert args.attestations
+
+    def test_skip_existing_non_pypi_flag(self):
+        args = self.parse_args(["--skip-existing-non-pypi"])
+        assert args.skip_existing_non_pypi
+
+    def test_skip_existing_non_pypi_environment(self, monkeypatch):
+        monkeypatch.setenv("TWINE_SKIP_EXISTING_NON_PYPI", "1")
+        args = self.parse_args([])
+        assert args.skip_existing_non_pypi
+        monkeypatch.setenv("TWINE_SKIP_EXISTING_NON_PYPI", "0")
+        args = self.parse_args([])
+        assert not args.skip_existing_non_pypi
