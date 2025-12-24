@@ -173,7 +173,8 @@ class InvalidPyPIUploadURL(TwineException):
     """
 
     pass
-    
+
+
 class UnableToReadConfigurationFile(TwineException):
     """Configuration file exists but cannot be read (e.g. encoding issue)."""
 

@@ -60,7 +60,10 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
     assert parser.get("server-login", "username") == expected_username
 
     # Ensure a log message indicating the fallback is present
-    assert "Configuration file not readable with default locale encoding, trying UTF-8" in caplog.text
+    assert (
+        "Configuration file not readable with default locale encoding, trying UTF-8"
+        in caplog.text
+    )
 
 
 def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_path):
@@ -77,11 +80,38 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     # Wrap builtins.open so that if encoding is not provided, we force utf-8.
     original_open = builtins.open
 
-    def open_force_utf8(file, mode="r", buffering=-1, encoding=None, errors=None, newline=None, closefd=True, opener=None):
+    def open_force_utf8(
+        file,
+        mode="r",
+        buffering=-1,
+        encoding=None,
+        errors=None,
+        newline=None,
+        closefd=True,
+        opener=None,
+    ):
         if encoding is None and "b" not in mode:
             # delegate to real open but force utf-8 as default encoding
-            return original_open(file, mode, buffering=buffering, encoding="utf-8", errors=errors, newline=newline, closefd=closefd, opener=opener)
-        return original_open(file, mode, buffering=buffering, encoding=encoding, errors=errors, newline=newline, closefd=closefd, opener=opener)
+            return original_open(
+                file,
+                mode,
+                buffering=buffering,
+                encoding="utf-8",
+                errors=errors,
+                newline=newline,
+                closefd=closefd,
+                opener=opener,
+            )
+        return original_open(
+            file,
+            mode,
+            buffering=buffering,
+            encoding=encoding,
+            errors=errors,
+            newline=newline,
+            closefd=closefd,
+            opener=opener,
+        )
 
     # Wrap pathlib.Path.read_text similarly
     original_read_text = pathlib.Path.read_text
