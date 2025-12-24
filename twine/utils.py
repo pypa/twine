@@ -83,7 +83,9 @@ def _parse_config(path: str) -> configparser.RawConfigParser:
     try:
         parser = _parse_file(path, encoding="utf-8")
     except UnicodeDecodeError as ude:
-        raise exceptions.UnableToReadConfigurationFile(path=path) from ude
+        raise exceptions.UnableToReadConfigurationFile(
+            f"Unable to read configuration file: {path}"
+        ) from ude
     else:
         return parser
 
