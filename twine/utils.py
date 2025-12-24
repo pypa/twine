@@ -50,25 +50,64 @@ RepositoryConfig = Dict[str, Optional[str]]
 logger = logging.getLogger(__name__)
 
 
+def _parse_file(path: str, **open_kwargs: Any) -> configparser.RawConfigParser:
+    """Open and parse a configuration file.
+
+    This helper performs a single open/read operation so that if a
+    UnicodeDecodeError is raised it happens before the parser has been
+    partially populated.
+    """
+    parser = configparser.RawConfigParser()
+    with open(path, **open_kwargs) as f:
+        parser.read_file(f)
+    return parser
+
+
+def _parse_config(path: str) -> configparser.RawConfigParser:
+    """Parse a config file with a UTF-8 fallback on decode errors.
+
+    Try to parse using the default system encoding first; if a
+    UnicodeDecodeError occurs, retry using UTF-8 and log that a fallback
+    was used.
+    """
+    logger.info("Using configuration from %s", path)
+    try:
+        parser = _parse_file(path)
+    except UnicodeDecodeError:
+        logger.info(
+            "Configuration file not readable with default locale encoding, trying UTF-8"
+        )
+    else:
+        return parser
+
+    try:
+        parser = _parse_file(path, encoding="utf-8")
+    except UnicodeDecodeError as ude:
+        raise exceptions.UnableToReadConfigurationFile(
+            f"Unable to read configuration file: {path}"
+        ) from ude
+    else:
+        return parser
+
+
 def get_config(path: str) -> Dict[str, RepositoryConfig]:
     """Read repository configuration from a file (i.e. ~/.pypirc).
 
     Format: https://packaging.python.org/specifications/pypirc/
 
     If the default config file doesn't exist, return a default configuration for
-    pypyi and testpypi.
+    pypi and testpypi.
     """
     realpath = os.path.realpath(os.path.expanduser(path))
-    parser = configparser.RawConfigParser()
 
     try:
-        with open(realpath) as f:
-            parser.read_file(f)
-            logger.info(f"Using configuration from {realpath}")
+        parser = _parse_config(realpath)
     except FileNotFoundError:
         # User probably set --config-file, but the file can't be read
         if path != DEFAULT_CONFIG_FILE:
             raise
+        # Create empty parser for missing default config file
+        parser = configparser.RawConfigParser()
 
     # server-login is obsolete, but retained for backwards compatibility
     defaults: RepositoryConfig = {
