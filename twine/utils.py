@@ -70,7 +70,7 @@ def _parse_config(path: str) -> configparser.RawConfigParser:
     UnicodeDecodeError occurs, retry using UTF-8 and log that a fallback
     was used.
     """
-    logger.info("Parsing configuration from %s", path)
+    logger.info("Using configuration from %s", path)
     try:
         parser = _parse_file(path)
     except UnicodeDecodeError:
@@ -106,6 +106,8 @@ def get_config(path: str) -> Dict[str, RepositoryConfig]:
         # User probably set --config-file, but the file can't be read
         if path != DEFAULT_CONFIG_FILE:
             raise
+        # Create empty parser for missing default config file
+        parser = configparser.RawConfigParser()
 
     # server-login is obsolete, but retained for backwards compatibility
     defaults: RepositoryConfig = {

@@ -140,4 +140,4 @@ def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_pat
     assert parser.get("server-login", "username") == expected_username
 
     # Verify that the used configuration file path is present in the logs.
-    assert f"Parsing configuration from {ini_path}" in caplog.text
+    assert f"Using configuration from {ini_path}" in caplog.text
