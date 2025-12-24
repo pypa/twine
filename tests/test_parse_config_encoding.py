@@ -14,7 +14,8 @@ def _write_utf8_ini(path, username: str = "テストユーザー🐍") -> None:
 username = {username}
 password = secret
 """
-    # Write explicitly as UTF-8 bytes (so reading will fail if the reader assumes a different encoding)
+    # Write explicitly as UTF-8 bytes
+    # (so reading will fail if the reader assumes a different encoding)
     path.write_bytes(content.encode("utf-8"))
 
 
