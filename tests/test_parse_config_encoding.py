@@ -57,9 +57,7 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
     # Patch both builtins.open and pathlib.Path.read_text to be robust
     # against whichever API _parse_config uses internally.
     monkeypatch.setattr(builtins, "open", open_raise_once)
-    monkeypatch.setattr(
-        pathlib.Path, "read_text", read_text_raise_once, raising=True
-    )
+    monkeypatch.setattr(pathlib.Path, "read_text", read_text_raise_once, raising=True)
 
     caplog.set_level(logging.INFO, logger="twine")
     parser = utils._parse_config(str(ini_path))
@@ -75,9 +73,7 @@ def test_parse_config_triggers_utf8_fallback(monkeypatch, caplog, tmp_path):
     )
 
 
-def test_parse_config_no_fallback_when_default_utf8(
-    monkeypatch, caplog, tmp_path
-):
+def test_parse_config_no_fallback_when_default_utf8(monkeypatch, caplog, tmp_path):
     """Test normal parsing when default encoding is UTF-8.
 
     When the default encoding is UTF-8, no fallback is necessary and the
@@ -135,9 +131,7 @@ def test_parse_config_no_fallback_when_default_utf8(
         return original_read_text(self, encoding=encoding, errors=errors)
 
     monkeypatch.setattr(builtins, "open", open_force_utf8)
-    monkeypatch.setattr(
-        pathlib.Path, "read_text", read_text_force_utf8, raising=True
-    )
+    monkeypatch.setattr(pathlib.Path, "read_text", read_text_force_utf8, raising=True)
 
     caplog.set_level(logging.INFO, logger="twine")
     parser = utils._parse_config(str(ini_path))
