@@ -199,14 +199,12 @@ def test_warns_potential_pgp_removal_on_3p_index(
     make_settings, stub_repository, caplog
 ):
     """Warn when a PGP signature is specified for upload to a third-party index."""
-    upload_settings = make_settings(
-        """
+    upload_settings = make_settings("""
         [pypi]
         repository: https://example.com/not-a-real-index/
         username:foo
         password:bar
-        """
-    )
+        """)
     upload_settings.create_repository = lambda: stub_repository
 
     # Upload a pre-signed distribution
@@ -301,13 +299,11 @@ def test_exception_for_http_status(
 
 def test_get_config_old_format(make_settings, config_file):
     try:
-        make_settings(
-            """
+        make_settings("""
             [server-login]
             username:foo
             password:bar
-            """
-        )
+            """)
     except KeyError as err:
         assert all(
             text in err.args[0]
@@ -322,14 +318,12 @@ def test_get_config_old_format(make_settings, config_file):
 
 def test_deprecated_repo(make_settings):
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
-        upload_settings = make_settings(
-            """
+        upload_settings = make_settings("""
             [pypi]
             repository: https://pypi.python.org/pypi/
             username:foo
             password:bar
-            """
-        )
+            """)
 
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
@@ -373,14 +367,12 @@ def test_exception_for_redirect(
 ):
     # Not using fixtures because this setup is significantly different
 
-    upload_settings = make_settings(
-        f"""
+    upload_settings = make_settings(f"""
         [pypi]
         repository: {repository_url}
         username:foo
         password:bar
-        """
-    )
+        """)
 
     stub_response = pretend.stub(
         is_redirect=True,
@@ -526,8 +518,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
 
 
 def test_values_from_env_non_pypi(monkeypatch, write_config_file):
-    write_config_file(
-        """
+    write_config_file("""
         [distutils]
         index-servers =
             notpypi
@@ -536,8 +527,7 @@ def test_values_from_env_non_pypi(monkeypatch, write_config_file):
         repository: https://upload.example.org/legacy/
         username:someusername
         password:password
-        """
-    )
+        """)
 
     def none_upload(*args, **settings_kwargs):
         pass
