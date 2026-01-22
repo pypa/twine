@@ -11,14 +11,12 @@ from . import helpers
 @pytest.fixture()
 def register_settings(make_settings):
     """Return a factory function for settings.Settings for register."""
-    return make_settings(
-        """
+    return make_settings("""
         [pypi]
         repository: https://test.pypi.org/legacy/
         username:foo
         password:bar
-        """
-    )
+        """)
 
 
 def test_successful_register(register_settings):
@@ -105,8 +103,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
 
 def test_values_from_env_not_pypi(monkeypatch, write_config_file):
     """Use env vars for settings when run from command line."""
-    write_config_file(
-        """
+    write_config_file("""
         [distutils]
         index-servers =
             notpypi
@@ -115,8 +112,7 @@ def test_values_from_env_not_pypi(monkeypatch, write_config_file):
         repository: https://upload.example.org/legacy/
         username:someusername
         password:password
-        """
-    )
+        """)
 
     def none_register(*args, **settings_kwargs):
         pass

@@ -23,16 +23,14 @@ from twine import utils
 
 
 def test_get_config(write_config_file):
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [distutils]
         index-servers = pypi
 
         [pypi]
         username = testuser
         password = testpassword
-        """
-    )
+        """)
 
     assert utils.get_config(config_file) == {
         "pypi": {
@@ -45,13 +43,11 @@ def test_get_config(write_config_file):
 
 def test_get_config_no_distutils(write_config_file):
     """Upload by default to PyPI if an index server is not set in .pypirc."""
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [pypi]
         username = testuser
         password = testpassword
-        """
-    )
+        """)
 
     assert utils.get_config(config_file) == {
         "pypi": {
@@ -68,16 +64,14 @@ def test_get_config_no_distutils(write_config_file):
 
 
 def test_get_config_no_section(write_config_file):
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [distutils]
         index-servers = pypi foo
 
         [pypi]
         username = testuser
         password = testpassword
-        """
-    )
+        """)
 
     assert utils.get_config(config_file) == {
         "pypi": {
@@ -89,12 +83,10 @@ def test_get_config_no_section(write_config_file):
 
 
 def test_get_config_override_pypi_url(write_config_file):
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [pypi]
         repository = http://pypiproxy
-        """
-    )
+        """)
 
     assert utils.get_config(config_file)["pypi"]["repository"] == "http://pypiproxy"
 
@@ -116,13 +108,11 @@ def test_get_config_missing(config_file):
 
 def test_empty_userpass(write_config_file):
     """Suppress prompts if empty username and password are provided in .pypirc."""
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [pypi]
         username=
         password=
-        """
-    )
+        """)
 
     config = utils.get_config(config_file)
     pypi = config["pypi"]
