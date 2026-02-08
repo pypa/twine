@@ -232,7 +232,7 @@ Adding a maintainer
 A checklist for adding a new maintainer to the project.
 
 #. Add them as a Member in the GitHub repo settings.
-#. Get them Test PyPI and canonical PyPI usernames and add them as a
+#. Get the Test PyPI and canonical PyPI usernames and add them as a
    Maintainer on `our Test PyPI project
    <https://test.pypi.org/manage/project/twine/collaboration/>`_ and
    `canonical PyPI
