@@ -162,7 +162,7 @@ on a CI/build server).
 * ``TWINE_REPOSITORY_URL`` - the repository URL to use.
 * ``TWINE_CERT`` - custom CA certificate to use for repositories with
   self-signed or untrusted certificates.
-* ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
+* ``TWINE_NON_INTERACTIVE`` - do not interactively prompt for username/password
   if the required credentials are missing.
 
 Proxy Support
@@ -186,7 +186,7 @@ Keyring Support
 
 Instead of typing in your password every time you upload a distribution, Twine
 allows storing a username and password securely using `keyring`_.
-Keyring is installed with Twine but for some systems (Linux mainly) may
+Keyring is installed with Twine, but some systems (Linux mainly) may
 require `additional installation steps`_.
 
 Once Twine is installed, use the ``keyring`` program to set a username and
