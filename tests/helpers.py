@@ -44,10 +44,54 @@ def build_archive(path, name, archive_format, files):
                     archive.addfile(member, io.BytesIO(data))
         return filepath
 
-    if archive_format == "zip":
+    if archive_format == "zip" or archive_format == "whl":
         with zipfile.ZipFile(filepath, mode="w") as archive:
             for mname, content in files.items():
                 archive.writestr(mname, textwrap.dedent(content))
         return filepath
 
     raise ValueError(format)
+
+
+def build_sdist(path, name, version, files):
+    content = {
+        f"{name}-{version}/README": "README",
+        f"{name}-{version}/PKG-INFO": f"""\
+            Metadata-Version: 1.1
+            Name: {name}
+            Version: {version}
+        """,
+    }
+
+    # Remap file paths to be under archive root folder.
+    root = f"{name}-{version}"
+    for key, value in files.items():
+        content[f"{root}/{key}"] = value
+
+    return build_archive(path, f"{name}-{version}", "tar.gz", content)
+
+
+def build_wheel(path, name, version, files):
+    # This does not generate valid a wheel file: the archive lacks the
+    # .dist-info/RECORD member with the content listing. However, the
+    # generated files pass validation done by twine and are sufficient
+    # for testing purposes.
+
+    content = {
+        f"{name}-{version}.dist-info/WHEEL": """\
+            Wheel-Version: 1.0
+            Generator: test
+            Root-Is-Purelib: true
+            Tag: py3-none-any
+        """,
+        f"{name}-{version}.dist-info/METADATA": f"""\
+            Metadata-Version: 1.1
+            Name: {name}
+            Version: {version}
+        """,
+    }
+
+    # Add wheel content.
+    content.update(files)
+
+    return build_archive(path, f"{name}-{version}-py3-none-any", "whl", content)
