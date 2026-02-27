@@ -9,7 +9,8 @@ from typing import cast
 from urllib.parse import urlparse
 
 import requests.auth
-from id import AmbientCredentialError, detect_credential
+from id import AmbientCredentialError
+from id import detect_credential
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -24,7 +25,8 @@ else:
         keyring = None
         NoKeyringError = None
 
-from twine import exceptions, utils
+from twine import exceptions
+from twine import utils
 
 logger = logging.getLogger(__name__)
 
