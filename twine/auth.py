@@ -9,8 +9,7 @@ from typing import cast
 from urllib.parse import urlparse
 
 import requests.auth
-from id import AmbientCredentialError  # type: ignore
-from id import detect_credential
+from id import AmbientCredentialError, detect_credential
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
 # pre-built wheels for ppc64le and s390x, see #1158.
@@ -25,8 +24,7 @@ else:
         keyring = None
         NoKeyringError = None
 
-from twine import exceptions
-from twine import utils
+from twine import exceptions, utils
 
 logger = logging.getLogger(__name__)
 
@@ -208,7 +206,7 @@ class Resolver:
 
         if not mint_token_resp.ok:
             reasons = "\n".join(
-                f'* `{error["code"]}`: {error["description"]}'
+                f"* `{error['code']}`: {error['description']}"
                 for error in mint_token_payload["errors"]
             )
             raise exceptions.TrustedPublishingFailure(
