@@ -14,7 +14,6 @@
 import argparse
 import importlib.metadata as importlib_metadata
 import logging.config
-import sys
 from typing import Any, List, Tuple
 
 import rich
