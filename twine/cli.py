@@ -12,14 +12,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 import argparse
+import importlib.metadata as importlib_metadata
 import logging.config
 import sys
 from typing import Any, List, Tuple
-
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
 
 import rich
 import rich.highlighter
@@ -86,8 +82,6 @@ def list_dependencies_and_versions() -> List[Tuple[str, str]]:
         "packaging",
         "id",
     ]
-    if sys.version_info < (3, 10):
-        deps.append("importlib-metadata")
 
     result: List[Tuple[str, str]] = []
     for dep in deps:
