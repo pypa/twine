@@ -270,7 +270,7 @@ class PackageFile:
         data["pyversion"] = self.python_version
         data["filetype"] = self.filetype
 
-        # Additional meta-data: some of these fileds may not be set. Some
+        # Additional meta-data: some of these fields may not be set. Some
         # package repositories do not allow null values, so this only sends
         # non-null values. In particular, FIPS disables Blake2, making
         # the digest values null. See https://github.com/pypa/twine/issues/775
