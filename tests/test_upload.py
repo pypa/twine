@@ -116,7 +116,7 @@ def test_make_package_attestations_flagged_but_missing(upload_settings):
         upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
 
 
-def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
+def test_success_prints_release_urls(upload_settings, stub_repository, capsys):
     """Print PyPI release URLS for each uploaded package."""
     stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
 
