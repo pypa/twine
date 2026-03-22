@@ -187,6 +187,26 @@ def test_sanitize_url(input_url: str, expected_url: str) -> None:
 
 
 @pytest.mark.parametrize(
+    ("input_url, expected_url"),
+    [
+        # Known PyPI hosts get trailing slash added
+        ("https://test.pypi.org/legacy", "https://test.pypi.org/legacy/"),
+        ("https://test.pypi.org/legacy/", "https://test.pypi.org/legacy/"),
+        ("https://upload.pypi.org/legacy", "https://upload.pypi.org/legacy/"),
+        ("https://upload.pypi.org/legacy/", "https://upload.pypi.org/legacy/"),
+        # HTTP upgraded to HTTPS for known hosts, with trailing slash
+        ("http://test.pypi.org/legacy", "https://test.pypi.org/legacy/"),
+        # Root path without trailing slash stays as-is
+        ("https://upload.pypi.org", "https://upload.pypi.org"),
+        # Non-PyPI hosts are not modified
+        ("https://custom.example.com/legacy", "https://custom.example.com/legacy"),
+    ],
+)
+def test_normalize_repository_url(input_url: str, expected_url: str) -> None:
+    assert utils.normalize_repository_url(input_url) == expected_url
+
+
+@pytest.mark.parametrize(
     "repo_url, message",
     [
         (
