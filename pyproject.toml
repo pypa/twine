@@ -38,7 +38,7 @@ dependencies = [
 	# workaround for missing binaries on these platforms, see #1158
 	"keyring >= 21.2.0; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
-	"rich >= 12.0.0",
+	"rich >= 14.3.3",
 	"packaging >= 24.0",
 	"id",
 ]
