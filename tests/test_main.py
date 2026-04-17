@@ -44,9 +44,12 @@ def test_exception_handling(monkeypatch, capsys):
 
 
 @pytest.mark.parametrize(
-    ("status_code", "status_phrase"), [(400, "Bad Request"), (599, "Unknown Status")]
+    ("status_code", "status_phrase", "reason"),
+    [(400, "Bad Request", "Error reason"), (599, "Unknown Status", "Another reason")],
 )
-def test_http_exception_handling(monkeypatch, capsys, status_code, status_phrase):
+def test_http_exception_handling(
+    monkeypatch, capsys, status_code, status_phrase, reason
+):
     monkeypatch.setattr(sys, "argv", ["twine", "upload", "test.whl"])
     monkeypatch.setattr(
         upload,
@@ -54,9 +57,7 @@ def test_http_exception_handling(monkeypatch, capsys, status_code, status_phrase
         pretend.raiser(
             requests.HTTPError(
                 response=pretend.stub(
-                    url="https://example.org",
-                    status_code=status_code,
-                    reason="Error reason",
+                    url="https://example.org", status_code=status_code, reason=reason
                 )
             )
         ),
@@ -69,7 +70,7 @@ def test_http_exception_handling(monkeypatch, capsys, status_code, status_phrase
 
     assert _unwrap_lines(captured.out) == (
         f"{RED_ERROR} HTTPError: {status_code} {status_phrase} "
-        "from https://example.org Error reason"
+        f"from https://example.org {reason}"
     )
 
 
