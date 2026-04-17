@@ -19,7 +19,8 @@ from typing import Any, cast
 
 import requests
 
-from twine import cli, exceptions
+from twine import cli
+from twine import exceptions
 
 logger = logging.getLogger(__name__)
 
