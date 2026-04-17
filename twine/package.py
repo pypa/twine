@@ -20,6 +20,7 @@ import re
 import subprocess
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, TypedDict
 
+from packaging import errors
 from packaging import metadata
 from packaging import version
 from rich import print
@@ -108,7 +109,6 @@ _RAW_TO_PACKAGE_METADATA = {
 
 
 class PackageMetadata(TypedDict, total=False):
-
     # Metadata 1.0 - PEP 241
     metadata_version: str
     name: str
@@ -241,7 +241,7 @@ class PackageFile:
 
         try:
             metadata.Metadata.from_raw(meta)
-        except metadata.ExceptionGroup as group:
+        except errors.ExceptionGroup as group:
             raise exceptions.InvalidDistribution(
                 "Invalid distribution metadata: {}".format(
                     "; ".join(sorted(str(e) for e in group.exceptions))
