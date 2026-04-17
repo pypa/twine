@@ -39,7 +39,7 @@ dependencies = [
 	"keyring >= 21.2.0; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
 	"rich >= 12.0.0",
-	"packaging >= 24.0",
+	"packaging >= 26.1",
 	"id",
 ]
 dynamic = ["version"]
