@@ -241,7 +241,7 @@ class PackageFile:
 
         try:
             metadata.Metadata.from_raw(meta)
-        except metadata.ExceptionGroup as group:
+        except metadata.ExceptionGroup as group:  # type: ignore[attr-defined]
             raise exceptions.InvalidDistribution(
                 "Invalid distribution metadata: {}".format(
                     "; ".join(sorted(str(e) for e in group.exceptions))
