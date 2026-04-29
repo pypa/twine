@@ -37,7 +37,20 @@ def main() -> Any:
 
         error = True
         status_code = response.status_code
-        status_phrase = http.HTTPStatus(status_code).phrase
+
+        try:
+            status_phrase = http.HTTPStatus(status_code).phrase
+        except ValueError:
+            # HTTPStatus will raise ValueError if the server responds with
+            # a non-standard status code. This is almost certainly an upstream
+            # index error since non-standard status codes should only be used
+            # for internal signaling, but there's nothing we can do about that
+            # here other than avoid propagating it as an unhandled exception.
+            #
+            # See: <https://github.com/pypa/twine/issues/1304>
+            # See: <https://github.com/pypi/warehouse/issues/19713>
+            status_phrase = "Unknown Status"
+
         logger.error(
             f"{exc.__class__.__name__}: {status_code} {status_phrase} "
             f"from {response.url}\n"
