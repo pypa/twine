@@ -234,7 +234,12 @@ def _config_from_repository_url(url: str) -> RepositoryConfig:
 def normalize_repository_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.netloc in _HOSTNAMES:
-        return urlunparse(("https",) + parsed[1:])
+        # Ensure trailing slash for known PyPI hosts to avoid confusing
+        # server errors like "body may not contain duplicate keys" (#1248).
+        path = parsed.path
+        if path and not path.endswith("/"):
+            path = path + "/"
+        return urlunparse(("https", parsed.netloc, path) + parsed[3:])
     return urlunparse(parsed)
 
 
