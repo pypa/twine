@@ -1,8 +1,8 @@
+import dataclasses
 import os
 
 import pytest
 
-from tests import helpers
 from twine import commands
 from twine import exceptions
 
@@ -52,41 +52,69 @@ def test_find_dists_handles_real_files():
     assert expected == files
 
 
+class Signed(str):
+
+    @property
+    def signature(self):
+        return f"{self}.asc"
+
+    def attestation(self, what):
+        return f"{self}.{what}.attestation"
+
+
+@dataclasses.dataclass
+class Distribution:
+    name: str
+    version: str
+
+    @property
+    def sdist(self):
+        return Signed(f"dist/{self.name}-{self.version}.tar.gz")
+
+    @property
+    def wheel(self):
+        return Signed(f"dist/{self.name}-{self.version}-py2.py3-none-any.whl")
+
+
 def test_split_inputs():
     """Split inputs into dists, signatures, and attestations."""
+    a = Distribution("twine", "1.5.0")
+    b = Distribution("twine", "1.6.5")
+
     inputs = [
-        helpers.WHEEL_FIXTURE,
-        helpers.WHEEL_FIXTURE + ".asc",
-        helpers.WHEEL_FIXTURE + ".build.attestation",
-        helpers.WHEEL_FIXTURE + ".publish.attestation",
-        helpers.SDIST_FIXTURE,
-        helpers.SDIST_FIXTURE + ".asc",
-        helpers.NEW_WHEEL_FIXTURE,
-        helpers.NEW_WHEEL_FIXTURE + ".frob.attestation",
-        helpers.NEW_SDIST_FIXTURE,
+        a.wheel,
+        a.wheel.signature,
+        a.wheel.attestation("build"),
+        a.wheel.attestation("build.publish"),
+        a.sdist,
+        a.sdist.signature,
+        b.wheel,
+        b.wheel.attestation("frob"),
+        b.sdist,
     ]
 
     inputs = commands._split_inputs(inputs)
 
     assert inputs.dists == [
-        helpers.WHEEL_FIXTURE,
-        helpers.SDIST_FIXTURE,
-        helpers.NEW_WHEEL_FIXTURE,
-        helpers.NEW_SDIST_FIXTURE,
+        a.wheel,
+        a.sdist,
+        b.wheel,
+        b.sdist,
     ]
 
-    expected_signatures = {
-        os.path.basename(dist) + ".asc": dist + ".asc"
-        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
+    assert inputs.signatures == {
+        "twine-1.5.0-py2.py3-none-any.whl.asc": a.wheel.signature,
+        "twine-1.5.0.tar.gz.asc": a.sdist.signature,
     }
-    assert inputs.signatures == expected_signatures
 
     assert inputs.attestations_by_dist == {
-        helpers.WHEEL_FIXTURE: [
-            helpers.WHEEL_FIXTURE + ".build.attestation",
-            helpers.WHEEL_FIXTURE + ".publish.attestation",
+        a.wheel: [
+            a.wheel.attestation("build"),
+            a.wheel.attestation("build.publish"),
         ],
-        helpers.SDIST_FIXTURE: [],
-        helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
-        helpers.NEW_SDIST_FIXTURE: [],
+        a.sdist: [],
+        b.wheel: [
+            b.wheel.attestation("frob"),
+        ],
+        b.sdist: [],
     }
