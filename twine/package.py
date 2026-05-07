@@ -32,7 +32,8 @@ from twine import wheel
 # Monkeypatch Metadata 2.0 support
 if hasattr(metadata, "_VALID_METADATA_VERSIONS"):
     if "2.0" not in metadata._VALID_METADATA_VERSIONS:
-        metadata._VALID_METADATA_VERSIONS[3:3] = ["2.0"]
+        i = metadata._VALID_METADATA_VERSIONS.index("2.1")
+        metadata._VALID_METADATA_VERSIONS.insert(i, "2.0")
 
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,
