@@ -23,9 +23,9 @@ import zipfile
 TESTS_DIR = pathlib.Path(__file__).parent
 FIXTURES_DIR = os.path.join(TESTS_DIR, "fixtures")
 SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0.tar.gz")
-WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.5.0-py2.py3-none-any.whl")
+WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-4.0.2-py3-none-any.whl")
 NEW_SDIST_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5.tar.gz")
-NEW_WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-1.6.5-py2.py3-none-any.whl")
+NEW_WHEEL_FIXTURE = os.path.join(FIXTURES_DIR, "twine-6.2.0-py3-none-any.whl")
 
 
 def build_archive(path, name, archive_format, files):

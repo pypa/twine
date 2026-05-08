@@ -70,7 +70,7 @@ def test_all_metadata_fields_are_flattened(monkeypatch):
         # All metadata fields up to metadata version 2.4
         metadata = open("tests/fixtures/everything.metadata24")
     monkeypatch.setattr(package.wheel.Wheel, "read", metadata.read)
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
     data = package.PackageFile.from_filename(
         filename, comment="comment"
     ).metadata_dictionary()

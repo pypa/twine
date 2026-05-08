@@ -25,12 +25,12 @@ from twine import wheel
 @pytest.fixture()
 def example_wheel(request):
     parent = pathlib.Path(__file__).parent
-    file_name = str(parent / "fixtures" / "twine-1.5.0-py2.py3-none-any.whl")
+    file_name = str(parent / "fixtures" / "twine-4.0.2-py3-none-any.whl")
     return wheel.Wheel(file_name)
 
 
 def test_version_parsing(example_wheel):
-    assert example_wheel.py_version == "py2.py3"
+    assert example_wheel.py_version == "py3"
 
 
 def test_version_parsing_missing_pyver(monkeypatch, example_wheel):
@@ -59,7 +59,7 @@ def test_read_valid(example_wheel):
     """Parse metadata from a valid wheel file."""
     metadata = example_wheel.read().decode().splitlines()
     assert "Name: twine" in metadata
-    assert "Version: 1.5.0" in metadata
+    assert "Version: 4.0.2" in metadata
 
 
 def test_read_non_existent_wheel_file_name():
