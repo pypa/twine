@@ -169,6 +169,27 @@ def test_get_username_keyring_runtime_error_logged(
     )
 
 
+def test_get_username_keyring_error_logged_without_traceback(
+    entered_username, monkeypatch, config, caplog
+):
+    class FailKeyring:
+        """Simulate expected keyring backend errors on get_credential."""
+
+        @staticmethod
+        def get_credential(system, username):
+            raise auth.KeyringError("Failed to create the collection")
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
+
+    assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
+
+    assert caplog.messages == [
+        "Keyring lookup failed while getting username: Failed to create the"
+        " collection. Twine will prompt for credentials."
+    ]
+    assert "Traceback" not in caplog.text
+
+
 def test_get_password_keyring_runtime_error_logged(
     entered_username, entered_password, monkeypatch, config, caplog
 ):
@@ -188,6 +209,27 @@ def test_get_password_keyring_runtime_error_logged(
         caplog.text,
         re.DOTALL,
     )
+
+
+def test_get_password_keyring_error_logged_without_traceback(
+    entered_username, entered_password, monkeypatch, config, caplog
+):
+    class FailKeyring:
+        """Simulate expected keyring backend errors on get_password."""
+
+        @staticmethod
+        def get_password(system, username):
+            raise auth.KeyringError("Prompt dismissed")
+
+    monkeypatch.setattr(auth, "keyring", FailKeyring)
+
+    assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
+
+    assert caplog.messages == [
+        "Keyring lookup failed while getting password: Prompt dismissed."
+        " Twine will prompt for credentials."
+    ]
+    assert "Traceback" not in caplog.text
 
 
 def _raise_home_key_error():

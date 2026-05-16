@@ -1,0 +1,1 @@
+Improve keyring backend failure messages before prompting.
