@@ -24,8 +24,8 @@ from twine.commands import upload
 
 from . import helpers
 
-RELEASE_URL = "https://pypi.org/project/twine/1.5.0/"
-NEW_RELEASE_URL = "https://pypi.org/project/twine/1.6.5/"
+RELEASE_URL = "https://pypi.org/project/twine/4.0.2/"
+NEW_RELEASE_URL = "https://pypi.org/project/twine/6.2.0/"
 
 
 @pytest.fixture
@@ -62,7 +62,7 @@ def upload_settings(make_settings, stub_repository):
 def test_make_package_pre_signed_dist(upload_settings, caplog):
     """Create a PackageFile and print path, size, and user-provided signature."""
     filename = helpers.WHEEL_FIXTURE
-    expected_size = "15.4 KB"
+    expected_size = "35.5 KB"
     signed_filename = helpers.WHEEL_FIXTURE + ".asc"
     signatures = {os.path.basename(signed_filename): signed_filename}
 
@@ -84,7 +84,7 @@ def test_make_package_pre_signed_dist(upload_settings, caplog):
 def test_make_package_unsigned_dist(upload_settings, monkeypatch, caplog):
     """Create a PackageFile and print path, size, and Twine-generated signature."""
     filename = helpers.NEW_WHEEL_FIXTURE
-    expected_size = "21.9 KB"
+    expected_size = "41.7 KB"
     signatures = {}
 
     upload_settings.sign = True
@@ -116,7 +116,7 @@ def test_make_package_attestations_flagged_but_missing(upload_settings):
         upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
 
 
-def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
+def test_success_prints_release_urls(upload_settings, stub_repository, capsys):
     """Print PyPI release URLS for each uploaded package."""
     stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}
 
@@ -139,8 +139,8 @@ def test_successs_prints_release_urls(upload_settings, stub_repository, capsys):
 def test_print_packages_if_verbose(upload_settings, caplog):
     """Print the path and file size of each distribution attempting to be uploaded."""
     dists_to_upload = {
-        helpers.WHEEL_FIXTURE: "15.4 KB",
-        helpers.NEW_WHEEL_FIXTURE: "21.9 KB",
+        helpers.WHEEL_FIXTURE: "35.5 KB",
+        helpers.NEW_WHEEL_FIXTURE: "41.7 KB",
         helpers.SDIST_FIXTURE: "20.8 KB",
         helpers.NEW_SDIST_FIXTURE: "26.1 KB",
     }
@@ -184,7 +184,7 @@ def test_success_with_pre_signed_distribution(upload_settings, stub_repository, 
     # The signature should be added via package.add_gpg_signature()
     package = stub_repository.upload.calls[0].args[0]
     assert package.gpg_signature == (
-        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        "twine-4.0.2-py3-none-any.whl.asc",
         b"signature",
     )
 
@@ -199,14 +199,12 @@ def test_warns_potential_pgp_removal_on_3p_index(
     make_settings, stub_repository, caplog
 ):
     """Warn when a PGP signature is specified for upload to a third-party index."""
-    upload_settings = make_settings(
-        """
+    upload_settings = make_settings("""
         [pypi]
         repository: https://example.com/not-a-real-index/
         username:foo
         password:bar
-        """
-    )
+        """)
     upload_settings.create_repository = lambda: stub_repository
 
     # Upload a pre-signed distribution
@@ -218,7 +216,7 @@ def test_warns_potential_pgp_removal_on_3p_index(
     # The signature should be added via package.add_gpg_signature()
     package = stub_repository.upload.calls[0].args[0]
     assert package.gpg_signature == (
-        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        "twine-4.0.2-py3-none-any.whl.asc",
         b"signature",
     )
 
@@ -264,7 +262,7 @@ def test_success_when_gpg_is_run(upload_settings, stub_repository, monkeypatch):
     assert len(package.run_gpg.calls) == 1
     assert helpers.WHEEL_FIXTURE in package.run_gpg.calls[0].args[1]
     assert package.gpg_signature == (
-        "twine-1.5.0-py2.py3-none-any.whl.asc",
+        "twine-4.0.2-py3-none-any.whl.asc",
         b"signature",
     )
 
@@ -289,7 +287,7 @@ def test_exception_for_http_status(
 
     if verbose:
         assert caplog.messages == [
-            f"{helpers.WHEEL_FIXTURE} (15.4 KB)",
+            f"{helpers.WHEEL_FIXTURE} (35.5 KB)",
             f"Response from {stub_response.url}:\n403 {stub_response.reason}",
             stub_response.text,
         ]
@@ -301,13 +299,11 @@ def test_exception_for_http_status(
 
 def test_get_config_old_format(make_settings, config_file):
     try:
-        make_settings(
-            """
+        make_settings("""
             [server-login]
             username:foo
             password:bar
-            """
-        )
+            """)
     except KeyError as err:
         assert all(
             text in err.args[0]
@@ -322,14 +318,12 @@ def test_get_config_old_format(make_settings, config_file):
 
 def test_deprecated_repo(make_settings):
     with pytest.raises(exceptions.UploadToDeprecatedPyPIDetected) as err:
-        upload_settings = make_settings(
-            """
+        upload_settings = make_settings("""
             [pypi]
             repository: https://pypi.python.org/pypi/
             username:foo
             password:bar
-            """
-        )
+            """)
 
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
@@ -373,14 +367,12 @@ def test_exception_for_redirect(
 ):
     # Not using fixtures because this setup is significantly different
 
-    upload_settings = make_settings(
-        f"""
+    upload_settings = make_settings(f"""
         [pypi]
         repository: {repository_url}
         username:foo
         password:bar
-        """
-    )
+        """)
 
     stub_response = pretend.stub(
         is_redirect=True,
@@ -416,8 +408,7 @@ def test_prints_skip_message_for_uploaded_package(
     assert RELEASE_URL not in captured.out
 
     assert caplog.messages == [
-        "Skipping twine-1.5.0-py2.py3-none-any.whl "
-        "because it appears to already exist"
+        "Skipping twine-4.0.2-py3-none-any.whl because it appears to already exist"
     ]
 
 
@@ -440,8 +431,7 @@ def test_prints_skip_message_for_response(
     assert RELEASE_URL not in captured.out
 
     assert caplog.messages == [
-        "Skipping twine-1.5.0-py2.py3-none-any.whl "
-        "because it appears to already exist"
+        "Skipping twine-4.0.2-py3-none-any.whl because it appears to already exist"
     ]
 
 
@@ -452,8 +442,8 @@ def test_prints_skip_message_for_response(
             dict(
                 status_code=400,
                 reason=(
-                    'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-                    "exists for twine-1.5.0."
+                    'A file named "twine-4.0.2-py3-none-any.whl" already '
+                    "exists for twine-4.0.2."
                 ),
             ),
             id="pypi",
@@ -462,8 +452,8 @@ def test_prints_skip_message_for_response(
             dict(
                 status_code=409,
                 reason=(
-                    'A file named "twine-1.5.0-py2.py3-none-any.whl" already '
-                    "exists for twine-1.5.0."
+                    'A file named "twine-4.0.2-py3-none-any.whl" already '
+                    "exists for twine-4.0.2."
                 ),
             ),
             id="pypiserver",
@@ -526,8 +516,7 @@ def test_values_from_env_pypi(monkeypatch, repo):
 
 
 def test_values_from_env_non_pypi(monkeypatch, write_config_file):
-    write_config_file(
-        """
+    write_config_file("""
         [distutils]
         index-servers =
             notpypi
@@ -536,8 +525,7 @@ def test_values_from_env_non_pypi(monkeypatch, write_config_file):
         repository: https://upload.example.org/legacy/
         username:someusername
         password:password
-        """
-    )
+        """)
 
     def none_upload(*args, **settings_kwargs):
         pass

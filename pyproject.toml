@@ -22,25 +22,24 @@ classifiers = [
 	"Programming Language :: Python",
 	"Programming Language :: Python :: 3",
 	"Programming Language :: Python :: 3 :: Only",
-	"Programming Language :: Python :: 3.9",
 	"Programming Language :: Python :: 3.10",
 	"Programming Language :: Python :: 3.11",
 	"Programming Language :: Python :: 3.12",
 	"Programming Language :: Python :: 3.13",
+	"Programming Language :: Python :: 3.14",
 	"Programming Language :: Python :: Implementation :: CPython",
 ]
-requires-python = ">=3.9"
+requires-python = ">=3.10"
 dependencies = [
 	"readme-renderer >= 35.0",
 	"requests >= 2.20",
 	"requests-toolbelt >= 0.8.0, != 0.9.0",
 	"urllib3 >= 1.26.0",
-	"importlib-metadata >= 3.6; python_version < '3.10'",
 	# workaround for missing binaries on these platforms, see #1158
 	"keyring >= 21.2.0; platform_machine != 'ppc64le' and platform_machine != 's390x'",
 	"rfc3986 >= 1.4.0",
-	"rich >= 12.0.0",
-	"packaging >= 24.0",
+	"rich >= 14.3.3",
+	"packaging >= 26.1",
 	"id",
 ]
 dynamic = ["version"]

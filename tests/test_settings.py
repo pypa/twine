@@ -34,14 +34,12 @@ def test_settings_transforms_repository_config_pypi(write_config_file):
 
     Ignores the username setting due to PyPI being the index.
     """
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [pypi]
         repository: https://upload.pypi.org/legacy/
         username:this-is-ignored
         password:password
-        """
-    )
+        """)
 
     s = settings.Settings(config_file=config_file)
     assert s.repository_config["repository"] == "https://upload.pypi.org/legacy/"
@@ -57,8 +55,7 @@ def test_settings_transforms_repository_config_pypi(write_config_file):
 
 def test_settings_transforms_repository_config_non_pypi(write_config_file):
     """Set repository config and defaults when .pypirc is provided."""
-    config_file = write_config_file(
-        """
+    config_file = write_config_file("""
         [distutils]
         index-servers =
             notpypi
@@ -67,8 +64,7 @@ def test_settings_transforms_repository_config_non_pypi(write_config_file):
         repository: https://upload.example.org/legacy/
         username:someusername
         password:password
-        """
-    )
+        """)
 
     s = settings.Settings(config_file=config_file, repository_name="notpypi")
     assert s.repository_config["repository"] == "https://upload.example.org/legacy/"

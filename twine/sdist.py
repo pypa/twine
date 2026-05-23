@@ -36,7 +36,7 @@ class TarGzSDist(SDist):
 
     def read(self) -> bytes:
         with tarfile.open(self.filename, "r:gz") as sdist:
-            # The sdist must contain a single top-level direcotry...
+            # The sdist must contain a single top-level directory...
             root = os.path.commonpath(sdist.getnames())
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(
@@ -65,7 +65,7 @@ class ZipSDist(SDist):
 
     def read(self) -> bytes:
         with zipfile.ZipFile(self.filename) as sdist:
-            # The sdist must contain a single top-level direcotry...
+            # The sdist must contain a single top-level directory...
             root = os.path.commonpath(sdist.namelist())
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(

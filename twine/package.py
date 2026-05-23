@@ -20,6 +20,7 @@ import re
 import subprocess
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, TypedDict
 
+from packaging import errors
 from packaging import metadata
 from packaging import version
 from rich import print
@@ -27,18 +28,6 @@ from rich import print
 from twine import exceptions
 from twine import sdist
 from twine import wheel
-
-# Monkeypatch Metadata 2.0 support
-metadata._VALID_METADATA_VERSIONS = [
-    "1.0",
-    "1.1",
-    "1.2",
-    "2.0",
-    "2.1",
-    "2.2",
-    "2.3",
-    "2.4",
-]
 
 DIST_TYPES = {
     "bdist_wheel": wheel.Wheel,
@@ -108,7 +97,6 @@ _RAW_TO_PACKAGE_METADATA = {
 
 
 class PackageMetadata(TypedDict, total=False):
-
     # Metadata 1.0 - PEP 241
     metadata_version: str
     name: str
@@ -241,7 +229,7 @@ class PackageFile:
 
         try:
             metadata.Metadata.from_raw(meta)
-        except metadata.ExceptionGroup as group:
+        except errors.ExceptionGroup as group:
             raise exceptions.InvalidDistribution(
                 "Invalid distribution metadata: {}".format(
                     "; ".join(sorted(str(e) for e in group.exceptions))
@@ -270,7 +258,7 @@ class PackageFile:
         data["pyversion"] = self.python_version
         data["filetype"] = self.filetype
 
-        # Additional meta-data: some of these fileds may not be set. Some
+        # Additional meta-data: some of these fields may not be set. Some
         # package repositories do not allow null values, so this only sends
         # non-null values. In particular, FIPS disables Blake2, making
         # the digest values null. See https://github.com/pypa/twine/issues/775

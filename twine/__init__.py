@@ -31,12 +31,7 @@ __all__ = (
 __copyright__ = "Copyright 2019 Donald Stufft and individual contributors"
 
 import email.utils
-import sys
-
-if sys.version_info >= (3, 10):
-    import importlib.metadata as importlib_metadata
-else:
-    import importlib_metadata
+import importlib.metadata as importlib_metadata
 
 metadata = importlib_metadata.metadata("twine")
 assert metadata is not None  # nosec: B101

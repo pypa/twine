@@ -9,7 +9,7 @@ from typing import cast
 from urllib.parse import urlparse
 
 import requests.auth
-from id import AmbientCredentialError  # type: ignore
+from id import AmbientCredentialError
 from id import detect_credential
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
@@ -208,7 +208,7 @@ class Resolver:
 
         if not mint_token_resp.ok:
             reasons = "\n".join(
-                f'* `{error["code"]}`: {error["description"]}'
+                f"* `{error['code']}`: {error['description']}"
                 for error in mint_token_payload["errors"]
             )
             raise exceptions.TrustedPublishingFailure(

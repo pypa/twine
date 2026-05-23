@@ -224,7 +224,7 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
     )
 
     package = package_file.PackageFile(
-        filename="tests/fixtures/twine-1.5.0-py2.py3-none-any.whl",
+        filename="tests/fixtures/twine-4.0.2-py3-none-any.whl",
         comment=pretend.stub(),
         metadata=meta,
         python_version=pretend.stub(),
@@ -293,18 +293,18 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
         assert "attestations" not in result
 
 
-TWINE_1_5_0_WHEEL_HEXDIGEST = package_file.Hexdigest(
-    "d86b0f33f0c7df49e888b11c43b417da5520cbdbce9f20618b1494b600061e67",
-    "b657a4148d05bd0098c1d6d8cc4e14e766dbe93c3a5ab6723b969da27a87bac0",
+TWINE_4_0_2_WHEEL_HEXDIGEST = package_file.Hexdigest(
+    "929bc3c280033347a00f847236564d1c52a3e61b1ac2516c97c48f3ceab756d8",
+    "3a38a3f27a9e8ce45523d7d1e28c09e9085b61a98dab15d35ec086f36a44b37c",
 )
 
 
 def test_hash_manager():
     """Generate hexdigest via HashManager."""
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
     hasher = package_file.HashManager(filename)
     hasher.hash()
-    assert hasher.hexdigest() == TWINE_1_5_0_WHEEL_HEXDIGEST
+    assert hasher.hexdigest() == TWINE_4_0_2_WHEEL_HEXDIGEST
 
 
 @pytest.mark.parametrize("exception_class", [TypeError, ValueError])
@@ -313,10 +313,10 @@ def test_fips_hash_manager_blake2(exception_class, monkeypatch):
     replaced_blake2b = pretend.raiser(exception_class("fipsmode"))
     monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
 
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
     hasher = package_file.HashManager(filename)
     hasher.hash()
-    hashes = TWINE_1_5_0_WHEEL_HEXDIGEST._replace(blake2=None)
+    hashes = TWINE_4_0_2_WHEEL_HEXDIGEST._replace(blake2=None)
     assert hasher.hexdigest() == hashes
 
 
@@ -328,7 +328,7 @@ def test_fips_metadata_excludes_blake2(monkeypatch):
     replaced_blake2b = pretend.raiser(ValueError("fipsmode"))
     monkeypatch.setattr(package_file.hashlib, "blake2b", replaced_blake2b)
 
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
     pf = package_file.PackageFile.from_filename(filename, None)
 
     mddict = pf.metadata_dictionary()
@@ -393,7 +393,7 @@ def test_fips_metadata_excludes_blake2(monkeypatch):
 def test_pkginfo_returns_no_metadata(read_data, exception_message, monkeypatch):
     """Raise an exception when pkginfo can't interpret the metadata."""
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
 
     with pytest.raises(exceptions.InvalidDistribution) as err:
         package_file.PackageFile.from_filename(filename, comment=None)
@@ -433,7 +433,7 @@ def test_setuptools_license_file_invalid(monkeypatch):
         "License-File: LICENSE\n"
     )
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
     meta = package.metadata_dictionary()
@@ -453,7 +453,7 @@ def test_setuptools_license_file_valid(monkeypatch):
         "License-File: LICENSE\n"
     )
     monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
-    filename = "tests/fixtures/twine-1.5.0-py2.py3-none-any.whl"
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
 
     package = package_file.PackageFile.from_filename(filename, comment=None)
     meta = package.metadata_dictionary()

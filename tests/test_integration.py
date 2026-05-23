@@ -116,9 +116,9 @@ def test_pypi_error(sampleproject_dist, monkeypatch, capsys):
 @pytest.fixture(
     params=[
         "twine-1.5.0.tar.gz",
-        "twine-1.5.0-py2.py3-none-any.whl",
+        "twine-4.0.2-py3-none-any.whl",
         "twine-1.6.5.tar.gz",
-        "twine-1.6.5-py2.py3-none-any.whl",
+        "twine-6.2.0-py3-none-any.whl",
     ]
 )
 def uploadable_dist(request):
