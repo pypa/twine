@@ -84,6 +84,8 @@ def _split_inputs(
         basename for basename, count in signature_counts.items() if count > 1
     ]
     if duplicate_signatures:
+        # Signatures are matched to distributions by basename, so duplicates
+        # would otherwise overwrite each other silently.
         raise exceptions.InvalidDistribution(
             "Multiple signature files have the same name: "
             + ", ".join(sorted(duplicate_signatures))
@@ -103,6 +105,8 @@ def _split_inputs(
         attestations_by_dist[dist] = [
             a
             for a in attestations
+            # Attestation filenames are expected to extend the distribution
+            # filename, e.g. ``pkg.tar.gz.build.attestation``.
             if os.path.basename(a).startswith(f"{dist_basename}.")
         ]
 
