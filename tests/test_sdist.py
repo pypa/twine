@@ -1,6 +1,7 @@
 import os
 import pathlib
 import tarfile
+import zipfile
 
 import pytest
 
@@ -83,6 +84,18 @@ def test_missing_pkg_info(archive_format, tmp_path):
     )
 
     with pytest.raises(exceptions.InvalidDistribution, match="No PKG-INFO in archive"):
+        sdist.SDist(str(filepath)).read()
+
+
+def test_empty_archive(archive_format, tmp_path):
+    """Raise an exception when sdist archive is empty."""
+    filepath = tmp_path / f"empty.{archive_format}"
+    if archive_format == "tar.gz":
+        tarfile.open(filepath, "x:gz").close()
+    else:
+        zipfile.ZipFile(filepath, mode="w").close()
+
+    with pytest.raises(exceptions.InvalidDistribution, match="Empty sdist archive"):
         sdist.SDist(str(filepath)).read()
 
 

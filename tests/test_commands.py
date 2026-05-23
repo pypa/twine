@@ -90,3 +90,33 @@ def test_split_inputs():
         helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
         helpers.NEW_SDIST_FIXTURE: [],
     }
+
+
+def test_split_inputs_attestations_require_filename_boundary():
+    dist = "dist/pkg-1.0.tar.gz"
+    inputs = [
+        dist,
+        f"{dist}.build.attestation",
+        f"{dist}2.build.attestation",
+    ]
+
+    inputs = commands._split_inputs(inputs)
+
+    assert inputs.attestations_by_dist == {
+        dist: [f"{dist}.build.attestation"],
+    }
+
+
+def test_split_inputs_errors_on_duplicate_signature_basenames():
+    with pytest.raises(
+        exceptions.InvalidDistribution,
+        match="Multiple signature files have the same name",
+    ):
+        commands._split_inputs(
+            [
+                "a/pkg-1.whl",
+                "b/pkg-1.whl",
+                "a/pkg-1.whl.asc",
+                "b/pkg-1.whl.asc",
+            ]
+        )

@@ -37,7 +37,12 @@ class TarGzSDist(SDist):
     def read(self) -> bytes:
         with tarfile.open(self.filename, "r:gz") as sdist:
             # The sdist must contain a single top-level directory...
-            root = os.path.commonpath(sdist.getnames())
+            names = sdist.getnames()
+            if not names:
+                raise exceptions.InvalidDistribution(
+                    f"Empty sdist archive: {self.filename}"
+                )
+            root = os.path.commonpath(names)
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(
                     f"Too many top-level members in sdist archive: {self.filename}"
@@ -66,7 +71,12 @@ class ZipSDist(SDist):
     def read(self) -> bytes:
         with zipfile.ZipFile(self.filename) as sdist:
             # The sdist must contain a single top-level directory...
-            root = os.path.commonpath(sdist.namelist())
+            names = sdist.namelist()
+            if not names:
+                raise exceptions.InvalidDistribution(
+                    f"Empty sdist archive: {self.filename}"
+                )
+            root = os.path.commonpath(names)
             if root in {".", "/", ""}:
                 raise exceptions.InvalidDistribution(
                     f"Too many top-level members in sdist archive: {self.filename}"

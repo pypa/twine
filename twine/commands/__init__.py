@@ -17,6 +17,7 @@ https://github.com/pypa/twine/issues/194 and https://github.com/pypa/twine/issue
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import collections
 import fnmatch
 import glob
 import os.path
@@ -75,7 +76,20 @@ def _split_inputs(
     dict of ``basename -> path``, and attestations are returned as a dict of
     ``dist-path -> [attestation-path]``.
     """
-    signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
+    signature_inputs = fnmatch.filter(inputs, "*.asc")
+    signature_counts = collections.Counter(
+        os.path.basename(i) for i in signature_inputs
+    )
+    duplicate_signatures = [
+        basename for basename, count in signature_counts.items() if count > 1
+    ]
+    if duplicate_signatures:
+        raise exceptions.InvalidDistribution(
+            "Multiple signature files have the same name: "
+            + ", ".join(sorted(duplicate_signatures))
+        )
+
+    signatures = {os.path.basename(i): i for i in signature_inputs}
     attestations = fnmatch.filter(inputs, "*.*.attestation")
     dists = [
         dist
@@ -87,7 +101,9 @@ def _split_inputs(
     for dist in dists:
         dist_basename = os.path.basename(dist)
         attestations_by_dist[dist] = [
-            a for a in attestations if os.path.basename(a).startswith(dist_basename)
+            a
+            for a in attestations
+            if os.path.basename(a).startswith(f"{dist_basename}.")
         ]
 
     return Inputs(dists, signatures, attestations_by_dist)
