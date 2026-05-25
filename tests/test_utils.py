@@ -13,6 +13,7 @@
 # limitations under the License.
 
 import os.path
+from typing import Callable, Dict, Optional
 
 import pretend
 import pytest
@@ -187,6 +188,20 @@ def test_sanitize_url(input_url: str, expected_url: str) -> None:
 
 
 @pytest.mark.parametrize(
+    ("url", "expected"),
+    [
+        ("https://upload.pypi.org/legacy/", "https://upload.pypi.org/legacy/"),
+        ("https://example.com/legacy/", "https://example.com/legacy/"),
+        ("pypi.python.org/legacy/", "pypi.python.org/legacy/"),
+        ("http://pypi.python.org/legacy/", "https://pypi.python.org/legacy/"),
+        ("http://testpypi.python.org/legacy/", "https://testpypi.python.org/legacy/"),
+    ],
+)
+def test_normalize_repository_url(url: str, expected: str) -> None:
+    assert utils.normalize_repository_url(url) == expected
+
+
+@pytest.mark.parametrize(
     "repo_url, message",
     [
         (
@@ -281,9 +296,16 @@ def test_get_config_deprecated_pypirc():
         ("cli", {}, "key", lambda: "fallback", "cli"),
         (None, {"key": "value"}, "key", lambda: "fallback", "value"),
         (None, {}, "key", lambda: "fallback", "fallback"),
+        (None, {}, "key", None, None),
     ),
 )
-def test_get_userpass_value(cli_value, config, key, strategy, expected):
+def test_get_userpass_value(
+    cli_value: Optional[str],
+    config: Dict[str, Optional[str]],
+    key: str,
+    strategy: Optional[Callable[[], str]],
+    expected: Optional[str],
+) -> None:
     ret = utils.get_userpass_value(cli_value, config, key, strategy)
     assert ret == expected
 
