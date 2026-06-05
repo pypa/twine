@@ -1,0 +1,1 @@
+Add a ``tox -e nocov`` environment for focused pytest runs.
