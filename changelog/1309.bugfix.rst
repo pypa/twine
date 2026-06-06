@@ -1,0 +1,1 @@
+Indices that respond with non-standard HTTP codes are now handled more gracefully.

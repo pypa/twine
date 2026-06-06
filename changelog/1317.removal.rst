@@ -1,0 +1,1 @@
+Remove monkeypatch allowing Metadata 2.0.

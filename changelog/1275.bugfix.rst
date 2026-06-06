@@ -1,0 +1,1 @@
+Add missing subdependencies to ``--version`` output.

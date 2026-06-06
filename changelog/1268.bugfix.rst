@@ -1,0 +1,1 @@
+Specify UTF-8 encoding when reading ``.pypirc`` files.
