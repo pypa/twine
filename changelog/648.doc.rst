@@ -1,0 +1,1 @@
+Clarify that adding yourself to ``AUTHORS`` is optional but encouraged.
