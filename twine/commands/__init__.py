@@ -72,22 +72,49 @@ def _split_inputs(
     Three groups are returned: upload files (i.e. dists), signatures, and attestations.
 
     Upload files are returned as a linear list, signatures are returned as a
-    dict of ``basename -> path``, and attestations are returned as a dict of
+    dict of ``dist-path -> signature-path``, and attestations are returned as a dict of
     ``dist-path -> [attestation-path]``.
     """
-    signatures = {os.path.basename(i): i for i in fnmatch.filter(inputs, "*.asc")}
+    signatures: Dict[str, str] = {}
+    signature_inputs = set(fnmatch.filter(inputs, "*.asc"))
     attestations = fnmatch.filter(inputs, "*.*.attestation")
+    remaining_signatures = set(signature_inputs)
+    remaining_attestations = set(attestations)
     dists = [
-        dist
-        for dist in inputs
-        if dist not in (set(signatures.values()) | set(attestations))
+        dist for dist in inputs if dist not in (signature_inputs | set(attestations))
     ]
 
-    attestations_by_dist = {}
+    attestations_by_dist: Dict[str, List[str]] = {}
     for dist in dists:
-        dist_basename = os.path.basename(dist)
-        attestations_by_dist[dist] = [
-            a for a in attestations if os.path.basename(a).startswith(dist_basename)
-        ]
+        signature = f"{dist}.asc"
+        if signature in remaining_signatures:
+            signatures[dist] = signature
+            remaining_signatures.remove(signature)
+
+        attestations_by_dist[dist] = []
+        attestation_prefix = f"{dist}."
+        for attestation in attestations:
+            if attestation in remaining_attestations and attestation.startswith(
+                attestation_prefix
+            ):
+                attestations_by_dist[dist].append(attestation)
+                remaining_attestations.remove(attestation)
+
+    if remaining_signatures:
+        if not dists:
+            raise exceptions.InvalidDistribution(
+                "Cannot upload signed files by themselves, must upload with a "
+                "corresponding distribution file."
+            )
+        raise exceptions.InvalidDistribution(
+            "Cannot find distribution file for signature(s): "
+            + ", ".join(sorted(remaining_signatures))
+        )
+
+    if remaining_attestations:
+        raise exceptions.InvalidDistribution(
+            "Cannot find distribution file for attestation(s): "
+            + ", ".join(sorted(remaining_attestations))
+        )
 
     return Inputs(dists, signatures, attestations_by_dist)

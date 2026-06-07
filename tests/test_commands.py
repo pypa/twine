@@ -76,8 +76,7 @@ def test_split_inputs():
     ]
 
     expected_signatures = {
-        os.path.basename(dist) + ".asc": dist + ".asc"
-        for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
+        dist: dist + ".asc" for dist in [helpers.WHEEL_FIXTURE, helpers.SDIST_FIXTURE]
     }
     assert inputs.signatures == expected_signatures
 
@@ -90,3 +89,64 @@ def test_split_inputs():
         helpers.NEW_WHEEL_FIXTURE: [helpers.NEW_WHEEL_FIXTURE + ".frob.attestation"],
         helpers.NEW_SDIST_FIXTURE: [],
     }
+
+
+def test_split_inputs_attestations_require_filename_boundary():
+    dist = "dist/pkg-1.0.tar.gz"
+    inputs = [
+        dist,
+        f"{dist}.build.attestation",
+    ]
+
+    inputs = commands._split_inputs(inputs)
+
+    assert inputs.attestations_by_dist == {
+        dist: [f"{dist}.build.attestation"],
+    }
+
+
+def test_split_inputs_matches_signatures_by_distribution_path(tmp_path):
+    first_signature = tmp_path / "a" / "pkg-1.whl.asc"
+    second_signature = tmp_path / "b" / "pkg-1.whl.asc"
+    first_dist = tmp_path / "a" / "pkg-1.whl"
+    second_dist = tmp_path / "b" / "pkg-1.whl"
+
+    inputs = commands._split_inputs(
+        [
+            str(first_dist),
+            str(second_dist),
+            str(first_signature),
+            str(second_signature),
+        ]
+    )
+
+    assert inputs.signatures == {
+        str(first_dist): str(first_signature),
+        str(second_dist): str(second_signature),
+    }
+
+
+def test_split_inputs_errors_on_unmatched_signature():
+    with pytest.raises(
+        exceptions.InvalidDistribution,
+        match="Cannot find distribution file for signature",
+    ):
+        commands._split_inputs(
+            [
+                "a/pkg-1.whl",
+                "b/pkg-1.whl.asc",
+            ]
+        )
+
+
+def test_split_inputs_errors_on_unmatched_attestation():
+    with pytest.raises(
+        exceptions.InvalidDistribution,
+        match="Cannot find distribution file for attestation",
+    ):
+        commands._split_inputs(
+            [
+                "a/pkg-1.whl",
+                "b/pkg-1.whl.publish.attestation",
+            ]
+        )

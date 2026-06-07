@@ -113,15 +113,21 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
 
     assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
 
-    assert caplog.record_tuples == [
+    assert len(caplog.record_tuples) == 1
+    logger, level, message = caplog.record_tuples[0]
+    assert logger == "twine.commands.check"
+    assert level == logging.ERROR
+    assert message.startswith(
+        "`long_description` has syntax errors in markup "
+        "and would not be rendered on PyPI.\n"
+        "line 2: Warning: "
+    )
+    assert message.endswith(
         (
-            "twine.commands.check",
-            logging.ERROR,
-            "`long_description` has syntax errors in markup "
-            "and would not be rendered on PyPI.\n"
-            "line 2: Warning: Document or section may not begin with a transition.",
-        ),
-    ]
+            "Document or section may not begin with a transition.",
+            "Transition at the end of the document.",
+        )
+    )
 
 
 def test_fails_rst_no_content(tmp_path, capsys, caplog):

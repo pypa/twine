@@ -77,9 +77,8 @@ def _make_package(
     """
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
 
-    signed_name = package.signed_basefilename
-    if signed_name in signatures:
-        package.add_gpg_signature(signatures[signed_name], signed_name)
+    if filename in signatures:
+        package.add_gpg_signature(signatures[filename], package.signed_basefilename)
     elif upload_settings.sign:
         package.sign(upload_settings.sign_with, upload_settings.identity)
 

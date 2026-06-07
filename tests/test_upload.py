@@ -11,8 +11,6 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-import os
-
 import pretend
 import pytest
 import requests
@@ -64,7 +62,7 @@ def test_make_package_pre_signed_dist(upload_settings, caplog):
     filename = helpers.WHEEL_FIXTURE
     expected_size = "35.5 KB"
     signed_filename = helpers.WHEEL_FIXTURE + ".asc"
-    signatures = {os.path.basename(signed_filename): signed_filename}
+    signatures = {filename: signed_filename}
 
     upload_settings.sign = True
     upload_settings.verbose = True
