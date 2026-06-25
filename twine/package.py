@@ -93,6 +93,9 @@ _RAW_TO_PACKAGE_METADATA = {
     # Metadata 2.4 - PEP 639
     "license_expression": "license_expression",
     "license_files": "license_file",  # Renamed
+    # Metadata 2.5 - PEP 794
+    "import_names": "import_name",  # Renamed
+    "import_namespaces": "import_namespace",  # Renamed
 }
 
 
@@ -138,6 +141,10 @@ class PackageMetadata(TypedDict, total=False):
     # Metadata 2.4 - PEP 639
     license_expression: str
     license_file: List[str]
+
+    # Metadata 2.5 - PEP 794
+    import_name: List[str]
+    import_namespace: List[str]
 
     # Additional metadata
     comment: str

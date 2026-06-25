@@ -1,0 +1,1 @@
+Support Core Metadata 2.5 upload fields.

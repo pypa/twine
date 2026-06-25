@@ -61,14 +61,30 @@ def test_iterables_are_flattened():
     assert tuples == [("platform", "UNKNOWN"), ("platform", "ANOTHERPLATFORM")]
 
 
+def test_core_metadata_25_fields_are_flattened():
+    """Flatten Core Metadata 2.5 import declaration fields."""
+    data = {
+        "metadata_version": "2.5",
+        "name": "example",
+        "version": "1.0",
+        "import_name": ["example"],
+        "import_namespace": ["example_namespace"],
+    }
+
+    tuples = repository.Repository._convert_metadata_to_list_of_tuples(data)
+
+    assert ("import_name", "example") in tuples
+    assert ("import_namespace", "example_namespace") in tuples
+
+
 def test_all_metadata_fields_are_flattened(monkeypatch):
     """Verify that package metadata fields are correctly flattened."""
     if version.Version(packaging.__version__) < version.Version("24.1"):
         # All metadata fields up to metadata version 2.3
-        metadata = open("tests/fixtures/everything.metadata23")
+        metadata = open("tests/fixtures/everything.metadata23", encoding="utf-8")
     else:
         # All metadata fields up to metadata version 2.4
-        metadata = open("tests/fixtures/everything.metadata24")
+        metadata = open("tests/fixtures/everything.metadata24", encoding="utf-8")
     monkeypatch.setattr(package.wheel.Wheel, "read", metadata.read)
     filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
     data = package.PackageFile.from_filename(

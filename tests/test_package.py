@@ -221,6 +221,8 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
         dynamic=pretend.stub(),
         license_expression=pretend.stub(),
         license_files=pretend.stub(),
+        import_names=pretend.stub(),
+        import_namespaces=pretend.stub(),
     )
 
     package = package_file.PackageFile(
@@ -277,6 +279,10 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
     # Metadata 2.4 - PEP 639
     assert result["license_expression"] == meta["license_expression"]
     assert result["license_file"] == meta["license_files"]
+
+    # Metadata 2.5 - PEP 794
+    assert result["import_name"] == meta["import_names"]
+    assert result["import_namespace"] == meta["import_namespaces"]
 
     # Additional metadata
     assert result["comment"] == package.comment
@@ -458,3 +464,23 @@ def test_setuptools_license_file_valid(monkeypatch):
     package = package_file.PackageFile.from_filename(filename, comment=None)
     meta = package.metadata_dictionary()
     assert "license_file" in meta
+
+
+def test_core_metadata_25_fields(monkeypatch):
+    """Keep Core Metadata 2.5 import declarations."""
+    read_data = (
+        "Metadata-Version: 2.5\n"
+        "Name: test-package\n"
+        "Version: 1.0.0\n"
+        "Import-Name: test_package\n"
+        "Import-Namespace: test_namespace\n"
+    )
+    monkeypatch.setattr(package_file.wheel.Wheel, "read", lambda _: read_data)
+    filename = "tests/fixtures/twine-4.0.2-py3-none-any.whl"
+
+    package = package_file.PackageFile.from_filename(filename, comment=None)
+    meta = package.metadata_dictionary()
+
+    assert meta["metadata_version"] == "2.5"
+    assert meta["import_name"] == ["test_package"]
+    assert meta["import_namespace"] == ["test_namespace"]
