@@ -1,1 +1,1 @@
-Remove monkeypatch allowing Metadata 2.0.
+Fix uploading packages with metadata version 2.5. The fix no longer allows metadata version 2.0, which was never officially standardised.
