@@ -1,0 +1,1 @@
+Upload each project's wheel and source archive together.

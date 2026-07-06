@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -50,6 +51,29 @@ def test_find_dists_handles_real_files():
     ]
     files = commands._find_dists(expected)
     assert expected == files
+
+
+def test_find_dists_groups_artifacts_by_distribution(tmp_path):
+    for filename in [
+        "bar-0.0.2-py3-none-any.whl",
+        "buzz-0.0.3-py3-none-any.whl",
+        "foo-0.0.1-py3-none-any.whl",
+        "bar-0.0.2.tar.gz",
+        "buzz-0.0.3.tar.gz",
+        "foo-0.0.1.tar.gz",
+    ]:
+        (tmp_path / filename).write_text("artifact")
+
+    files = commands._find_dists([str(tmp_path / "*")])
+
+    assert [Path(filename).name for filename in files] == [
+        "bar-0.0.2-py3-none-any.whl",
+        "bar-0.0.2.tar.gz",
+        "buzz-0.0.3-py3-none-any.whl",
+        "buzz-0.0.3.tar.gz",
+        "foo-0.0.1-py3-none-any.whl",
+        "foo-0.0.1.tar.gz",
+    ]
 
 
 def test_split_inputs():
