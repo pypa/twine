@@ -217,6 +217,13 @@ class PackageFile:
             # unparsed dictionary. Remove them to avoid triggering the
             # following check.
             unparsed.pop("license-file", None)
+        else:
+            # For metadata versions >= 2.4, License-File is a valid field
+            # (PEP 639), but older versions of packaging may not recognize
+            # it if the metadata version is above what packaging's parser
+            # knows about (e.g. metadata 2.5 with packaging that only knows
+            # up to 2.3).
+            unparsed.pop("license-file", None)
 
         if unparsed:
             raise exceptions.InvalidDistribution(
