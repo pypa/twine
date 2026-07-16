@@ -1,0 +1,3 @@
+Log a short informational message, instead of a warning with a traceback,
+when the keyring's SecretService backend can't create or unlock its
+collection (e.g. no keyring is configured on the system).
