@@ -9,6 +9,7 @@ from typing import cast
 from urllib.parse import urlparse
 
 import requests.auth
+import rich
 from id import AmbientCredentialError
 from id import detect_credential
 
@@ -97,6 +98,7 @@ class TrustedPublishingAuthenticator(requests.auth.AuthBase):
 class Resolver:
     _tp_token: t.Optional[TrustedPublishingToken] = None
     _expires: t.Optional[int] = None
+    _notified_no_keyring: bool = False
 
     def __init__(
         self,
@@ -237,6 +239,17 @@ class Resolver:
     def system(self) -> t.Optional[str]:
         return self.config["repository"]
 
+    def _notify_no_keyring_backend(self) -> None:
+        # keyring is installed but its backend can't be used — e.g. no
+        # SecretService/D-Bus session is available, or the user dismissed the
+        # unlock prompt (keyring raises InitError / KeyringLocked). Twine falls
+        # back to prompting for credentials, so surface a short, non-alarming
+        # notice. Print it (rather than logger.info) so it is visible even at
+        # twine's default WARNING log level — see #556.
+        if not self._notified_no_keyring:
+            rich.print("No keyring backend accessible")
+            self._notified_no_keyring = True
+
     def get_username_from_keyring(self) -> t.Optional[str]:
         if keyring is None:
             logger.info("keyring module is not available")
@@ -251,7 +264,7 @@ class Resolver:
             # To support keyring prior to 15.2
             pass
         except (InitError, KeyringLocked):
-            logger.info("No keyring backend accessible")
+            self._notify_no_keyring_backend()
         except Exception as exc:
             logger.warning("Error getting username from keyring", exc_info=exc)
         return None
@@ -268,7 +281,7 @@ class Resolver:
         except NoKeyringError:
             logger.info("No keyring backend found")
         except (InitError, KeyringLocked):
-            logger.info("No keyring backend accessible")
+            self._notify_no_keyring_backend()
         except Exception as exc:
             logger.warning("Error getting password from keyring", exc_info=exc)
         return None

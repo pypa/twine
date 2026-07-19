@@ -190,80 +190,64 @@ def test_get_password_keyring_runtime_error_logged(
     )
 
 
-def test_get_username_keyring_init_error_logged(
-    entered_username, monkeypatch, config, caplog
+def test_get_username_keyring_init_error_notifies(
+    entered_username, monkeypatch, config, capsys
 ):
-    """Simulate a SecretService backend that can't create/unlock a collection."""
-    caplog.set_level(logging.INFO, "twine")
-
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise auth.InitError("Failed to create the collection: Prompt dismissed.")
 
     monkeypatch.setattr(auth, "keyring", FailKeyring)
-
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
+    captured = capsys.readouterr()
+    assert "No keyring backend accessible" in captured.out
+    assert "Traceback" not in captured.out
 
-    assert "No keyring backend accessible" in caplog.text
-    assert "Traceback" not in caplog.text
 
-
-def test_get_password_keyring_init_error_logged(
-    entered_username, entered_password, monkeypatch, config, caplog
+def test_get_password_keyring_init_error_notifies(
+    entered_username, entered_password, monkeypatch, config, capsys
 ):
-    """Simulate a SecretService backend that can't create/unlock a collection."""
-    caplog.set_level(logging.INFO, "twine")
-
     class FailKeyring:
         @staticmethod
         def get_password(system, username):
             raise auth.InitError("Failed to create the collection: Prompt dismissed.")
 
     monkeypatch.setattr(auth, "keyring", FailKeyring)
-
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
+    captured = capsys.readouterr()
+    assert "No keyring backend accessible" in captured.out
+    assert "Traceback" not in captured.out
 
-    assert "No keyring backend accessible" in caplog.text
-    assert "Traceback" not in caplog.text
 
-
-def test_get_username_keyring_locked_logged(
-    entered_username, monkeypatch, config, caplog
+def test_get_username_keyring_locked_notifies(
+    entered_username, monkeypatch, config, capsys
 ):
-    """Simulate a SecretService backend where the user dismissed the unlock prompt."""
-    caplog.set_level(logging.INFO, "twine")
-
     class FailKeyring:
         @staticmethod
         def get_credential(system, username):
             raise auth.KeyringLocked("Failed to unlock the collection!")
 
     monkeypatch.setattr(auth, "keyring", FailKeyring)
-
     assert auth.Resolver(config, auth.CredentialInput()).username == "entered user"
+    captured = capsys.readouterr()
+    assert "No keyring backend accessible" in captured.out
+    assert "Traceback" not in captured.out
 
-    assert "No keyring backend accessible" in caplog.text
-    assert "Traceback" not in caplog.text
 
-
-def test_get_password_keyring_locked_logged(
-    entered_username, entered_password, monkeypatch, config, caplog
+def test_get_password_keyring_locked_notifies(
+    entered_username, entered_password, monkeypatch, config, capsys
 ):
-    """Simulate a SecretService backend where the user dismissed the unlock prompt."""
-    caplog.set_level(logging.INFO, "twine")
-
     class FailKeyring:
         @staticmethod
         def get_password(system, username):
             raise auth.KeyringLocked("Failed to unlock the collection!")
 
     monkeypatch.setattr(auth, "keyring", FailKeyring)
-
     assert auth.Resolver(config, auth.CredentialInput()).password == "entered pw"
-
-    assert "No keyring backend accessible" in caplog.text
-    assert "Traceback" not in caplog.text
+    captured = capsys.readouterr()
+    assert "No keyring backend accessible" in captured.out
+    assert "Traceback" not in captured.out
 
 
 def _raise_home_key_error():
