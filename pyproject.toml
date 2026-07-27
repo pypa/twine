@@ -57,7 +57,6 @@ Documentation = "https://twine.readthedocs.io/en/latest/"
 [project.entry-points."twine.registered_commands"]
 check = "twine.commands.check:main"
 upload = "twine.commands.upload:main"
-register = "twine.commands.register:main"
 
 [project.optional-dependencies]
 keyring = ["keyring >= 21.2.0"]

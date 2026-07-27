@@ -184,22 +184,6 @@ def test_package_is_uploaded_different_filenames(default_repo):
     assert default_repo.package_is_uploaded(package) is False
 
 
-def test_package_is_registered(default_repo):
-    """Return API response from registering a package."""
-    package = pretend.stub(
-        basefilename="fake.whl", metadata_dictionary=lambda: {"name": "fake"}
-    )
-
-    resp = response_with(status_code=200)
-    setattr(resp, "raw", pretend.stub())
-    setattr(resp.raw, "close", lambda: None)
-    default_repo.session = pretend.stub(
-        post=lambda url, data, allow_redirects, headers: resp
-    )
-
-    assert default_repo.register(package)
-
-
 @pytest.mark.parametrize("disable_progress_bar", [True, False])
 def test_disable_progress_bar_is_forwarded_to_rich(
     monkeypatch, tmpdir, disable_progress_bar, default_repo

@@ -91,24 +91,6 @@ class Repository:
         if clientcert:
             self.session.cert = clientcert
 
-    def register(self, package: package_file.PackageFile) -> requests.Response:
-        print(f"Registering {package.basefilename}")
-
-        metadata = package.metadata_dictionary()
-        data_to_send = self._convert_metadata_to_list_of_tuples(metadata)
-        data_to_send.append((":action", "submit"))
-        data_to_send.append(("protocol_version", "1"))
-        encoder = requests_toolbelt.MultipartEncoder(data_to_send)
-        resp = self.session.post(
-            self.url,
-            data=encoder,
-            allow_redirects=False,
-            headers={"Content-Type": encoder.content_type},
-        )
-        # Bug 28. Try to silence a ResourceWarning by releasing the socket.
-        resp.close()
-        return resp
-
     def _upload(self, package: package_file.PackageFile) -> requests.Response:
         print(f"Uploading {package.basefilename}")
 
