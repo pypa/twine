@@ -1,1 +1,0 @@
-The dependency on ``rich`` has been bumped to avoid a hang in some environments.
