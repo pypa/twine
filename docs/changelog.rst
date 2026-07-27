@@ -12,6 +12,30 @@ schemes recommended by the Python Packaging Authority.
 
 .. towncrier release notes start
 
+twine 7.0.0 (2026-07-27)
+------------------------
+
+Bugfixes
+^^^^^^^^
+
+- Specify UTF-8 encoding when reading ``.pypirc`` files. (`#1268 <https://github.com/pypa/twine/issues/1268>`_)
+- Add missing subdependencies to ``--version`` output. (`#1275 <https://github.com/pypa/twine/issues/1275>`_)
+- The dependency on ``rich`` has been bumped to avoid a hang in some environments. (`#1308 <https://github.com/pypa/twine/issues/1308>`_)
+- Indices that respond with non-standard HTTP codes are now handled more gracefully. (`#1309 <https://github.com/pypa/twine/issues/1309>`_)
+
+
+Deprecations and Removals
+^^^^^^^^^^^^^^^^^^^^^^^^^
+
+- Fix uploading packages with metadata version 2.5. The fix no longer allows metadata version 2.0, which was never officially standardised. (`#1317 <https://github.com/pypa/twine/issues/1317>`_)
+
+
+Misc
+^^^^
+
+- `#1298 <https://github.com/pypa/twine/issues/1298>`_
+
+
 twine 6.2.0 (2025-09-04)
 ------------------------
 

@@ -119,7 +119,7 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
             logging.ERROR,
             "`long_description` has syntax errors in markup "
             "and would not be rendered on PyPI.\n"
-            "line 2: Warning: Document or section may not begin with a transition.",
+            "line 2: Warning: Transition at the end of the document.",
         ),
     ]
 
@@ -141,16 +141,14 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
     assert check.check([sdist])
 
     assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
+    assert len(caplog.record_tuples) == 1
 
-    assert caplog.record_tuples == [
-        (
-            "twine.commands.check",
-            logging.ERROR,
-            "`long_description` has syntax errors in markup "
-            "and would not be rendered on PyPI.\n"
-            "No content rendered from RST source.",
-        ),
-    ]
+    # Note: we intentionally don't check the full error message below,
+    # since readme_renderer/docutils doesn't guarantee it.
+    error = caplog.record_tuples[0]
+    assert error[0] == "twine.commands.check"
+    assert error[1] == logging.ERROR
+    assert "syntax errors" in error[2]
 
 
 def test_passes_rst_description(tmp_path, capsys, caplog):
