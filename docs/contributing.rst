@@ -195,8 +195,7 @@ HTTPS. Its three purposes are to be:
    for publishing on any Python package index
 
 
-Currently, Twine has two principal functions: uploading new packages
-and checking distributions.
+Currently, Twine has one principal function: uploading new packages.
 
 Its command line arguments are parsed in :file:`twine/cli.py`. The
 code for checking distributions is in :file:`twine/commands/check.py`,
