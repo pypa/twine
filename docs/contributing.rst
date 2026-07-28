@@ -195,16 +195,14 @@ HTTPS. Its three purposes are to be:
    for publishing on any Python package index
 
 
-Currently, twine has two principal functions: uploading new packages
-and registering new `projects`_ (``register`` is no longer supported
-on PyPI, and is in Twine for use with other package indexes).
+Currently, Twine has one principal function: uploading new packages.
 
 Its command line arguments are parsed in :file:`twine/cli.py`. The
-code for registering new projects is in
-:file:`twine/commands/register.py`, and the code for uploading is in
-:file:`twine/commands/upload.py`. The file :file:`twine/package.py`
-contains a single class, ``PackageFile``, which hashes the project
-files and extracts their metadata. The file
+code for checking distributions is in :file:`twine/commands/check.py`,
+and the code for uploading is in :file:`twine/commands/upload.py`.
+The file :file:`twine/package.py` contains a single class,
+``PackageFile``, which hashes the project files and extracts their
+metadata. The file
 :file:`twine/repository.py` contains the ``Repository`` class, whose
 methods control the URL the package is uploaded to (which the user can
 specify either as a default, in the :file:`.pypirc` file, or pass on
