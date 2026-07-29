@@ -339,8 +339,9 @@ class MockResponse:
         if 400 <= self.status_code:
             raise requests.exceptions.HTTPError()
 
+    @property
     def ok(self) -> bool:
-        return self.status_code == 200
+        return self.status_code < 400
 
 
 class MockSession:
