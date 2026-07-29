@@ -455,3 +455,32 @@ def test_inability_to_make_token_raises_error():
     )
     with pytest.raises(exceptions.TrustedPublishingFailure):
         authenticator(None)
+
+
+def test_github_permission_error_recommends_id_token_write(monkeypatch, config):
+    monkeypatch.setenv("GITHUB_ACTIONS", "1")
+    monkeypatch.delenv("ACTIONS_ID_TOKEN_REQUEST_TOKEN", raising=False)
+    monkeypatch.delenv("ACTIONS_ID_TOKEN_REQUEST_URL", raising=False)
+
+    def make_session():
+        return MockSession(
+            get_response_list=[
+                MockResponse(status_code=200, json={"audience": "fake-aud"})
+            ],
+            post_response_list=[],
+        )
+
+    config.update({"repository": utils.TEST_REPOSITORY})
+    monkeypatch.setattr(auth.utils, "make_requests_session", make_session)
+    res = auth.Resolver(config, auth.CredentialInput(username="__token__"))
+
+    with pytest.raises(exceptions.TrustedPublishingFailure) as exc_info:
+        res.make_trusted_publishing_token()
+
+    message = str(exc_info.value)
+    assert "for trusted publishing.\n\nGitHub: missing" in message
+    assert "id-token: write" in message
+    assert (
+        "https://docs.pypi.org/trusted-publishers/using-a-publisher/#github-actions"
+        in message
+    )
