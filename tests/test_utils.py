@@ -366,3 +366,25 @@ def test_get_file_size(size_in_bytes, formatted_size, monkeypatch):
     file_size = utils.get_file_size(size_in_bytes)
 
     assert file_size == formatted_size
+
+
+@pytest.mark.parametrize(
+    "url, expected",
+    [
+        # Known hosts: trailing slash added
+        ("https://test.pypi.org/legacy", "https://test.pypi.org/legacy/"),
+        ("https://upload.pypi.org/legacy", "https://upload.pypi.org/legacy/"),
+        # Known hosts: already has trailing slash
+        ("https://test.pypi.org/legacy/", "https://test.pypi.org/legacy/"),
+        ("https://upload.pypi.org/legacy/", "https://upload.pypi.org/legacy/"),
+        # Known hosts: root path (no trailing slash needed)
+        ("https://test.pypi.org", "https://test.pypi.org"),
+        # Known hosts: HTTP upgraded to HTTPS + trailing slash
+        ("http://test.pypi.org/legacy", "https://test.pypi.org/legacy/"),
+        # Non-known hosts: not modified
+        ("https://custom.repo.com/simple/", "https://custom.repo.com/simple/"),
+        ("https://custom.repo.com/simple", "https://custom.repo.com/simple"),
+    ],
+)
+def test_normalize_repository_url_trailing_slash(url, expected):
+    assert utils.normalize_repository_url(url) == expected

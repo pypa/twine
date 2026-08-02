@@ -234,7 +234,10 @@ def _config_from_repository_url(url: str) -> RepositoryConfig:
 def normalize_repository_url(url: str) -> str:
     parsed = urlparse(url)
     if parsed.netloc in _HOSTNAMES:
-        return urlunparse(("https",) + parsed[1:])
+        path = parsed.path
+        if path and not path.endswith("/"):
+            path += "/"
+        return urlunparse(("https",) + (parsed.netloc, path) + parsed[3:])
     return urlunparse(parsed)
 
 

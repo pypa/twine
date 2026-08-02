@@ -342,10 +342,10 @@ def test_deprecated_repo(make_settings):
     "repository_url, redirect_url, message_match",
     [
         (
-            "https://test.pypi.org/legacy",
-            "https://test.pypi.org/legacy/",
+            "https://custom.repo.com/legacy",
+            "https://custom.repo.com/legacy/",
             (
-                r"https://test.pypi.org/legacy.+https://test.pypi.org/legacy/"
+                r"https://custom.repo.com/legacy.+https://custom.repo.com/legacy/"
                 r".+\nYour repository URL is missing a trailing slash"
             ),
         ),
