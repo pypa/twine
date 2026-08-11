@@ -151,10 +151,43 @@ class NonInteractive(TwineException):
     pass
 
 
+_GITHUB_TOKEN_RETRIEVAL_FAILED = (
+    "Unable to retrieve an OIDC token from GitHub Actions for trusted "
+    "publishing.\n"
+    "\n"
+    "{identity_error}\n"
+    "\n"
+    "This generally indicates a workflow configuration error, such as "
+    "insufficient permissions. Make sure that your workflow has "
+    "`id-token: write` configured at the job level, e.g.:\n"
+    "\n"
+    "    permissions:\n"
+    "      id-token: write\n"
+    "\n"
+    "If this workflow was triggered by a pull request from a fork, note that "
+    "GitHub does not grant OIDC permissions to those workflows, even when "
+    "`id-token: write` is configured. Change the workflow to use an event "
+    "that forks cannot trigger, such as a tag or release, or a manual "
+    "workflow dispatch.\n"
+    "\n"
+    "Learn more at https://docs.pypi.org/trusted-publishers"
+    "/using-a-publisher/#github-actions"
+)
+
+
 class TrustedPublishingFailure(TwineException):
     """Raised if we expected to use trusted publishing but couldn't."""
 
-    pass
+    @classmethod
+    def from_github_permission_error(
+        cls, identity_error: Exception
+    ) -> "TrustedPublishingFailure":
+        """Return a failure for a GitHub Actions OIDC permission error."""
+        return cls(
+            _GITHUB_TOKEN_RETRIEVAL_FAILED.format(
+                identity_error=identity_error,
+            )
+        )
 
 
 class InvalidPyPIUploadURL(TwineException):
