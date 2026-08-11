@@ -166,7 +166,7 @@ class Resolver:
         # Indices are expected to support `https://{domain}/_/oidc/audience`,
         # which tells OIDC exchange clients which audience to use.
         audience_url = f"https://{repository_domain}/_/oidc/audience"
-        resp = session.get(audience_url, timeout=5)
+        resp = session.get(audience_url)
         resp.raise_for_status()
         audience = cast(str, resp.json()["audience"])
 
@@ -197,7 +197,6 @@ class Resolver:
         mint_token_resp = session.post(
             token_exchange_url,
             json={"token": oidc_token},
-            timeout=5,  # S113 wants a timeout
         )
         try:
             mint_token_payload = mint_token_resp.json()
