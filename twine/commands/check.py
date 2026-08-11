@@ -114,8 +114,10 @@ def check(
 ) -> bool:
     """Check that a distribution will render correctly on PyPI and display the results.
 
-    This is currently only validates ``long_description``, but more checks could be
+    This currently only validates ``long_description``, but more checks could be
     added.
+
+    Note: check is not intended to catch all reasons why an upload to PyPI might fail.
 
     :param dists:
         The distribution files to check.
@@ -174,7 +176,16 @@ def main(args: List[str]) -> bool:
     :return:
         The exit status of the ``check`` command.
     """
-    parser = argparse.ArgumentParser(prog="twine check")
+    description = """This currently only validates if long_description will render on PyPI.
+    
+    ** Caution: This does **not** verify everything that PyPI will.
+
+    ** Caution: This **never** verifies anything pertinent to non-PyPI index behaviour.
+    
+    By virtue of performing rendering checks on the long_description, this may validate
+    other metadata characteristics loosely. 
+    """
+    parser = argparse.ArgumentParser(prog="twine check", description=description)
     parser.add_argument(
         "dists",
         nargs="+",
