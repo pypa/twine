@@ -209,7 +209,8 @@ class Settings:
             env="TWINE_USERNAME",
             required=False,
             help="The username to authenticate to the repository "
-            "(package index) as. Has no effect on PyPI or TestPyPI. "
+            "(package index) as. PyPI and TestPyPI accept only __token__, "
+            "which twine uses when this option is omitted. "
             "(Can also be set via %(env)s environment variable.)",
         )
         parser.add_argument(
