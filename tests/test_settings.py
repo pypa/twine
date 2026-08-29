@@ -112,6 +112,50 @@ def test_settings_verify_feature_compatibility() -> None:
 
 
 @pytest.mark.parametrize(
+    "repository_url, expected_url, expected_warning",
+    [
+        (
+            "https://upload.pypi.org/legacy",
+            "https://upload.pypi.org/legacy/",
+            "'https://upload.pypi.org/legacy' is missing a trailing slash. Auto-correcting to 'https://upload.pypi.org/legacy/'.",
+        ),
+        (
+            "https://test.pypi.org/legacy",
+            "https://test.pypi.org/legacy/",
+            "'https://test.pypi.org/legacy' is missing a trailing slash. Auto-correcting to 'https://test.pypi.org/legacy/'.",
+        ),
+        (
+            "https://upload.pypi.org/legacy/",
+            "https://upload.pypi.org/legacy/",
+            None,
+        ),
+        (
+            "https://test.pypi.org/legacy/",
+            "https://test.pypi.org/legacy/",
+            None,
+        ),
+        (
+            "https://custom.repo.org/legacy",
+            "https://custom.repo.org/legacy",
+            None,
+        ),
+    ],
+)
+def test_check_repository_url_trailing_slash(
+    caplog, repository_url, expected_url, expected_warning
+):
+    s = settings.Settings()
+    s.repository_config = {"repository": repository_url}
+    s.check_repository_url()
+
+    assert s.repository_config["repository"] == expected_url
+    if expected_warning:
+        assert expected_warning in caplog.messages
+    else:
+        assert not caplog.messages
+
+
+@pytest.mark.parametrize(
     "verbose, log_level", [(True, logging.INFO), (False, logging.WARNING)]
 )
 def test_setup_logging(verbose, log_level):

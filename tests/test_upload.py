@@ -342,18 +342,18 @@ def test_deprecated_repo(make_settings):
     "repository_url, redirect_url, message_match",
     [
         (
-            "https://test.pypi.org/legacy",
-            "https://test.pypi.org/legacy/",
+            "https://upload.example.org/legacy",
+            "https://upload.example.org/legacy/",
             (
-                r"https://test.pypi.org/legacy.+https://test.pypi.org/legacy/"
+                r"https://upload.example.org/legacy.+https://upload.example.org/legacy/"
                 r".+\nYour repository URL is missing a trailing slash"
             ),
         ),
         (
-            "https://test.pypi.org/legacy/",
+            "https://upload.example.org/legacy/",
             "https://malicious.website.org/danger/",
             (
-                r"https://test.pypi.org/legacy/.+https://malicious.website.org/danger/"
+                r"https://upload.example.org/legacy/.+https://malicious.website.org/danger/"
                 r".+\nIf you trust these URLs"
             ),
         ),
@@ -391,6 +391,29 @@ def test_exception_for_redirect(
 
     with pytest.raises(exceptions.RedirectDetected, match=message_match):
         upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
+
+
+def test_upload_normalizes_pypi_url_missing_slash(
+    make_settings, stub_repository, caplog
+):
+    upload_settings = make_settings("""
+        [pypi]
+        repository: https://upload.pypi.org/legacy
+        username:foo
+        password:bar
+        """)
+    upload_settings.create_repository = lambda: stub_repository
+
+    upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
+
+    assert (
+        "'https://upload.pypi.org/legacy' is missing a trailing slash. "
+        "Auto-correcting to 'https://upload.pypi.org/legacy/'."
+    ) in caplog.messages
+    assert (
+        upload_settings.repository_config["repository"]
+        == "https://upload.pypi.org/legacy/"
+    )
 
 
 def test_prints_skip_message_for_uploaded_package(

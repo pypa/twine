@@ -23,6 +23,8 @@ from twine import exceptions
 from twine import repository
 from twine import utils
 
+logger = logging.getLogger(__name__)
+
 
 class Settings:
     """Object that manages the configuration for Twine.
@@ -345,6 +347,16 @@ class Settings:
         ):
             raise exceptions.UploadToDeprecatedPyPIDetected.from_args(
                 repository_url, utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY
+            )
+
+        if repository_url in (
+            utils.DEFAULT_REPOSITORY.rstrip("/"),
+            utils.TEST_REPOSITORY.rstrip("/"),
+        ):
+            self.repository_config["repository"] = f"{repository_url}/"
+            logger.warning(
+                f"{repository_url!r} is missing a trailing slash. "
+                f"Auto-correcting to '{repository_url}/'."
             )
 
     def create_repository(self) -> repository.Repository:
