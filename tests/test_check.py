@@ -125,6 +125,7 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
 
 
 def test_fails_rst_no_content(tmp_path, capsys, caplog):
+    # A comment renders no content, whereas readme-renderer >= 46 renders titles.
     sdist = build_sdist_with_metadata(
         tmp_path,
         """\
@@ -133,8 +134,7 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
         Version: 1.2.3
         Description-Content-Type: text/x-rst
 
-        test-package
-        ============
+        .. This comment renders no content.
         """,
     )
 
