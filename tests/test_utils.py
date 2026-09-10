@@ -41,6 +41,42 @@ def test_get_config(write_config_file):
     }
 
 
+def test_get_config_strips_utf8_bom(tmp_path):
+    path = tmp_path / "pypirc"
+    body = """[distutils]
+index-servers = pypi
+
+[pypi]
+username = testuser
+password = testpassword
+"""
+    path.write_bytes(b"\xef\xbb\xbf" + body.encode("utf-8"))
+    assert utils.get_config(str(path))["pypi"]["username"] == "testuser"
+
+
+def test_get_config_utf8_bom_under_legacy_locale(tmp_path, monkeypatch):
+    """A BOM is still ignored when the locale codec is not UTF-8."""
+    path = tmp_path / "pypirc"
+    body = """[distutils]
+index-servers = pypi
+
+[pypi]
+username = testuser
+password = testpassword
+"""
+    path.write_bytes(b"\xef\xbb\xbf" + body.encode("utf-8"))
+    monkeypatch.setattr(utils.locale, "getpreferredencoding", lambda *a, **k: "cp1252")
+    original_open = __import__("builtins").open
+
+    def open_legacy(file, mode="r", *args, encoding=None, **kwargs):
+        if encoding is None and "b" not in mode:
+            encoding = "cp1252"
+        return original_open(file, mode, *args, encoding=encoding, **kwargs)
+
+    monkeypatch.setattr("builtins.open", open_legacy)
+    assert utils.get_config(str(path))["pypi"]["username"] == "testuser"
+
+
 def test_get_config_no_distutils(write_config_file):
     """Upload by default to PyPI if an index server is not set in .pypirc."""
     config_file = write_config_file("""

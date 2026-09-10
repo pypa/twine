@@ -15,6 +15,7 @@ import argparse
 import collections
 import configparser
 import functools
+import locale
 import logging
 import os
 import os.path
@@ -50,6 +51,19 @@ RepositoryConfig = Dict[str, Optional[str]]
 logger = logging.getLogger(__name__)
 
 
+def _open_encoding(encoding: Optional[str]) -> Optional[str]:
+    """Map UTF-8 to utf-8-sig so a leading BOM is not returned as U+FEFF."""
+    if encoding is None:
+        encoding = locale.getpreferredencoding(False) or ""
+        explicit = False
+    else:
+        explicit = True
+    normalized = encoding.lower().replace("_", "-")
+    if normalized in {"utf-8", "utf8", "cp65001"}:
+        return "utf-8-sig"
+    return encoding if explicit else None
+
+
 def _parse_file(path: str, **open_kwargs: Any) -> configparser.RawConfigParser:
     """Open and parse a configuration file.
 
@@ -58,7 +72,11 @@ def _parse_file(path: str, **open_kwargs: Any) -> configparser.RawConfigParser:
     partially populated.
     """
     parser = configparser.RawConfigParser()
-    with open(path, **open_kwargs) as f:
+    kwargs = dict(open_kwargs)
+    encoding = _open_encoding(kwargs.get("encoding"))
+    if encoding is not None:
+        kwargs["encoding"] = encoding
+    with open(path, **kwargs) as f:
         parser.read_file(f)
     return parser
 
@@ -66,14 +84,13 @@ def _parse_file(path: str, **open_kwargs: Any) -> configparser.RawConfigParser:
 def _parse_config(path: str) -> configparser.RawConfigParser:
     """Parse a config file with a UTF-8 fallback on decode errors.
 
-    Try to parse using the default system encoding first; if a
-    UnicodeDecodeError occurs, retry using UTF-8 and log that a fallback
-    was used.
+    Try the default system encoding first. Retry UTF-8 on UnicodeDecodeError
+    or on a UTF-8 BOM that the locale codec decoded into a bad section header.
     """
     logger.info("Using configuration from %s", path)
     try:
         parser = _parse_file(path)
-    except UnicodeDecodeError:
+    except (UnicodeDecodeError, configparser.MissingSectionHeaderError):
         logger.info(
             "Configuration file not readable with default locale encoding, trying UTF-8"
         )
