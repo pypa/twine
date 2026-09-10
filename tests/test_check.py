@@ -133,8 +133,7 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
         Version: 1.2.3
         Description-Content-Type: text/x-rst
 
-        test-package
-        ============
+        .. comment
         """,
     )
 
@@ -149,6 +148,27 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
     assert error[0] == "twine.commands.check"
     assert error[1] == logging.ERROR
     assert "syntax errors" in error[2]
+
+
+def test_passes_rst_title_only(tmp_path, capsys, caplog):
+    sdist = build_sdist_with_metadata(
+        tmp_path,
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+        test-package
+        ============
+        """,
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert not caplog.record_tuples
 
 
 def test_passes_rst_description(tmp_path, capsys, caplog):
