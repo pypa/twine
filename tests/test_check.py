@@ -11,13 +11,17 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import importlib.metadata
 import logging
 
+from packaging.version import Version
 import pretend
 import pytest
 
 from tests import helpers
 from twine.commands import check
+
+README_RENDERER_VERSION = Version(importlib.metadata.version("readme-renderer"))
 
 
 class TestWarningStream:
@@ -133,8 +137,7 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
         Version: 1.2.3
         Description-Content-Type: text/x-rst
 
-        test-package
-        ============
+        .. A comment with no document content.
         """,
     )
 
@@ -164,6 +167,31 @@ def test_passes_rst_description(tmp_path, capsys, caplog):
         ============
 
         A test package.
+        """,
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert not caplog.record_tuples
+
+
+@pytest.mark.skipif(
+    README_RENDERER_VERSION < Version("46.0"),
+    reason="readme-renderer < 46.0 drops lone top-level headings",
+)
+def test_passes_rst_title_only(tmp_path, capsys, caplog):
+    sdist = build_sdist_with_metadata(
+        tmp_path,
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+        test-package
+        ============
         """,
     )
 

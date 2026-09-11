@@ -1,0 +1,1 @@
+Fix test failure in ``test_fails_rst_no_content`` when running against ``readme-renderer>=46.0``.
