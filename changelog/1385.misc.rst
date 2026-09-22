@@ -1,0 +1,4 @@
+Update ``test_fails_rst_no_content`` to use a comment-only RST description, which renders
+no content on every supported ``readme-renderer`` version. readme-renderer 46.0 now keeps
+lone top-level headings, so a title-only description no longer exercises the no-content
+failure path. New tests cover both rendering behaviors via a runtime probe.

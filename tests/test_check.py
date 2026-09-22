@@ -11,13 +11,33 @@
 # WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+import io
 import logging
 
 import pretend
 import pytest
+import readme_renderer.rst
 
 from tests import helpers
 from twine.commands import check
+
+
+def _renders_lone_heading() -> bool:
+    """Whether the installed readme-renderer keeps a lone top-level heading.
+
+    readme-renderer 46.0 stopped promoting a lone top-level heading to the
+    (dropped) document title, so title-only RST now renders instead of
+    failing with "No content rendered from RST source.".  Probe the actual
+    behavior instead of pinning a version so the test suite works with both
+    older and newer readme-renderer releases.
+    """
+    return (
+        readme_renderer.rst.render("test-package\n============\n", stream=io.StringIO())
+        is not None
+    )
+
+
+_TITLE_RENDERS = _renders_lone_heading()
 
 
 class TestWarningStream:
@@ -125,6 +145,8 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
 
 
 def test_fails_rst_no_content(tmp_path, capsys, caplog):
+    # A comment renders no content on every supported readme-renderer
+    # version, unlike a lone title (see _renders_lone_heading).
     sdist = build_sdist_with_metadata(
         tmp_path,
         """\
@@ -133,8 +155,7 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
         Version: 1.2.3
         Description-Content-Type: text/x-rst
 
-        test-package
-        ============
+        .. This comment renders no content.
         """,
     )
 
@@ -172,6 +193,55 @@ def test_passes_rst_description(tmp_path, capsys, caplog):
     assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
 
     assert not caplog.record_tuples
+
+
+@pytest.mark.skipif(
+    not _TITLE_RENDERS,
+    reason="readme-renderer < 46 drops a lone top-level heading",
+)
+def test_passes_rst_title_only(tmp_path, capsys, caplog):
+    sdist = build_sdist_with_metadata(
+        tmp_path,
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+        test-package
+        ============
+        """,
+    )
+
+    assert not check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+
+    assert not caplog.record_tuples
+
+
+@pytest.mark.skipif(
+    _TITLE_RENDERS,
+    reason="readme-renderer >= 46 renders a lone top-level heading",
+)
+def test_fails_rst_title_only(tmp_path, capsys, caplog):
+    sdist = build_sdist_with_metadata(
+        tmp_path,
+        """\
+        Metadata-Version: 2.1
+        Name: test-package
+        Version: 1.2.3
+        Description-Content-Type: text/x-rst
+
+        test-package
+        ============
+        """,
+    )
+
+    assert check.check([sdist])
+
+    assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
+    assert len(caplog.record_tuples) == 1
 
 
 @pytest.mark.parametrize("content_type", ["text/markdown", "text/plain"])
