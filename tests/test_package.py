@@ -188,7 +188,8 @@ def test_metadata_keys_consistency():
 
 @pytest.mark.parametrize("gpg_signature", [(None), (pretend.stub())])
 @pytest.mark.parametrize("attestation", [(None), ({"fake": "attestation"})])
-def test_metadata_dictionary_values(gpg_signature, attestation):
+@pytest.mark.parametrize("organization", [None, "acme"])
+def test_metadata_dictionary_values(gpg_signature, attestation, organization):
     """Pass values from ``metadata.RawMetadata`` through to ``PackageMetadata``."""
     meta = metadata.RawMetadata(
         metadata_version=pretend.stub(),
@@ -233,6 +234,7 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
     package.gpg_signature = gpg_signature
     if attestation:
         package.attestations = [attestation]
+    package.organization = organization
 
     result = package.metadata_dictionary()
 
@@ -291,6 +293,11 @@ def test_metadata_dictionary_values(gpg_signature, attestation):
         assert result["attestations"] == json.dumps(package.attestations)
     else:
         assert "attestations" not in result
+
+    if organization:
+        assert result["organization"] == organization
+    else:
+        assert "organization" not in result
 
 
 TWINE_4_0_2_WHEEL_HEXDIGEST = package_file.Hexdigest(

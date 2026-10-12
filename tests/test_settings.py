@@ -143,6 +143,17 @@ def test_identity_requires_sign():
         settings.Settings(sign=False, identity="fakeid")
 
 
+def test_organization_defaults_to_none():
+    """Leave organization unset when it isn't given."""
+    assert settings.Settings().organization is None
+
+
+def test_organization_must_not_be_empty():
+    """Raise an exception when organization is an empty string."""
+    with pytest.raises(exceptions.InvalidConfiguration, match="organization"):
+        settings.Settings(organization="")
+
+
 @pytest.mark.parametrize("client_cert", [None, ""])
 def test_password_is_required_if_no_client_cert(client_cert, entered_password):
     """Set password when client_cert is not provided."""
@@ -198,3 +209,30 @@ class TestArgumentParsing:
     def test_attestations_flag(self):
         args = self.parse_args(["--attestations"])
         assert args.attestations
+
+    @pytest.mark.parametrize("option", ["-o", "--organization", "--org"])
+    def test_organization_option(self, option):
+        args = self.parse_args([option, "acme"])
+        assert args.organization == "acme"
+
+    def test_organization_default(self, monkeypatch):
+        monkeypatch.delenv("TWINE_UPLOAD_ORGANIZATION", raising=False)
+        args = self.parse_args([])
+        assert args.organization is None
+
+    def test_organization_environment(self, monkeypatch):
+        monkeypatch.setenv("TWINE_UPLOAD_ORGANIZATION", "acme")
+        args = self.parse_args([])
+        assert args.organization == "acme"
+        args = self.parse_args(["--organization", "other"])
+        assert args.organization == "other"
+
+    def test_organization_empty_environment_is_unset(self, monkeypatch):
+        monkeypatch.setenv("TWINE_UPLOAD_ORGANIZATION", "")
+        args = self.parse_args([])
+        assert args.organization is None
+
+    def test_organization_empty_option_is_rejected(self):
+        args = self.parse_args(["--organization", ""])
+        with pytest.raises(exceptions.InvalidConfiguration):
+            settings.Settings.from_argparse(args)

@@ -53,6 +53,7 @@ class Settings:
         password: Optional[str] = None,
         non_interactive: bool = False,
         comment: Optional[str] = None,
+        organization: Optional[str] = None,
         config_file: str = utils.DEFAULT_CONFIG_FILE,
         skip_existing: bool = False,
         cacert: Optional[str] = None,
@@ -84,6 +85,12 @@ class Settings:
             credentials are missing.
         :param comment:
             The comment to include with each distribution file.
+        :param organization:
+            The name of the organization that will own the project, if the
+            upload creates it. If the project already exists, it must already
+            belong to this organization, otherwise the upload is rejected. Has
+            no effect on package indexes that don't support uploading to
+            organizations.
         :param config_file:
             The path to the configuration file to use.
         :param skip_existing:
@@ -110,6 +117,7 @@ class Settings:
         """
         self.config_file = config_file
         self.comment = comment
+        self._handle_organization(organization)
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
         self.skip_existing = skip_existing
@@ -235,6 +243,25 @@ class Settings:
             "--comment",
             help="The comment to include with the distribution file.",
         )
+        organization = parser.add_argument(
+            "-o",
+            "--organization",
+            "--org",
+            action=utils.EnvironmentDefault,
+            env="TWINE_UPLOAD_ORGANIZATION",
+            required=False,
+            help="The organization that will own the project, if this upload "
+            "creates it. If the project already exists, it must already belong "
+            "to this organization, otherwise the upload is rejected. The "
+            "repository (package index) must support uploading to "
+            "organizations, otherwise this option is ignored. (Can also be set "
+            "via %(env)s environment variable.)",
+        )
+        # Treat an empty environment variable as unset, since CI systems often
+        # expand an undefined variable to "".  An explicit empty option value
+        # is still rejected when the Settings are created.
+        if organization.default == "":
+            organization.default = None
         parser.add_argument(
             "--config-file",
             default=utils.DEFAULT_CONFIG_FILE,
@@ -286,6 +313,11 @@ class Settings:
         settings["repository_name"] = settings.pop("repository")
         settings["cacert"] = settings.pop("cert")
         return cls(**settings)
+
+    def _handle_organization(self, organization: Optional[str]) -> None:
+        if organization == "":
+            raise exceptions.InvalidConfiguration("organization must not be empty")
+        self.organization = organization
 
     def _handle_package_signing(
         self, sign: bool, sign_with: str, identity: Optional[str]
