@@ -294,7 +294,6 @@ def test_metadata_dictionary_values(gpg_signature, attestation, organization):
     else:
         assert "attestations" not in result
 
-    # Organization
     if organization:
         assert result["organization"] == organization
     else:
