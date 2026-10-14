@@ -1,0 +1,1 @@
+Make HTML coverage reports available as GitHub Actions artifacts.
