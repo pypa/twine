@@ -65,6 +65,14 @@ jobs:
         run: python -m tox -e types
       - name: Run tests
         run: python -m tox -e ${{ matrix.tox-environment }}
+      - name: Upload coverage report
+        if: ${{ !cancelled() && hashFiles('htmlcov/index.html') != '' }}
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a # v7.0.1
+        with:
+          name: coverage-${{ matrix.platform }}-${{ matrix.python-version }}-${{ matrix.tox-environment }}
+          path: htmlcov/
+          if-no-files-found: error
+          retention-days: 5
 
   # Because the tests can be flaky, they shouldn't be required for merge, but
   # it's still helpful to run them on PRs. See:
