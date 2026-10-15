@@ -20,6 +20,7 @@ import os
 import os.path
 import unicodedata
 from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union, cast
+from urllib.parse import unquote
 from urllib.parse import urlparse
 from urllib.parse import urlunparse
 
@@ -222,8 +223,10 @@ def _config_from_repository_url(url: str) -> RepositoryConfig:
     parsed = urlparse(url)
     config = {"repository": url, "username": None, "password": None}
     if parsed.username:
-        config["username"] = parsed.username
-        config["password"] = parsed.password
+        config["username"] = unquote(parsed.username)
+        config["password"] = (
+            unquote(parsed.password) if parsed.password is not None else None
+        )
         config["repository"] = cast(
             str, rfc3986.urlparse(url).copy_with(userinfo=None).unsplit()
         )

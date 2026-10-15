@@ -173,6 +173,35 @@ def test_get_repository_config_url_with_auth(
 
 
 @pytest.mark.parametrize(
+    "userinfo,username,password",
+    [
+        ("user%40example.com:p%40ss%3Aword", "user@example.com", "p@ss:word"),
+        ("user%2Bname:pass%25word%2B", "user+name", "pass%word+"),
+        ("user%252Fname:pass%252Fword", "user%2Fname", "pass%2Fword"),
+        ("user+name:pass+word", "user+name", "pass+word"),
+        ("user%40example.com:", "user@example.com", ""),
+    ],
+)
+def test_get_repository_config_url_decodes_auth(
+    config_file, userinfo, username, password
+):
+    """Preserve Requests' URL authentication when extracting encoded credentials."""
+    repository_url = f"https://{userinfo}@example.com/repository/path%2Fpart/"
+    config = utils.get_repository_from_config(config_file, "custom", repository_url)
+
+    assert config == {
+        "repository": "https://example.com/repository/path%2Fpart/",
+        "username": username,
+        "password": password,
+    }
+    direct = requests.Request("GET", repository_url).prepare()
+    extracted = requests.Request(
+        "GET", config["repository"], auth=(config["username"], config["password"])
+    ).prepare()
+    assert extracted.headers["Authorization"] == direct.headers["Authorization"]
+
+
+@pytest.mark.parametrize(
     "input_url, expected_url",
     [
         ("https://upload.pypi.org/legacy/", "https://upload.pypi.org/legacy/"),
