@@ -152,6 +152,53 @@ on a CI/build server).
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
 
+TLS Certificates
+^^^^^^^^^^^^^^^^
+
+Twine uses Requests to verify HTTPS server certificates. To trust a private
+package index's certificate authority (CA), use ``--cert`` with the path to a
+PEM-encoded CA bundle:
+
+.. code-block:: bash
+
+   twine upload --repository internal \
+       --cert /path/to/ca-bundle.pem dist/*
+
+The repository name must be configured in ``.pypirc``. Alternatively, use
+``TWINE_CERT`` or the repository's ``ca_cert`` option in ``.pypirc``.
+``--cert`` takes precedence over ``TWINE_CERT``, which takes precedence over
+``ca_cert``.
+
+A client certificate serves a different purpose: it authenticates the client
+to an index that requires mutual TLS. Use ``--client-cert`` or the repository's
+``client_cert`` option in ``.pypirc``. Twine expects a single PEM file
+containing both the client certificate and its unencrypted private key:
+
+.. code-block:: bash
+
+   twine upload --repository internal \
+       --client-cert /path/to/client.pem dist/*
+
+These settings can be combined when the index requires both a custom CA bundle
+and a client certificate:
+
+.. code-block:: ini
+
+   [distutils]
+   index-servers = internal
+
+   [internal]
+   repository = https://packages.example.org/legacy/
+   ca_cert = /path/to/ca-bundle.pem
+   client_cert = /path/to/client.pem
+
+Requests also reads ``REQUESTS_CA_BUNDLE`` and, as a fallback,
+``CURL_CA_BUNDLE``. These environment variables can override the session's CA
+bundle, including one set by Twine. Check their values if Twine appears to use
+a different bundle than expected. For details, see Requests' documentation on
+:ref:`requests:ssl-cert-verification` and
+:ref:`requests:client-side-certificates`.
+
 Proxy Support
 ^^^^^^^^^^^^^
 
