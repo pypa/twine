@@ -20,20 +20,40 @@ https://github.com/pypa/twine/issues/194 and https://github.com/pypa/twine/issue
 import fnmatch
 import glob
 import os.path
-from typing import Dict, List, NamedTuple
+from typing import Dict, List, NamedTuple, Tuple
+
+from packaging.utils import InvalidSdistFilename
+from packaging.utils import InvalidWheelFilename
+from packaging.utils import parse_sdist_filename
+from packaging.utils import parse_wheel_filename
 
 from twine import exceptions
 
 __all__: List[str] = []
 
 
+def _dist_sort_key(path: str) -> Tuple[str, int, str]:
+    basename = os.path.basename(path)
+    if basename.endswith(".whl"):
+        try:
+            return (parse_wheel_filename(basename)[0], 0, path)
+        except InvalidWheelFilename:
+            pass
+    try:
+        return (parse_sdist_filename(basename)[0], 1, path)
+    except InvalidSdistFilename:
+        pass
+
+    fallback_name = basename.split("-", 1)[0].replace("-", "_").lower()
+    return (fallback_name, 0 if basename.endswith(".whl") else 1, path)
+
+
 def _group_wheel_files_first(files: List[str]) -> List[str]:
-    if not any(fname for fname in files if fname.endswith(".whl")):
-        # Return early if there's no wheel files
+    if not any(fname.endswith(".whl") for fname in files):
+        # Return early if there are no wheel files
         return files
 
-    files.sort(key=lambda x: -1 if x.endswith(".whl") else 0)
-
+    files.sort(key=_dist_sort_key)
     return files
 
 

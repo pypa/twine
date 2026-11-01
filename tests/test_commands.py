@@ -9,13 +9,43 @@ from twine import exceptions
 
 def test_ensure_wheel_files_uploaded_first():
     files = commands._group_wheel_files_first(
-        ["twine/foo.py", "twine/first.whl", "twine/bar.py", "twine/second.whl"]
+        ["dist/foo-1.0.tar.gz", "dist/foo-1.0-py3-none-any.whl"]
     )
     expected = [
-        "twine/first.whl",
-        "twine/second.whl",
-        "twine/foo.py",
-        "twine/bar.py",
+        "dist/foo-1.0-py3-none-any.whl",
+        "dist/foo-1.0.tar.gz",
+    ]
+    assert expected == files
+
+
+def test_ensure_wheel_files_uploaded_first_multiple_packages():
+    files = commands._group_wheel_files_first(
+        [
+            "dist/foo-0.0.1.tar.gz",
+            "dist/bar-0.0.2.tar.gz",
+            "dist/foo-0.0.1-py3-none-any.whl",
+            "dist/bar-0.0.2-py3-none-any.whl",
+        ]
+    )
+    expected = [
+        "dist/bar-0.0.2-py3-none-any.whl",
+        "dist/bar-0.0.2.tar.gz",
+        "dist/foo-0.0.1-py3-none-any.whl",
+        "dist/foo-0.0.1.tar.gz",
+    ]
+    assert expected == files
+
+
+def test_ensure_wheel_files_uploaded_first_normalized_names():
+    files = commands._group_wheel_files_first(
+        [
+            "dist/foo-bar-1.0.0.tar.gz",
+            "dist/foo_bar-1.0.0-py3-none-any.whl",
+        ]
+    )
+    expected = [
+        "dist/foo_bar-1.0.0-py3-none-any.whl",
+        "dist/foo-bar-1.0.0.tar.gz",
     ]
     assert expected == files
 

@@ -1,0 +1,2 @@
+Upload full packages before proceeding to the next package during
+batch releases, avoiding partially published packages if an upload fails.
