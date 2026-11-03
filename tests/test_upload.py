@@ -151,7 +151,10 @@ def test_print_packages_if_verbose(upload_settings, caplog):
     assert result is None
 
     assert [m for m in caplog.messages if m.endswith("KB)")] == [
-        f"{filename} ({size})" for filename, size in dists_to_upload.items()
+        f"{helpers.SDIST_FIXTURE} ({dists_to_upload[helpers.SDIST_FIXTURE]})",
+        f"{helpers.NEW_SDIST_FIXTURE} ({dists_to_upload[helpers.NEW_SDIST_FIXTURE]})",
+        f"{helpers.WHEEL_FIXTURE} ({dists_to_upload[helpers.WHEEL_FIXTURE]})",
+        f"{helpers.NEW_WHEEL_FIXTURE} ({dists_to_upload[helpers.NEW_WHEEL_FIXTURE]})",
     ]
 
 

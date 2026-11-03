@@ -1,4 +1,5 @@
 import os
+from pathlib import Path
 
 import pytest
 
@@ -50,6 +51,30 @@ def test_find_dists_handles_real_files():
     ]
     files = commands._find_dists(expected)
     assert expected == files
+
+
+def test_find_dists_groups_artifacts_by_project_release(tmp_path):
+    filenames = [
+        "foo-2.0.tar.gz",
+        "bar-1.0-py3-none-any.whl",
+        "foo-1.0.tar.gz",
+        "foo-2.0-py3-none-any.whl",
+        "bar-1.0.tar.gz",
+        "foo-1.0-py3-none-any.whl",
+    ]
+    for filename in filenames:
+        (tmp_path / filename).touch()
+
+    files = commands._find_dists([str(tmp_path / "*")])
+
+    assert [Path(filename).name for filename in files] == [
+        "bar-1.0-py3-none-any.whl",
+        "bar-1.0.tar.gz",
+        "foo-1.0-py3-none-any.whl",
+        "foo-1.0.tar.gz",
+        "foo-2.0-py3-none-any.whl",
+        "foo-2.0.tar.gz",
+    ]
 
 
 def test_split_inputs():

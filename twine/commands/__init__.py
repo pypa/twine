@@ -22,6 +22,8 @@ import glob
 import os.path
 from typing import Dict, List, NamedTuple
 
+from packaging import utils as packaging_utils
+
 from twine import exceptions
 
 __all__: List[str] = []
@@ -32,9 +34,27 @@ def _group_wheel_files_first(files: List[str]) -> List[str]:
         # Return early if there's no wheel files
         return files
 
-    files.sort(key=lambda x: -1 if x.endswith(".whl") else 0)
+    def sort_key(indexed_file: tuple[int, str]) -> tuple[object, ...]:
+        index, filename = indexed_file
+        basename = os.path.basename(filename)
 
-    return files
+        try:
+            if basename.endswith(".whl"):
+                name, version, _, _ = packaging_utils.parse_wheel_filename(basename)
+                return (0, name, version, 0, basename, index)
+            if basename.endswith((".tar.gz", ".zip")):
+                name, version = packaging_utils.parse_sdist_filename(basename)
+                return (0, name, version, 1, basename, index)
+        except (
+            packaging_utils.InvalidSdistFilename,
+            packaging_utils.InvalidWheelFilename,
+        ):
+            pass
+
+        # Keep the existing wheel-first, stable ordering for unrecognized files.
+        return (1, 0 if basename.endswith(".whl") else 1, index)
+
+    return [filename for _, filename in sorted(enumerate(files), key=sort_key)]
 
 
 def _find_dists(dists: List[str]) -> List[str]:
