@@ -414,11 +414,15 @@ def test_prints_skip_message_for_uploaded_package(
 
 
 @pytest.mark.parametrize(
-    "repository_url", [utils.DEFAULT_REPOSITORY, utils.TEST_REPOSITORY]
+    "repository_url, json_url",
+    [
+        (utils.DEFAULT_REPOSITORY, "https://pypi.python.org/pypi/twine/json"),
+        (utils.TEST_REPOSITORY, "https://test.pypi.org/pypi/twine/json"),
+    ],
 )
 @pytest.mark.parametrize("exists", [True, False])
 def test_skip_existing_checks_index_before_upload(
-    make_settings, repository_url, exists, stub_response, capsys, caplog
+    make_settings, repository_url, json_url, exists, stub_response, capsys, caplog
 ):
     """Skip known files before uploading, while still uploading missing files."""
     upload_settings = make_settings(
@@ -428,15 +432,17 @@ def test_skip_existing_checks_index_before_upload(
         password="password",
     )
     repo = upload_settings.create_repository()
-    repo.session.get = lambda url, headers: pretend.stub(
-        status_code=200,
-        json=lambda: {
-            "releases": (
-                {"4.0.2": [{"filename": "twine-4.0.2-py3-none-any.whl"}]}
-                if exists
-                else {}
-            )
-        },
+    repo.session.get = pretend.call_recorder(
+        lambda url, headers: pretend.stub(
+            status_code=200,
+            json=lambda: {
+                "releases": (
+                    {"4.0.2": [{"filename": "twine-4.0.2-py3-none-any.whl"}]}
+                    if exists
+                    else {}
+                )
+            },
+        )
     )
     stub_response.text = ""
     repo.session.post = pretend.call_recorder(lambda *args, **kwargs: stub_response)
@@ -444,6 +450,9 @@ def test_skip_existing_checks_index_before_upload(
 
     upload.upload(upload_settings, [helpers.WHEEL_FIXTURE])
 
+    assert repo.session.get.calls == [
+        pretend.call(json_url, headers={"Accept": "application/json"})
+    ]
     assert len(repo.session.post.calls) == (0 if exists else 1)
     assert (
         "Uploading twine-4.0.2-py3-none-any.whl" in capsys.readouterr().out
