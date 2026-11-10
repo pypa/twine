@@ -548,7 +548,7 @@ Bugfixes
 Misc
 ^^^^
 
-- `Update PyPI URLs <https://packaging.python.org/guides/migrating-to-pypi-org/>`_. (`#318 <https://github.com/pypa/twine/issues/318>`_)
+- Update PyPI URLs. (`#318 <https://github.com/pypa/twine/issues/318>`_)
 - Add new maintainer, release checklists. (`#314 <https://github.com/pypa/twine/issues/314>`_)
 - Add instructions on how to use keyring. (`#277 <https://github.com/pypa/twine/issues/277>`_)
 
