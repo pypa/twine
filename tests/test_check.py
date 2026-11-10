@@ -124,7 +124,7 @@ def test_fails_rst_syntax_error(tmp_path, capsys, caplog):
     ]
 
 
-def test_fails_rst_no_content(tmp_path, capsys, caplog):
+def test_passes_rst_header_only(tmp_path, capsys, caplog):
     sdist = build_sdist_with_metadata(
         tmp_path,
         """\
@@ -138,17 +138,10 @@ def test_fails_rst_no_content(tmp_path, capsys, caplog):
         """,
     )
 
-    assert check.check([sdist])
+    assert not check.check([sdist])
 
-    assert capsys.readouterr().out == f"Checking {sdist}: FAILED\n"
-    assert len(caplog.record_tuples) == 1
-
-    # Note: we intentionally don't check the full error message below,
-    # since readme_renderer/docutils doesn't guarantee it.
-    error = caplog.record_tuples[0]
-    assert error[0] == "twine.commands.check"
-    assert error[1] == logging.ERROR
-    assert "syntax errors" in error[2]
+    assert capsys.readouterr().out == f"Checking {sdist}: PASSED\n"
+    assert not caplog.record_tuples
 
 
 def test_passes_rst_description(tmp_path, capsys, caplog):

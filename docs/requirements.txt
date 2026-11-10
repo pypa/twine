@@ -1,5 +1,5 @@
 doc8>=0.8.0
 furo>=2021.10.09
-readme-renderer>=17.4
+readme-renderer>=46.0
 Sphinx>=6
 sphinxcontrib-programoutput>=0.17
