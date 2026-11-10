@@ -18,6 +18,8 @@ import logging
 import os
 import re
 import subprocess
+import tarfile
+import zipfile
 from typing import Any, Dict, List, NamedTuple, Optional, Tuple, TypedDict
 
 from packaging import errors
@@ -187,7 +189,7 @@ class PackageFile:
                     dist = DIST_TYPES[dtype](filename)
                     data = dist.read()
                     py_version = dist.py_version
-                except EOFError:
+                except (EOFError, OSError, zipfile.BadZipFile, tarfile.TarError):
                     raise exceptions.InvalidDistribution(
                         "Invalid distribution file: '%s'" % os.path.basename(filename)
                     )

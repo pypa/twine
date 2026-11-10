@@ -417,6 +417,25 @@ def test_package_from_sdist():
     assert p.python_version == "source"
 
 
+@pytest.mark.parametrize(
+    "filename",
+    [
+        pytest.param("corrupt-1.0-py3-none-any.whl", id="whl"),
+        pytest.param("corrupt-1.0.tar.gz", id="sdist-tar-gz"),
+        pytest.param("corrupt-1.0.zip", id="sdist-zip"),
+    ],
+)
+def test_corrupt_archive_from_file(tmp_path, filename):
+    """Raise InvalidDistribution when an archive cannot be opened at all."""
+    dist = tmp_path / filename
+    dist.write_bytes(b"this is not an archive")
+
+    with pytest.raises(exceptions.InvalidDistribution) as err:
+        package_file.PackageFile.from_filename(str(dist), comment=None)
+
+    assert "Invalid distribution file" in err.value.args[0]
+
+
 def test_package_from_unrecognized_file_error():
     filename = "twine/package.py"
     with pytest.raises(exceptions.InvalidDistribution) as err:
