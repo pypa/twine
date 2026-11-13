@@ -10,6 +10,7 @@ from urllib.parse import urlparse
 
 import requests.auth
 from id import AmbientCredentialError
+from id import GitHubOidcPermissionCredentialError
 from id import detect_credential
 
 # keyring has an indirect dependency on PyCA cryptography, which has no
@@ -172,8 +173,12 @@ class Resolver:
 
         try:
             oidc_token = detect_credential(audience)
+        except GitHubOidcPermissionCredentialError as cred_lookup_err:
+            raise exceptions.TrustedPublishingFailure.from_github_permission_error(
+                cred_lookup_err,
+            ) from cred_lookup_err
         except AmbientCredentialError as e:
-            # If we get here, we're on a supported CI platform for trusted
+            # If we get here, we're on a non-GHA supported CI platform for trusted
             # publishing, and we have not been given any token, so we can error.
             raise exceptions.TrustedPublishingFailure(
                 "Unable to retrieve an OIDC token from the CI platform for "

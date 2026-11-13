@@ -295,6 +295,11 @@ intersphinx_mapping = {
 # Be strict about the invalid references:
 nitpicky = True
 
+# id does not publish an intersphinx inventory for this external exception.
+nitpick_ignore = [
+    ("py:class", "id.GitHubOidcPermissionCredentialError"),
+]
+
 # -- Options for apidoc output ------------------------------------------------
 
 autodoc_default_options = {
