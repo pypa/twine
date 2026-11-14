@@ -151,6 +151,8 @@ on a CI/build server).
   self-signed or untrusted certificates.
 * ``TWINE_NON_INTERACTIVE`` - Do not interactively prompt for username/password
   if the required credentials are missing.
+* ``TWINE_UPLOAD_ORGANIZATION`` - the organization that will own a new project,
+  on package indexes that support it.
 
 Proxy Support
 ^^^^^^^^^^^^^

@@ -76,6 +76,7 @@ def _make_package(
     the settings indicate to do so.
     """
     package = package_file.PackageFile.from_filename(filename, upload_settings.comment)
+    package.organization = upload_settings.organization
 
     signed_name = package.signed_basefilename
     if signed_name in signatures:

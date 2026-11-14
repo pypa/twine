@@ -116,6 +116,28 @@ def test_make_package_attestations_flagged_but_missing(upload_settings):
         upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
 
 
+@pytest.mark.parametrize("organization", [None, "acme"])
+def test_make_package_organization(upload_settings, organization):
+    """Pass the organization from the settings to the package."""
+    upload_settings.organization = organization
+
+    package = upload._make_package(helpers.NEW_WHEEL_FIXTURE, {}, [], upload_settings)
+
+    assert package.organization == organization
+
+
+def test_upload_sends_organization(upload_settings, stub_repository):
+    """Include the organization in the data uploaded for each package."""
+    upload_settings.organization = "acme"
+
+    upload.upload(upload_settings, [helpers.WHEEL_FIXTURE, helpers.NEW_SDIST_FIXTURE])
+
+    packages = [call.args[0] for call in stub_repository.upload.calls]
+    assert len(packages) == 2
+    for package in packages:
+        assert package.metadata_dictionary()["organization"] == "acme"
+
+
 def test_success_prints_release_urls(upload_settings, stub_repository, capsys):
     """Print PyPI release URLS for each uploaded package."""
     stub_repository.release_urls = lambda packages: {RELEASE_URL, NEW_RELEASE_URL}

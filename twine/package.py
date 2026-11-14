@@ -141,6 +141,7 @@ class PackageMetadata(TypedDict, total=False):
 
     # Additional metadata
     comment: str
+    organization: str
     pyversion: str
     filetype: str
     gpg_signature: Tuple[str, bytes]
@@ -170,6 +171,7 @@ class PackageFile:
         self.signed_basefilename = self.basefilename + ".asc"
         self.gpg_signature: Optional[Tuple[str, bytes]] = None
         self.attestations: Optional[List[Dict[Any, str]]] = None
+        self.organization: Optional[str] = None
 
         hasher = HashManager(filename)
         hasher.hash()
@@ -265,6 +267,9 @@ class PackageFile:
 
         if self.comment is not None:
             data["comment"] = self.comment
+
+        if self.organization is not None:
+            data["organization"] = self.organization
 
         if self.sha2_digest is not None:
             data["sha256_digest"] = self.sha2_digest
