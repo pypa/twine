@@ -112,6 +112,21 @@ To pass options to ``pytest``, e.g. the name of a test, run:
 
    tox -e py -- tests/test_upload.py::test_exception_for_http_status
 
+The ``py`` environment also checks coverage for the whole project. Running only
+a subset of tests can therefore fail the coverage threshold even when all
+selected tests pass. For local debugging with tox 4, prepare the environment
+without running its commands, then run pytest directly inside it:
+
+.. code-block:: bash
+
+   tox run -e py --notest
+   tox exec -e py -- python -m pytest tests/test_upload.py::test_exception_for_http_status
+
+You can also pass pytest options such as ``-k`` or ``--pdb`` to the second
+command. This skips the coverage commands, but still reports test failures.
+Run ``tox -e py`` before submitting changes to check the full suite and its
+coverage threshold.
+
 Twine is continuously tested against supported versions of Python using
 `GitHub Actions`_. To run the tests against a specific version, e.g. Python
 3.8, you will need it installed on your machine. Then, run:
