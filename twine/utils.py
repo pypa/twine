@@ -32,9 +32,6 @@ from requests_toolbelt.utils import user_agent
 import twine
 from twine import exceptions
 
-# Shim for input to allow testing.
-input_func = input
-
 DEFAULT_REPOSITORY = "https://upload.pypi.org/legacy/"
 TEST_REPOSITORY = "https://test.pypi.org/legacy/"
 
