@@ -18,6 +18,7 @@ import functools
 import logging
 import os
 import os.path
+import re
 import unicodedata
 from typing import Any, Callable, DefaultDict, Dict, Optional, Sequence, Union, cast
 from urllib.parse import urlparse
@@ -353,8 +354,46 @@ get_cacert = functools.partial(get_userpass_value, key="ca_cert")
 #: Get the client certificate via :func:`get_userpass_value`.
 get_clientcert = functools.partial(get_userpass_value, key="client_cert")
 
+#: Maximum length of the suffix a caller may append to twine's user agent.
+USER_AGENT_SUFFIX_MAX_LENGTH = 128
 
-def make_requests_session() -> requests.Session:
+#: Printable ASCII, including spaces: headers must not carry control characters.
+_USER_AGENT_SUFFIX_RE = re.compile(r"[\x20-\x7e]+")
+
+
+def _clean_user_agent_suffix(suffix: str) -> str:
+    """Validate and normalize a caller-supplied user agent suffix.
+
+    :raises twine.exceptions.InvalidConfiguration:
+        If the suffix is empty, longer than :data:`USER_AGENT_SUFFIX_MAX_LENGTH`,
+        or contains anything outside printable ASCII (notably newlines, which
+        would otherwise allow header injection).
+    """
+    if not suffix.strip():
+        raise exceptions.InvalidConfiguration("--user-agent-suffix must not be empty")
+    if not _USER_AGENT_SUFFIX_RE.fullmatch(suffix):
+        raise exceptions.InvalidConfiguration(
+            "--user-agent-suffix may only contain printable ASCII characters"
+        )
+    suffix = " ".join(suffix.split())
+    if len(suffix) > USER_AGENT_SUFFIX_MAX_LENGTH:
+        raise exceptions.InvalidConfiguration(
+            "--user-agent-suffix must be at most"
+            f" {USER_AGENT_SUFFIX_MAX_LENGTH} characters"
+        )
+    return suffix
+
+
+def user_agent_string(suffix: Optional[str] = None) -> str:
+    """Build twine's user agent, optionally followed by a caller suffix."""
+    value = user_agent.UserAgentBuilder("twine", twine.__version__)
+    value = value.include_implementation().build()
+    if suffix is None:
+        return value
+    return f"{value} {_clean_user_agent_suffix(suffix)}"
+
+
+def make_requests_session(user_agent_suffix: Optional[str] = None) -> requests.Session:
     """Prepare a requests Session with retries & twine's user-agent string."""
     s = requests.Session()
 
@@ -368,11 +407,7 @@ def make_requests_session() -> requests.Session:
     for scheme in ("http://", "https://"):
         s.mount(scheme, HTTPAdapter(max_retries=retry))
 
-    s.headers["User-Agent"] = (
-        user_agent.UserAgentBuilder("twine", twine.__version__)
-        .include_implementation()
-        .build()
-    )
+    s.headers["User-Agent"] = user_agent_string(user_agent_suffix)
     return s
 
 

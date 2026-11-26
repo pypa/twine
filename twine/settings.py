@@ -61,6 +61,7 @@ class Settings:
         repository_url: Optional[str] = None,
         verbose: bool = False,
         disable_progress_bar: bool = False,
+        user_agent_suffix: Optional[str] = None,
         **ignored_kwargs: Any,
     ) -> None:
         """Initialize our settings instance.
@@ -107,11 +108,15 @@ class Settings:
             Show verbose output.
         :param disable_progress_bar:
             Disable the progress bar.
+        :param user_agent_suffix:
+            An optional suffix appended to twine's User-Agent header, for
+            wrappers and integrations that need to identify themselves.
         """
         self.config_file = config_file
         self.comment = comment
         self.verbose = verbose
         self.disable_progress_bar = disable_progress_bar
+        self.user_agent_suffix = user_agent_suffix
         self.skip_existing = skip_existing
         self._handle_repository_options(
             repository_name=repository_name,
@@ -236,6 +241,11 @@ class Settings:
             help="The comment to include with the distribution file.",
         )
         parser.add_argument(
+            "--user-agent-suffix",
+            default=None,
+            help=argparse.SUPPRESS,
+        )
+        parser.add_argument(
             "--config-file",
             default=utils.DEFAULT_CONFIG_FILE,
             help="The .pypirc config file to use.",
@@ -354,6 +364,7 @@ class Settings:
             self.username,
             self.password,
             self.disable_progress_bar,
+            self.user_agent_suffix,
         )
         repo.set_certificate_authority(self.cacert)
         repo.set_client_certificate(self.client_cert)

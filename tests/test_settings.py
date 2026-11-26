@@ -198,3 +198,20 @@ class TestArgumentParsing:
     def test_attestations_flag(self):
         args = self.parse_args(["--attestations"])
         assert args.attestations
+
+    def test_user_agent_suffix_flag(self):
+        args = self.parse_args(["--user-agent-suffix", "acme/1.0"])
+        assert args.user_agent_suffix == "acme/1.0"
+
+    def test_user_agent_suffix_is_hidden(self):
+        parser = argparse.ArgumentParser()
+        settings.Settings.register_argparse_arguments(parser)
+        assert "--user-agent-suffix" not in parser.format_help()
+
+
+def test_user_agent_suffix_propagates_to_repository():
+    settings_obj = settings.Settings(
+        username="u", password="p", user_agent_suffix="acme/1.0"
+    )
+    repo = settings_obj.create_repository()
+    assert repo.session.headers["User-Agent"].endswith(" acme/1.0")

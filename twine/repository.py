@@ -39,10 +39,11 @@ class Repository:
         username: Optional[str],
         password: Optional[str],
         disable_progress_bar: bool = False,
+        user_agent_suffix: Optional[str] = None,
     ) -> None:
         self.url = repository_url
 
-        self.session = make_requests_session()
+        self.session = make_requests_session(user_agent_suffix)
         # requests.Session.auth should be Union[None, Tuple[str, str], ...]
         # But username or password could be None
         # See TODO for utils.RepositoryConfig

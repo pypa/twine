@@ -351,3 +351,16 @@ def test_logs_username_and_password(username, password, messages, caplog):
     )
 
     assert caplog.messages == messages
+
+
+def test_make_user_agent_string_with_suffix():
+    """A caller suffix is appended to twine's User-Agent header."""
+    repo = repository.Repository(
+        repository_url=utils.DEFAULT_REPOSITORY,
+        username="username",
+        password="password",
+        user_agent_suffix="gh-action-pypi-publish/1.14.2",
+    )
+
+    assert repo.session.headers["User-Agent"].startswith("twine/")
+    assert repo.session.headers["User-Agent"].endswith(" gh-action-pypi-publish/1.14.2")

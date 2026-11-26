@@ -366,3 +366,33 @@ def test_get_file_size(size_in_bytes, formatted_size, monkeypatch):
     file_size = utils.get_file_size(size_in_bytes)
 
     assert file_size == formatted_size
+
+
+def test_user_agent_string_defaults_to_twine():
+    """Without a suffix, the user agent is exactly twine's own."""
+    assert utils.user_agent_string().startswith("twine/")
+
+
+@pytest.mark.parametrize(
+    ("suffix", "expected"),
+    [
+        ("gh-action-pypi-publish/1.14.2", "gh-action-pypi-publish/1.14.2"),
+        ("  my-wrapper/0.1   builder ", "my-wrapper/0.1 builder"),
+    ],
+)
+def test_user_agent_string_appends_suffix(suffix, expected):
+    """A caller suffix is appended to, not substituted for, twine's value."""
+    user_agent = utils.user_agent_string(suffix)
+
+    assert user_agent.startswith("twine/")
+    assert user_agent.endswith(f" {expected}")
+
+
+@pytest.mark.parametrize(
+    "suffix",
+    ["", "   ", "evil\r\nX-Injected: 1", "naïve", "x" * 129],
+)
+def test_user_agent_string_rejects_invalid_suffix(suffix):
+    """Control characters, non-ASCII, empty and over-long suffixes are refused."""
+    with pytest.raises(exceptions.InvalidConfiguration):
+        utils.user_agent_string(suffix)
